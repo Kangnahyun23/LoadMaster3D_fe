@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": ["design/**", "dist/**"],
+  "env": { "browser": true, "es2024": true },
+  "plugins": ["react", "react-hooks", "typescript", "oxc"],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/only-export-components": "off"
+  }
+}

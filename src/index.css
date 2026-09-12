@@ -1,0 +1,359 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Design tokens — nguồn sự thật duy nhất cho màu, khoảng cách, bo góc.
+   Không hardcode hex trong component.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* nền và chữ */
+  --bg: #ffffff;
+  --surface: #f7f8fa;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-2: #4b5563;
+  --text-3: #6b7280;
+
+  /* thương hiệu */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-bg: #eff6ff;
+
+  /* chữ trên nền vô hiệu hoá — style sheet gọi là --text-disabled */
+  --text-disabled: #9ca3af;
+
+  /* rãnh switch khi tắt */
+  --switch-off: #d1d5db;
+
+  /* kiện đang thao tác trên nền canvas tối (màn máy tính bảng kho) */
+  --highlight: #facc15;
+
+  /* ngữ nghĩa */
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --info: #0891b2;
+
+  /* tông badge trạng thái: nền nhạt + chữ đậm + viền cùng tông.
+     Lấy từ mục 4 style sheet, khai báo ở đây để component không hardcode hex. */
+  --badge-neutral-bg: #f7f8fa;
+  --badge-neutral-fg: #4b5563;
+  --badge-neutral-border: #e5e7eb;
+  --badge-info-bg: #eff6ff;
+  --badge-info-fg: #1d4ed8;
+  --badge-info-border: #bfdbfe;
+  --badge-cyan-bg: #ecfeff;
+  --badge-cyan-fg: #0e7490;
+  --badge-cyan-border: #a5f3fc;
+  --badge-success-bg: #ecfdf3;
+  --badge-success-fg: #15803d;
+  --badge-success-border: #bbf7d0;
+  --badge-warning-bg: #fff7ed;
+  --badge-warning-fg: #b45309;
+  --badge-warning-border: #fed7aa;
+  --badge-danger-bg: #fef2f2;
+  --badge-danger-fg: #b91c1c;
+  --badge-danger-border: #fecaca;
+
+  /* vùng 3D, luôn tối */
+  --canvas-1: #1a1d23;
+  --canvas-2: #0f1115;
+  --panel-dark: #1e2228;
+  --border-dark: #2d323b;
+
+  /* màu định danh điểm giao, an toàn cho người mù màu */
+  --stop-1: #e69f00;
+  --stop-2: #56b4e9;
+  --stop-3: #009e73;
+  --stop-4: #f0e442;
+  --stop-5: #0072b2;
+  --stop-6: #d55e00;
+  --stop-7: #cc79a7;
+  --stop-8: #555555;
+
+  /* bo góc */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+
+  /* đổ bóng, chỉ cho lớp nổi */
+  --e1: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --e2: 0 4px 12px rgba(16, 24, 40, 0.1);
+  --e3: 0 12px 32px rgba(16, 24, 40, 0.16);
+
+  /* chuyển động */
+  --dur-fast: 120ms;
+  --dur-md: 250ms;
+  --dur-slow: 500ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+}
+
+/* ---------------------------------------------------------------------------
+   Cầu nối sang Tailwind. `inline` = utility trỏ thẳng vào var() ở trên,
+   không sao chép giá trị, nên token chỉ có một chỗ để sửa.
+   --------------------------------------------------------------------------- */
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-text-disabled: var(--text-disabled);
+  --color-switch-off: var(--switch-off);
+  --color-highlight: var(--highlight);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-bg: var(--primary-bg);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-info: var(--info);
+
+  --color-badge-neutral-bg: var(--badge-neutral-bg);
+  --color-badge-neutral-fg: var(--badge-neutral-fg);
+  --color-badge-neutral-border: var(--badge-neutral-border);
+  --color-badge-info-bg: var(--badge-info-bg);
+  --color-badge-info-fg: var(--badge-info-fg);
+  --color-badge-info-border: var(--badge-info-border);
+  --color-badge-cyan-bg: var(--badge-cyan-bg);
+  --color-badge-cyan-fg: var(--badge-cyan-fg);
+  --color-badge-cyan-border: var(--badge-cyan-border);
+  --color-badge-success-bg: var(--badge-success-bg);
+  --color-badge-success-fg: var(--badge-success-fg);
+  --color-badge-success-border: var(--badge-success-border);
+  --color-badge-warning-bg: var(--badge-warning-bg);
+  --color-badge-warning-fg: var(--badge-warning-fg);
+  --color-badge-warning-border: var(--badge-warning-border);
+  --color-badge-danger-bg: var(--badge-danger-bg);
+  --color-badge-danger-fg: var(--badge-danger-fg);
+  --color-badge-danger-border: var(--badge-danger-border);
+
+  --color-canvas-1: var(--canvas-1);
+  --color-canvas-2: var(--canvas-2);
+  --color-panel-dark: var(--panel-dark);
+  --color-border-dark: var(--border-dark);
+
+  --color-stop-1: var(--stop-1);
+  --color-stop-2: var(--stop-2);
+  --color-stop-3: var(--stop-3);
+  --color-stop-4: var(--stop-4);
+  --color-stop-5: var(--stop-5);
+  --color-stop-6: var(--stop-6);
+  --color-stop-7: var(--stop-7);
+  --color-stop-8: var(--stop-8);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+
+  --shadow-e1: var(--e1);
+  --shadow-e2: var(--e2);
+  --shadow-e3: var(--e3);
+
+  --ease-standard: var(--ease-standard);
+  --ease-decelerate: var(--ease-decelerate);
+  --ease-accelerate: var(--ease-accelerate);
+
+  --font-sans: 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* type scale — display 32/40 · h1 24/32 · h2 20/28 · h3 16/24
+     body 14/20 · body-lg 16/24 · caption 12/16 */
+  --text-display: 32px;
+  --text-display--line-height: 40px;
+  --text-h1: 24px;
+  --text-h1--line-height: 32px;
+  --text-h2: 20px;
+  --text-h2--line-height: 28px;
+  --text-h3: 16px;
+  --text-h3--line-height: 24px;
+  --text-body: 14px;
+  --text-body--line-height: 20px;
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+}
+
+@keyframes lm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lm-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes lm-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Skeleton: dải sáng chạy ngang trên nền sáng; nhấp nháy nhẹ trên nền tối */
+@keyframes lm-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes lm-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Thanh trượt native. Phần đã đi qua tô primary qua biến --lm-range-fill
+   (component đặt inline), phần còn lại màu viền.
+   --------------------------------------------------------------------------- */
+
+@layer components {
+  .lm-range {
+    appearance: none;
+    width: 100%;
+    height: 20px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    --lm-range-fill: 100%;
+  }
+
+  .lm-range-thin {
+    height: 16px;
+  }
+
+  .lm-range:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  .lm-range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: linear-gradient(
+      to right,
+      var(--primary) var(--lm-range-fill),
+      var(--border) var(--lm-range-fill)
+    );
+  }
+
+  .lm-range::-moz-range-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--border);
+  }
+
+  .lm-range::-moz-range-progress {
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--primary);
+  }
+
+  .lm-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--bg);
+    box-shadow: var(--e1);
+    transition: background-color var(--dur-fast) var(--ease-standard);
+  }
+
+  .lm-range::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--bg);
+  }
+
+  .lm-range:hover::-webkit-slider-thumb,
+  .lm-range:hover::-moz-range-thumb {
+    background: var(--primary-hover);
+  }
+}
+
+/* --------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+  }
+
+  /* Tablet và điện thoại: chữ tối thiểu 16px (mục 10) */
+  @media (max-width: 1024px) {
+    body {
+      font-size: 16px;
+      line-height: 24px;
+    }
+  }
+
+  /* Số, mã kiện, kích thước, khối lượng luôn tabular */
+  .font-mono,
+  code,
+  kbd,
+  samp {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* Kéo trên khung 3D là xoay mô hình, không phải cuộn trang —
+     bắt buộc cho máy tính bảng ở kho. */
+  canvas {
+    touch-action: none;
+  }
+}
+
+/* Mục 8 — mọi thời lượng trên 200ms rút về 100ms, tắt chuyển động lớn */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-md: 100ms;
+    --dur-slow: 100ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 100ms !important;
+    scroll-behavior: auto !important;
+  }
+}
