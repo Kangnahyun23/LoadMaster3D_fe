@@ -1,0 +1,71 @@
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
+import type { ComponentProps } from 'react'
+import { cn } from '@/lib/utils'
+
+/**
+ * Menu thả xuống. Là lớp nổi nên được dùng bóng (mục 5 CLAUDE.md).
+ */
+export const DropdownMenu = DropdownMenuPrimitive.Root
+export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+
+export function DropdownMenuContent({
+  className,
+  sideOffset = 8,
+  ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+  return (
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.Content
+        sideOffset={sideOffset}
+        className={cn(
+          'z-50 min-w-56 overflow-hidden rounded-md border border-border bg-bg p-1 shadow-e2',
+          className,
+        )}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
+  )
+}
+
+export function DropdownMenuItem({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.Item>) {
+  return (
+    <DropdownMenuPrimitive.Item
+      className={cn(
+        'flex h-9 cursor-pointer select-none items-center gap-2 rounded-sm px-2',
+        'text-body text-text outline-none',
+        'data-[highlighted]:bg-surface',
+        'data-[disabled]:pointer-events-none data-[disabled]:text-text-disabled',
+        '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-text-3',
+        className,
+      )}
+      {...props}
+    />
+  )
+}
+
+export function DropdownMenuLabel({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.Label>) {
+  return (
+    <DropdownMenuPrimitive.Label
+      className={cn('flex flex-col gap-0.5 px-2 py-2', className)}
+      {...props}
+    />
+  )
+}
+
+export function DropdownMenuSeparator({
+  className,
+  ...props
+}: ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
+  return (
+    <DropdownMenuPrimitive.Separator
+      className={cn('my-1 h-px bg-border', className)}
+      {...props}
+    />
+  )
+}
