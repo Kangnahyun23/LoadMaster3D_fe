@@ -14,7 +14,7 @@ spec: [6, 7.5]
 ## Việc cần làm
 
 - [ ] `src/domain/geometry/orientation.ts`: `orientDimensions(pkg, code) → { placedLengthCm, placedWidthCm, placedHeightCm }` cho `LWH, LHW, WLH, WHL, HLW, HWL` (chữ thứ nhất → trục X, thứ hai → Y, thứ ba → Z).
-- [ ] `UPRIGHT_ORIENTATIONS = ['LWH', 'WLH']`; `isUpright(code)`.
+- [ ] `UPRIGHT_ORIENTATIONS = ['LWH', 'WLH']`; `isUpright(code)`. Thay hằng nội bộ cùng tên trong `src/domain/models/package.ts` (LM-010) bằng bản dùng chung này.
 - [ ] `effectiveOrientations(pkg)` = `allowedOrientations` giao với upright khi `keepUpright`.
 - [ ] `nextOrientation(pkg, current)` cho editor: vòng qua `effectiveOrientations`, bỏ qua hướng trùng kích thước (kiện vuông).
 - [ ] `matchesOrientation(placement, pkg)`: kích thước placement khớp hướng đã chọn (có EPSILON).

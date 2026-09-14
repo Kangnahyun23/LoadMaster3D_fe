@@ -20,7 +20,7 @@ Spec 7.8 yêu cầu không chỉ kiểm tra kiện ngay phía trên. D-18 chốt
 - [ ] Dựng đồ thị đỡ: cạnh `trên → dưới` kèm diện tích tiếp xúc (dùng lưới LM-016).
 - [ ] Duyệt theo z giảm dần (từ đỉnh xuống): `load[below] += (weight[top] + load[top]) × area / totalSupportArea(top)`. Phần tựa sàn hoặc vật cản chịu tải không truyền vào kiện.
 - [ ] Kiểm tra: `load > maxTopLoadKg` → `TOP_LOAD_EXCEEDED` (error, `params.loadKg`, `params.maxKg`); `stackable = false` mà có kiện tựa lên → `NOT_STACKABLE`; `fragilityLevel = HIGH` và `maxTopLoadKg = 0` có tải → error; số tầng trong cột vượt `maxStackCount` → `STACK_COUNT_EXCEEDED`.
-- [ ] Vật cản chịu tải có `maxTopLoadKg` → kiểm tra tương tự.
+- [ ] Vật cản chịu tải có `maxTopLoadKg` → kiểm tra tương tự. Chốt nghĩa khi vật cản chịu tải **bỏ trống** `maxTopLoadKg` (không giới hạn hay chặn) — schema LM-010 đang cho phép bỏ trống.
 - [ ] API tính lại cục bộ: `recomputeColumn(graph, affectedIds)` chỉ duyệt các kiện phía trên/dưới bị ảnh hưởng (phục vụ LM-023).
 
 ## Tiêu chí nghiệm thu

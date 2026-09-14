@@ -15,6 +15,9 @@ spec: [9.2, 13]
 
 - [ ] `features/fleet/VehicleDetailPage.tsx` cho `/doi-xe/moi` và `/doi-xe/:vehicleId`; header 72px, một nút primary "Lưu".
 - [ ] Form RHF + `vehicleConfigSchema`: tên, dài/rộng/cao trong thùng (cm), tải trọng tối đa (kg), rộng/cao cửa (cm), clearance (cm). `Input numeric` có hậu tố đơn vị, bước 0,1 cm / 0,01 kg; giá trị qua `roundCm` khi lưu.
+  - zod 4 không cho `.omit('id')` trên schema có refinement → form tạo mới dùng id tạm hoặc schema form riêng dựng từ các khối trường của `src/domain/models`.
+  - Lỗi nhiều trường (cửa ≤ thùng, vật cản trong thùng) chỉ xuất hiện khi các trường liên quan hợp lệ (`abort` trong schema); nếu cần hiện sớm hơn thì dùng `when` của zod.
+  - Schema chỉ đòi `name` là chuỗi; bắt buộc không rỗng là quy tắc của form.
 - [ ] Bảng vật cản (`useFieldArray`, số dòng nhỏ): loại (Select 4 loại), x/y/z, dài/rộng/cao (cm), chịu tải (Switch), tải tối đa (kg, chỉ bật khi chịu tải). Thêm, sửa, xoá.
 - [ ] Bảng trục xe tuỳ chọn: tên, vị trí X (cm), tải rỗng, tải tối đa (kg), nhãn "Chưa dùng trong tính toán".
 - [ ] Lỗi hiển thị tại field và trong validation summary đầu form (qua `formatIssue`), không dùng `alert`.
