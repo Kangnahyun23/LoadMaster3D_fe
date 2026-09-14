@@ -15,23 +15,40 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | Phase | Nội dung | Xong / Tổng | Ước lượng | Trạng thái |
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
-| 0 | Git, luật, Vitest, Playwright, CI | 3 / 6 | ~4 ngày | 🟦 Đang làm |
+| 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 4 / 7 | ~4,5 ngày | 🟦 Đang làm |
 | 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 4 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor | 0 / 9 | ~10 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **7 / 56 issue** | **~55,5 ngày công** | |
+| **Tổng** | | **8 / 56 issue** | **~55,5 ngày công** | |
 
-**Đang làm song song (15/09/2026):** LM-005 (Playwright) — agent trong git worktree riêng. LM-010 và LM-027 đã gộp.
+**Đang làm song song (15/09/2026):** LM-005 (Playwright), LM-012 (6 hướng), LM-013 (instance ID), LM-014 (mô hình lỗi) — mỗi issue một agent trong worktree riêng.
 
-**Làm được ngay:** LM-012, LM-013, LM-014, LM-016 (đủ phụ thuộc) · LM-055 (bug màu chữ nút, mới mở). Chờ: LM-006 (cần LM-005) · LM-028 (cần LM-014).
+**Làm được ngay:** LM-016 (lưới không gian). Chờ: LM-006 (cần LM-005) · LM-017, LM-021 (cần LM-012/013/014) · LM-028 (cần LM-014).
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 0–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 15/09/2026 — LM-055 xong; giao LM-012, LM-013, LM-014
+
+**Đã làm**
+
+- Chốt seam TDD: LM-012 qua `@/domain/geometry`; LM-013 module mới `@/domain/cargo`; LM-014 module mới `@/domain/constraints`; LM-055 qua `cn()` (unit) + `Button` (RTL).
+- Giao 3 agent (worktree từ `99f6f99`, Vitest tối đa 2 worker, không dev server) cho LM-012, LM-013, LM-014. LM-013 dùng đúng tên trường `ConstraintIssue` của LM-014 để gộp không phải đổi tên.
+- LM-055 (tự làm, TDD): `lib/utils.ts` khai báo 7 token cỡ chữ `@theme` cho tailwind-merge → nút primary/danger giữ `text-white`, secondary/ghost giữ `text-text`. 1 vòng red → green + 4 test chặn (đã chứng minh đỏ khi bỏ token). Thêm quy tắc vào AGENTS.md mục 4; bỏ chú thích né lỗi trong `LanguageSwitch`.
+- Dọn 2 worktree đã gộp (LM-010, LM-027), giữ nhánh.
+
+**Kiểm tra**
+
+- `pnpm test`: 121/121 ✅ · `pnpm lint`: ✅ · `pnpm build`: ✅
+
+**Việc tiếp theo**
+
+- Chờ 4 agent; gộp lần lượt, sau đó LM-016, LM-017, LM-021, LM-028, LM-006.
 
 ### 15/09/2026 — Gộp LM-027: hạ tầng i18n; mở LM-055
 
@@ -189,7 +206,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-004](issues/LM-004-them-vitest-rtl.md) | Vitest + RTL | ✅ | 14/09/2026 | 14/09/2026 | 39/39 test, Vitest 5.0.0 |
 | [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | 🟦 | 15/09/2026 | | Agent trong worktree |
 | [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ⬜ | | | |
-| [LM-055](issues/LM-055-tailwind-merge-bo-mau-chu.md) | Bug `cn()` bỏ màu chữ nút | ⬜ | | | Mở 15/09/2026, phát hiện ở LM-027 |
+| [LM-055](issues/LM-055-tailwind-merge-bo-mau-chu.md) | Bug `cn()` bỏ màu chữ nút | ✅ | 15/09/2026 | 15/09/2026 | TDD, 5 test; `/thanh-phan` chờ E2E |
 
 ### Phase 1 — Domain, service, dữ liệu, i18n nền
 
@@ -197,9 +214,9 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|---|
 | [LM-010](issues/LM-010-domain-models-schema.md) | Domain models + zod | ✅ | 15/09/2026 | 15/09/2026 | `4901e6f`, 39 test, 34 mã lỗi |
 | [LM-011](issues/LM-011-numeric-roundcm-epsilon.md) | `roundCm` + EPSILON | ✅ | 14/09/2026 | 14/09/2026 | TDD 6 test; quy ước AGENTS chờ LM-003 |
-| [LM-012](issues/LM-012-orientation-6-huong.md) | 6 hướng đặt | ⬜ | | | |
-| [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | ⬜ | | | |
-| [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | ⬜ | | | Nhận thêm bọc `EXCEEDS_BOUNDARY` |
+| [LM-012](issues/LM-012-orientation-6-huong.md) | 6 hướng đặt | 🟦 | 15/09/2026 | | Agent trong worktree (TDD) |
+| [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | 🟦 | 15/09/2026 | | Agent trong worktree (TDD) |
+| [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | 🟦 | 15/09/2026 | | Agent trong worktree (TDD), gồm bọc `EXCEEDS_BOUNDARY` |
 | [LM-015](issues/LM-015-geometry-boundary-overlap-volume.md) | Biên, chồng lấn, thể tích | ✅ | 14/09/2026 | 14/09/2026 | TDD 8 test; phần diện tích giao → LM-018 |
 | [LM-016](issues/LM-016-luoi-khong-gian.md) | Lưới không gian | ⬜ | | | |
 | [LM-017](issues/LM-017-validation-dau-vao-xe-kien.md) | Validation đầu vào | ⬜ | | | |

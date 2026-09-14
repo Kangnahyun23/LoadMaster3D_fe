@@ -24,13 +24,20 @@ Phát hiện khi làm LM-027 (15/09/2026), đã kiểm chứng lại bằng `tai
 
 ## Việc cần làm
 
-- [ ] Chốt seam test với người dùng (TDD): đề xuất render `Button` các variant qua RTL và kiểm class/màu, cộng một test đơn vị cho `cn` với bảng ví dụ ở trên.
-- [ ] `src/lib/utils.ts`: dùng `extendTailwindMerge` khai báo nhóm `font-size` gồm mọi token cỡ chữ trong `@theme` (đọc đúng danh sách từ `src/index.css`, không đoán).
-- [ ] Rà các chỗ đã né lỗi (ví dụ cỡ chữ đặt ở khung trong `LanguageSwitch`) — giữ hoặc đơn giản hoá sau khi sửa.
-- [ ] Nếu thêm token cỡ chữ mới vào `@theme` sau này thì phải thêm vào cấu hình merge: ghi quy tắc này vào AGENTS.md mục 4.
+- [x] Chốt seam test với người dùng (TDD): `cn()` qua `@/lib/utils` (unit) và `Button` các variant qua RTL (dom).
+- [x] `src/lib/utils.ts`: `extendTailwindMerge` khai báo theme `text` gồm mọi token cỡ chữ trong `@theme` (đọc từ `src/index.css`: `display`, `h1`, `h2`, `h3`, `body-lg`, `body`, `caption`).
+- [x] Rà các chỗ đã né lỗi: chỉ có `LanguageSwitch` — bỏ chú thích đã lỗi thời, giữ bố cục.
+- [x] Ghi quy tắc thêm token cỡ chữ vào AGENTS.md mục 4.
 
 ## Tiêu chí nghiệm thu
 
-- [ ] Ba ví dụ trong bảng giữ nguyên cả màu chữ lẫn cỡ chữ.
-- [ ] Nút primary và danger render có `text-white`; secondary và ghost có `text-text`.
-- [ ] `pnpm test`, `pnpm lint`, `pnpm build` xanh; ảnh chụp nút ở `/thanh-phan` đúng màu (kiểm tay hoặc E2E sau LM-005).
+- [x] Ba ví dụ trong bảng giữ nguyên cả màu chữ lẫn cỡ chữ.
+- [x] Nút primary và danger render có `text-white`; secondary và ghost có `text-text`.
+- [x] `pnpm test`, `pnpm lint`, `pnpm build` xanh. Ảnh chụp `/thanh-phan` chưa kiểm — chờ E2E của LM-005.
+
+## Kết quả — 15/09/2026 (TDD)
+
+- Vòng 1 RED → GREEN: `cn('bg-primary text-white', 'h-10 px-4 text-body')` trả thiếu `text-white` → khai báo `THEME_FONT_SIZES` qua `extendTailwindMerge({ extend: { theme: { text: [...] } } })` (nhóm `font-size` của tailwind-merge 3.6 đọc theme key `text`).
+- 4 test chặn: `cn` giữ cỡ chữ khi màu đứng sau; cỡ chữ sau vẫn thay cỡ chữ trước; `Button` primary/danger giữ `text-white` ở cỡ md và touch; secondary/ghost giữ `text-text`. Đã chứng minh: bỏ `body-lg`, `body`, `caption` khỏi cấu hình → 4/5 test đỏ (test cỡ chữ-thay-cỡ chữ vẫn xanh vì chặn lỗi khác), rồi khôi phục.
+- Kiểm tra: `pnpm test` 121/121 ✅ · `pnpm lint` ✅ · `pnpm build` ✅.
+- `text-micro` (11px) vẫn chưa có trong `@theme` — code còn `text-[11px]` rải rác (lệch luật mục 4); để issue riêng nếu nhóm muốn thêm token.

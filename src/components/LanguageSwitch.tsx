@@ -29,8 +29,6 @@ export function LanguageSwitch({ orientation = 'horizontal', size = 'md', classN
       className={cn('flex items-center', vertical ? 'flex-col gap-1' : 'gap-2', className)}
     >
       <Languages className={cn('text-text-3', size === 'touch' ? 'size-6' : 'size-5')} strokeWidth={1.5} aria-hidden />
-      {/* Cỡ chữ đặt ở khung chứ không ở nút: `cn` (tailwind-merge) coi `text-caption`
-          là màu chữ và bỏ nó khi gặp `text-primary-hover`. */}
       <div
         className={cn(
           'flex gap-0.5 rounded-md border border-border bg-bg p-0.5 font-semibold',
