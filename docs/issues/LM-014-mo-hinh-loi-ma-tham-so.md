@@ -21,6 +21,7 @@ Editor hiện trả chuỗi tiếng Việt cứng ("Vượt cửa sau", "Chồng
 - [ ] Danh mục mã có kiểu (union), tối thiểu phủ Spec mục 13: `DIMENSION_NOT_POSITIVE`, `DOOR_EXCEEDS_INNER`, `NO_ALLOWED_ORIENTATION`, `PAYLOAD_EXCEEDED`, `MUST_LOAD_PAYLOAD_EXCEEDED`, `DOOR_TOO_SMALL`, `EXCEEDS_BOUNDARY`, `OVERLAP`, `OBSTACLE_OVERLAP`, `NON_BEARING_SUPPORT`, `SUPPORT_BELOW_MIN`, `TOP_LOAD_EXCEEDED`, `NOT_STACKABLE`, `STACK_COUNT_EXCEEDED`, `LIFO_BLOCKED`, `LIFO_PARTIAL`, `COG_LATERAL`, `COG_HIGH`, `MUST_LOAD_UNPLACED`, `LOADING_ORDER_INFEASIBLE`, `DUPLICATE_INSTANCE_ID`, `ORIENTATION_MISMATCH`.
 - [ ] Tham số là số thô theo đơn vị domain (cm, kg, tỷ lệ 0..1) — UI format.
 - [ ] Hàm `toContractWarnings(issues) → string[]` (mảng mã) và ngược lại cho `constraintWarnings`.
+- [ ] Bọc `vehicleBoundaryExcess` (LM-015, đã có) thành `EXCEEDS_BOUNDARY` với `params.axis`, `params.side` (`beforeOrigin` / `beyondInterior`), `params.overCm`.
 
 ## Tiêu chí nghiệm thu
 

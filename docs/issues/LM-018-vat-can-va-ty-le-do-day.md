@@ -18,6 +18,7 @@ spec: [7.6, 7.7]
 - [ ] `supportRatio(placement, others, obstacles)`: diện tích hợp của các mặt đỡ (sàn, kiện, vật cản chịu tải) trong tolerance, không đếm trùng. Chuyển thuật toán hợp diện tích từ `viewer3d/editor/geometry.ts` sang domain (cm, EPSILON).
 - [ ] Dưới `minSupportRatio` → `SUPPORT_BELOW_MIN` (warning) với `params.ratio`, `params.required`.
 - [ ] Dùng lưới LM-016 để lấy ứng viên.
+- [ ] `overlapArea2D`, `overlapVolume` trong `@/domain/geometry` (chuyển từ LM-015 vì đây là nơi dùng đầu tiên), so qua `lt/gt` EPSILON.
 
 ## Tiêu chí nghiệm thu
 

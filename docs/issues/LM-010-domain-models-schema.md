@@ -22,6 +22,7 @@ Contract của Spec mục 6 là nguồn duy nhất cho hình dạng dữ liệu 
 - [ ] Quy tắc dữ liệu Spec: `minSupportRatio ∈ [0,1]`; `stackable = false ⇒ maxTopLoadKg = 0`; `quantity ≥ 1` (số nguyên); `allowedOrientations` không rỗng; `keepUpright ⇒ allowedOrientations ⊆ {LWH, WLH}` (D-25: schema **từ chối**, form mới là nơi tự đồng bộ).
 - [ ] Mọi kích thước > 0; số phải hữu hạn.
 - [ ] Không import React/Three trong `src/domain`.
+- [ ] Adapter `placementToBox(PackagePlacement)` và `obstacleToBox(VehicleObstacle)` sang `Box` của `@/domain/geometry` (chuyển từ LM-015).
 
 ## Tiêu chí nghiệm thu
 

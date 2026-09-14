@@ -16,20 +16,42 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI | 2 / 6 | ~4 ngày | 🟦 Đang làm |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 0 / 19 | ~18,5 ngày | ⬜ |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 2 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor | 0 / 9 | ~10 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **2 / 55 issue** | **~55 ngày công** | |
+| **Tổng** | | **4 / 55 issue** | **~55 ngày công** | |
 
-**Việc tiếp theo:** TDD LM-011 + LM-015 (chốt seam cần test trước khi viết test đầu tiên). Các việc phase 0 còn lại (LM-003, LM-005, LM-006) làm song song được.
+**Việc tiếp theo:** LM-010 (domain models + zod) → LM-014 (mô hình lỗi, bọc `vehicleBoundaryExcess`). Phase 0 còn LM-003, LM-005, LM-006, làm song song được.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 0–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 14/09/2026 — LM-011 + LM-015: TDD helper số và geometry
+
+**Đã làm** (nhánh `feat/spec-mvp`, theo skill TDD: một test → một cài đặt tối thiểu mỗi vòng)
+
+- Chốt seam: test chỉ import từ `@/domain/geometry`. Chốt quy tắc làm tròn: nửa xa số 0, bù EPSILON, không trả `-0`.
+- `src/domain/geometry/`: `numeric.ts` (`EPSILON`, `roundCm`, `roundKg`, `eq`, `lt`, `gt`), `box.ts` (`Box`, `volumeCm3`, `overlaps`), `boundary.ts` (`vehicleBoundaryExcess`, `VehicleInterior`), `index.ts`.
+- 14 test trong `geometry.test.ts`, 11 vòng red → green + 3 test chặn hồi quy. Kiểm test chặn hồi quy bằng cách cố ý đổi `<` thành `<=` → test đỏ, rồi khôi phục.
+- Chuyển phần chưa có nơi dùng: adapter `PackagePlacement`/`VehicleObstacle → Box` sang LM-010; `overlapArea2D`/`overlapVolume` sang LM-018; bọc mã `EXCEEDS_BOUNDARY` sang LM-014; `lte`/`gte` hoãn; quy ước `roundCm` tại biên + cấm so sánh trực tiếp ghi vào AGENTS ở LM-003.
+
+**Kiểm tra**
+
+- `pnpm test`: 53/53 ✅ (39 cũ + 14 mới) · `pnpm lint`: ✅ · `pnpm build`: ✅
+
+**Vướng mắc / quyết định mới**
+
+- Ba ví dụ dấu phẩy động viết trong issue gốc là sai khi kiểm bằng Node: `45.1 + 45.1 + 45.1 = 135.3`, `0.15 * 10 = 1.5`, và `100.1 + 60.3` trôi **xuống** nên không gây chồng lấn giả. Đã thay bằng ca kiểm chứng thật: `262.45 − 250 = 12.449999…`, `100.4 + 120.7 = 221.10000000000002`, `1.005 * 100 = 100.4999…`. Quy tắc từ nay: mọi ví dụ số trong test phải chạy thử bằng máy trước.
+- Công thức thô Spec 7.2 báo chồng lấn giả với toạ độ trôi lên → `overlaps` so qua `lt/gt` EPSILON, vẫn giữ nghĩa chạm mặt không chồng lấn.
+
+**Việc tiếp theo**
+
+- LM-010 → LM-014.
 
 ### 14/09/2026 — LM-004: Vitest + React Testing Library
 
@@ -117,15 +139,15 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 | ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
 |---|---|---|---|---|---|
-| [LM-010](issues/LM-010-domain-models-schema.md) | Domain models + zod | ⬜ | | | |
-| [LM-011](issues/LM-011-numeric-roundcm-epsilon.md) | `roundCm` + EPSILON | ⬜ | | | Việc tiếp theo (TDD) |
+| [LM-010](issues/LM-010-domain-models-schema.md) | Domain models + zod | ⬜ | | | Việc tiếp theo; nhận thêm adapter → `Box` |
+| [LM-011](issues/LM-011-numeric-roundcm-epsilon.md) | `roundCm` + EPSILON | ✅ | 14/09/2026 | 14/09/2026 | TDD 6 test; quy ước AGENTS chờ LM-003 |
 | [LM-012](issues/LM-012-orientation-6-huong.md) | 6 hướng đặt | ⬜ | | | |
 | [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | ⬜ | | | |
-| [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | ⬜ | | | |
-| [LM-015](issues/LM-015-geometry-boundary-overlap-volume.md) | Biên, chồng lấn, thể tích | ⬜ | | | |
+| [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | ⬜ | | | Nhận thêm bọc `EXCEEDS_BOUNDARY` |
+| [LM-015](issues/LM-015-geometry-boundary-overlap-volume.md) | Biên, chồng lấn, thể tích | ✅ | 14/09/2026 | 14/09/2026 | TDD 8 test; phần diện tích giao → LM-018 |
 | [LM-016](issues/LM-016-luoi-khong-gian.md) | Lưới không gian | ⬜ | | | |
 | [LM-017](issues/LM-017-validation-dau-vao-xe-kien.md) | Validation đầu vào | ⬜ | | | |
-| [LM-018](issues/LM-018-vat-can-va-ty-le-do-day.md) | Vật cản, tỷ lệ đỡ đáy | ⬜ | | | |
+| [LM-018](issues/LM-018-vat-can-va-ty-le-do-day.md) | Vật cản, tỷ lệ đỡ đáy | ⬜ | | | Nhận thêm `overlapArea2D`/`overlapVolume` |
 | [LM-019](issues/LM-019-tai-xep-chong-toan-stack.md) | Truyền tải toàn stack | ⬜ | | | |
 | [LM-020](issues/LM-020-kiem-tra-lifo.md) | Kiểm tra LIFO | ⬜ | | | |
 | [LM-021](issues/LM-021-metrics-trong-tam.md) | Metrics, trọng tâm | ⬜ | | | |
