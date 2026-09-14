@@ -25,6 +25,20 @@ Backend là Spring Boot monolith + PostgreSQL, cộng một Python FastAPI servi
 **Trạng thái hiện tại:** backend chưa nối. Toàn bộ dữ liệu là mẫu. Đăng nhập đã có nhưng
 **chưa phân quyền theo vai trò** — mọi tài khoản đăng nhập đều vào được mọi màn.
 
+### MVP theo Build Spec *(bổ sung 15/09/2026)*
+
+Đang tích hợp [LoadMaster_FE_MVP_Build_Spec.md](LoadMaster_FE_MVP_Build_Spec.md) vào repo
+này trên nhánh `feat/spec-mvp`. Quyết định và phạm vi: [docs/prd.md](docs/prd.md) (D-01 → D-39).
+Việc chia nhỏ: [docs/issues/](docs/issues/README.md). Tiến độ theo ngày: [docs/progress.md](docs/progress.md).
+
+- **Bắt buộc theo Spec:** đơn vị cm/kg, hệ toạ độ, mô hình dữ liệu và contract
+  `OptimizationService`, validation, nhãn **MOCK RESULT**, acceptance criteria mục 15.
+  Khi luật dưới đây mâu thuẫn với phần bắt buộc của Spec, Spec thắng và phải sửa luật.
+- **Được điều chỉnh cho khớp repo:** cấu trúc thư mục, component, thư viện.
+- Mọi kết quả từ mock có badge **MOCK RESULT** (không dịch). Không có chữ kiểu "AI optimized",
+  không đặt tên service là `AIService`.
+- Giao diện chuyển được **vi / en** (D-07); tiếng Việt là ngôn ngữ mặc định và nguồn chuẩn của từ điển.
+
 ## 2. Tech stack
 
 Khóa version trong lockfile, không tự nâng major. Dùng **pnpm**, không dùng npm/yarn
@@ -53,7 +67,15 @@ three  ·  @react-three/fiber  ·  @react-three/drei
 camera-controls (qua drei)
 ```
 
-**Không dùng:** `framer-motion-3d` (deprecated, không hỗ trợ React 19) · Redux · axios (dùng fetch) · moment.js · thư viện UI khác.
+Kiểm thử (devDependencies):
+
+```
+vitest 5                 — unit (node) và dom (jsdom), cấu hình ở vitest.config.ts
+@testing-library/react   — test component qua hành vi người dùng (+ user-event, jest-dom)
+@playwright/test         — E2E trình duyệt thật (thêm ở LM-005)
+```
+
+**Không dùng:** `framer-motion-3d` (deprecated, không hỗ trợ React 19) · Redux · Zustand (state dùng chung đi qua mock repository + TanStack Query, D-06) · thư viện i18n (từ điển tự viết, D-07) · axios (dùng fetch) · moment.js · thư viện UI khác.
 
 ### Radix trực tiếp, không dùng shadcn CLI *(đã điều chỉnh)*
 
@@ -92,11 +114,27 @@ src/
     fleet/              đội xe
     admin/              người dùng
   lib/                  format, helper, mock dùng chung, api client
+    i18n/               từ điển vi/en, provider, hook (LM-027)
   types/                type dùng từ hai feature trở lên
+  domain/               logic nghiệp vụ THUẦN theo Spec — không React, không Three.js
+    geometry/           số (roundCm, EPSILON), hộp, chồng lấn, biên thùng
+    models/             type contract Spec + zod schema (LM-010)
+    constraints/        validation và ràng buộc, trả mã lỗi (LM-014 →)
+    metrics/            tỷ lệ sử dụng, trọng tâm (LM-021)
+    fixtures/           dữ liệu mẫu Spec mục 12
+  services/
+    optimization/       interface OptimizationService, MockOptimizationService, worker (LM-024 →)
+  test/                 setup dùng chung cho Vitest (setup-dom.ts)
+tests/                  unit test cũ của viewer3d (Vitest)
+e2e/                    Playwright (LM-005)
 ```
 
 Mỗi feature tự chứa component, hook, type của nó. Chỉ đưa lên `components/`, `lib/`
 hoặc `types/` khi có **từ hai feature trở lên** dùng chung.
+
+**`src/domain` và `src/services`** *(bổ sung, D-19)*: không import React, Three.js, router hay
+component. Mọi hàm tính toán ở đây là pure function có unit test. Feature và engine 3D gọi vào
+domain, không bao giờ ngược lại. Three.js không quyết định tính hợp lệ của placement.
 
 **Đặt mock ở đâu** *(bổ sung)*: mock chỉ một feature dùng thì để trong feature đó
 (`features/trips/trip-detail.mock.ts`). Mock nhiều feature dùng chung thì lên `lib/`
@@ -239,20 +277,59 @@ Chiều cao dòng cố định (48px thoáng, 36px gọn, 56px cảm ứng). C�
 
 ## 6. Ngôn ngữ giao diện
 
-### Định dạng tiếng Việt
+### Đơn vị nghiệp vụ *(đã điều chỉnh 15/09/2026)*
 
-Dùng `Intl.NumberFormat('vi-VN')`, không tự nối chuỗi.
+Luật ban đầu dùng **mm** cho kích thước và toạ độ. Spec bắt buộc **cm/kg** và cấm trộn đơn vị
+trong state và payload (D-03), nên đích là:
+
+| Đại lượng | Đơn vị | Làm tròn khi vào domain |
+|---|---|---|
+| Dài, rộng, cao, toạ độ, clearance | cm | `roundCm` — bội 0,1 cm |
+| Khối lượng, tải trọng, tải tối đa | kg | `roundKg` — bội 0,01 kg |
+| Thể tích | cm³ (hiển thị thêm m³ cho dễ đọc) | — |
+
+- Chỉ `viewer3d/scene/units.ts` được đổi scale sang đơn vị Three.js.
+- `roundCm`/`roundKg` áp **tại biên**: khi lưu dữ liệu form, khi nhận placement từ service, khi
+  editor commit. Không làm tròn giữa các phép tính trung gian.
+- So sánh số thực trong `src/domain` qua `eq/lt/gt` có `EPSILON = 1e-6` của `@/domain/geometry`,
+  **không** dùng `<` `>` `===` trực tiếp giữa toạ độ hoặc kích thước. Oxlint không có rule tự
+  động cho việc này — reviewer phải chặn. Ví dụ đã gặp: `100.4 + 120.7 = 221.10000000000002`
+  làm hai kiện chạm mặt bị báo chồng lấn giả.
+- Mọi ví dụ số thực đưa vào test phải được chạy thử bằng máy trước; ba giả định viết tay trong
+  issue gốc đã sai (`45.1 + 45.1 + 45.1` thực ra bằng đúng `135.3`).
+- **Trạng thái chuyển đổi:** `src/domain` đã dùng cm. Engine 3D, editor, kho, tài xế và mock
+  `LoadPlan` **vẫn là mm** cho tới LM-031/LM-060/LM-061/LM-062. Code mới không được thêm giá trị
+  mm; code cũ đổi theo đúng issue, không đổi rải rác.
+
+### Định dạng số và ngày theo ngôn ngữ
+
+Dùng `Intl`, không tự nối chuỗi hay thay dấu (`toFixed().replace('.', ',')` là sai).
 
 ```
-Khối lượng   8.240 kg        (chấm phân nhóm nghìn)
-Phần trăm    87,4%           (phẩy thập phân)
-Thể tích     18,4 m³
-Kích thước   7.200 × 2.350 × 2.400 mm
-Ngày         14/09/2026
-Giờ          14:30
+                 vi-VN                      en-US
+Khối lượng       8.240 kg                   8,240 kg
+Phần trăm        87,4%                      87.4%
+Thể tích         18,4 m³                    18.4 m³
+Kích thước       720 × 235 × 240 cm         720 × 235 × 240 cm
+Ngày             14/09/2026                 (theo LM-027)
+Giờ              14:30                      (theo LM-027)
 ```
 
-Đặt các hàm format trong `src/lib/format.ts` và dùng lại, không viết rải rác.
+Đặt các hàm format trong `src/lib/format.ts` và dùng lại, không viết rải rác. Từ LM-027 hàm
+format nhận locale đang chọn.
+
+### i18n vi/en *(bổ sung, D-07, D-08)*
+
+- Từ điển TypeScript tự viết trong `src/lib/i18n/`. `vi` là nguồn chuẩn; `en` khai báo sao cho
+  **thiếu hoặc thừa key là lỗi TypeScript** lúc build.
+- Ngôn ngữ đọc theo thứ tự `?lang` → `sessionStorage` → `vi`. Không dùng `localStorage`.
+  Đổi ngôn ngữ không tải lại trang, không mất dữ liệu đang nhập.
+- Chuỗi hiển thị viết qua `t()`; từ LM-027 mọi chuỗi mới **phải** qua từ điển. Chuỗi cũ được
+  chuyển theo đợt (LM-070, LM-071), không sửa rải rác ngoài issue.
+- Không dịch: badge **MOCK RESULT**; tên riêng trong dữ liệu (tên kho, điểm giao, người).
+- `src/domain` **không chứa câu chữ hiển thị**: validation và constraint trả **mã lỗi + tham số**
+  (`{ code, severity, params }`, D-28); zod schema dùng mã làm message. UI dịch mã và format số
+  theo locale. Test so mã, không so câu.
 
 ### Không để từ vựng kỹ thuật rò ra màn vận hành *(bổ sung)*
 
@@ -265,11 +342,16 @@ Tên trường dữ liệu trong code vẫn giữ đúng hợp đồng với bac
 giao diện làm lớp dịch. Ngoại lệ: màn **So sánh phương án** được dùng từ vựng thuật
 toán ("GA 500 thế hệ", "GA có ràng buộc LIFO") vì ở đó người đọc đang so sánh thuật toán.
 
-### Nút chưa nối backend
+### Nút chưa hoạt động *(đã điều chỉnh 15/09/2026, D-20)*
 
-Không để nút bấm vào mà im lặng — người dùng không phân biệt được với lỗi. Gọi
-`notifyPendingFeature()` trong `lib/pending-feature.ts` để báo rõ đang chờ gì. Xoá lời
-gọi khi chức năng được nối thật.
+Luật ban đầu cho phép giữ nút chưa nối backend nếu gọi `notifyPendingFeature()` để báo đang
+chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạt động), nên nay:
+
+- **Không hiển thị** nút hay mục menu chưa có chức năng. Không để nút bấm vào mà im lặng,
+  không dùng toast báo "đang chờ", không báo thành công giả.
+- Ngoại lệ duy nhất: nơi Spec yêu cầu giữ vị trí cho tính năng sau (tải trục) hiển thị nhãn
+  **"Sẽ có sau" / "Coming later"** dạng chữ, không bấm được.
+- Code hiện còn `notifyPendingFeature()` ở một số màn cũ — gỡ ở LM-053, không thêm lời gọi mới.
 
 ## 7. Quy tắc riêng cho 3D
 
@@ -314,6 +396,25 @@ gọi khi chức năng được nối thật.
 - Planner mặc định ưu tiên scene với HUD gọn; thông tin kiện, tải trục, màu/slice và lớp phân tích nằm trong inspector mở theo nhu cầu. Double-click focus giữ góc nhìn; Esc hoặc “Xem toàn xe” thoát focus. Theo bước là tùy chọn, tạm dừng khi người dùng tự điều khiển camera. Chọn blocker không đổi target dỡ; có đường quay lại target.
 - Viền/nhãn selected/current/next/hover là tập nhỏ cố định; `SceneCallout` giữ nhãn trong khung và đường chỉ dẫn neo đúng vị trí 3D. Editor có ba hướng đo, mặt phẳng kéo, tối đa ba mặt snap và bốn vùng overlap bằng hai InstancedMesh phụ cố định. Geometry/nhãn của preview cập nhật imperative, không đưa pointer frames qua React. Phone giữ trạng thái/snap/invalid, lược nhãn đo phụ để dành chỗ cho kiện.
 - Three của kho và driver được lazy-load từ `viewer3d`. Driver chỉ tải khi mở “Xem vị trí hàng”; mô phỏng không đánh dấu giao hàng và không có editor. Phone dùng panel dưới/drawer, nút thao tác 56px, không phụ thuộc hover/gizmo nhỏ.
+
+### Tích hợp Spec vào engine *(bổ sung 15/09/2026 — đích, làm theo issue)*
+
+Các mục "Foundation engine", "Manual editor", "Operations" phía trên mô tả code **hiện tại**
+(mm, 3 hướng, `placement.step`). Đích sau phase 2 của [docs/issues](docs/issues/README.md):
+
+- Engine nhận view model dựng từ `OptimizationResult` + `CargoPackage` + chuyến (LM-030),
+  đơn vị cm, `SCENE_SCALE = 0.01` chỉ trong `scene/units.ts` (LM-031).
+- 6 hướng đặt `LWH … HWL`; xoay chỉ vòng qua `allowedOrientations`, tôn trọng `keepUpright` (LM-032).
+- Vật cản vẽ bằng số draw call cố định (tối đa 2), màu token riêng, không raycast khi kéo kiện (LM-033).
+- Editor: nudge 1/5/10 cm, lưới 5 cm, snap 2 cm, commit qua `roundCm` (LM-034). Mỗi lần thả/xoay
+  chạy constraint engine của `src/domain`; lỗi chặn commit, cảnh báo vẫn commit (LM-035).
+  Ngân sách: constraint engine 1.000 kiện p95 ≤ 50 ms, một lần thả p95 ≤ 8 ms (D-29).
+- Timeline dùng `loadingOrder` / `unloadingOrder` của kết quả; LIFO lấy từ domain — che kín
+  100% mặt sau là vi phạm, che một phần là cảnh báo (LM-036, D-26).
+- Tải trục không hiện số khi backend chưa trả dữ liệu tin cậy: nhãn "Sẽ có sau" (LM-037, Spec 7.10).
+- Mock optimization chạy trong Web Worker, không chặn main thread (LM-025, D-30).
+
+Khi làm một issue trong nhóm này, sửa luật tương ứng ở các mục phía trên cùng lúc với code.
 
 ### Ảnh xem trước tĩnh dùng SVG, không dùng Three.js *(bổ sung)*
 
@@ -369,6 +470,30 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
 Màn nào còn giữ dữ liệu ở `useState` (Đội xe, Người dùng) thì phải chuyển sang đường
 đi này khi nối backend — đừng thêm màn mới theo lối cũ.
 
+### Dữ liệu dùng chung và tối ưu *(bổ sung 15/09/2026, D-06, D-30, D-31)*
+
+- Dữ liệu đi qua nhiều màn (xe, chuyến, kiện, revision kết quả) nằm trong **mock repository
+  in-memory** (`src/lib/mock-db/`, LM-026) → `features/<tên>/<tên>-api.ts` → hook TanStack Query.
+  Ghi bằng `useMutation` rồi invalidate. Không thêm store client (Zustand, Redux, Context giữ dữ liệu nghiệp vụ).
+- Tối ưu đi qua interface `OptimizationService` (`src/services/optimization`). Hiện chỉ có
+  `MockOptimizationService`; API thật sau này thay tại `-api.ts`, UI không đổi. Kết quả mock luôn
+  `isMockResult: true`.
+- Kết quả là **revision bất biến** theo `jobId`. Duyệt tạo revision approved mới; sửa xe/kiện sau
+  khi tối ưu làm revision lỗi thời và chặn Duyệt. Kho và tài xế chỉ đọc revision đã duyệt.
+- Trạng thái demo lỗi service bật bằng tham số URL (`?mo-phong=loi`), đọc ở `-api.ts`, không đưa
+  công tắc kỹ thuật lên UI vận hành.
+
+### Kiểm thử *(bổ sung 15/09/2026, D-15, D-39)*
+
+- `pnpm test` chạy Vitest: project `unit` (node) cho `tests/**/*.test.ts` và `src/**/*.test.ts`;
+  project `dom` (jsdom + React Testing Library) cho `src/**/*.dom.test.tsx`, setup ở `src/test/setup-dom.ts`.
+- Test ở **seam** đã thống nhất (giao diện công khai), không test file nội bộ. Ví dụ: domain geometry
+  chỉ test qua `@/domain/geometry`.
+- Logic domain làm theo TDD: một test đỏ → cài đặt tối thiểu → xanh, rồi mới sang test sau.
+  Giá trị kỳ vọng lấy từ nguồn độc lập (literal trong Spec, số đã kiểm bằng máy), không tính lại
+  theo cách code tính.
+- Benchmark domain: `pnpm test:bench` (file `*.bench.ts`). E2E: `pnpm test:e2e` sau LM-005.
+
 ### Chia chunk theo route
 
 Mọi màn trong `app/App.tsx` đều `lazy()`. Nhờ đó Three.js chỉ tải khi mở màn 3D,
@@ -409,7 +534,9 @@ Thêm màn mới thì thêm theo đúng lối này.
 - Dùng trạng thái code hiện tại làm nguồn chuẩn cho task tiếp theo. Không đọc lại toàn repo hoặc file đã audit nếu chúng không thay đổi.
 - Ưu tiên `git diff`, tìm symbol và import/reference; chỉ mở đúng phần liên quan. Tận dụng findings và kết quả kiểm tra đã có.
 - Nếu cần research song song, chỉ dùng tối đa 1–2 subagent với scope hẹp, không giao đọc trùng code. Subagent trả findings ngắn, không viết essay hoặc paste code dài.
+- Làm song song **nhiều issue** thì mỗi issue một git worktree riêng, chỉ giao issue không sửa chung file và đã đủ phụ thuộc. Agent không sửa `docs/progress.md`; người điều phối gộp nhánh và cập nhật tiến độ sau khi kiểm tra lại lint/build/test trên nhánh gộp.
 - Không refactor ngoài scope, không over-engineer; chỉ thêm abstraction/dependency khi có nhu cầu đã chứng minh.
 - Khi giải pháp đơn giản đạt acceptance criteria và performance target, dừng khám phá phương án khác.
-- Chạy full `pnpm lint` và `pnpm build` để xác nhận cuối task; không lặp lại sau từng thay đổi nhỏ nếu chưa có lỗi hoặc rủi ro mới cần kiểm tra.
+- Chạy full `pnpm lint`, `pnpm build` và `pnpm test` để xác nhận cuối task (thêm `pnpm test:e2e` khi task đụng UI, sau LM-005); không lặp lại sau từng thay đổi nhỏ nếu chưa có lỗi hoặc rủi ro mới cần kiểm tra.
+- Mỗi task xong: ghi kết quả vào file issue tương ứng và thêm một mục nhật ký có ngày vào `docs/progress.md`.
 - Giữ chất lượng implementation và bằng chứng kiểm thử, đồng thời giảm tối đa context/token không cần thiết.
