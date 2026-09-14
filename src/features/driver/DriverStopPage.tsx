@@ -1,6 +1,10 @@
 import { ArrowRight, ChevronLeft, CloudOff, Navigation, Phone } from 'lucide-react'
 import { Link } from 'react-router'
+import { lazy, Suspense, useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/Dialog'
+import { Spinner } from '@/components/ui/Spinner'
+import { LOAD_PLAN } from '@/lib/load-plan.mock'
 import { formatInteger } from '@/lib/format'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
@@ -8,6 +12,8 @@ import { DeliveryItemRow } from './DeliveryItemRow'
 import { DELIVERY_STOP } from './driver.mock'
 import { DriverTabBar } from './DriverTabBar'
 import { useDeliveryStop } from './useDeliveryStop'
+
+const DriverCargoViewer = lazy(() => import('@/features/viewer3d/DriverCargoViewer').then((m) => ({ default: m.DriverCargoViewer })))
 
 /**
  * Màn tài xế tại điểm giao — điện thoại, một tay, ngoài trời.
@@ -20,8 +26,10 @@ import { useDeliveryStop } from './useDeliveryStop'
 export function DriverStopPage() {
   const stop = DELIVERY_STOP
   const state = useDeliveryStop(stop)
+  const [cargoOpen, setCargoOpen] = useState(false)
 
   return (
+    <Dialog open={cargoOpen} onOpenChange={setCargoOpen}>
     <div className="flex h-dvh flex-col bg-bg text-body-lg">
       <header className="flex flex-none flex-col gap-2.5 border-b border-border bg-bg px-4 pt-[calc(env(safe-area-inset-top)+12px)] pb-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -29,7 +37,7 @@ export function DriverStopPage() {
             <Link
               to="/chuyen"
               aria-label="Thoát màn hình tài xế"
-              className="-ml-2 grid size-11 flex-none place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="-ml-2 grid size-14 flex-none place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <ChevronLeft className="size-6" strokeWidth={2} aria-hidden />
             </Link>
@@ -102,6 +110,7 @@ export function DriverStopPage() {
           </div>
         </div>
 
+        <DialogTrigger asChild><Button variant="secondary" size="touch" block>Xem vị trí hàng</Button></DialogTrigger>
         <ul className="m-0 flex flex-none list-none flex-col overflow-hidden rounded-md border border-border bg-bg p-0">
           {stop.items.map((item) => (
             <DeliveryItemRow
@@ -128,5 +137,16 @@ export function DriverStopPage() {
         <DriverTabBar />
       </div>
     </div>
+    {cargoOpen ? <DialogContent className="fixed inset-0 h-dvh max-h-dvh w-full max-w-full rounded-none">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-border px-3">
+        <DialogTitle className="text-h3 font-semibold">Vị trí hàng tại điểm giao</DialogTitle>
+        <DialogClose asChild><Button variant="secondary" size="touch">Đóng 3D</Button></DialogClose>
+      </div>
+      <DialogDescription className="sr-only">Mô phỏng dỡ hàng gợi ý, vị trí kiện và cảnh báo đường dỡ.</DialogDescription>
+      <Suspense fallback={<div className="grid flex-1 place-items-center bg-canvas-1"><Spinner tone="light" /></div>}>
+        <DriverCargoViewer plan={LOAD_PLAN} stopNumber={stop.number} doneIds={state.done} retainedIds={state.rejected} />
+      </Suspense>
+    </DialogContent> : null}
+    </Dialog>
   )
 }

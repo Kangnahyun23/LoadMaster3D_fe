@@ -1,50 +1,102 @@
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createQualityPolicy, observeQuality, type QualityObservation } from './quality-policy'
 
-/**
- * Cờ bật/tắt hiệu ứng theo năng lực thiết bị (CLAUDE.md mục 7).
- * Mọi hiệu ứng nâng cao phải đi qua đây; mặc định ưu tiên giữ ≥30 FPS.
- */
+export type QualityTier = 'high' | 'balanced' | 'low'
+export type AnimationQuality = 'full' | 'reduced' | 'none'
+export type ExperienceMode = 'planner' | 'warehouse' | 'driver'
+
+/** Hiệu ứng chỉ thay đổi cách vẽ, không được loại bỏ trạng thái nghiệp vụ. */
 export type PerformanceFlags = {
-  /** Bóng đổ từ đèn chính xuống sàn thùng */
+  tier: QualityTier
   shadows: boolean
-  /** Viền tối quanh kiện (inverted hull) — thêm 1 draw call */
+  /** Viền tối chung; viền kiện đang chọn luôn được giữ lại. */
   outlines: boolean
-  /** Post-processing — tắt hẳn, chưa cần và tốn nhất */
-  postprocessing: boolean
-  /** Người dùng bật "giảm chuyển động" ở hệ điều hành */
+  /** Cabin, bánh xe và mặt đất; vẫn giữ thùng và cửa để định hướng. */
+  decoration: boolean
+  animationQuality: AnimationQuality
+  postprocessing: false
   reducedMotion: boolean
-  /** Giới hạn devicePixelRatio cho Canvas */
   dpr: [number, number]
+  onPerformanceSample: (sample: QualityObservation) => void
 }
 
-function detect(): PerformanceFlags {
-  if (typeof window === 'undefined') {
-    return {
-      shadows: false,
-      outlines: true,
-      postprocessing: false,
-      reducedMotion: false,
-      dpr: [1, 1],
-    }
-  }
+type QualityProfile = Omit<PerformanceFlags, 'tier' | 'reducedMotion' | 'onPerformanceSample'>
 
+const PROFILES: Record<QualityTier, QualityProfile> = {
+  high: {
+    shadows: true,
+    outlines: true,
+    decoration: true,
+    animationQuality: 'full',
+    postprocessing: false,
+    dpr: [1, 2],
+  },
+  balanced: {
+    shadows: false,
+    outlines: true,
+    decoration: true,
+    animationQuality: 'reduced',
+    postprocessing: false,
+    dpr: [1, 1.5],
+  },
+  low: {
+    shadows: false,
+    outlines: false,
+    decoration: false,
+    animationQuality: 'none',
+    postprocessing: false,
+    // Low prioritizes interaction; DOM labels stay sharp at native resolution.
+    dpr: [0.5, 0.5],
+  },
+}
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
+
+/** Chỉ là cấu hình ban đầu; không suy diễn năng lực GPU từ kích thước màn hình. */
+function detectInitialTier(): QualityTier {
+  if (typeof navigator === 'undefined') return 'balanced'
   const cores = navigator.hardwareConcurrency ?? 4
   const memoryGb =
     (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4
-  const reducedMotion = window.matchMedia(
-    '(prefers-reduced-motion: reduce)',
-  ).matches
-  const capable = cores >= 8 && memoryGb >= 8
-
-  return {
-    shadows: capable,
-    outlines: true,
-    postprocessing: false,
-    reducedMotion,
-    dpr: capable ? [1, 2] : [1, 1.5],
-  }
+  if (cores <= 2 || memoryGb <= 2) return 'low'
+  return cores >= 8 && memoryGb >= 8 ? 'high' : 'balanced'
 }
 
-export function usePerformanceFlags(): PerformanceFlags {
-  return useMemo(() => detect(), [])
+function readReducedMotion(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia(REDUCED_MOTION_QUERY).matches
+}
+
+/** Override chỉ dùng ở luồng debug; không thêm tuỳ chọn kỹ thuật vào màn vận hành. */
+export function usePerformanceFlags(tierOverride?: QualityTier, experience: ExperienceMode = 'planner'): PerformanceFlags {
+  const [adaptiveTier, setAdaptiveTier] = useState<QualityTier>(() => {
+    const detected = detectInitialTier()
+    return experience !== 'planner' && detected === 'high' ? 'balanced' : detected
+  })
+  const policy = useRef(createQualityPolicy(adaptiveTier))
+  const [reducedMotion, setReducedMotion] = useState(readReducedMotion)
+  const tier = tierOverride ?? adaptiveTier
+  const onPerformanceSample = useCallback((sample: QualityObservation) => {
+    if (tierOverride) return // Explicit debug tier locks reproducible measurements.
+    const previous = policy.current
+    policy.current = observeQuality(previous, sample, performance.now())
+    if (policy.current.tier !== previous.tier) setAdaptiveTier(policy.current.tier)
+  }, [tierOverride])
+
+  useEffect(() => {
+    const query = window.matchMedia(REDUCED_MOTION_QUERY)
+    function handleChange(event: MediaQueryListEvent) {
+      setReducedMotion(event.matches)
+    }
+    query.addEventListener('change', handleChange)
+    return () => query.removeEventListener('change', handleChange)
+  }, [])
+
+  return useMemo(() => ({
+    ...PROFILES[tier],
+    tier,
+    reducedMotion,
+    onPerformanceSample,
+    // Không còn chuyển động lớn kể cả khi đổi tuỳ chọn hệ điều hành lúc đang xem.
+    animationQuality: reducedMotion ? 'none' : PROFILES[tier].animationQuality,
+  }), [tier, reducedMotion, onPerformanceSample])
 }

@@ -20,14 +20,14 @@ export function StopLegend({
   if (colorMode === 'khoi-luong') {
     const ramp = [0, 0.25, 0.5, 0.75, 1].map(weightColor).join(', ')
     return (
-      <div className="flex min-w-50 flex-col gap-2 rounded-md border border-border bg-bg px-3 py-2.5 shadow-e2">
-        <span className="text-caption text-text-2">Khối lượng mỗi kiện</span>
+      <div className="flex min-w-50 flex-col gap-2 rounded-md border border-border bg-bg px-3 py-2.5">
+        <span className="text-body-lg xl:text-caption text-text-2">Khối lượng mỗi kiện</span>
         <div
           aria-hidden
           className="h-2.5 rounded-xs"
           style={{ background: `linear-gradient(90deg, ${ramp})` }}
         />
-        <div className="flex justify-between font-mono text-caption text-text-3">
+        <div className="flex justify-between font-mono text-body-lg xl:text-caption text-text-3">
           <span>{formatDecimal(colorContext.minWeightKg)} kg</span>
           <span>{formatDecimal(colorContext.maxWeightKg)} kg</span>
         </div>
@@ -36,14 +36,14 @@ export function StopLegend({
   }
 
   return (
-    <div className="flex min-w-50 flex-col gap-1.5 rounded-md border border-border bg-bg px-3 py-2.5 shadow-e2">
+    <div className="flex min-w-50 flex-col gap-1.5 rounded-md border border-border bg-bg px-3 py-2.5">
       {colorMode === 'don-hang' ? (
-        <span className="pb-0.5 text-caption text-text-3">
+        <span className="pb-0.5 text-body-lg xl:text-caption text-text-3">
           Cùng điểm giao, đơn sau tối hơn một nấc
         </span>
       ) : null}
       {stops.map((stop) => (
-        <span key={stop.number} className="flex items-center gap-2 text-caption">
+        <span key={stop.number} className="flex items-center gap-2 text-body-lg xl:text-caption">
           <span
             aria-hidden
             className="size-2.5 flex-none rounded-[3px]"

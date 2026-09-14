@@ -1,17 +1,14 @@
-import { formatDimensions } from '@/lib/format'
+import { formatDimensions, formatInteger } from '@/lib/format'
 import { findBelow, layerOf, PACKAGING_LABELS } from '@/lib/placement'
 import type { Orientation, Placement, VehicleSpec } from '@/types/load-plan'
 
 /** Câu chữ hướng dẫn cho công nhân kho, suy ra từ dữ liệu phương án. */
 
 const ORIENTATION_TEXT: Record<Orientation, string> = {
-  0: 'Nằm ngang, mặt dài hướng ra cửa',
-  1: 'Nằm ngang, mặt ngắn hướng ra cửa',
-  2: 'Dựng đứng, mặt cao hướng ra cửa',
+  0: 'Hướng chuẩn · D×R×C',
+  1: 'Đổi dài/rộng · R×D×C',
+  2: 'Đổi dài/cao · C×R×D',
 }
-
-/** Khe hở giữa hai kiện trong cùng hàng, khớp bộ xếp mẫu. */
-const ROW_GAP_MM = 20
 
 export type StepNote = {
   tone: 'warning' | 'neutral'
@@ -23,18 +20,10 @@ export function describePosition(
   all: Placement[],
   vehicle: VehicleSpec,
 ): string {
-  const row = Math.floor(p.position.y / (p.widthMm + ROW_GAP_MM)) + 1
   const layer = layerOf(p, all)
   const below = findBelow(p, all)
-
-  let third: string
-  // Gạch nối không ngắt để mã kiện không bị bẻ đôi khi ô hẹp.
-  if (below) third = `Trên ${below.id.replace('-', '‑')}`
-  else if (p.position.y <= ROW_GAP_MM) third = 'Sát vách trái'
-  else if (p.position.y + p.widthMm >= vehicle.innerWidthMm - ROW_GAP_MM) third = 'Sát vách phải'
-  else third = 'Giữa thùng'
-
-  return `Hàng ${row}, Lớp ${layer}, ${third}`
+  const rear = vehicle.innerLengthMm - p.position.x - p.lengthMm
+  return `Lớp ${layer} · Cách cửa ${formatInteger(rear)} mm${below ? ` · Phía dưới: ${below.id}` : ''}`
 }
 
 export function describeOrientation(p: Placement): string {
@@ -47,7 +36,7 @@ export function stepNote(p: Placement, all: Placement[]): StepNote {
   }
   const below = findBelow(p, all)
   if (below?.fragile) {
-    return { tone: 'neutral', text: 'Nhẹ — được đặt lên kiện dễ vỡ' }
+    return { tone: 'warning', text: 'Phía dưới có kiện dễ vỡ — kiểm tra cách nâng đỡ' }
   }
   if (p.weightKg >= 50) {
     return { tone: 'neutral', text: 'Nặng — hai người khiêng hoặc dùng xe nâng tay' }

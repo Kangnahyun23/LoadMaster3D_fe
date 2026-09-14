@@ -3,12 +3,14 @@
  * (đổ bóng khi thiết bị đủ mạnh), đèn phụ chéo ngược để mặt khuất không đen.
  * Gốc toạ độ thế giới là tâm thùng xe nên đèn chỉ cần trỏ về (0,0,0).
  */
+import { readToken } from '@/lib/tokens'
+
 export function SceneLighting({ shadows }: { shadows: boolean }) {
   return (
     <>
-      <hemisphereLight args={['#ffffff', '#1a1d23', 0.85]} />
+      <hemisphereLight args={[readToken('--bg'), readToken('--canvas-1'), 0.95]} />
       <directionalLight
-        position={[6, 10, 5]}
+        position={[3, 12, 4]}
         intensity={1.9}
         castShadow={shadows}
         shadow-mapSize={[2048, 2048]}

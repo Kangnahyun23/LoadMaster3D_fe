@@ -1,7 +1,9 @@
 import { CameraControls } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
+import { PerspectiveCamera, Vector3 } from 'three'
 import { useEffect, useRef, type ComponentRef } from 'react'
-import type { CameraPreset } from '@/types/load-plan'
-import type { Vec3 } from './units'
+import type { CameraPreset, Placement, VehicleSpec } from '@/types/load-plan'
+import { boxCenter, containerCenter, type Vec3 } from './units'
 
 /**
  * Điều khiển camera bằng camera-controls (qua drei). Gốc thế giới là tâm
@@ -24,26 +26,77 @@ const SMOOTH_TIME = 0.3
 export function CameraRig({
   preset,
   reducedMotion,
+  focus,
+  vehicle,
+  fit = false,
+  vehicleDecoration = false,
+  onUserControl,
 }: {
   preset: CameraPreset
   reducedMotion: boolean
+  focus?: { placement: Placement; request: number } | null
+  vehicle?: VehicleSpec
+  fit?: boolean
+  vehicleDecoration?: boolean
+  onUserControl?: () => void
 }) {
   const controlsRef = useRef<ComponentRef<typeof CameraControls>>(null)
+  const applied = useRef<{ preset: CameraPreset; vehicle?: VehicleSpec } | null>(null)
+  const size = useThree((state) => state.size)
+  const camera = useThree((state) => state.camera)
 
   useEffect(() => {
     const controls = controlsRef.current
-    if (!controls) return
-    const [x, y, z] = PRESET_POSITIONS[preset]
+    if (!controls || !size.width || !size.height) return
+    // Responsive panels can resize the Canvas mid-orbit. Keep the user's pose;
+    // only an explicit preset or a new vehicle requests a fresh framing.
+    if (applied.current?.preset === preset && applied.current.vehicle === vehicle) return
+    applied.current = { preset, vehicle }
+    let [x, y, z] = PRESET_POSITIONS[preset]
+    if (fit && vehicle && camera instanceof PerspectiveCamera) {
+      const center = containerCenter(vehicle)
+      const vfov = camera.fov * Math.PI / 180
+      const hfov = 2 * Math.atan(Math.tan(vfov / 2) * size.width / Math.max(1, size.height))
+      const direction = new Vector3(x, y, z).normalize()
+      const right = new Vector3().crossVectors(new Vector3(0, 1, 0), direction).normalize()
+      const up = new Vector3().crossVectors(direction, right).normalize()
+      // Fit projected corners at the existing angle, not a length-dominated sphere.
+      // This keeps a rear-door view readable on phones without fitToBox rotating it.
+      let distance = 3
+      const point = new Vector3()
+      for (const px of [vehicleDecoration ? -1.85 : 0, center[0] * 2 + 1.2]) {
+        for (const py of [vehicleDecoration ? -1.15 : 0, center[1] * 2 + 0.2]) {
+          for (const pz of [-0.45, center[2] * 2 + 0.45]) {
+            point.set(px - center[0], py - center[1], pz - center[2])
+            const depth = point.dot(direction)
+            distance = Math.max(distance, depth + Math.abs(point.dot(right)) * 1.16 / Math.tan(hfov / 2),
+              depth + Math.abs(point.dot(up)) * 1.16 / Math.tan(vfov / 2))
+          }
+        }
+      }
+      const scale = distance / Math.hypot(x, y, z)
+      x *= scale; y *= scale; z *= scale
+    }
     void controls.setLookAt(x, y, z, 0, 0, 0, !reducedMotion)
-  }, [preset, reducedMotion])
+  }, [preset, reducedMotion, vehicle, fit, vehicleDecoration, size.width, size.height, camera])
+
+  useEffect(() => {
+    const controls = controlsRef.current
+    if (!controls || !focus || !vehicle) return
+    const center = containerCenter(vehicle)
+    const target = boxCenter(focus.placement).map((value, i) => value - center[i]!) as Vec3
+    // moveTo translates target AND camera, preserving the user's viewing direction.
+    void controls.moveTo(...target, !reducedMotion)
+  }, [focus, vehicle, reducedMotion])
 
   return (
     <CameraControls
       ref={controlsRef}
       makeDefault
+      onControlStart={onUserControl}
       smoothTime={reducedMotion ? 0.05 : SMOOTH_TIME}
       minDistance={3}
-      maxDistance={26}
+      maxDistance={80}
       minPolarAngle={0.02}
       maxPolarAngle={Math.PI / 2 - 0.03}
       dollySpeed={0.6}

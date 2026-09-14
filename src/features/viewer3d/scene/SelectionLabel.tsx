@@ -17,8 +17,8 @@ export function SelectionLabel({ placement }: { placement: Placement }) {
       style={{ pointerEvents: 'none' }}
     >
       <div className="absolute bottom-0 left-0 flex -translate-x-1/2 flex-col items-center">
-        <span className="rounded-sm bg-bg px-2 py-1 font-mono text-[11px] leading-3.5 font-semibold whitespace-nowrap text-text">
-          {placement.id}
+        <span className="rounded-sm bg-bg px-2 py-1 font-mono text-body-lg font-semibold whitespace-nowrap text-text xl:text-caption">
+          {placement.id} · Điểm {placement.stop}
         </span>
         <span aria-hidden className="h-[34px] w-px bg-bg" />
       </div>

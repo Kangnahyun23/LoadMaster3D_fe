@@ -19,7 +19,7 @@ function footprintsOverlap(a: Placement, b: Placement): boolean {
 }
 
 /** Kiện nằm ngay dưới: đỉnh cao nhất trong số kiện có đỉnh ≤ đáy kiện này. */
-export function findBelow(p: Placement, all: Placement[]): Placement | undefined {
+export function findBelow(p: Placement, all: readonly Placement[]): Placement | undefined {
   let best: Placement | undefined
   for (const q of all) {
     if (q.id === p.id || !footprintsOverlap(p, q)) continue
@@ -31,7 +31,7 @@ export function findBelow(p: Placement, all: Placement[]): Placement | undefined
 }
 
 /** Kiện nằm ngay trên: đáy thấp nhất trong số kiện có đáy ≥ đỉnh kiện này. */
-export function findAbove(p: Placement, all: Placement[]): Placement | undefined {
+export function findAbove(p: Placement, all: readonly Placement[]): Placement | undefined {
   const top = p.position.z + p.heightMm
   let best: Placement | undefined
   for (const q of all) {
@@ -43,7 +43,7 @@ export function findAbove(p: Placement, all: Placement[]): Placement | undefined
 }
 
 /** Số lớp = 1 + số kiện xếp chồng bên dưới. */
-export function layerOf(p: Placement, all: Placement[]): number {
+export function layerOf(p: Placement, all: readonly Placement[]): number {
   let layer = 1
   let current: Placement | undefined = p
   while (current) {
@@ -57,7 +57,7 @@ export function layerOf(p: Placement, all: Placement[]): number {
 /** "Sàn · sát vách trước", "Lớp 2 · bên trái"… cho danh sách kiện ghim. */
 export function describeWhere(
   p: Placement,
-  all: Placement[],
+  all: readonly Placement[],
   vehicle: VehicleSpec,
 ): string {
   const layer = layerOf(p, all)

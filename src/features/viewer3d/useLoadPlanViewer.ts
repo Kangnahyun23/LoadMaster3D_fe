@@ -4,9 +4,11 @@ import type {
   ColorMode,
   LoadPlan,
   Orientation,
-  Placement,
   PlaybackSpeed,
 } from '@/types/load-plan'
+import { adaptLoadPlan } from './viewer-scene-model'
+import { resolveEffectiveScene, type PlacementPatch } from './viewer-draft'
+import { commitCommand, createDraftHistory, travelHistory, type CommandType } from './editor/draft-history'
 
 /**
  * Toàn bộ state tương tác của màn xem phương án 3D.
@@ -22,8 +24,10 @@ export function useLoadPlanViewer(
   plan: LoadPlan,
   { initialSelectedId }: { initialSelectedId?: string } = {},
 ) {
-  const totalSteps = plan.placements.length
-  const initialSelected = plan.placements.find((p) => p.id === initialSelectedId)
+  // ViewerPage keys each session by snapshot. No draft is carried to another plan.
+  const sceneModel = useMemo(() => adaptLoadPlan(plan), [plan])
+  const totalSteps = Math.max(0, ...sceneModel.placements.map((p) => p.step))
+  const initialSelected = initialSelectedId ? sceneModel.placementById.get(initialSelectedId) : undefined
 
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('goc-cheo')
   const [colorMode, setColorMode] = useState<ColorMode>('diem-giao')
@@ -37,12 +41,13 @@ export function useLoadPlanViewer(
   )
   const [leftOpen, setLeftOpen] = useState(true)
   const [leftTab, setLeftTab] = useState<LeftTab>('unplaced')
-  const [orientationOverrides, setOrientationOverrides] = useState<
-    ReadonlyMap<string, Orientation>
-  >(new Map())
+  const [history, setHistory] = useState(createDraftHistory)
+  const draft = history.draft
+  const effectiveScene = useMemo(() => resolveEffectiveScene(sceneModel, draft), [sceneModel, draft])
+  const placements = effectiveScene.placements
 
   const setStep = useCallback(
-    (next: number) => setStepState(Math.min(totalSteps, Math.max(1, next))),
+    (next: number) => setStepState(Math.min(totalSteps, Math.max(totalSteps > 0 ? 1 : 0, next))),
     [totalSteps],
   )
 
@@ -77,54 +82,41 @@ export function useLoadPlanViewer(
 
   const toggleLeft = useCallback(() => setLeftOpen((o) => !o), [])
 
-  const setOrientation = useCallback(
-    (id: string, orientation: Orientation) =>
-      setOrientationOverrides((current) => {
-        const next = new Map(current)
-        next.set(id, orientation)
-        return next
-      }),
-    [],
-  )
+  const commitDraft = useCallback((type: CommandType, id?: string, patch?: PlacementPatch) => {
+    setHistory((current) => commitCommand(sceneModel, current, type, id, patch))
+  }, [sceneModel])
+  const undo = useCallback(() => setHistory((current) => travelHistory(current, 'undo')), [])
+  const redo = useCallback(() => setHistory((current) => travelHistory(current, 'redo')), [])
+  const stopPlaying = useCallback(() => setPlaying(false), [])
 
-  const [pinnedOverrides, setPinnedOverrides] = useState<
-    ReadonlyMap<string, boolean>
-  >(new Map())
+  // Programmatic commits still cross one boundary; pointer previews never call this.
+  const updatePlacement = useCallback(
+    (id: string, patch: PlacementPatch) => commitDraft('MOVE', id, patch),
+    [commitDraft],
+  )
+  const setOrientation = useCallback(
+    (id: string, orientation: Orientation) => commitDraft('ROTATE', id, { orientation }),
+    [commitDraft],
+  )
 
   const togglePinned = useCallback(
     (id: string) =>
-      setPinnedOverrides((current) => {
-        const base = plan.placements.find((p) => p.id === id)?.pinned ?? false
-        const next = new Map(current)
-        next.set(id, !(current.get(id) ?? base))
-        return next
+      setHistory((current) => {
+        const base = sceneModel.placementById.get(id)
+        if (!base) return current
+        const pinned = current.draft.patches.get(id)?.pinned ?? base.pinned
+        return commitCommand(sceneModel, current, pinned ? 'UNPIN' : 'PIN', id, { pinned: !pinned })
       }),
-    [plan.placements],
+    [sceneModel],
   )
 
-  /** Placement đã áp hướng xoay và trạng thái ghim người dùng chọn. */
-  const placements = useMemo<Placement[]>(
-    () =>
-      plan.placements.map((p) => {
-        const orientation = orientationOverrides.get(p.id)
-        const pinned = pinnedOverrides.get(p.id)
-        const rotated =
-          orientation === undefined || orientation === p.orientation
-            ? p
-            : applyOrientation(p, orientation)
-        return pinned === undefined || pinned === rotated.pinned
-          ? rotated
-          : { ...rotated, pinned }
-      }),
-    [plan.placements, orientationOverrides, pinnedOverrides],
-  )
-
-  const selected = useMemo(
-    () => placements.find((p) => p.id === selectedId),
-    [placements, selectedId],
-  )
+  const selected = selectedId ? effectiveScene.placementById.get(selectedId) : undefined
 
   return {
+    sceneModel,
+    draft,
+    commitDraft, undo, redo, canUndo: history.past.length > 0, canRedo: history.future.length > 0, stopPlaying,
+    updatePlacement,
     placements,
     totalSteps,
     cameraPreset,
@@ -155,20 +147,3 @@ export function useLoadPlanViewer(
 }
 
 export type LoadPlanViewerState = ReturnType<typeof useLoadPlanViewer>
-
-/**
- * Hoán vị kích thước theo hướng đặt, giữ nguyên góc gốc của kiện.
- * Luôn nhận placement gốc từ `plan.placements` (bộ tối ưu trả về ở hướng 0),
- * nên chỉ cần hoán vị một lần, không cần đảo ngược hướng cũ.
- * 0 D×R×C giữ nguyên · 1 R×D×C đổi dài↔rộng · 2 C×R×D đổi dài↔cao
- */
-function applyOrientation(p: Placement, orientation: Orientation): Placement {
-  switch (orientation) {
-    case 0:
-      return { ...p, orientation }
-    case 1:
-      return { ...p, orientation, lengthMm: p.widthMm, widthMm: p.lengthMm }
-    case 2:
-      return { ...p, orientation, lengthMm: p.heightMm, heightMm: p.lengthMm }
-  }
-}

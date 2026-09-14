@@ -27,25 +27,25 @@ export function ViewerHeader({
   onApprove: () => void
 }) {
   return (
-    <header className="flex h-14 flex-none items-center gap-4 border-b border-border bg-bg px-5">
+    <header className="flex h-14 flex-none items-center gap-2 border-b border-border bg-bg px-2 xl:gap-4 xl:px-5">
       <Link
         to={`/chuyen/${tripId}`}
         aria-label="Quay lại chuyến"
-        className="grid size-9 place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="grid size-14 shrink-0 place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary xl:size-11"
       >
         <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
       </Link>
 
-      <div className="flex items-center gap-2.5">
+      <div className="hidden items-center gap-2.5 xl:flex">
         <h1 className="font-mono text-[18px] leading-6 font-semibold tracking-[-0.02em]">
           {tripId}
         </h1>
         <StatusBadge status="da_toi_uu" />
       </div>
 
-      <span aria-hidden className="h-6 w-px bg-border" />
+      <span aria-hidden className="hidden h-6 w-px bg-border xl:block" />
 
-      <dl className="flex items-center gap-5">
+      <dl className="hidden items-center gap-5 xl:flex">
         <Stat label="Lấp đầy">
           <span className="font-semibold text-primary">{formatDecimal(fillRate)}%</span>
         </Stat>
@@ -64,13 +64,13 @@ export function ViewerHeader({
       <div className="flex-1" />
 
       <div className="flex gap-2">
-        <Button variant="secondary" className="h-9 px-3.5" asChild>
+        <Button variant="secondary" className="hidden h-10 px-3.5 xl:flex" asChild>
           <Link to={`/chuyen/${tripId}/so-sanh`}>
             <Columns2 strokeWidth={1.5} />
             So sánh phương án
           </Link>
         </Button>
-        <Button variant="primary" className="h-9 px-3.5" onClick={onApprove}>
+        <Button variant="primary" className="h-14 px-4 text-body-lg xl:h-10 xl:text-body" onClick={onApprove}>
           <Check strokeWidth={1.5} />
           Duyệt phương án
         </Button>

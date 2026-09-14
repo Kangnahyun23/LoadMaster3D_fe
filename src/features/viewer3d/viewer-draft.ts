@@ -1,0 +1,83 @@
+import type { Orientation, Placement, PositionMm } from '@/types/load-plan'
+import { orientDimensions, type ViewerSceneModel } from './viewer-scene-model.ts'
+
+export type PlacementPatch = {
+  readonly position?: PositionMm
+  readonly orientation?: Orientation
+  readonly pinned?: boolean
+}
+
+/** Chỉ lưu khác biệt so với snapshot, sẵn sàng nhận một commit sau gesture. */
+export type ViewerDraft = {
+  readonly patches: ReadonlyMap<string, PlacementPatch>
+}
+
+export type EffectiveViewerScene = {
+  /** Array mới để giữ tương thích API panel/renderer; không sửa các phần tử. */
+  readonly placements: Placement[]
+  readonly placementById: ReadonlyMap<string, Placement>
+}
+
+export function createViewerDraft(): ViewerDraft {
+  return Object.freeze({ patches: new Map<string, PlacementPatch>() })
+}
+
+function samePosition(a: PositionMm | undefined, b: PositionMm | undefined): boolean {
+  return a === b || Boolean(a && b && a.x === b.x && a.y === b.y && a.z === b.z)
+}
+
+function samePatch(a: PlacementPatch | undefined, b: PlacementPatch): boolean {
+  return a?.orientation === b.orientation && a?.pinned === b.pinned && samePosition(a?.position, b.position)
+}
+
+/**
+ * Các field được truyền sẽ thay field tương ứng; undefined xoá field đó.
+ * Giá trị bằng snapshot được bỏ để reset hướng/ghim không để lại draft rỗng.
+ */
+export function patchPlacement(
+  model: ViewerSceneModel,
+  draft: ViewerDraft,
+  id: string,
+  update: PlacementPatch,
+): ViewerDraft {
+  const source = model.placementById.get(id)
+  if (!source) return draft
+  const previous = draft.patches.get(id)
+  const merged = { ...previous, ...update }
+  const position = merged.position && !samePosition(merged.position, source.position)
+    ? Object.freeze({ ...merged.position })
+    : undefined
+  const orientation = merged.orientation !== source.orientation ? merged.orientation : undefined
+  const pinned = merged.pinned !== source.pinned ? merged.pinned : undefined
+  const patch = Object.freeze({ position, orientation, pinned })
+  if (samePatch(previous, patch)) return draft
+
+  const patches = new Map(draft.patches)
+  if (position === undefined && orientation === undefined && pinned === undefined) patches.delete(id)
+  else patches.set(id, patch)
+  return Object.freeze({ patches })
+}
+
+/** Immutable snapshot + draft keyed by id = effective dimensions/positions. */
+export function resolveEffectiveScene(model: ViewerSceneModel, draft: ViewerDraft): EffectiveViewerScene {
+  const placementById = new Map<string, Placement>()
+  const placements = model.placements.map((source) => {
+    const patch = draft.patches.get(source.id)
+    const baseDimensions = model.baseDimensionsById.get(source.id)
+    if (!patch || !baseDimensions) {
+      placementById.set(source.id, source)
+      return source
+    }
+    const orientation = patch.orientation ?? source.orientation
+    const placement = Object.freeze({
+      ...source,
+      ...orientDimensions(baseDimensions, orientation),
+      orientation,
+      position: patch.position ?? source.position,
+      pinned: patch.pinned ?? source.pinned,
+    })
+    placementById.set(source.id, placement)
+    return placement
+  })
+  return { placements, placementById }
+}

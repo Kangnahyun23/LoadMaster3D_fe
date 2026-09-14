@@ -1,43 +1,36 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router'
-import { toast } from 'sonner'
+import { notifyPendingFeature } from '@/lib/pending-feature'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
-import { formatInteger } from '@/lib/format'
 import { DEFAULT_SELECTED_ID, LOAD_PLAN } from '@/lib/load-plan.mock'
 import { PLANS } from '@/lib/plan-comparison.mock'
-import type { CameraPreset, ColorMode } from '@/types/load-plan'
-import { ApprovePlanDialog, type ApprovalCheck } from './ApprovePlanDialog'
+import type { LoadPlan } from '@/types/load-plan'
+import { benchmarkCountFromSearch, createBenchmarkPlan } from './benchmark.mock'
+import { createPerfStore, DebugOverlay } from './DebugOverlay'
+import { CAMERA_PRESETS, COLOR_MODES, debugQualityTier } from './viewer-options'
+import { ApprovePlanDialog } from './ApprovePlanDialog'
 import { createColorContext } from './colors'
 import { AxleLoadPanel } from './overlays/AxleLoadPanel'
 import { SlicePanel } from './overlays/SlicePanel'
 import { StopLegend } from './overlays/StopLegend'
 import { PackageListPanel } from './panels/PackageListPanel'
-import { SelectedPackagePanel } from './panels/SelectedPackagePanel'
-import type { PerfSample } from './scene/PerfProbe'
+import { SceneInspector } from './panels/SceneInspector'
 import { Timeline } from './Timeline'
 import { useLoadPlanViewer } from './useLoadPlanViewer'
 import { ViewerHeader } from './ViewerHeader'
 import { usePerformanceFlags } from './usePerformanceFlags'
 import { ViewerSkeleton } from './ViewerSkeleton'
+import { useManualEditor } from './editor/useManualEditor'
+import { EditorToolbar } from './editor/EditorToolbar'
+import { EditorPanel } from './editor/EditorPanel'
+import { useOperations } from './operations/useOperations'
+import { OperationsToolbar } from './operations/OperationsToolbar'
+import { operationApprovalChecks } from './operations/approval-checks'
 
 /** Three.js là chunk nặng nhất — chỉ tải khi mở màn này, các màn khác không gánh. */
 const LoadPlanViewer = lazy(() =>
   import('./LoadPlanViewer').then((module) => ({ default: module.LoadPlanViewer })),
 )
-
-const CAMERA_PRESETS: ReadonlyArray<{ value: CameraPreset; label: string }> = [
-  { value: 'truoc', label: 'Trước' },
-  { value: 'cua-sau', label: 'Cửa sau' },
-  { value: 'ben-hong', label: 'Bên hông' },
-  { value: 'tren', label: 'Trên' },
-  { value: 'goc-cheo', label: 'Góc chéo' },
-]
-
-const COLOR_MODES: ReadonlyArray<{ value: ColorMode; label: string }> = [
-  { value: 'diem-giao', label: 'Theo điểm giao' },
-  { value: 'don-hang', label: 'Theo đơn hàng' },
-  { value: 'khoi-luong', label: 'Theo khối lượng' },
-]
 
 /**
  * Xem phương án 3D — toàn màn, không có nav rail (theo bản design).
@@ -45,17 +38,27 @@ const COLOR_MODES: ReadonlyArray<{ value: ColorMode; label: string }> = [
  * Phím tắt: Space phát/dừng, ←/→ lùi/tiến một bước, Home về đầu.
  */
 export function ViewerPage() {
+  const [searchParams] = useSearchParams()
+  const params = useParams()
+  const count = benchmarkCountFromSearch(searchParams.toString())
+  const plan = useMemo(() => count ? createBenchmarkPlan(count) : LOAD_PLAN, [count])
+  // A new snapshot owns a new draft, selection, slice and playback session.
+  return <ViewerSession key={`${params.tripId}:${plan.tripId}`} plan={plan} />
+}
+
+function ViewerSession({ plan }: { plan: LoadPlan }) {
   const params = useParams()
   const [searchParams] = useSearchParams()
-  const plan = LOAD_PLAN
   const tripId = params.tripId ?? plan.tripId
   const showPerf = searchParams.has('debug')
   const selectedPlan = PLANS.find((p) => p.key === searchParams.get('plan')) ?? PLANS[2]
 
-  const flags = usePerformanceFlags()
-  const state = useLoadPlanViewer(plan, { initialSelectedId: DEFAULT_SELECTED_ID })
+  const flags = usePerformanceFlags(debugQualityTier(searchParams))
+  const state = useLoadPlanViewer(plan, { initialSelectedId: plan === LOAD_PLAN ? DEFAULT_SELECTED_ID : plan.placements[0]?.id })
+  const editor = useManualEditor(state)
+  const operations = useOperations(state)
   const colorContext = useMemo(() => createColorContext(plan), [plan])
-  const [perf, setPerf] = useState<PerfSample | null>(null)
+  const perfStore = useMemo(() => createPerfStore(), [])
   const [approveOpen, setApproveOpen] = useState(false)
 
   const totalWeightKg = useMemo(
@@ -65,30 +68,17 @@ export function ViewerPage() {
   const pinned = useMemo(() => state.placements.filter((p) => p.pinned), [state.placements])
   const totalPackages = plan.placements.length + plan.unplaced.length
 
-  const approvalChecks = useMemo<ApprovalCheck[]>(() => {
-    const rearPercent = Math.round((plan.vehicle.rearAxle.loadKg / plan.vehicle.rearAxle.capacityKg) * 100)
-    const ordered = [...state.placements].sort((a, b) => a.step - b.step)
-    const lifo = ordered.every((p, i) => i === 0 || (ordered[i - 1]?.stop ?? 0) >= p.stop)
-    const checks: ApprovalCheck[] = [
-      lifo
-        ? { tone: 'success', text: `Tuân thủ thứ tự dỡ ${formatInteger(plan.stops.length)} điểm giao` }
-        : { tone: 'danger', text: 'Chưa tuân thủ thứ tự dỡ hàng' },
-      rearPercent <= 100
-        ? { tone: 'success', text: `Tải trọng trục trong giới hạn (trục sau ${rearPercent}%)` }
-        : { tone: 'danger', text: `Trục sau vượt giới hạn (${rearPercent}%)` },
-    ]
-    if (pinned.length > 0) {
-      checks.push({ tone: 'warning', text: `${formatInteger(pinned.length)} kiện đã ghim thủ công, không được tối ưu lại` })
-    }
-    return checks
-  }, [plan, state.placements, pinned.length])
+  const approvalChecks = useMemo(() => approveOpen
+    ? operationApprovalChecks(state.placements, plan.vehicle, state.draft.patches.size > 0) : [],
+  [approveOpen, state.placements, plan.vehicle, state.draft.patches.size])
 
-  const { togglePlaying, stepForward, stepBackward, goToStart } = state
+  const { togglePlaying, stepForward, stepBackward, goToStart } = operations
   useEffect(() => {
+    if (editor.mode === 'edit') return
     function handleKeyDown(event: KeyboardEvent) {
       // Không cướp phím khi người dùng đang gõ trong ô nhập hoặc hộp thoại đang mở.
       const target = event.target instanceof HTMLElement ? event.target : null
-      if (target?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) return
+      if (target?.closest('input, textarea, select, button, a, [contenteditable="true"], [role="dialog"]')) return
       switch (event.key) {
         case ' ':
           event.preventDefault()
@@ -107,14 +97,13 @@ export function ViewerPage() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [togglePlaying, stepForward, stepBackward, goToStart])
+  }, [togglePlaying, stepForward, stepBackward, goToStart, editor.mode])
 
   function handleApprove() {
     setApproveOpen(false)
-    toast.success(`Đã duyệt ${selectedPlan?.name ?? 'phương án'}`, {
-      description: 'Phiếu xếp hàng đã gửi tới máy tính bảng kho Long Bình.',
-    })
+    notifyPendingFeature('Duyệt phương án và gửi phiếu xếp tới kho')
   }
+  function handleModeChange(mode: 'view' | 'edit') { operations.stop(); editor.setMode(mode) }
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-bg">
@@ -127,8 +116,11 @@ export function ViewerPage() {
         totalCount={totalPackages}
         onApprove={() => setApproveOpen(true)}
       />
+      <EditorToolbar state={state} editor={editor} onModeChange={handleModeChange} />
+      {editor.mode === 'view' ? <OperationsToolbar operations={operations} stops={plan.stops} /> : null}
 
-      <div className="flex min-h-0 flex-1">
+      <div className={`relative flex min-h-0 flex-1 ${editor.mode === 'edit' ? 'flex-col xl:flex-row' : ''}`}>
+        {editor.mode === 'view' ? <div className="hidden xl:flex">
         <PackageListPanel
           unplaced={plan.unplaced}
           pinned={pinned}
@@ -141,64 +133,55 @@ export function ViewerPage() {
           selectedId={state.selectedId}
           onSelect={state.select}
         />
+        </div> : null}
 
-        <div className="relative min-w-0 flex-1 overflow-hidden bg-[linear-gradient(180deg,var(--canvas-1)_0%,var(--canvas-2)_100%)]">
+        <div className="relative min-h-48 min-w-0 flex-1 overflow-hidden bg-canvas-1">
           <Suspense fallback={<ViewerSkeleton packageCount={plan.placements.length} stopCount={plan.stops.length} />}>
-            <LoadPlanViewer plan={plan} state={state} flags={flags} onPerfSample={showPerf ? setPerf : undefined} />
+            <LoadPlanViewer state={state} flags={flags} editor={editor} operations={operations} onPerfSample={showPerf ? perfStore.publish : undefined} />
           </Suspense>
 
-          <div className="absolute top-4 left-4">
-            <SegmentedControl ariaLabel="Góc nhìn" options={CAMERA_PRESETS} value={state.cameraPreset} onChange={state.setCameraPreset} />
+          <div className="absolute top-2 left-2 max-w-[calc(100%-16px)] overflow-x-auto xl:top-4 xl:left-4">
+            <SegmentedControl ariaLabel="Góc nhìn" options={CAMERA_PRESETS} value={state.cameraPreset} onChange={state.setCameraPreset}
+              className="[&_button]:h-14 [&_button]:text-body-lg xl:[&_button]:h-7 xl:[&_button]:text-caption" />
           </div>
 
-          <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
+          <div className="absolute top-4 right-4 hidden flex-col items-end gap-2 xl:flex">
             <SegmentedControl ariaLabel="Chế độ tô màu" options={COLOR_MODES} value={state.colorMode} onChange={state.setColorMode} />
             <StopLegend stops={plan.stops} colorMode={state.colorMode} colorContext={colorContext} />
           </div>
 
-          <div className="absolute bottom-4 left-4">
-            <AxleLoadPanel front={plan.vehicle.frontAxle} rear={plan.vehicle.rearAxle} />
+          <div className="absolute bottom-4 left-4 hidden xl:block">
+            <AxleLoadPanel front={plan.vehicle.frontAxle} rear={plan.vehicle.rearAxle} compact />
           </div>
 
-          <div className="absolute right-4 bottom-4">
+          {editor.mode === 'view' ? <div className="absolute right-4 bottom-4 hidden xl:block">
             <SlicePanel sliceMm={state.sliceMm} maxMm={plan.vehicle.innerLengthMm} onChange={state.setSliceMm} />
-          </div>
+          </div> : null}
 
-          {showPerf && perf ? (
-            <output
-              title={`${formatInteger(perf.triangles)} tam giác`}
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-sm bg-panel-dark px-2 py-1 font-mono text-caption whitespace-nowrap text-white/80"
-            >
-              {perf.fps} FPS · {perf.drawCalls} draw calls
-            </output>
-          ) : null}
+          {showPerf ? <DebugOverlay store={perfStore} /> : null}
         </div>
 
-        <SelectedPackagePanel
-          placement={state.selected}
-          placements={state.placements}
-          totalSteps={state.totalSteps}
-          stops={plan.stops}
-          tripId={tripId}
-          onClose={() => state.select(null)}
-          onSetOrientation={state.setOrientation}
-          onTogglePin={state.togglePinned}
-        />
+        {editor.mode === 'edit' ? <EditorPanel state={state} editor={editor} /> :
+          <SceneInspector state={state} operations={operations} tripId={tripId} colorContext={colorContext}
+            onEdit={() => handleModeChange('edit')} onFocus={editor.focusSelected}
+            onSelect={(p) => { state.select(p.id); editor.focusPlacement(p) }} />}
       </div>
 
-      <Timeline
+      {editor.mode === 'view' ? <Timeline
         placements={state.placements}
-        step={state.step}
-        totalSteps={state.totalSteps}
-        playing={state.playing}
+        kind={operations.kind}
+        orderedOverride={operations.kind === 'unloading' ? operations.unload.ordered : undefined}
+        step={operations.kind === 'unloading' ? operations.unload.cursor : state.step}
+        totalSteps={operations.kind === 'unloading' ? operations.unload.ordered.length : state.totalSteps}
+        playing={operations.playing}
         speed={state.speed}
-        onStepChange={state.setStep}
-        onStepForward={state.stepForward}
-        onStepBackward={state.stepBackward}
-        onGoToStart={state.goToStart}
-        onTogglePlaying={state.togglePlaying}
+        onStepChange={operations.kind === 'unloading' ? operations.unload.setCursor : state.setStep}
+        onStepForward={operations.stepForward}
+        onStepBackward={operations.stepBackward}
+        onGoToStart={operations.goToStart}
+        onTogglePlaying={operations.togglePlaying}
         onSpeedChange={state.setSpeed}
-      />
+      /> : null}
 
       <ApprovePlanDialog
         open={approveOpen}
