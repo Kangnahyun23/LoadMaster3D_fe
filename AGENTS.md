@@ -117,7 +117,7 @@ src/
     i18n/               từ điển vi/en, provider, hook (LM-027)
   types/                type dùng từ hai feature trở lên
   domain/               logic nghiệp vụ THUẦN theo Spec — không React, không Three.js
-    geometry/           số (roundCm, EPSILON), hộp, chồng lấn, biên thùng
+    geometry/           số (roundCm, EPSILON), hộp, chồng lấn, biên thùng, 6 hướng đặt, lưới không gian
     models/             type contract Spec + zod schema (LM-010)
     constraints/        validation và ràng buộc, trả mã lỗi (LM-014 →)
     metrics/            tỷ lệ sử dụng, trọng tâm (LM-021)

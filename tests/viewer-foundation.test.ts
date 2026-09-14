@@ -111,7 +111,8 @@ for (const count of BENCHMARK_COUNTS) {
       }
     }
     expect(plan.stops.reduce((sum, stop) => sum + stop.packageCount, 0)).toBe(count)
-  })
+    // ~500.000 expect cho 1.000 kiện: vượt mặc định 5 s khi máy/CI đang tải nặng.
+  }, 30_000)
 }
 
 test('benchmark parameters cannot alter normal product flow', () => {

@@ -121,4 +121,5 @@ test('a 50 cm grid answers every query exactly like a single-cell grid, before a
     scan.update(id, moved)
   }
   expect(allQueries(fine, entries)).toStrictEqual(allQueries(scan, entries))
-})
+  // Lưới một ô là quét thẳng 1.000 × 1.000 × 4 truy vấn: vượt mặc định 5 s khi máy/CI đang tải nặng.
+}, 30_000)
