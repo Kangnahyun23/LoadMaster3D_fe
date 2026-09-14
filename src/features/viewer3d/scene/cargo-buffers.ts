@@ -3,7 +3,7 @@ import type { Placement } from '@/types/load-plan'
 import { boxCenter, boxSize, MM } from './units'
 
 export const HULL_PADDING = 0.012
-export const DROP_HEIGHT = 1.2
+export const DROP_HEIGHT = 0.22
 const dummy = new Object3D()
 const corner = new Vector3()
 

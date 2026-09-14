@@ -4,7 +4,7 @@ import type { CameraPreset, ColorMode, Placement } from '@/types/load-plan'
 import type { ViewerSceneModel } from '../viewer-scene-model'
 import type { ExperienceMode, PerformanceFlags } from '../usePerformanceFlags'
 import type { SceneSemantics } from '../operations/scene-semantics'
-import { CargoMassMarker, RearDoorCue, StopRibbon } from '../operations/OperationsCues'
+import { CargoMassMarker, RearDoorCue, InteriorStopMap } from '../operations/OperationsCues'
 import { UnloadMotion, type UnloadMotionStep } from '../operations/UnloadMotion'
 import { ExtractionCorridor } from '../operations/ExtractionCorridor'
 import { createColorContext } from '../colors'
@@ -14,7 +14,6 @@ import { Container } from './Container'
 import { TruckCab } from './TruckCab'
 import { sceneMaterials } from './materials'
 import { SceneLighting } from './SceneLighting'
-import { SelectionLabel } from './SelectionLabel'
 import { PerfProbe, type PerfSample } from './PerfProbe'
 import { containerCenter } from './units'
 
@@ -24,10 +23,12 @@ export type SceneCanvasProps = {
   placements: readonly Placement[]
   flags: PerformanceFlags
   preset: CameraPreset
-  focus?: { placement: Placement; request: number } | null
+  focus?: { placement: Placement; request: number; follow?: boolean } | null
   onUserControl?: () => void
   selectedId: string | null
   onSelect: (id: string | null) => void
+  onFocus?: (p: Placement) => void
+  warningSignal?: number
   colorMode?: ColorMode
   sliceMm?: number
   step: number
@@ -45,7 +46,7 @@ export type SceneCanvasProps = {
 
 /** Shared renderer; experience wrappers own controls/workflows, not another scene engine. */
 export function SceneCanvas({
-  experience, model, placements, flags, preset, focus, onUserControl, selectedId, onSelect,
+  experience, model, placements, flags, preset, focus, onUserControl, selectedId, onSelect, onFocus, warningSignal = 0,
   colorMode = 'diem-giao', sliceMm = model.vehicle.innerLengthMm, step, semantics, hiddenId,
   animateLoading = true, decoration = true, xraySelection, showMass, showDistribution, unloadMotion, onPerfSample, children,
 }: SceneCanvasProps) {
@@ -72,14 +73,13 @@ export function SceneCanvas({
       <Container vehicle={model.vehicle} materials={materials} detail={flags.decoration} reducedMotion={flags.reducedMotion} />
       {decoration && flags.decoration ? <TruckCab vehicle={model.vehicle} materials={materials} shadows={flags.shadows} /> : null}
       <CargoInstances placements={placements} colorMode={colorMode} colorContext={colorContext} sliceMm={sliceMm}
-        step={step} selectedId={selected?.id ?? null} onSelect={onSelect} outlines={flags.outlines} outlineColor={materials.outline}
+        step={step} selectedId={selected?.id ?? null} onSelect={onSelect} onFocus={onFocus} outlines={flags.outlines} outlineColor={materials.outline}
         reducedMotion={flags.reducedMotion} animationQuality={animateLoading ? flags.animationQuality : 'none'} hiddenId={hiddenId}
-        semantics={semantics} xraySelection={xraySelection} surfaceDetail={flags.decoration} />
-      {selected ? <SelectionLabel placement={selected} /> : null}
+        semantics={semantics} warningSignal={warningSignal} xraySelection={xraySelection} surfaceDetail={flags.decoration} />
       <RearDoorCue vehicle={model.vehicle} />
-      {showDistribution ? <StopRibbon placements={semantics?.massPlacements ?? placements} vehicle={model.vehicle} /> : null}
-      {showMass ? <CargoMassMarker placements={semantics?.massPlacements ?? placements} /> : null}
-      {inspected ? <ExtractionCorridor target={inspected} vehicle={model.vehicle} blocked={Boolean(semantics?.blockers.length)} /> : null}
+      {showDistribution ? <InteriorStopMap placements={semantics?.massPlacements ?? placements} vehicle={model.vehicle} reducedMotion={flags.reducedMotion} /> : null}
+      {showMass ? <CargoMassMarker placements={semantics?.massPlacements ?? placements} vehicle={model.vehicle} /> : null}
+      {inspected ? <ExtractionCorridor key={`${inspected.id}:${warningSignal}`} target={inspected} vehicle={model.vehicle} blockers={semantics?.blockers ?? []} reducedMotion={flags.reducedMotion} /> : null}
       {unloadMotion ? <UnloadMotion motion={unloadMotion} remaining={semantics?.massPlacements ?? placements}
         vehicle={model.vehicle} quality={flags.animationQuality} reducedMotion={flags.reducedMotion} /> : null}
       {children}

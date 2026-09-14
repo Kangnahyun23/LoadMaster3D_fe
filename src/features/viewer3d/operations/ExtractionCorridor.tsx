@@ -1,21 +1,45 @@
-import { useEffect, useMemo } from 'react'
-import { BoxGeometry, EdgesGeometry } from 'three'
+import { Line } from '@react-three/drei'
+import { animated, useSpring } from '@react-spring/three'
+import { useThree } from '@react-three/fiber'
+import { useMemo } from 'react'
 import type { Placement, VehicleSpec } from '@/types/load-plan'
 import { readToken } from '@/lib/tokens'
-import { MM } from '../scene/units'
+import { boxCenter, MM, type Vec3 } from '../scene/units'
+import { SceneCallout } from '../scene/SceneCallout'
 
-/** Advisory volume only, with real depth testing; no claim of an executable path. */
-export function ExtractionCorridor({ target, vehicle, blocked }: { target: Placement; vehicle: VehicleSpec; blocked: boolean }) {
-  const edges = useMemo(() => {
-    const box = new BoxGeometry(1, 1, 1), result = new EdgesGeometry(box)
-    box.dispose(); return result
-  }, [])
-  useEffect(() => () => edges.dispose(), [edges])
-  const start = target.position.x + target.lengthMm, length = Math.max(0, vehicle.innerLengthMm - start)
-  if (!length) return null
-  return <lineSegments name="extraction-corridor" geometry={edges} raycast={() => null}
-    position={[(start + length / 2) * MM, (target.position.z + target.heightMm / 2) * MM, (target.position.y + target.widthMm / 2) * MM]}
-    scale={[length * MM, target.heightMm * MM, target.widthMm * MM]}>
-    <lineBasicMaterial color={readToken(blocked ? '--warning' : '--info')} transparent opacity={0.7} />
-  </lineSegments>
+/** Straight extraction is an advisory corridor, not a physically proven route. */
+export function ExtractionCorridor({ target, vehicle, blockers, reducedMotion }: {
+  target: Placement; vehicle: VehicleSpec; blockers: readonly Placement[]; reducedMotion: boolean
+}) {
+  const invalidate = useThree((s) => s.invalidate)
+  const spring = useSpring({ from: { opacity: 0.05 }, opacity: 0.22, config: { duration: reducedMotion ? 100 : 180 }, onChange: () => invalidate() })
+  const start = (target.position.x + target.lengthMm) * MM, end = vehicle.innerLengthMm * MM + 0.6
+  const y = target.position.z * MM + 0.008, z = (target.position.y + target.widthMm / 2) * MM
+  const color = readToken(blockers.length ? '--warning' : '--success')
+  const points = useMemo(() => {
+    const points: Vec3[] = [[start, y, z], [end, y, z]]
+    const count = Math.min(10, Math.max(1, Math.ceil((end - start) / 0.5)))
+    for (let i = 1; i <= count; i++) {
+      const x = start + (end - start) * i / count
+      points.push([x - 0.12, y, z - 0.08], [x, y, z], [x, y, z], [x - 0.12, y, z + 0.08])
+    }
+    // Two relationship lines at most; all blocker IDs remain available in the panel.
+    for (const blocker of blockers.slice(0, 2)) {
+      const from = boxCenter(target), to = boxCenter(blocker)
+      from[1] += target.heightMm * MM / 2 + 0.02
+      to[1] += blocker.heightMm * MM / 2 + 0.02
+      points.push(from, to)
+    }
+    return points
+  }, [start, end, y, z, target, blockers])
+  return <group name="extraction-corridor">
+    <mesh position={[(start + end) / 2, y, z]} rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
+      <planeGeometry args={[Math.max(0.001, end - start), target.widthMm * MM]} />
+      <animated.meshBasicMaterial color={color} transparent opacity={spring.opacity} depthWrite={false} />
+    </mesh>
+    <Line points={points} segments color={color} lineWidth={2} raycast={() => null} />
+    {blockers[0] ? <SceneCallout position={boxCenter(blockers[0])} offset={[150, 36]} width={180}>
+      <span className="inline-block rounded-sm border border-warning bg-panel-dark px-2 py-1 text-body text-bg">{blockers.length} kiện có thể cản</span>
+    </SceneCallout> : null}
+  </group>
 }

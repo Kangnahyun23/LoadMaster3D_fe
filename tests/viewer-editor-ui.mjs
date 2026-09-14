@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { metrics, proxyPoint, sceneSnapshot, waitIdle } from './viewer-browser-helpers.mjs'
+import { cameraPreset, enterEdit, metrics, proxyPoint, sceneSnapshot, waitIdle } from './viewer-browser-helpers.mjs'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE ?? 'playwright')
@@ -86,7 +86,7 @@ try {
   await button('Hoàn tác').click()
   assert.equal((await position())[2], initial[2] + 10)
   await button('Làm lại').click()
-  await button('Trên').click()
+  await cameraPreset(page, 'Trên')
   await waitIdle(page)
   const beforeFocus = await sceneSnapshot(page)
   await button('Tập trung vào kiện').click()
@@ -127,8 +127,10 @@ try {
     await waitIdle(page)
     const editMetrics = await metrics(page), scene = await sceneSnapshot(page)
     assert.ok(Number(editMetrics.drawCalls) < 100)
-    assert.equal(scene.instances.length, 2)
-    assert.ok(scene.instances.every((mesh) => mesh.count === count))
+    assert.equal(scene.instances.filter((mesh) => mesh.name.startsWith('cargo-')).length, 2)
+    assert.ok(scene.instances.filter((mesh) => mesh.name.startsWith('cargo-')).every((mesh) => mesh.count === count))
+    assert.equal(scene.instances.find((mesh) => mesh.name === 'snap-surfaces').count, 3)
+    assert.equal(scene.instances.find((mesh) => mesh.name === 'overlap-regions').count, 4)
     assert.ok(scene.meshes < 50)
     report.benchmarks.push({ count, view: viewMetrics, edit: editMetrics, scene })
   }
@@ -142,7 +144,7 @@ try {
     await mobile.getByLabel('Email', { exact: true }).fill('dieuphoi@loadmaster.vn')
     await mobile.getByLabel('Mật khẩu', { exact: true }).fill('loadmaster')
     await mobile.getByRole('button', { name: 'Đăng nhập', exact: true }).tap()
-    await mobile.getByRole('button', { name: 'Chỉnh sửa', exact: true }).tap()
+    await enterEdit(mobile)
     await mobile.getByRole('combobox', { name: 'Chọn kiện', exact: true }).selectOption('BENCH-01000')
     const nudge = mobile.getByRole('button', { name: 'Tăng X', exact: true })
     await nudge.tap()
@@ -153,7 +155,7 @@ try {
     const sceneBounds = await mobile.locator('canvas').boundingBox()
     assert.ok(sceneBounds.width >= viewport.width - 20 && sceneBounds.height >= 192)
     if (viewport.width === 820) {
-      await mobile.getByRole('button', { name: 'Trên', exact: true }).tap()
+      await cameraPreset(mobile, 'Trên')
       await mobile.getByRole('button', { name: 'Tập trung vào kiện', exact: true }).tap()
       await mobile.getByRole('button', { name: 'Hút khi kéo: Bật', exact: true }).tap()
       await mobile.getByRole('button', { name: 'Tập trung vào kiện', exact: true }).tap()

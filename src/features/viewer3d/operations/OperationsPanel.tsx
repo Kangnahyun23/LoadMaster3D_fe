@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
 import { Button } from '@/components/ui/Button'
-import { formatInteger, formatWeight } from '@/lib/format'
 import type { Placement } from '@/types/load-plan'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import { AxleLoadPanel } from '../overlays/AxleLoadPanel'
-import { cargoCenterOfMass, stopOrderConsistent } from './operations-model'
+import { stopOrderConsistent } from './operations-model'
 import { BlockerPanel } from './BlockerPanel'
 import type { OperationsState } from './useOperations'
 
@@ -14,9 +13,14 @@ export function OperationsPanel({ state, operations, onSelect }: {
   const { current, next, focusStop, semantics } = operations
   const stop = state.sceneModel.stops.find((p) => p.number === focusStop)
   const consistent = useMemo(() => stopOrderConsistent(state.placements), [state.placements])
-  const mass = useMemo(() => cargoCenterOfMass(semantics.massPlacements), [semantics.massPlacements])
   const target = state.placements.find((p) => p.id === semantics.inspectionId)
   return <div className="flex flex-col gap-4 p-4 text-body-lg xl:text-body">
+    <label className="flex flex-col gap-2 md:hidden">Điểm giao
+      <select aria-label="Tập trung điểm giao" value={focusStop ?? ''} onChange={(e) => operations.setFocusStop(e.target.value ? Number(e.target.value) : null)} className="h-14 rounded-md border border-border bg-bg px-2">
+        {operations.kind === 'loading' ? <option value="">Tất cả điểm giao</option> : null}
+        {state.sceneModel.stops.map((s) => <option key={s.number} value={s.number}>Điểm {s.number} · {s.name}</option>)}
+      </select>
+    </label>
     <div>
       <h2 className="text-h3 font-semibold">{stop ? `Điểm ${stop.number} / ${state.sceneModel.stops.length}` : 'Toàn bộ điểm giao'}</h2>
       <p>{stop?.name ?? 'Phương án đang mô phỏng'}</p>
@@ -34,17 +38,7 @@ export function OperationsPanel({ state, operations, onSelect }: {
     <Button variant="secondary" aria-pressed={operations.inspectBlockers} onClick={() => operations.setInspectBlockers(!operations.inspectBlockers)}
       className="h-14 text-body-lg xl:h-11 xl:text-body">{operations.inspectBlockers ? 'Ẩn' : 'Xem'} kiện có thể cản đường</Button>
     {operations.inspectBlockers ? <BlockerPanel target={target} blockers={semantics.blockers} onSelect={onSelect} /> : null}
-    {operations.kind === 'unloading' ? <p className="text-text-2">Khung hướng về cửa là vùng kiểm tra đường dỡ. Chuyển động chỉ minh họa; kiện có khả năng bị cản sẽ mờ tại chỗ.</p> : null}
-    <div className="flex flex-col gap-2 border-t border-border pt-4">
-      <Button variant="secondary" aria-pressed={operations.showMass} onClick={() => operations.setShowMass(!operations.showMass)}
-        className="h-14 text-body-lg xl:h-11 xl:text-body">{operations.showMass ? 'Ẩn' : 'Hiện'} tâm khối lượng hàng</Button>
-      {operations.showMass ? <p>{mass ? `X ${formatInteger(mass.position.x)} · Y ${formatInteger(mass.position.y)} · Z ${formatInteger(mass.position.z)} mm · ${formatWeight(mass.weightKg)}` : 'Chưa có khối lượng hàng để tính.'}</p> : null}
-      <p className="text-text-2">Chỉ tính hàng đã xếp/còn lại trong mô phỏng, không phải toàn xe.</p>
-      <Button variant="secondary" aria-pressed={operations.showDistribution} onClick={() => operations.setShowDistribution(!operations.showDistribution)}
-        className="h-14 text-body-lg xl:h-11 xl:text-body">{operations.showDistribution ? 'Ẩn' : 'Hiện'} phân bố điểm giao</Button>
-      <p className="text-text-2">Dải bên sàn biểu diễn hàng đã xếp/còn lại theo từng đoạn thùng; đoạn có nhiều điểm giữ nhiều màu.</p>
-      <ul>{state.sceneModel.stops.map((s) => <li key={s.number}>Điểm {s.number} · {s.name}</li>)}</ul>
-    </div>
+    {operations.kind === 'unloading' ? <p className="text-text-2">Mũi tên về cửa biểu diễn hành lang dỡ thẳng. Cảnh báo chỉ mang tính hỗ trợ; mô phỏng tạm dừng để xem kiện có khả năng cản đường.</p> : null}
     <AxleLoadPanel front={state.sceneModel.vehicle.frontAxle} rear={state.sceneModel.vehicle.rearAxle} />
   </div>
 }

@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
 import { mkdir, writeFile } from 'node:fs/promises'
-import { metrics, sceneSnapshot, waitIdle } from './viewer-browser-helpers.mjs'
+import { cameraPreset, metrics, sceneSnapshot, waitIdle } from './viewer-browser-helpers.mjs'
 import assert from 'node:assert/strict'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE ?? 'playwright')
 const output = 'node_modules/.tmp/viewer-final'
@@ -45,7 +45,7 @@ try {
   } else {
   await page.goto(route + '?debug&quality=high'); await settle()
   await page.screenshot({ path: `${output}/planner-overview.png` })
-  await page.getByRole('button', { name: 'Trước', exact: true }).click(); await settle()
+  await cameraPreset(page, 'Trước'); await settle()
   const r = await page.locator('canvas').boundingBox()
   await page.mouse.move(r.x + 45, r.y + r.height / 2); await page.mouse.down()
   await page.mouse.move(r.x + 165, r.y + r.height / 2, { steps: 15 }); await page.mouse.up(); await settle()

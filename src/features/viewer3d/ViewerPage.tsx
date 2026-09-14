@@ -1,19 +1,16 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router'
 import { notifyPendingFeature } from '@/lib/pending-feature'
-import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import { WorkspaceToolbar, type InspectorTab } from './panels/WorkspaceToolbar'
+import { SceneHud } from './operations/SceneHud'
 import { DEFAULT_SELECTED_ID, LOAD_PLAN } from '@/lib/load-plan.mock'
 import { PLANS } from '@/lib/plan-comparison.mock'
 import type { LoadPlan } from '@/types/load-plan'
 import { benchmarkCountFromSearch, createBenchmarkPlan } from './benchmark.mock'
 import { createPerfStore, DebugOverlay } from './DebugOverlay'
-import { CAMERA_PRESETS, COLOR_MODES, debugQualityTier } from './viewer-options'
+import { debugQualityTier } from './viewer-options'
 import { ApprovePlanDialog } from './ApprovePlanDialog'
 import { createColorContext } from './colors'
-import { AxleLoadPanel } from './overlays/AxleLoadPanel'
-import { SlicePanel } from './overlays/SlicePanel'
-import { StopLegend } from './overlays/StopLegend'
-import { PackageListPanel } from './panels/PackageListPanel'
 import { SceneInspector } from './panels/SceneInspector'
 import { Timeline } from './Timeline'
 import { useLoadPlanViewer } from './useLoadPlanViewer'
@@ -23,8 +20,8 @@ import { ViewerSkeleton } from './ViewerSkeleton'
 import { useManualEditor } from './editor/useManualEditor'
 import { EditorToolbar } from './editor/EditorToolbar'
 import { EditorPanel } from './editor/EditorPanel'
+import { EditorGestureHud } from './editor/EditorGestureHud'
 import { useOperations } from './operations/useOperations'
-import { OperationsToolbar } from './operations/OperationsToolbar'
 import { operationApprovalChecks } from './operations/approval-checks'
 
 /** Three.js là chunk nặng nhất — chỉ tải khi mở màn này, các màn khác không gánh. */
@@ -60,12 +57,15 @@ function ViewerSession({ plan }: { plan: LoadPlan }) {
   const colorContext = useMemo(() => createColorContext(plan), [plan])
   const perfStore = useMemo(() => createPerfStore(), [])
   const [approveOpen, setApproveOpen] = useState(false)
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab | null>(null)
+  const { followPlacement } = editor
+  const { follow, current: currentOperation } = operations
+  useEffect(() => { if (follow === 'on' && currentOperation && editor.mode === 'view') followPlacement(currentOperation) }, [follow, currentOperation, editor.mode, followPlacement])
 
   const totalWeightKg = useMemo(
     () => state.placements.reduce((sum, p) => sum + p.weightKg, 0),
     [state.placements],
   )
-  const pinned = useMemo(() => state.placements.filter((p) => p.pinned), [state.placements])
   const totalPackages = plan.placements.length + plan.unplaced.length
 
   const approvalChecks = useMemo(() => approveOpen
@@ -103,7 +103,7 @@ function ViewerSession({ plan }: { plan: LoadPlan }) {
     setApproveOpen(false)
     notifyPendingFeature('Duyệt phương án và gửi phiếu xếp tới kho')
   }
-  function handleModeChange(mode: 'view' | 'edit') { operations.stop(); editor.setMode(mode) }
+  function handleModeChange(mode: 'view' | 'edit') { operations.stop(); operations.setFollow('off'); editor.setMode(mode) }
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-bg">
@@ -116,55 +116,27 @@ function ViewerSession({ plan }: { plan: LoadPlan }) {
         totalCount={totalPackages}
         onApprove={() => setApproveOpen(true)}
       />
-      <EditorToolbar state={state} editor={editor} onModeChange={handleModeChange} />
-      {editor.mode === 'view' ? <OperationsToolbar operations={operations} stops={plan.stops} /> : null}
-
+      {editor.mode === 'edit' ? <EditorToolbar state={state} editor={editor} onModeChange={handleModeChange} /> :
+        <WorkspaceToolbar operations={operations} stops={plan.stops} preset={state.cameraPreset} onPreset={state.setCameraPreset}
+          onInspect={setInspectorTab} onEdit={() => handleModeChange('edit')} />}
       <div className={`relative flex min-h-0 flex-1 ${editor.mode === 'edit' ? 'flex-col xl:flex-row' : ''}`}>
-        {editor.mode === 'view' ? <div className="hidden xl:flex">
-        <PackageListPanel
-          unplaced={plan.unplaced}
-          pinned={pinned}
-          placements={state.placements}
-          vehicle={plan.vehicle}
-          open={state.leftOpen}
-          onToggle={state.toggleLeft}
-          tab={state.leftTab}
-          onTabChange={state.setLeftTab}
-          selectedId={state.selectedId}
-          onSelect={state.select}
-        />
-        </div> : null}
-
         <div className="relative min-h-48 min-w-0 flex-1 overflow-hidden bg-canvas-1">
           <Suspense fallback={<ViewerSkeleton packageCount={plan.placements.length} stopCount={plan.stops.length} />}>
             <LoadPlanViewer state={state} flags={flags} editor={editor} operations={operations} onPerfSample={showPerf ? perfStore.publish : undefined} />
           </Suspense>
 
-          <div className="absolute top-2 left-2 max-w-[calc(100%-16px)] overflow-x-auto xl:top-4 xl:left-4">
-            <SegmentedControl ariaLabel="Góc nhìn" options={CAMERA_PRESETS} value={state.cameraPreset} onChange={state.setCameraPreset}
-              className="[&_button]:h-14 [&_button]:text-body-lg xl:[&_button]:h-7 xl:[&_button]:text-caption" />
-          </div>
-
-          <div className="absolute top-4 right-4 hidden flex-col items-end gap-2 xl:flex">
-            <SegmentedControl ariaLabel="Chế độ tô màu" options={COLOR_MODES} value={state.colorMode} onChange={state.setColorMode} />
-            <StopLegend stops={plan.stops} colorMode={state.colorMode} colorContext={colorContext} />
-          </div>
-
-          <div className="absolute bottom-4 left-4 hidden xl:block">
-            <AxleLoadPanel front={plan.vehicle.frontAxle} rear={plan.vehicle.rearAxle} compact />
-          </div>
-
-          {editor.mode === 'view' ? <div className="absolute right-4 bottom-4 hidden xl:block">
-            <SlicePanel sliceMm={state.sliceMm} maxMm={plan.vehicle.innerLengthMm} onChange={state.setSliceMm} />
-          </div> : null}
-
+          {editor.mode === 'view' ? <SceneHud state={state} operations={operations} onInspect={setInspectorTab}
+            onResetFocus={editor.focus ? () => { operations.setFollow('off'); editor.resetFocus() } : undefined}
+            onFocus={(p) => { operations.pauseFollow(); if (p) editor.focusPlacement(p); else editor.focusSelected() }} onEdit={() => handleModeChange('edit')} /> : null}
           {showPerf ? <DebugOverlay store={perfStore} /> : null}
+          {editor.mode === 'edit' && state.selected ? <EditorGestureHud placement={state.selected} editor={editor} /> : null}
         </div>
 
         {editor.mode === 'edit' ? <EditorPanel state={state} editor={editor} /> :
           <SceneInspector state={state} operations={operations} tripId={tripId} colorContext={colorContext}
             onEdit={() => handleModeChange('edit')} onFocus={editor.focusSelected}
-            onSelect={(p) => { state.select(p.id); editor.focusPlacement(p) }} />}
+            onSelect={(p) => { state.select(p.id); operations.pauseFollow(); editor.focusPlacement(p) }}
+            tab={inspectorTab} onTab={setInspectorTab} onClose={() => setInspectorTab(null)} />}
       </div>
 
       {editor.mode === 'view' ? <Timeline

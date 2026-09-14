@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { instancePoint, metrics, sceneSnapshot, visibleCargo, waitIdle } from './viewer-browser-helpers.mjs'
+import { cameraPreset, openInspector, closeInspector, selectedPlacementId, instancePoint, metrics, sceneSnapshot, visibleCargo, waitIdle } from './viewer-browser-helpers.mjs'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE ?? 'playwright')
@@ -48,31 +48,47 @@ try {
   await button(page, 'Tiến một bước').click(); await settle(page)
   assert.equal((await visibleCargo(page))['cargo-opaque'], 2)
   const loadingSlider = page.getByRole('slider', { name: 'Bước xếp', exact: true })
-  await loadingSlider.fill('1000'); await button(page, 'Trên').click(); await settle(page)
+  await loadingSlider.fill('1000'); await cameraPreset(page, 'Trên'); await settle(page)
   const point = await instancePoint(page, 999)
   await page.mouse.click(point.x, point.y)
-  assert.equal(await page.getByRole('combobox', { name: 'Chọn kiện', exact: true }).inputValue(), 'BENCH-01000')
+  assert.equal(await selectedPlacementId(page), 'BENCH-01000')
+  await openInspector(page, 'display')
   await button(page, 'Hiện tâm khối lượng hàng').click(); await settle(page)
+  await closeInspector(page)
   assert.equal(await page.evaluate(async () => {
     const { _roots } = await import('/node_modules/.vite/deps/@react-three_fiber.js')
     return Boolean(_roots.get(document.querySelector('canvas')).store.getState().scene.getObjectByName('cargo-center-of-mass'))
   }), true)
   await button(page, 'Dỡ hàng').click(); await settle(page)
-  assert.match(await page.getByRole('complementary', { name: 'Thông tin vận hành' }).innerText(), /Thứ tự dỡ gợi ý/)
+  await openInspector(page, 'operations')
+  assert.match(await page.getByRole('dialog').innerText(), /Thứ tự dỡ gợi ý/)
+  await closeInspector(page)
   await button(page, 'Tiến một bước').click(); await settle(page)
   let cargo = await visibleCargo(page)
   assert.equal(cargo['cargo-opaque'] + cargo['cargo-dim'], 999)
   await page.getByRole('combobox', { name: 'Tập trung điểm giao', exact: true }).selectOption('2'); await settle(page)
   cargo = await visibleCargo(page)
   assert.equal(cargo['cargo-opaque'] + cargo['cargo-dim'], 750, 'prior stop is removed from the simulation')
-  await page.getByRole('combobox', { name: 'Chọn kiện', exact: true }).selectOption('BENCH-00501'); await settle(page)
+  const blockedIndex = await page.evaluate(async () => {
+    const { createBenchmarkPlan } = await import('/src/features/viewer3d/benchmark.mock.ts')
+    const { suggestedUnloadOrder, potentialBlockers } = await import('/src/features/viewer3d/operations/operations-model.ts')
+    const plan = createBenchmarkPlan(1000), order = suggestedUnloadOrder(plan.placements)
+    return order.findIndex((p, i) => p.stop === 2 && potentialBlockers(p, order.slice(i), plan.vehicle).length)
+  })
+  assert.ok(blockedIndex >= 0)
+  const unloadSlider = page.getByRole('slider', { name: 'Đã dỡ (gợi ý)', exact: true })
+  await unloadSlider.fill(String(blockedIndex)); await button(page, 'Tiến một bước').click(); await settle(page)
+  assert.equal(await unloadSlider.inputValue(), String(blockedIndex), 'advisory pauses the simulation')
   cargo = await visibleCargo(page)
   assert.ok(cargo['cargo-hull'] > 0, 'blocker warning hull survives low tier')
+  await openInspector(page, 'operations')
   const blockerPanel = page.getByRole('region', { name: 'Kiện có khả năng cản đường', exact: true })
   assert.match(await blockerPanel.innerText(), /có khả năng cản đường/)
   const blockerName = await blockerPanel.getByRole('button').first().innerText()
   await blockerPanel.getByRole('button').first().click(); await settle(page)
-  assert.equal(await page.getByRole('combobox', { name: 'Chọn kiện', exact: true }).inputValue(), blockerName.split(' · ')[0])
+  assert.equal(await selectedPlacementId(page), blockerName.split(' · ')[0])
+  assert.equal(await unloadSlider.inputValue(), String(blockedIndex), 'inspecting a blocker cannot replace the unload target')
+  await button(page, 'Quay lại kiện cần dỡ').click(); await settle(page)
   await button(page, 'Duyệt phương án').click()
   const approval = page.getByRole('dialog')
   assert.match(await approval.innerText(), /Thứ tự xếp phù hợp thứ tự điểm giao/)
@@ -80,7 +96,7 @@ try {
   assert.doesNotMatch(await approval.innerText(), /LIFO hoàn toàn hợp lệ|Tuân thủ thứ tự dỡ/)
   await button(page, 'Huỷ').click()
   await page.screenshot({ path: path.join(output, 'planner-unloading.png') })
-  report.planner = { selected: await page.getByRole('combobox', { name: 'Chọn kiện', exact: true }).inputValue(), cargo, metrics: await metrics(page) }
+  report.planner = { selected: await selectedPlacementId(page), cargo, metrics: await metrics(page) }
 
   report.benchmarks = []
   for (const count of [132, 300, 500, 1000]) {
@@ -89,7 +105,7 @@ try {
     await settle(page)
     const resting = await metrics(page), scene = await sceneSnapshot(page)
     assert.ok(Number(resting.drawCalls) < 100)
-    assert.ok(scene.instances.every((mesh) => mesh.count === count))
+    assert.ok(scene.instances.filter((mesh) => mesh.name.startsWith('cargo-')).every((mesh) => mesh.count === count))
     report.benchmarks.push({ count, active, resting, meshes: scene.meshes })
   }
   for (const tier of ['balanced', 'high']) {
@@ -139,8 +155,8 @@ try {
     await button(mobile, 'Dỡ hàng').tap()
     await button(mobile, 'Chi tiết / Hiển thị').tap()
     const drawer = mobile.getByRole('dialog')
-    await drawer.getByRole('button', { name: 'Hiện tâm khối lượng hàng', exact: true }).tap()
     await drawer.getByRole('button', { name: 'Hiển thị', exact: true }).tap()
+    await drawer.getByRole('button', { name: 'Hiện tâm khối lượng hàng', exact: true }).tap()
     await drawer.getByRole('button', { name: 'Theo khối lượng', exact: true }).tap()
     await drawer.getByRole('button', { name: 'Đóng', exact: true }).tap()
     assert.equal(await mobile.getByRole('dialog').count(), 0)

@@ -1,11 +1,13 @@
 import type { PositionMm } from '@/types/load-plan'
 import type { GeometryResult } from './geometry'
+import type { SnapTarget } from './snapping'
 
 export type EditorPreview = {
   id: string
   position: PositionMm
   result: GeometryResult
   sources: string[]
+  targets?: SnapTarget[]
   dragging: boolean
   message?: string
 }

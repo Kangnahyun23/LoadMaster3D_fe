@@ -3,6 +3,8 @@ import { Redo2, Undo2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import type { ManualEditor } from './useManualEditor'
+import { CAMERA_PRESETS } from '../viewer-options'
+import type { CameraPreset } from '@/types/load-plan'
 
 export function EditorToolbar({ state, editor, onModeChange = editor.setMode }: {
   state: LoadPlanViewerState; editor: ManualEditor; onModeChange?: ManualEditor['setMode']
@@ -27,6 +29,10 @@ export function EditorToolbar({ state, editor, onModeChange = editor.setMode }: 
           <Redo2 strokeWidth={1.5} />
         </Button>
       </> : null}
+      <select aria-label="Góc nhìn" value={state.cameraPreset} onChange={(e) => state.setCameraPreset(e.target.value as CameraPreset)}
+        className="h-14 min-w-0 rounded-md border border-border bg-bg px-2 text-body-lg xl:h-11 xl:text-body">
+        {CAMERA_PRESETS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+      </select>
       <label className="ml-auto flex min-w-0 basis-full items-center gap-2 text-body-lg sm:basis-auto xl:text-body">
         <span className="shrink-0 sm:hidden xl:inline">Chọn kiện</span>
         <select aria-label="Chọn kiện" value={state.selectedId ?? ''} disabled={dragging}

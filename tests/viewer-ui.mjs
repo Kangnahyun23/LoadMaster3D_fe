@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { cameraPreset, openInspector, closeInspector } from './viewer-browser-helpers.mjs'
 
 // Use an existing Playwright installation; this suite never installs dependencies.
 const require = createRequire(import.meta.url)
@@ -41,21 +42,24 @@ try {
   await page.waitForTimeout(1200)
   assert.equal((await metrics()).renderedFrames, framesBefore, 'debug overlay must not keep rendering')
   const selected = page.getByRole('complementary', { name: 'Kiện đang chọn' })
-  await page.getByRole('button', { name: 'Kiện', exact: true }).click()
+  await openInspector(page, 'package')
   assert.match(await selected.innerText(), /PKG-00147/)
   await page.screenshot({ path: path.join(output, 'normal.png') })
+  await closeInspector(page)
 
   for (const name of ['Trên', 'Cửa sau', 'Bên hông', 'Trước', 'Góc chéo']) {
     const before = Number((await metrics()).renderedFrames)
-    await page.getByRole('button', { name, exact: true }).click()
+    await cameraPreset(page, name)
     await page.waitForTimeout(1100)
     assert.ok(Number((await metrics()).renderedFrames) > before, 'camera preset should wake demand rendering')
   }
   // Geometry-aware edit actions have their own gesture/validation suite.
+  await openInspector(page, 'package')
   await selected.getByRole('button', { name: 'Chỉnh sửa kiện', exact: true }).click()
   await page.getByRole('button', { name: 'Ghim', exact: true }).click()
   await page.getByRole('button', { name: 'Bỏ ghim', exact: true }).click()
   await page.getByRole('button', { name: 'Xem', exact: true }).click()
+  await openInspector(page, 'display')
   for (const name of ['Theo đơn hàng', 'Theo khối lượng', 'Theo điểm giao']) {
     await page.getByRole('button', { name, exact: true }).click()
   }
@@ -65,12 +69,13 @@ try {
   assert.equal(await slice.inputValue(), '0')
   await slice.press('End')
   assert.equal(await slice.inputValue(), '7200')
+  await closeInspector(page)
   const timeline = page.getByRole('slider', { name: 'Bước xếp', exact: true })
   await page.getByRole('button', { name: 'Về đầu', exact: true }).click()
   assert.equal(await timeline.inputValue(), '1')
   await page.getByRole('button', { name: 'Tiến một bước', exact: true }).click()
   assert.equal(await timeline.inputValue(), '2')
-  await page.getByRole('button', { name: '4×', exact: true }).click()
+  await page.getByRole('combobox', { name: 'Tốc độ phát', exact: true }).selectOption('4')
   await page.getByRole('button', { name: 'Phát', exact: true }).click()
   await page.waitForTimeout(1400)
   await page.getByRole('button', { name: 'Tạm dừng', exact: true }).click()
@@ -94,7 +99,7 @@ try {
     window.dispatchEvent(new PopStateEvent('popstate'))
   })
   await page.waitForFunction(() => document.querySelector('[data-viewer-performance]')?.getAttribute('data-placement-count') === '300')
-  await page.getByRole('button', { name: 'Kiện', exact: true }).click()
+  await openInspector(page, 'package')
   await selected.getByRole('button', { name: 'Chỉnh sửa kiện', exact: true }).waitFor()
   assert.match(await selected.innerText(), /Chưa ghim/)
   report.snapshotReset = true
