@@ -39,7 +39,7 @@ export function ApprovePlanDialog({
           <div className="flex flex-col gap-1">
             <DialogTitle className="text-h2 font-semibold">Duyệt phương án này?</DialogTitle>
             <DialogDescription className="text-body text-pretty text-text-2">
-              {planLabel} sẽ được khoá và gửi phiếu xếp tới kho. Sau khi duyệt, thay đổi cần chạy tối ưu lại.
+              {planLabel}. Kiểm tra thứ tự và cảnh báo hình học chỉ hỗ trợ xem xét. Chức năng duyệt và gửi kho đang chờ kết nối hệ thống.
             </DialogDescription>
           </div>
 

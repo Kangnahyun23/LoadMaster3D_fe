@@ -1,103 +1,60 @@
-import { useLayoutEffect, useMemo, useRef } from 'react'
-import { InstancedMesh, Object3D } from 'three'
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { ExtrudeGeometry, InstancedMesh, Object3D, Shape } from 'three'
 import type { VehicleSpec } from '@/types/load-plan'
 import type { SceneMaterials } from './materials'
 import { containerSize } from './units'
+import { truckDetails, truckWheel } from './truck-geometry'
 
-/**
- * Đầu kéo, khung gầm, bánh xe và mặt đất nhận bóng.
- * Sáu bánh dùng một InstancedMesh — thêm đúng một draw call.
- */
+const cabX = -1
 
-const CAB_LENGTH = 1.5
-const CAB_GAP = 0.25
-const CAB_FLOOR = 0.35
-const CAB_HEIGHT = 1.95
-const WHEEL_RADIUS = 0.5
-const WHEEL_WIDTH = 0.32
-const CHASSIS_HEIGHT = 0.3
-/** Mặt đất nằm dưới đáy bánh xe */
-const GROUND_Y = -(CHASSIS_HEIGHT + WHEEL_RADIUS * 2 - 0.2)
-
-const dummy = new Object3D()
-
-export function TruckCab({
-  vehicle,
-  materials,
-}: {
-  vehicle: VehicleSpec
-  materials: SceneMaterials
+/** Cosmetic vehicle representation. Wheel locations are not authoritative axle data. */
+export function TruckCab({ vehicle, materials, shadows }: {
+  vehicle: VehicleSpec; materials: SceneMaterials; shadows: boolean
 }) {
   const { length: L, width: W } = containerSize(vehicle)
-  const wheelsRef = useRef<InstancedMesh>(null)
-
-  const cabX = -CAB_GAP - CAB_LENGTH / 2
-  const wheelY = -CHASSIS_HEIGHT - WHEEL_RADIUS + 0.2
-
-  const wheelPositions = useMemo(
-    () => [
-      [cabX, wheelY, 0.22],
-      [cabX, wheelY, W - 0.22],
-      [L * 0.72, wheelY, 0.2],
-      [L * 0.72, wheelY, W - 0.2],
-      [L * 0.72 + 1.15, wheelY, 0.2],
-      [L * 0.72 + 1.15, wheelY, W - 0.2],
-    ],
-    [cabX, wheelY, L, W],
-  )
-
+  const wheels = useRef<InstancedMesh>(null)
+  const detail = useMemo(() => truckDetails(L, W, cabX, materials), [L, W, materials])
+  const wheel = useMemo(() => truckWheel(materials), [materials])
+  const body = useMemo(() => {
+    const profile = new Shape()
+    profile.moveTo(-0.75, 0.35); profile.lineTo(0.75, 0.35)
+    profile.lineTo(0.75, 2.3); profile.lineTo(-0.46, 2.3)
+    profile.lineTo(-0.75, 1.35); profile.closePath()
+    return new ExtrudeGeometry(profile, { depth: W - 0.12, bevelEnabled: true, bevelSegments: 1,
+      steps: 1, bevelSize: 0.04, bevelThickness: 0.025 }).translate(cabX, 0, 0.06)
+  }, [W])
   useLayoutEffect(() => {
-    const mesh = wheelsRef.current
-    if (!mesh) return
-    wheelPositions.forEach(([x, y, z], i) => {
-      dummy.position.set(x ?? 0, y ?? 0, z ?? 0)
-      dummy.rotation.set(Math.PI / 2, 0, 0)
-      dummy.updateMatrix()
-      mesh.setMatrixAt(i, dummy.matrix)
-    })
-    mesh.instanceMatrix.needsUpdate = true
-  }, [wheelPositions])
-
-  return (
-    <group>
-      {/* Cabin */}
-      <mesh position={[cabX, CAB_FLOOR + CAB_HEIGHT / 2, W / 2]} castShadow>
-        <boxGeometry args={[CAB_LENGTH, CAB_HEIGHT, W - 0.1]} />
-        <meshStandardMaterial color={materials.cab} roughness={0.6} metalness={0.15} />
-      </mesh>
-
-      {/* Kính chắn gió phía trước cabin */}
-      <mesh position={[cabX - CAB_LENGTH / 2 - 0.005, CAB_FLOOR + 1.45, W / 2]}>
-        <boxGeometry args={[0.01, 0.7, W - 0.5]} />
-        <meshStandardMaterial
-          color={materials.windshield}
-          transparent
-          opacity={0.55}
-          roughness={0.2}
-          metalness={0.4}
-        />
-      </mesh>
-
-      {/* Khung gầm chạy suốt từ cabin tới đuôi */}
-      <mesh
-        position={[(L + 0.1 - (cabX - CAB_LENGTH / 2)) / 2 + (cabX - CAB_LENGTH / 2), -CHASSIS_HEIGHT / 2, W / 2]}
-        castShadow
-      >
-        <boxGeometry args={[L + 0.1 - (cabX - CAB_LENGTH / 2), CHASSIS_HEIGHT, W - 0.6]} />
-        <meshStandardMaterial color={materials.chassis} roughness={0.9} />
-      </mesh>
-
-      {/* Sáu bánh xe */}
-      <instancedMesh ref={wheelsRef} args={[undefined, undefined, wheelPositions.length]} castShadow>
-        <cylinderGeometry args={[WHEEL_RADIUS, WHEEL_RADIUS, WHEEL_WIDTH, 24]} />
-        <meshStandardMaterial color={materials.wheel} roughness={0.95} />
-      </instancedMesh>
-
-      {/* Mặt đất chỉ hiện bóng đổ */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[L / 2, GROUND_Y, W / 2]} receiveShadow>
-        <planeGeometry args={[60, 60]} />
-        <shadowMaterial transparent opacity={0.45} />
-      </mesh>
-    </group>
-  )
+    if (!wheels.current) return
+    const dummy = new Object3D()
+    let i = 0
+    for (const x of [cabX, L * 0.72, L * 0.72 + 1.15]) for (const z of [0.2, W - 0.2]) {
+      dummy.position.set(x, -0.6, z); dummy.rotation.set(Math.PI / 2, 0, 0); dummy.updateMatrix()
+      wheels.current.setMatrixAt(i++, dummy.matrix)
+    }
+    wheels.current.instanceMatrix.needsUpdate = true
+    wheels.current.computeBoundingSphere()
+  }, [L, W])
+  useEffect(() => () => { detail.dispose(); wheel.dispose(); body.dispose() }, [detail, wheel, body])
+  return <group name="vehicle-decoration">
+    <mesh geometry={body} castShadow={shadows}>
+      <meshStandardMaterial color={materials.cab} roughness={0.45} metalness={0.18} />
+    </mesh>
+    <mesh position={[cabX - 0.616, 1.8, W / 2]} rotation={[0, 0, -0.297]}>
+      <boxGeometry args={[0.018, 0.78, W - 0.45]} />
+      <meshStandardMaterial color={materials.windshield} roughness={0.18} metalness={0.45} />
+    </mesh>
+    <mesh position={[(L - 1.75) / 2, -0.15, W / 2]} castShadow={shadows}>
+      <boxGeometry args={[L + 1.85, 0.3, W - 0.6]} />
+      <meshStandardMaterial color={materials.chassis} roughness={0.9} />
+    </mesh>
+    <mesh name="vehicle-details" geometry={detail} castShadow={shadows}>
+      <meshStandardMaterial vertexColors roughness={0.56} metalness={0.3} />
+    </mesh>
+    <instancedMesh name="vehicle-wheels" ref={wheels} args={[wheel, undefined, 6]} castShadow={shadows}>
+      <meshStandardMaterial vertexColors roughness={0.78} metalness={0.12} />
+    </instancedMesh>
+    {shadows ? <mesh rotation={[-Math.PI / 2, 0, 0]} position={[L / 2, -1.11, W / 2]} receiveShadow>
+      <planeGeometry args={[60, 60]} /><shadowMaterial transparent opacity={0.2} />
+    </mesh> : null}
+  </group>
 }

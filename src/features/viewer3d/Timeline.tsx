@@ -5,149 +5,57 @@ import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { formatInteger } from '@/lib/format'
 import { stopColor } from '@/lib/stops'
 import type { Placement, PlaybackSpeed } from '@/types/load-plan'
+import { timelineBins } from './operations/operations-model'
 
-const SPEEDS = [
-  { value: 1 as PlaybackSpeed, label: '1×' },
-  { value: 2 as PlaybackSpeed, label: '2×' },
-  { value: 4 as PlaybackSpeed, label: '4×' },
-] as const
+const SPEEDS = [{ value: 1, label: '1×' }, { value: 2, label: '2×' }, { value: 4, label: '4×' }] as const
+export type TimelineProps = {
+  placements: readonly Placement[]; step: number; totalSteps: number; playing: boolean; speed: PlaybackSpeed
+  onStepChange: (step: number) => void; onStepForward: () => void; onStepBackward: () => void
+  onGoToStart: () => void; onTogglePlaying: () => void; onSpeedChange: (speed: PlaybackSpeed) => void
+  kind?: 'loading' | 'unloading'
+  orderedOverride?: readonly Placement[]
+}
 
-/** Cột thấp nhất và cao nhất của dải thời gian, px */
-const BAR_MIN = 14
-const BAR_MAX = 44
-
-/**
- * Thanh phát lại thứ tự xếp. Mỗi cột là một kiện, màu theo điểm giao,
- * chiều cao theo chiều cao kiện; cột đã xếp tới bước hiện tại thì đậm.
- */
-export function Timeline({
-  placements,
-  step,
-  totalSteps,
-  playing,
-  speed,
-  onStepChange,
-  onStepForward,
-  onStepBackward,
-  onGoToStart,
-  onTogglePlaying,
-  onSpeedChange,
-}: {
-  placements: Placement[]
-  step: number
-  totalSteps: number
-  playing: boolean
-  speed: PlaybackSpeed
-  onStepChange: (step: number) => void
-  onStepForward: () => void
-  onStepBackward: () => void
-  onGoToStart: () => void
-  onTogglePlaying: () => void
-  onSpeedChange: (speed: PlaybackSpeed) => void
-}) {
-  const ordered = useMemo(
-    () => [...placements].sort((a, b) => a.step - b.step),
-    [placements],
-  )
-  const maxHeight = useMemo(
-    () => Math.max(...ordered.map((p) => p.heightMm), 1),
-    [ordered],
-  )
-  const first = ordered[0]
-  const last = ordered[ordered.length - 1]
-  const percent = Math.round((step / totalSteps) * 100)
-  const markerLeft = `${(((step - 0.5) / totalSteps) * 100).toFixed(2)}%`
-
-  return (
-    <div className="flex h-30 flex-none items-center gap-5 border-t border-border bg-bg px-5">
-      <div className="flex flex-none items-center gap-1">
-        <Button variant="secondary" size="icon" aria-label="Về đầu" onClick={onGoToStart}>
-          <SkipBack className="size-4" strokeWidth={1.5} />
-        </Button>
-        <Button variant="secondary" size="icon" aria-label="Lùi một bước" onClick={onStepBackward} disabled={step <= 1}>
-          <ChevronLeft className="size-4" strokeWidth={1.5} />
-        </Button>
-        <Button
-          variant="primary"
-          size="icon"
-          className="mx-1 size-11"
-          aria-label={playing ? 'Tạm dừng' : 'Phát'}
-          aria-pressed={playing}
-          onClick={onTogglePlaying}
-        >
-          {playing ? <Pause className="size-4.5 fill-current" strokeWidth={0} /> : <Play className="size-4.5 fill-current" strokeWidth={0} />}
-        </Button>
-        <Button variant="secondary" size="icon" aria-label="Tiến một bước" onClick={onStepForward} disabled={step >= totalSteps}>
-          <ChevronRight className="size-4" strokeWidth={1.5} />
-        </Button>
+/** At most 80 visual bins; the slider retains full step resolution. */
+export function Timeline({ placements, step, totalSteps, playing, speed, onStepChange, onStepForward,
+  onStepBackward, onGoToStart, onTogglePlaying, onSpeedChange, kind = 'loading', orderedOverride }: TimelineProps) {
+  const ordered = useMemo(() => orderedOverride ?? [...placements].sort((a, b) => a.step - b.step), [placements, orderedOverride])
+  const bins = useMemo(() => timelineBins(ordered), [ordered])
+  const maxHeight = Math.max(...bins.map((bin) => bin.heightMm), 1)
+  const progress = kind === 'unloading' ? step : ordered.filter((p) => p.step <= step).length
+  const minimum = kind === 'loading' && totalSteps ? 1 : 0
+  const percent = totalSteps ? Math.round(step / totalSteps * 100) : 0
+  const label = kind === 'loading' ? 'Bước xếp' : 'Đã dỡ (gợi ý)'
+  const cue = kind === 'loading' ? 'xếp' : 'dỡ'
+  return <div className="flex flex-none flex-wrap items-center gap-2 border-t border-border bg-bg p-2 text-body-lg xl:h-30 xl:flex-nowrap xl:gap-5 xl:px-5 xl:text-body">
+    <div className="flex items-center gap-1">
+      <Button variant="secondary" className="size-14 p-0 xl:size-11" aria-label="Về đầu" onClick={onGoToStart} disabled={!totalSteps}><SkipBack strokeWidth={1.5} /></Button>
+      <Button variant="secondary" className="size-14 p-0 xl:size-11" aria-label="Lùi một bước" onClick={onStepBackward} disabled={step <= minimum}><ChevronLeft strokeWidth={1.5} /></Button>
+      <Button variant="secondary" className="size-14 p-0 xl:size-11" aria-label={playing ? 'Tạm dừng' : 'Phát'} aria-pressed={playing} onClick={onTogglePlaying} disabled={!totalSteps}>
+        {playing ? <Pause strokeWidth={1.5} /> : <Play strokeWidth={1.5} />}
+      </Button>
+      <Button variant="secondary" className="size-14 p-0 xl:size-11" aria-label="Tiến một bước" onClick={onStepForward} disabled={step >= totalSteps}><ChevronRight strokeWidth={1.5} /></Button>
+    </div>
+    <div className="ml-auto flex flex-col xl:ml-0"><span>{label}</span><span className="font-mono">{formatInteger(step)} / {formatInteger(totalSteps)}</span></div>
+    <div className="order-last flex min-w-0 basis-full flex-col gap-1 xl:order-none xl:flex-1 xl:basis-auto">
+      <div aria-hidden className="relative hidden h-11 items-end gap-px sm:flex" data-timeline-bins={bins.length}>
+        {bins.map((bin) => <span key={bin.start} className="flex min-w-0 flex-1 overflow-hidden rounded-sm"
+          style={{ height: 14 + 30 * bin.heightMm / maxHeight, opacity: bin.end <= progress ? 1 : 0.3 }}>
+          {bin.stops.map((part) => <span key={part.stop} style={{ width: `${part.ratio * 100}%`, background: stopColor(part.stop) }} />)}
+        </span>)}
+        <span className="absolute inset-y-0 w-0.5 bg-text" style={{ left: `${ordered.length ? progress / ordered.length * 100 : 0}%` }} />
       </div>
-
-      <div className="flex min-w-30 flex-none flex-col gap-0.5">
-        <span className="text-[11px] leading-3.5 text-text-3">Bước xếp</span>
-        <span className="font-mono text-[18px] leading-6 font-semibold tracking-[-0.01em]">
-          {formatInteger(step)}{' '}
-          <span className="text-body font-normal text-text-3">/ {formatInteger(totalSteps)}</span>
-        </span>
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <div aria-hidden className="relative flex h-11 items-end gap-px px-px">
-          {ordered.map((p) => (
-            <span
-              key={p.id}
-              className="min-w-0 flex-1 rounded-px transition-opacity duration-(--dur-fast)"
-              style={{
-                height: BAR_MIN + (BAR_MAX - BAR_MIN) * (p.heightMm / maxHeight),
-                background: stopColor(p.stop),
-                opacity: p.step <= step ? 1 : 0.28,
-              }}
-            />
-          ))}
-          <span className="absolute -top-1 -bottom-1 w-0.5 rounded-px bg-text" style={{ left: markerLeft }} />
-        </div>
-
-        <input
-          type="range"
-          className="lm-range lm-range-thin"
-          min={1}
-          max={totalSteps}
-          step={1}
-          value={step}
-          onChange={(event) => onStepChange(Number(event.target.value))}
-          aria-label="Bước xếp"
-          aria-valuetext={`Bước ${step} trên ${totalSteps}`}
-          style={{ '--lm-range-fill': `${percent}%` } as CSSProperties}
-        />
-
-        <div className="flex justify-between text-[11px] leading-3.5 text-text-3">
-          {first ? (
-            <span className="inline-flex items-center gap-1.5">
-              <span aria-hidden className="size-2 rounded-xs" style={{ background: stopColor(first.stop) }} />
-              Điểm {first.stop} xếp trước
-            </span>
-          ) : <span />}
-          <span className="font-mono">{percent}%</span>
-          {last ? (
-            <span className="inline-flex items-center gap-1.5">
-              Điểm {last.stop} xếp sau cùng
-              <span aria-hidden className="size-2 rounded-xs" style={{ background: stopColor(last.stop) }} />
-            </span>
-          ) : <span />}
-        </div>
-      </div>
-
-      <div className="flex min-w-24 flex-none flex-col items-end gap-0.5">
-        <span className="text-[11px] leading-3.5 text-text-3">Tốc độ</span>
-        <SegmentedControl
-          ariaLabel="Tốc độ phát"
-          size="sm"
-          mono
-          floating={false}
-          options={SPEEDS}
-          value={speed}
-          onChange={onSpeedChange}
-        />
+      <input type="range" className="lm-range min-h-11 xl:min-h-0" min={minimum} max={totalSteps || minimum} step={1} value={step}
+        disabled={!totalSteps} onChange={(e) => onStepChange(Number(e.target.value))} aria-label={label}
+        aria-valuetext={`${label}: ${formatInteger(step)} trên ${formatInteger(totalSteps)}`}
+        style={{ '--lm-range-fill': `${percent}%` } as CSSProperties} />
+      <div className="hidden justify-between text-caption text-text-2 xl:flex">
+        <span>{ordered[0] ? `Điểm ${ordered[0].stop} ${cue} trước` : ''}</span><span>{percent}%</span>
+        <span>{ordered.at(-1) ? `Điểm ${ordered.at(-1)!.stop} ${cue} sau cùng` : ''}</span>
       </div>
     </div>
-  )
+    <div className="ml-auto hidden flex-col xl:flex"><span>Tốc độ</span>
+      <SegmentedControl ariaLabel="Tốc độ phát" size="sm" mono floating={false} options={SPEEDS} value={speed} onChange={onSpeedChange} />
+    </div>
+  </div>
 }

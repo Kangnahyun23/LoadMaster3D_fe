@@ -1,6 +1,6 @@
 import { Check, PackageX, TriangleAlert } from 'lucide-react'
-import { lazy, Suspense } from 'react'
-import { Link } from 'react-router'
+import { lazy, Suspense, useMemo } from 'react'
+import { Link, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { LOAD_PLAN } from '@/lib/load-plan.mock'
@@ -8,6 +8,8 @@ import { ConfirmedOverlay } from './ConfirmedOverlay'
 import { PackageInstructionCard } from './PackageInstructionCard'
 import { StepHeader } from './StepHeader'
 import { useLoadingSession } from './useLoadingSession'
+import { benchmarkCountFromSearch, createBenchmarkPlan } from '@/features/viewer3d/benchmark.mock'
+import type { LoadPlan } from '@/types/load-plan'
 
 /** Three.js nặng — chỉ tải khi màn kho thực sự hiển thị ô vị trí 3D. */
 const PositionViewer = lazy(() =>
@@ -26,7 +28,13 @@ const INITIAL_STEP = 47
  * nên ở đây là nút primary "Xác nhận đã xếp".
  */
 export function LoadingStepPage() {
-  const plan = LOAD_PLAN
+  const [search] = useSearchParams()
+  const count = benchmarkCountFromSearch(search.toString())
+  const plan = useMemo(() => count ? createBenchmarkPlan(count) : LOAD_PLAN, [count])
+  return <LoadingSessionPage key={plan.tripId} plan={plan} />
+}
+
+function LoadingSessionPage({ plan }: { plan: LoadPlan }) {
   const session = useLoadingSession(plan, INITIAL_STEP)
   const exitTo = `/chuyen/${plan.tripId}`
 
@@ -39,7 +47,7 @@ export function LoadingStepPage() {
         exitTo={exitTo}
       />
 
-      <div className="relative grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_340px] grid-rows-[minmax(0,1fr)] gap-5 p-5 px-6">
+      <div className="relative grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto p-3 lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)]">
         {session.current ? (
           <>
             <PackageInstructionCard
@@ -53,17 +61,13 @@ export function LoadingStepPage() {
                 <div
                   role="status"
                   aria-label="Đang dựng sơ đồ thùng xe"
-                  className="grid h-full place-items-center rounded-md bg-[linear-gradient(180deg,var(--canvas-1)_0%,var(--canvas-2)_100%)]"
+                  className="grid min-h-80 place-items-center rounded-md bg-canvas-1"
                 >
                   <Spinner tone="light" />
                 </div>
               }
             >
-              <PositionViewer
-                placements={plan.placements}
-                current={session.current}
-                vehicle={plan.vehicle}
-              />
+              <div className="order-first min-h-96 lg:order-last lg:min-h-0"><PositionViewer plan={plan} current={session.current} /></div>
             </Suspense>
           </>
         ) : (
@@ -82,18 +86,18 @@ export function LoadingStepPage() {
       </div>
 
       {session.current ? (
-        <div className="flex flex-none flex-col gap-3 px-6 pb-4">
+        <div className="flex flex-none flex-col gap-2 px-3 pb-3">
           <Button
             variant="primary"
             block
-            className="h-18 gap-3 text-h2 [&_svg]:size-7"
+            className="h-14 gap-3 text-body-lg [&_svg]:size-6"
             onClick={session.confirm}
             disabled={Boolean(session.confirmedId)}
           >
             <Check strokeWidth={2.5} />
             Xác nhận đã xếp
           </Button>
-          <div className="flex justify-center gap-10">
+          <div className="flex flex-wrap justify-center gap-2">
             <Button variant="ghost" size="touch" className="font-medium text-text-2 hover:text-text" onClick={session.reportDeviation}>
               <TriangleAlert className="size-4.5" strokeWidth={2} />
               Ghi nhận sai lệch

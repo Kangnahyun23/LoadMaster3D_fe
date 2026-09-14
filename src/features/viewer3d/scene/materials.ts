@@ -14,6 +14,9 @@ export type SceneMaterials = {
   wheel: string
   windshield: string
   outline: string
+  metal: string
+  light: string
+  tailLight: string
 }
 
 function derive(token: `--${string}`, fallback: string, factor: number): string {
@@ -29,10 +32,13 @@ export function sceneMaterials(): SceneMaterials {
     floor: derive('--border-dark', '#2d323b', 1.55),
     wall: derive('--border-dark', '#2d323b', 1.25),
     skirt: derive('--border-dark', '#2d323b', 1.9),
-    cab: derive('--border-dark', '#2d323b', 1.7),
+    cab: derive('--bg', '#ffffff', 0.62),
     chassis: derive('--panel-dark', '#1e2228', 0.9),
     wheel: derive('--canvas-2', '#0f1115', 1.1),
-    windshield: `#${info.lerp(bg, 0.45).getHexString()}`,
+    windshield: `#${info.multiplyScalar(0.24).getHexString()}`,
     outline: derive('--canvas-2', '#0f1115', 1),
+    metal: derive('--text-disabled', '#9ca3af', 0.8),
+    light: `#${bg.getHexString()}`,
+    tailLight: readToken('--danger'),
   }
 }

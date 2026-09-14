@@ -1,7 +1,7 @@
 import { Color } from 'three'
 import { stopColor } from '@/lib/stops'
 import { readToken } from '@/lib/tokens'
-import type { ColorMode, LoadPlan, Placement } from '@/types/load-plan'
+import type { ColorMode, Placement } from '@/types/load-plan'
 
 /**
  * Màu kiện theo chế độ tô:
@@ -19,7 +19,7 @@ export type ColorContext = {
   maxWeightKg: number
 }
 
-export function createColorContext(plan: LoadPlan): ColorContext {
+export function createColorContext(plan: { placements: readonly Placement[] }): ColorContext {
   const orderIndexByStop = new Map<string, number>()
   const orderCountByStop = new Map<number, number>()
 
@@ -34,8 +34,8 @@ export function createColorContext(plan: LoadPlan): ColorContext {
   return {
     orderIndexByStop,
     orderCountByStop,
-    minWeightKg: Math.min(...weights),
-    maxWeightKg: Math.max(...weights),
+    minWeightKg: weights.length ? Math.min(...weights) : 0,
+    maxWeightKg: weights.length ? Math.max(...weights) : 0,
   }
 }
 

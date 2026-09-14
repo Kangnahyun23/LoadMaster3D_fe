@@ -276,14 +276,42 @@ gọi khi chức năng được nối thật.
 ### Three.js
 
 - Toàn bộ code Three.js nằm trong `src/features/viewer3d`. Không import `three` ở nơi khác. Màn khác cần 3D thì import component từ `viewer3d` (ví dụ `PositionViewer` cho màn kho).
-- Kiện hàng render bằng **InstancedMesh** với `setColorAt`, không tạo mesh riêng từng kiện. Màn phương án dùng 3 InstancedMesh: kiện trong lát cắt, kiện ngoài lát cắt (mờ), và vỏ viền.
+- Kiện hàng render bằng **InstancedMesh** với `setColorAt`, không tạo mesh riêng từng kiện. Tối đa 3 InstancedMesh cargo: solid, ghost và vỏ viền. Tier low tắt viền chung nhưng giữ viền cảnh báo khi có blocker. Mapping `instanceId ↔ placementId` nằm trong `scene/instance-layout.ts`, không lấy index của danh sách UI để picking. Editor và animation dỡ mỗi loại dùng tối đa một proxy tạm; bánh xe dùng instancing riêng, không nhân theo cargo count.
 - Nền Canvas luôn tối, kể cả khi phần còn lại của app sáng.
-- Mục tiêu ≥30 FPS với 300 kiện. Trước khi thêm bất kỳ hiệu ứng nào, đo `renderer.info.render.calls` — giữ dưới 100. Thêm `?debug` vào URL màn phương án để hiện số đo.
-- Mọi hiệu ứng nâng cao (post-processing, shadow, AO) phải có cờ tắt được trong `usePerformanceFlags`.
+- Target chức năng/performance là 1.000 placements với draw calls dưới 100, số mesh/nhãn không tăng tuyến tính theo cargo. Đã kiểm tra selection, editor, playback và các vai trò trên Chromium; mục tiêu thiết bị thật: desktop hướng tới 60 FPS, tablet 45–60 FPS, phone khoảng ≥30 FPS bằng quality adaptation. Số đo SwiftShader không phải cam kết FPS trên thiết bị thật. Thêm `?debug` để đo trước khi thêm hiệu ứng.
+- Mọi hiệu ứng nâng cao (post-processing, shadow, AO) phải có cờ tắt được trong `usePerformanceFlags`. Ba tier `high / balanced / low` điều khiển DPR, bóng, viền chung, trang trí, bề mặt cargo và animation; viền kiện đang chọn luôn được giữ. Runtime bỏ qua idle, hạ tier sau 3 mẫu chậm (>28 ms), nâng sau 8 mẫu nhanh (<18 ms), cooldown 12 giây. Debug quality override khóa tier để đo lặp lại.
 - Animation trong Canvas dùng `@react-spring/three`. Animation ngoài Canvas dùng `motion`.
 - Panel điều khiển nổi trên Canvas là React thường đặt đè bằng CSS, không dùng `<Html>` của drei trừ khi cần neo theo vật thể 3D. Lớp phủ phải `pointer-events-none`, chỉ bật lại trên đúng nhóm nút, nếu không nó nuốt thao tác kéo xoay.
 - Canvas phải có `touch-action: none` (đã đặt toàn cục trong `index.css`). Thiếu nó thì trên máy tính bảng kéo ngón tay sẽ cuộn trang thay vì xoay mô hình — lỗi chỉ lộ khi chạm tay, dùng chuột không thấy.
-- Ba lưu ý về camera: `fitToBox` của camera-controls **xoay camera** về nhìn thẳng mặt gần nhất nên làm mất góc chéo — với panel hẹp hãy tự tính khoảng cách từ bán kính bao và tỉ lệ khung. Vách thùng dùng mặt đơn pháp tuyến hướng vào trong để vách gần camera tự biến mất. `PCFSoftShadowMap` đã bị gỡ khỏi three r186, dùng `shadows="percentage"`.
+- Ba lưu ý về camera: `fitToBox` của camera-controls **xoay camera** về nhìn thẳng mặt gần nhất nên làm mất góc chéo — dùng phép chiếu các góc bao theo preset và tỉ lệ khung; bounding sphere theo chiều dài làm góc cửa sau trên phone quá nhỏ. Resize panel giữ góc người dùng đang xoay. Vách thùng dùng mặt đơn pháp tuyến hướng vào trong để vách gần camera tự biến mất. `PCFSoftShadowMap` đã bị gỡ khỏi three r186, dùng `shadows="percentage"`.
+
+### Foundation engine *(bổ sung)*
+
+- `LoadPlan` là snapshot bất biến. Planner đi qua `adaptLoadPlan → ViewerSceneModel`, kết hợp `ViewerDraft` theo ID để sinh effective placements. Chỉ commit `{ position?, orientation?, pinned? }` vào draft; không sửa `plan.placements`. Tất cả vị trí trong draft dùng mm nghiệp vụ.
+- Kích thước domain **đã áp orientation**. Phải khôi phục kích thước nguyên bản từ hướng nguồn rồi áp hướng đích, kể cả nguồn ở hướng 1 hoặc 2. Xoay giữ nguyên góc vị trí của kiện. Helper nằm trong `viewer-scene-model.ts`.
+- Cả ba vai trò dùng chung `SceneCanvas` với `frameloop="demand"`. CameraControls tự invalidate khi chuyển động; mọi thay đổi buffer imperative phải gọi invalidate. Spring chỉ ghi ma trận/proxy kiện đang chạy, không đưa state từng frame qua React.
+- `frustumCulled={false}` không loại bỏ nhu cầu bounds của **raycast**. Cargo dùng sphere bao toàn bộ effective geometry và quãng animation, cập nhật khi geometry đổi. Không tính lại `computeBoundingSphere()` trong animation/step/slice path; cập nhật màu không ghi lại ma trận.
+- Dữ liệu đo riêng trong `features/viewer3d/benchmark.mock.ts`: `?debug&packages=132|300|500|1000`, có thể thêm `&quality=high|balanced|low`. Không đổi mock nghiệp vụ và không kích hoạt benchmark khi thiếu `debug`. Đây là fixture renderer có khe hở, không phải phương án đã xác nhận ổn định chất xếp.
+- Debug chỉ quan sát: FPS khi scene chuyển động, draw calls, tam giác, số kiện, DPR và tier. Khi nghỉ hiển thị trạng thái nghỉ; không tự invalidate để đo FPS. Chưa nâng mục tiêu FPS trên thiết bị thật chỉ dựa vào số đo Chromium phần mềm.
+- Low tier dùng DPR 0,5 và vật liệu cargo Lambert sau phép đo kéo camera 1.000 kiện trên SwiftShader; giữ nguyên picking và nhãn HTML. Balanced/high giữ Standard. Phần 3D mềm hơn là trade-off có chủ ý để ưu tiên tương tác. Không suy diễn kết quả này thành cam kết FPS trên mọi thiết bị hoặc mọi tier.
+
+### Manual editor *(bổ sung)*
+
+- Planner có chế độ Xem/Chỉnh sửa. Chỉ kiện đang chọn dùng một proxy mesh; instance tương ứng được ẩn theo ID. Lưới sàn và chỉ dẫn trục có số draw call cố định.
+- Kéo dùng pointer capture, ref và cập nhật Three imperative; chỉ commit một lệnh khi thả hợp lệ. Trong gesture tạm ngưng camera và raycast instances, khôi phục khi thả/hủy/unmount. Không đưa pointer position qua React mỗi frame.
+- Snapping/validation dùng mm nguyên trong `viewer3d/editor`. Nút nudge đi đúng bước mm; snapping dùng khi kéo hoặc bấm Căn vị trí. Không xoay quaternion tự do.
+- Chồng lấn và vượt biên chặn commit. Nâng đỡ dưới 80%, tiếp xúc kiện dễ vỡ và chỉnh thủ công chỉ là advisory. Coverage tính union diện tích tiếp xúc, tolerance 2 mm; không phải stability solver. Fixture có khe hở có thể nhận advisory.
+- Lịch sử giữ patch trước/sau theo ID, tối đa 200 lệnh, không snapshot placements mỗi lần di chuột. Ghim khóa move/rotate cho đến khi bỏ ghim. Reset mọi chỉnh sửa cần dialog; reset riêng bị chặn nếu vị trí gốc đang bị kiện khác chiếm.
+- Không tạo placement từ UnplacedPackage, không lưu draft qua phiên/trang và không coi kiểm tra frontend là kết quả tối ưu authoritative.
+
+### Operations và scene dùng chung *(bổ sung)*
+
+- `operations/scene-semantics.ts` tách loaded/current/next/future/removed khỏi renderer. Planner, `PositionViewer` (kho) và `DriverCargoViewer` cùng dùng `SceneCanvas`; panel và workflow nằm ở wrapper. Không thêm engine cho từng vai trò.
+- Loading lấy `placement.step`; unloading lấy **thứ tự dỡ gợi ý**, ưu tiên stop tăng, cao trước, gần cửa trước. Stop-order consistency không chứng minh unload accessibility. Blocker chỉ là giao cắt hành lang thẳng về +X cửa sau, không tính người, xe nâng, clearance hay xoay lúc dỡ.
+- CoM là **tâm khối lượng hàng** đã xếp/còn lại, không phải toàn xe. Tải trục hiển thị số từ phương án gốc, chưa tính lại sau edit/dỡ. Cabin, bánh và khung gầm là mô hình minh họa, không phải axle geometry.
+- Chi tiết xe gộp geometry theo vật liệu; sáu bánh dùng một draw. Texture cargo là một bề mặt trung tính dùng chung, không phải nhãn hướng đặt. Low tắt chi tiết phụ; không tắt cues nghiệp vụ. Animation dỡ bị cản mờ tại chỗ, reduced motion không dịch chuyển lớn; hoàn tất phải trở lại idle.
+- Timeline tối đa 80 bins, slider giữ toàn bộ bước. Stop ribbon tính từ phân bố thể tích thực, giữ nhiều màu khi stop xen kẽ. Màu phải có số/tên điểm trong panel hoặc nhãn.
+- Three của kho và driver được lazy-load từ `viewer3d`. Driver chỉ tải khi mở “Xem vị trí hàng”; mô phỏng không đánh dấu giao hàng và không có editor. Phone dùng panel dưới/drawer, nút thao tác 56px, không phụ thuộc hover/gizmo nhỏ.
 
 ### Ảnh xem trước tĩnh dùng SVG, không dùng Three.js *(bổ sung)*
 
@@ -373,3 +401,13 @@ Thêm màn mới thì thêm theo đúng lối này.
 | Chữ 11px và 13px rải rác | Ép về 11px (micro) hoặc 12/14px | Giữ thang chữ ở mục 4 |
 | Màn kho không có nút thoát | Thêm nút quay lại 56px | Mục 10: màn toàn màn hình phải có lối ra |
 | Ô vị trí 3D ở màn kho là ảnh tĩnh | Three.js xoay được | Công nhân cần nhìn quanh kiện để đặt đúng |
+
+## 12. Tối ưu token và context *(bổ sung)*
+
+- Dùng trạng thái code hiện tại làm nguồn chuẩn cho task tiếp theo. Không đọc lại toàn repo hoặc file đã audit nếu chúng không thay đổi.
+- Ưu tiên `git diff`, tìm symbol và import/reference; chỉ mở đúng phần liên quan. Tận dụng findings và kết quả kiểm tra đã có.
+- Nếu cần research song song, chỉ dùng tối đa 1–2 subagent với scope hẹp, không giao đọc trùng code. Subagent trả findings ngắn, không viết essay hoặc paste code dài.
+- Không refactor ngoài scope, không over-engineer; chỉ thêm abstraction/dependency khi có nhu cầu đã chứng minh.
+- Khi giải pháp đơn giản đạt acceptance criteria và performance target, dừng khám phá phương án khác.
+- Chạy full `pnpm lint` và `pnpm build` để xác nhận cuối task; không lặp lại sau từng thay đổi nhỏ nếu chưa có lỗi hoặc rủi ro mới cần kiểm tra.
+- Giữ chất lượng implementation và bằng chứng kiểm thử, đồng thời giảm tối đa context/token không cần thiết.

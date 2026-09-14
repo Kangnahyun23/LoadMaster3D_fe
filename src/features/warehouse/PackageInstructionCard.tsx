@@ -1,6 +1,7 @@
 import { ArrowRight, ArrowUp, Package, TriangleAlert } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
-import { formatDecimal } from '@/lib/format'
+import { formatDecimal, formatInteger } from '@/lib/format'
+import { placementMeasurements } from '@/features/viewer3d/operations/placement-measurements'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
 import type { Placement, PlanStop, VehicleSpec } from '@/types/load-plan'
@@ -30,23 +31,24 @@ export function PackageInstructionCard({
 }) {
   const stopName = stops.find((s) => s.number === placement.stop)?.name ?? ''
   const note = stepNote(placement, placements)
+  const measurements = placementMeasurements(placement, placements, vehicle)
 
   return (
-    <Card className="flex min-h-0 min-w-0 flex-col gap-4 overflow-hidden px-7 py-6">
-      <div className="flex items-start justify-between gap-4">
+    <Card className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <span className="text-body-lg font-medium text-text-3">Kiện cần xếp</span>
           <h1 className="font-mono text-[40px] leading-12 font-semibold tracking-[-0.02em]">{placement.id}</h1>
         </div>
         <span
-          className="inline-flex h-9 flex-none items-center gap-2 rounded-full px-3.5 text-body-lg font-semibold leading-none whitespace-nowrap"
+          className="inline-flex min-h-9 items-center gap-2 rounded-md px-3 text-body-lg font-semibold"
           style={{ background: stopColor(placement.stop), color: stopForeground(placement.stop) }}
         >
           Điểm {placement.stop} · {stopName}
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
         <Tile label="Vị trí">{describePosition(placement, placements, vehicle)}</Tile>
         <Tile label="Hướng đặt">{describeOrientation(placement)}</Tile>
         <Tile label="Khối lượng">
@@ -56,6 +58,12 @@ export function PackageInstructionCard({
           <span className="text-body-lg font-normal text-text-3">kg</span>
         </Tile>
       </div>
+      <dl className="grid grid-cols-2 gap-2 text-body-lg">
+        {([['Vách trước', measurements.frontMm], ['Vách trái', measurements.leftMm], ['Vách phải', measurements.rightMm],
+          ['Cửa sau', measurements.rearMm], ['Sàn', measurements.floorMm]] as const).map(([label, value]) =>
+          <div key={label}><dt className="text-text-2">Cách {label.toLowerCase()}</dt><dd className="font-mono">{formatInteger(value)} mm</dd></div>)}
+        <div><dt className="text-text-2">Phía dưới gần nhất</dt><dd className="font-mono">{measurements.belowId ?? 'Không có kiện'}</dd></div>
+      </dl>
 
       <div
         role="note"
@@ -74,7 +82,7 @@ export function PackageInstructionCard({
         <span className="text-[18px] leading-6 font-semibold">{note.text}</span>
       </div>
 
-      <div className="flex min-h-0 flex-1 items-center gap-6 px-2 pt-1">
+      <div className="flex flex-wrap items-center gap-4 pt-1">
         <OrientationFigure placement={placement} />
         <ul className="flex min-w-0 flex-col gap-2 text-body-lg text-text-2">
           <li className="flex items-center gap-2.5">

@@ -20,16 +20,16 @@ export function SlicePanel({
   const label = sliceMm >= maxMm ? 'Toàn bộ' : `${formatInteger(sliceMm)} mm`
 
   return (
-    <div className="flex w-70 flex-col gap-2 rounded-md border border-border bg-bg p-3 shadow-e2">
+    <div className="flex w-full max-w-80 flex-col gap-2 rounded-md border border-border bg-bg p-3 xl:w-70">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-caption font-medium text-text-3">
+        <span className="text-body-lg font-medium text-text-2 xl:text-caption">
           Cắt lớp theo chiều dài
         </span>
-        <span className="font-mono text-caption font-medium">{label}</span>
+        <span className="font-mono text-body-lg font-medium xl:text-caption">{label}</span>
       </div>
       <input
         type="range"
-        className="lm-range"
+        className="lm-range min-h-14 xl:min-h-0"
         min={0}
         max={maxMm}
         step={SLICE_STEP_MM}
@@ -39,7 +39,7 @@ export function SlicePanel({
         aria-valuetext={label}
         style={{ '--lm-range-fill': `${percent}%` } as CSSProperties}
       />
-      <div className="flex justify-between font-mono text-[11px] leading-3.5 text-text-3">
+      <div className="flex justify-between font-mono text-body-lg text-text-2 xl:text-caption">
         <span>Vách trước</span>
         <span>Cửa sau</span>
       </div>

@@ -1,4 +1,5 @@
 import { LOAD_PLAN } from '@/lib/load-plan.mock'
+import { suggestedUnloadOrder } from '@/features/viewer3d/operations/operations-model'
 
 /**
  * Điểm giao 2/4 của TRIP-2026-0914 nhìn từ phía tài xế.
@@ -54,9 +55,7 @@ function whereText(x: number, z: number, lengthMm: number): string {
   return `${area}, ${layer}`
 }
 
-const items: DeliveryItem[] = LOAD_PLAN.placements
-  .filter((p) => p.stop === STOP_NUMBER)
-  .sort((a, b) => b.step - a.step) // kiện gần cửa (xếp sau) dỡ trước
+const items: DeliveryItem[] = suggestedUnloadOrder(LOAD_PLAN.placements.filter((p) => p.stop === STOP_NUMBER))
   .map((p, index) => {
     const goods = GOODS_BY_ORDER[p.orderId] ?? ['Hàng tổng hợp']
     return {

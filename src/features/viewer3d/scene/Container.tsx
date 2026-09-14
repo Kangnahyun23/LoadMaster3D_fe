@@ -3,6 +3,7 @@ import { DoubleSide } from 'three'
 import type { VehicleSpec } from '@/types/load-plan'
 import type { SceneMaterials } from './materials'
 import { containerSize, type Vec3 } from './units'
+import { ContainerDoor, FloorScale } from './ContainerDetails'
 
 /**
  * Thùng xe: sàn, ba vách, gờ thấp hai bên, viền nóc đứt nét và hai cánh cửa
@@ -10,19 +11,22 @@ import { containerSize, type Vec3 } from './units'
  * gần camera tự biến mất — nhìn từ góc nào cũng thấy hàng bên trong.
  */
 
-const DOOR_ANGLE = (110 * Math.PI) / 180
 const DOOR_THICKNESS = 0.03
 const SKIRT_HEIGHT = 0.28
-const EDGE_COLOR = '#ffffff'
 
 export function Container({
   vehicle,
   materials,
+  detail = true,
+  reducedMotion = false,
 }: {
   vehicle: VehicleSpec
   materials: SceneMaterials
+  detail?: boolean
+  reducedMotion?: boolean
 }) {
   const { length: L, height: H, width: W } = containerSize(vehicle)
+  const EDGE_COLOR = materials.light
 
   const roofRectangle: Vec3[] = [
     [0, H, 0],
@@ -82,19 +86,9 @@ export function Container({
       <Line points={roofRectangle} color={EDGE_COLOR} transparent opacity={0.28} lineWidth={1} dashed dashSize={0.08} gapSize={0.06} />
       <Line points={verticalEdges} segments color={EDGE_COLOR} transparent opacity={0.22} lineWidth={1} dashed dashSize={0.08} gapSize={0.06} />
 
-      {/* Cửa sau, bản lề tại hai góc, mở ra ngoài */}
-      <group position={[L, 0, 0]} rotation={[0, DOOR_ANGLE, 0]}>
-        <mesh position={[DOOR_THICKNESS / 2, H / 2, W / 4]} castShadow>
-          <boxGeometry args={[DOOR_THICKNESS, H, W / 2]} />
-          <meshStandardMaterial color={materials.wall} roughness={0.85} />
-        </mesh>
-      </group>
-      <group position={[L, 0, W]} rotation={[0, -DOOR_ANGLE, 0]}>
-        <mesh position={[DOOR_THICKNESS / 2, H / 2, -W / 4]} castShadow>
-          <boxGeometry args={[DOOR_THICKNESS, H, W / 2]} />
-          <meshStandardMaterial color={materials.wall} roughness={0.85} />
-        </mesh>
-      </group>
+      {detail ? <FloorScale length={L} width={W} color={materials.light} /> : null}
+      <ContainerDoor length={L} height={H} width={W} side={1} materials={materials} detail={detail} reducedMotion={reducedMotion || !detail} />
+      <ContainerDoor length={L} height={H} width={W} side={-1} materials={materials} detail={detail} reducedMotion={reducedMotion || !detail} />
     </group>
   )
 }
