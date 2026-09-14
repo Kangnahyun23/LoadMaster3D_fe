@@ -1,6 +1,6 @@
 # Theo dõi tiến độ — LoadMaster FE MVP
 
-Cập nhật lần cuối: **14/09/2026**
+Cập nhật lần cuối: **15/09/2026**
 
 Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](../LoadMaster_FE_MVP_Build_Spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](../handoff.md)
 
@@ -15,21 +15,39 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | Phase | Nội dung | Xong / Tổng | Ước lượng | Trạng thái |
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
-| 0 | Git, luật, Vitest, Playwright, CI | 2 / 6 | ~4 ngày | 🟦 Đang làm |
+| 0 | Git, luật, Vitest, Playwright, CI | 3 / 6 | ~4 ngày | 🟦 Đang làm |
 | 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 2 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor | 0 / 9 | ~10 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **4 / 55 issue** | **~55 ngày công** | |
+| **Tổng** | | **5 / 55 issue** | **~55 ngày công** | |
 
-**Việc tiếp theo:** LM-010 (domain models + zod) → LM-014 (mô hình lỗi, bọc `vehicleBoundaryExcess`). Phase 0 còn LM-003, LM-005, LM-006, làm song song được.
+**Đang làm song song (15/09/2026):** LM-005 (Playwright), LM-010 (domain models), LM-027 (i18n) — mỗi issue một agent trong git worktree riêng; người điều phối gộp vào `feat/spec-mvp` sau khi kiểm tra.
+
+**Việc tiếp theo sau khi gộp:** LM-006 (cần LM-005) · LM-012, LM-013, LM-014 (cần LM-010) · LM-028 (cần LM-014 + LM-027).
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 0–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 15/09/2026 — Làm song song: LM-003 xong; LM-005, LM-010, LM-027 giao agent
+
+**Đã làm**
+
+- Chốt seam TDD: LM-010 test qua `@/domain/models`, lỗi zod là mã i18n; LM-027 hai seam — `@/lib/format` (unit) và `I18nProvider` qua RTL (dom).
+- Giao 3 agent chạy nền, mỗi agent một worktree từ `fa7a68c`: LM-005, LM-010, LM-027. Agent không sửa file này; gộp và cập nhật tiến độ do người điều phối làm.
+- LM-003 (tự làm): cập nhật AGENTS.md mục 1, 2, 3, 6, 7, 9, 12 theo PRD — đơn vị cm/kg *(đã điều chỉnh)* kèm trạng thái chuyển đổi, i18n + mã lỗi, ẩn nút chưa hoạt động *(đã điều chỉnh)*, đích tích hợp engine, mock repository + revision, quy trình kiểm thử và làm song song. CLAUDE.md chỉ còn `@AGENTS.md`.
+
+**Kiểm tra**
+
+- LM-003 chỉ sửa tài liệu; không chạy lại test.
+
+**Việc tiếp theo**
+
+- Chờ 3 agent báo cáo → kiểm tra từng nhánh → gộp → chạy lint/build/test trên nhánh gộp → cập nhật tiến độ.
 
 ### 14/09/2026 — LM-011 + LM-015: TDD helper số và geometry
 
@@ -130,16 +148,16 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|---|
 | [LM-001](issues/LM-001-commit-scene-first-tao-nhanh.md) | Commit scene-first, tạo nhánh | ✅ | 14/09/2026 | 14/09/2026 | `d737f93`, nhánh `feat/spec-mvp` |
 | [LM-002](issues/LM-002-chot-contract-backend.md) | Chốt contract backend | 🟨 | 14/09/2026 | | Chờ nhóm backend, không chặn |
-| [LM-003](issues/LM-003-cap-nhat-agents-claude-md.md) | Cập nhật AGENTS.md, CLAUDE.md | ⬜ | | | |
+| [LM-003](issues/LM-003-cap-nhat-agents-claude-md.md) | Cập nhật AGENTS.md, CLAUDE.md | ✅ | 15/09/2026 | 15/09/2026 | CLAUDE.md import `@AGENTS.md` |
 | [LM-004](issues/LM-004-them-vitest-rtl.md) | Vitest + RTL | ✅ | 14/09/2026 | 14/09/2026 | 39/39 test, Vitest 5.0.0 |
-| [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | ⬜ | | | |
+| [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | 🟦 | 15/09/2026 | | Agent trong worktree |
 | [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ⬜ | | | |
 
 ### Phase 1 — Domain, service, dữ liệu, i18n nền
 
 | ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
 |---|---|---|---|---|---|
-| [LM-010](issues/LM-010-domain-models-schema.md) | Domain models + zod | ⬜ | | | Việc tiếp theo; nhận thêm adapter → `Box` |
+| [LM-010](issues/LM-010-domain-models-schema.md) | Domain models + zod | 🟦 | 15/09/2026 | | Agent trong worktree (TDD) |
 | [LM-011](issues/LM-011-numeric-roundcm-epsilon.md) | `roundCm` + EPSILON | ✅ | 14/09/2026 | 14/09/2026 | TDD 6 test; quy ước AGENTS chờ LM-003 |
 | [LM-012](issues/LM-012-orientation-6-huong.md) | 6 hướng đặt | ⬜ | | | |
 | [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | ⬜ | | | |
@@ -156,7 +174,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-024](issues/LM-024-mock-optimization-service.md) | MockOptimizationService | ⬜ | | | |
 | [LM-025](issues/LM-025-worker-tien-trinh-huy-loi.md) | Web Worker | ⬜ | | | |
 | [LM-026](issues/LM-026-mock-repository-revision.md) | Mock repository, revision | ⬜ | | | |
-| [LM-027](issues/LM-027-ha-tang-i18n.md) | Hạ tầng i18n | ⬜ | | | |
+| [LM-027](issues/LM-027-ha-tang-i18n.md) | Hạ tầng i18n | 🟦 | 15/09/2026 | | Agent trong worktree (TDD) |
 | [LM-028](issues/LM-028-tu-dien-thong-bao-rang-buoc.md) | Thông báo ràng buộc vi/en | ⬜ | | | |
 
 ### Phase 2 — Engine 3D sang cm
