@@ -1,6 +1,6 @@
 import type { Placement, PositionMm, VehicleSpec } from '@/types/load-plan'
-import { AXES, extent, overlapsAxis } from './geometry.ts'
-import type { SnapTarget } from './snapping.ts'
+import { AXES, extent, overlapsAxis } from './geometry'
+import type { SnapTarget } from './snapping'
 
 export type FeedbackBox = { position: PositionMm; lengthMm: number; widthMm: number; heightMm: number }
 export type MeasurementGuide = { from: PositionMm; to: PositionMm; label: string; mm: number }

@@ -15,21 +15,47 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | Phase | Nội dung | Xong / Tổng | Ước lượng | Trạng thái |
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
-| 0 | Git, luật, Vitest, Playwright, CI | 1 / 6 | ~4 ngày | 🟦 Đang làm |
+| 0 | Git, luật, Vitest, Playwright, CI | 2 / 6 | ~4 ngày | 🟦 Đang làm |
 | 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 0 / 19 | ~18,5 ngày | ⬜ |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor | 0 / 9 | ~10 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **1 / 55 issue** | **~55 ngày công** | |
+| **Tổng** | | **2 / 55 issue** | **~55 ngày công** | |
 
-**Việc tiếp theo:** LM-004 — cài Vitest + RTL, chuyển 37 test; sau đó TDD LM-011 + LM-015 (đã chốt 14/09/2026).
+**Việc tiếp theo:** TDD LM-011 + LM-015 (chốt seam cần test trước khi viết test đầu tiên). Các việc phase 0 còn lại (LM-003, LM-005, LM-006) làm song song được.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 0–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 14/09/2026 — LM-004: Vitest + React Testing Library
+
+**Đã làm** (nhánh `feat/spec-mvp`)
+
+- LM-004: thêm vitest 5.0.0, @testing-library/react 16.3.3, user-event 14.6.7, jest-dom 7.0.1, @testing-library/dom 10.4.1, jsdom 30.0.1.
+- `vitest.config.ts` gộp `vite.config.ts`, hai project `unit` (node) và `dom` (jsdom, `*.dom.test.tsx`); setup `src/test/setup-dom.ts`.
+- Script `test`, `test:watch`, `test:bench`.
+- Codemod AST chuyển 4 file test cũ: 171 `assert.*` → `expect`, import sang alias `@/`.
+- Bỏ đuôi `.ts` trong import của 8 file viewer3d.
+- Test RTL mẫu cho `VehicleFormDialog` (form trống báo lỗi; form hợp lệ lưu và đóng).
+- `handoff.md` đổi lệnh test sang `pnpm test`.
+
+**Kiểm tra**
+
+- `pnpm test`: 39/39 ✅ (37 cũ + 2 RTL) · `pnpm lint`: ✅ · `pnpm build`: ✅, `dist/` không chứa code test.
+
+**Vướng mắc / quyết định mới**
+
+- Vitest 5 và jest-dom 7 là bản major mới: đã đọc type trong `node_modules` để dùng `test.projects` (thay `environmentMatchGlobs` cũ).
+- `vitest bench` thoát mã 1 khi chưa có file bench → thêm `--passWithNoTests`.
+- Test RTL mẫu gắn với `VehicleFormDialog` sẽ bị gỡ ở LM-040/041; chuyển test sang form mới lúc đó.
+
+**Việc tiếp theo**
+
+- TDD LM-011 + LM-015.
 
 ### 14/09/2026 — LM-001: commit scene-first, tạo nhánh
 
@@ -83,7 +109,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-001](issues/LM-001-commit-scene-first-tao-nhanh.md) | Commit scene-first, tạo nhánh | ✅ | 14/09/2026 | 14/09/2026 | `d737f93`, nhánh `feat/spec-mvp` |
 | [LM-002](issues/LM-002-chot-contract-backend.md) | Chốt contract backend | 🟨 | 14/09/2026 | | Chờ nhóm backend, không chặn |
 | [LM-003](issues/LM-003-cap-nhat-agents-claude-md.md) | Cập nhật AGENTS.md, CLAUDE.md | ⬜ | | | |
-| [LM-004](issues/LM-004-them-vitest-rtl.md) | Vitest + RTL | ⬜ | | | Việc tiếp theo |
+| [LM-004](issues/LM-004-them-vitest-rtl.md) | Vitest + RTL | ✅ | 14/09/2026 | 14/09/2026 | 39/39 test, Vitest 5.0.0 |
 | [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | ⬜ | | | |
 | [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ⬜ | | | |
 
@@ -92,7 +118,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
 |---|---|---|---|---|---|
 | [LM-010](issues/LM-010-domain-models-schema.md) | Domain models + zod | ⬜ | | | |
-| [LM-011](issues/LM-011-numeric-roundcm-epsilon.md) | `roundCm` + EPSILON | ⬜ | | | |
+| [LM-011](issues/LM-011-numeric-roundcm-epsilon.md) | `roundCm` + EPSILON | ⬜ | | | Việc tiếp theo (TDD) |
 | [LM-012](issues/LM-012-orientation-6-huong.md) | 6 hướng đặt | ⬜ | | | |
 | [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | ⬜ | | | |
 | [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | ⬜ | | | |

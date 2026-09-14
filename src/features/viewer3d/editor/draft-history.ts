@@ -1,6 +1,6 @@
-import { createViewerDraft, patchPlacement, type PlacementPatch, type ViewerDraft } from '../viewer-draft.ts'
-import type { ViewerSceneModel } from '../viewer-scene-model.ts'
-import { EDITOR_RULES } from './geometry.ts'
+import { createViewerDraft, patchPlacement, type PlacementPatch, type ViewerDraft } from '../viewer-draft'
+import type { ViewerSceneModel } from '../viewer-scene-model'
+import { EDITOR_RULES } from './geometry'
 
 export type CommandType = 'MOVE' | 'ROTATE' | 'PIN' | 'UNPIN' | 'RESET_PLACEMENT' | 'RESET_DRAFT'
 type Change = { id: string; before?: PlacementPatch; after?: PlacementPatch }
