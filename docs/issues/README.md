@@ -37,6 +37,7 @@ Mỗi issue là một file `LM-0xx-ten-ngan.md` với frontmatter:
 | [LM-004](LM-004-them-vitest-rtl.md) | Vitest + RTL, chuyển 37 test | 1d | 001 |
 | [LM-005](LM-005-them-playwright-test.md) | `@playwright/test`, chuyển suite trình duyệt | 1,5d | 001 |
 | [LM-006](LM-006-github-actions-ci.md) | GitHub Actions CI | 0,5d | 004, 005 |
+| [LM-055](LM-055-tailwind-merge-bo-mau-chu.md) | Bug: `cn()` bỏ màu chữ nút khi gặp cỡ chữ token *(mở 15/09/2026)* | 0,5d | 004 |
 
 ### Phase 1 — Domain, service, dữ liệu, i18n nền (~18,5 ngày)
 
