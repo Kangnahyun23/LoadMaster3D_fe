@@ -1,16 +1,16 @@
 import { useThree, type ThreeEvent } from '@react-three/fiber'
-import { useEffect, useMemo, useRef } from 'react'
-import { BackSide, BoxGeometry, EdgesGeometry, type InstancedMesh } from 'three'
-import { readToken } from '@/lib/tokens'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { BackSide, BoxGeometry, InstancedBufferAttribute, type InstancedMesh } from 'three'
 import type { ColorMode, Placement } from '@/types/load-plan'
 import type { ColorContext } from '../colors'
 import { createInstanceLayout } from './instance-layout'
 import { useCargoMatrices } from './useCargoMatrices'
 import type { AnimationQuality } from '../usePerformanceFlags'
 import { useCargoColors } from './useCargoColors'
-import { boxCenter, boxSize } from './units'
 import type { SceneSemantics } from '../operations/scene-semantics'
-import { createCargoSurface } from './cargo-surface'
+import { applyCargoSurface, createCargoSurface } from './cargo-surface'
+import { CargoFeedback } from './CargoFeedback'
+import { animated, useSpring } from '@react-spring/three'
 
 type Props = {
   placements: readonly Placement[]
@@ -20,6 +20,7 @@ type Props = {
   step: number
   selectedId: string | null
   onSelect: (id: string | null) => void
+  onFocus?: (p: Placement) => void
   outlines: boolean
   outlineColor: string
   reducedMotion: boolean
@@ -28,12 +29,13 @@ type Props = {
   semantics?: SceneSemantics
   xraySelection?: boolean
   surfaceDetail?: boolean
+  warningSignal?: number
 }
 
 /** Three cargo draws at most: solid, ghost, inverted hull. One selected outline. */
 export function CargoInstances({
-  placements, colorMode, colorContext, sliceMm, step, selectedId, onSelect,
-  outlines, outlineColor, reducedMotion, animationQuality = 'full', hiddenId, semantics, xraySelection = false, surfaceDetail = false,
+  placements, colorMode, colorContext, sliceMm, step, selectedId, onSelect, onFocus,
+  outlines, outlineColor, reducedMotion, animationQuality = 'full', hiddenId, semantics, xraySelection = false, surfaceDetail = false, warningSignal = 0,
 }: Props) {
   const opaque = useRef<InstancedMesh>(null)
   const dim = useRef<InstancedMesh>(null)
@@ -41,13 +43,26 @@ export function CargoInstances({
   const meshes = useMemo(() => ({ opaque, dim, hull }), [])
   const layout = useMemo(() => createInstanceLayout(placements), [placements])
   const gl = useThree((state) => state.gl)
+  const invalidate = useThree((state) => state.invalidate)
+  const [warningSpring, warningApi] = useSpring(() => ({ opacity: 1 }))
+  useEffect(() => {
+    if (!warningSignal) return
+    void warningApi.start({ from: { opacity: 0.25 }, to: { opacity: 1 }, config: { duration: reducedMotion ? 100 : 200 }, onChange: () => invalidate() })
+  }, [warningSignal, warningApi, invalidate, reducedMotion])
   const geometry = useMemo(() => new BoxGeometry(1, 1, 1), [])
-  const edges = useMemo(() => new EdgesGeometry(geometry), [geometry])
+  useLayoutEffect(() => {
+    geometry.setAttribute('packageSurface', new InstancedBufferAttribute(new Float32Array(layout.instanceToPlacementId.map((id) =>
+      ({ carton: 0, pallet: 1, crate: 2 })[layout.placementById.get(id)!.packaging])), 1))
+  }, [geometry, layout])
   const surface = useMemo(() => surfaceDetail ? createCargoSurface() : null, [surfaceDetail])
   useEffect(() => () => surface?.dispose(), [surface])
-  const selectionColor = readToken('--bg')
   const selected = selectedId && selectedId !== hiddenId ? layout.placementById.get(selectedId) : undefined
   const count = layout.instanceToPlacementId.length
+  const [hoverId, setHoverId] = useState<string | null>(null)
+  const current = layout.placementById.get(semantics?.currentId ?? '')
+  const next = layout.placementById.get(semantics?.nextId ?? '')
+  const hover = layout.placementById.get(hoverId ?? '')
+  const visible = (p: Placement | undefined) => p && p.id !== hiddenId && (!semantics || semantics.appearanceById.get(p.id)?.visibility !== 'hidden')
   const showHull = outlines || Boolean(semantics?.blockers.length)
 
   useCargoMatrices({ meshes, layout, placements, step, sliceMm, outlines, reducedMotion, animationQuality, hiddenId, semantics })
@@ -55,17 +70,26 @@ export function CargoInstances({
 
   useEffect(() => () => {
     geometry.dispose()
-    edges.dispose()
     gl.domElement.style.removeProperty('cursor')
-  }, [geometry, edges, gl])
+  }, [geometry, gl])
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation()
     const id = event.instanceId === undefined ? undefined : layout.instanceToPlacementId[event.instanceId]
     if (id) onSelect(id)
   }
-  const handleOver = () => gl.domElement.style.setProperty('cursor', 'pointer')
-  const handleOut = () => gl.domElement.style.removeProperty('cursor')
+  const handleOver = (e: ThreeEvent<PointerEvent>) => {
+    if (e.pointerType === 'touch' || e.buttons) return
+    e.stopPropagation()
+    setHoverId(e.instanceId === undefined ? null : layout.instanceToPlacementId[e.instanceId] ?? null)
+    gl.domElement.style.setProperty('cursor', 'pointer')
+  }
+  const handleOut = () => { setHoverId(null); gl.domElement.style.removeProperty('cursor') }
+  const handleFocus = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation()
+    const id = e.instanceId === undefined ? undefined : layout.instanceToPlacementId[e.instanceId]
+    if (id) { onSelect(id); onFocus?.(layout.placementById.get(id)!) }
+  }
 
   return (
     <group>
@@ -79,10 +103,13 @@ export function CargoInstances({
         castShadow
         receiveShadow
         onClick={handleClick}
+        onDoubleClick={handleFocus}
+        onPointerMove={handleOver}
+        onPointerDown={handleOut}
         onPointerOver={handleOver}
         onPointerOut={handleOut}
       >
-        {surfaceDetail ? <meshStandardMaterial map={surface} roughness={0.86} metalness={0.02} /> : <meshLambertMaterial />}
+        {surfaceDetail ? <meshStandardMaterial map={surface} onBeforeCompile={applyCargoSurface} customProgramCacheKey={() => 'cargo-surface-atlas-v1'} roughness={0.86} metalness={0.02} /> : <meshLambertMaterial />}
       </instancedMesh>
       <instancedMesh
         name="cargo-dim"
@@ -92,6 +119,9 @@ export function CargoInstances({
         geometry={geometry}
         frustumCulled={false}
         onClick={handleClick}
+        onDoubleClick={handleFocus}
+        onPointerMove={handleOver}
+        onPointerDown={handleOut}
         onPointerOver={handleOver}
         onPointerOut={handleOut}
       >
@@ -107,21 +137,14 @@ export function CargoInstances({
           geometry={geometry}
           frustumCulled={false}
         >
-          <meshBasicMaterial side={BackSide} toneMapped={false} />
+          <animated.meshBasicMaterial side={BackSide} toneMapped={false} transparent opacity={warningSpring.opacity} />
         </instancedMesh>
       ) : null}
-      {selected ? (
-        <lineSegments
-          position={boxCenter(selected)}
-          scale={boxSize(selected).map((value) => value + 0.004) as [number, number, number]}
-          geometry={edges}
-        >
-          <lineBasicMaterial color={selectionColor} toneMapped={false} />
-        </lineSegments>
-      ) : null}
-      {selected && xraySelection ? <lineSegments position={boxCenter(selected)} scale={boxSize(selected)} geometry={edges} renderOrder={3}>
-        <lineBasicMaterial color={selectionColor} transparent opacity={0.35} depthTest={false} depthWrite={false} />
-      </lineSegments> : null}
+      {visible(selected) && selected?.id !== current?.id ? <CargoFeedback key={`selected-${selected!.id}`} placement={selected!} role="selected" reducedMotion={reducedMotion} xray={xraySelection} /> : null}
+      {visible(current) ? <CargoFeedback key={`current-${current!.id}`} placement={current!} role="current" reducedMotion={reducedMotion}
+        xray={xraySelection || Boolean(semantics?.blockers.length && semantics.inspectionId === current!.id)} /> : null}
+      {visible(next) && next?.id !== selected?.id ? <CargoFeedback key={`next-${next!.id}`} placement={next!} role="next" reducedMotion={reducedMotion} /> : null}
+      {visible(hover) && hover?.id !== selectedId && hover?.id !== current?.id && hover?.id !== next?.id ? <CargoFeedback key={`hover-${hover!.id}`} placement={hover!} role="hover" reducedMotion /> : null}
     </group>
   )
 }

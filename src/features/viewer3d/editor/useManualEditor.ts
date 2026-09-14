@@ -14,7 +14,7 @@ export function useManualEditor(state: LoadPlanViewerState) {
   const [plane, setPlane] = useState<DragPlane>('xy')
   const [nudgeMm, setNudgeMm] = useState(10)
   const [snapping, setSnapping] = useState(true)
-  const [focus, setFocus] = useState<{ placement: Placement; request: number } | null>(null)
+  const [focus, setFocus] = useState<{ placement: Placement; request: number; follow?: boolean } | null>(null)
   const preview = useMemo(() => createPreviewStore(), [])
   const { selected, placements, sceneModel, draft } = state
   const patch = selected ? draft.patches.get(selected.id) : undefined
@@ -64,9 +64,12 @@ export function useManualEditor(state: LoadPlanViewerState) {
   const focusSelected = () => {
     if (selected && !preview.getLatest()?.dragging) setFocus((current) => ({ placement: selected, request: (current?.request ?? 0) + 1 }))
   }
-  const focusPlacement = (placement: Placement) => {
+  const focusPlacement = useCallback((placement: Placement) => {
     if (!preview.getLatest()?.dragging) setFocus((current) => ({ placement, request: (current?.request ?? 0) + 1 }))
-  }
+  }, [preview])
+  const followPlacement = useCallback((placement: Placement) => {
+    if (!preview.getLatest()?.dragging) setFocus((current) => ({ placement, request: (current?.request ?? 0) + 1, follow: true }))
+  }, [preview])
   const undo = () => { if (!preview.getLatest()?.dragging) { preview.publish(null, true); state.undo() } }
   const redo = () => { if (!preview.getLatest()?.dragging) { preview.publish(null, true); state.redo() } }
   const resetPlacement = () => {
@@ -110,7 +113,7 @@ export function useManualEditor(state: LoadPlanViewerState) {
 
   return {
     mode, setMode, plane, setPlane, nudgeMm, setNudgeMm, snapping, setSnapping, preview,
-    focus, focusSelected, focusPlacement, inspect, commitMove, rotate, nudge, snap, undo, redo, resetPlacement, resetDraft,
+    focus, resetFocus: () => setFocus(null), focusSelected, focusPlacement, followPlacement, inspect, commitMove, rotate, nudge, snap, undo, redo, resetPlacement, resetDraft,
     togglePin, validation, manual,
   }
 }

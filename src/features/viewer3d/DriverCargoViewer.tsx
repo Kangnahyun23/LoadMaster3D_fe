@@ -25,7 +25,8 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
   const available = useMemo(() => model.placements.filter((p) => p.stop === stopNumber && !doneIds.has(p.id) && !retainedIds.has(p.id)),
     [model, stopNumber, doneIds, retainedIds])
   const [speed, setSpeed] = useState<PlaybackSpeed>(2)
-  const unload = useUnloadPlayback(available, speed)
+  const unloadContext = useMemo(() => model.placements.filter((p) => !doneIds.has(p.id)), [model, doneIds])
+  const unload = useUnloadPlayback(available, speed, model.vehicle, unloadContext)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [preset, setPreset] = useState<CameraPreset>('cua-sau')
   const [focus, setFocus] = useState<{ placement: Placement; request: number } | null>(null)
@@ -36,8 +37,8 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
   const selected = model.placements.find((p) => p.id === selectedId && !removed.has(p.id) && p.stop >= stopNumber) ?? unload.current
   const semantics = useMemo(() => deriveSceneSemantics(model.placements, model.vehicle, {
     kind: 'unloading', step: 0, focusStop: stopNumber, unloadedIds: removed,
-    currentId: unload.current?.id, nextId: unload.next?.id, inspectId: inspect ? selected?.id : null,
-  }), [model, stopNumber, removed, unload.current, unload.next, inspect, selected])
+    currentId: unload.current?.id, nextId: unload.next?.id, inspectId: inspect || unload.warning ? unload.current?.id : null,
+  }), [model, stopNumber, removed, unload.current, unload.next, inspect, unload.warning])
   const measurements = selected ? placementMeasurements(selected, model.placements, model.vehicle) : null
   const stop = model.stops.find((s) => s.number === stopNumber)
   const handleFocus = (p: Placement) => { setSelectedId(p.id); setFocus((f) => ({ placement: p, request: (f?.request ?? 0) + 1 })) }
@@ -52,7 +53,7 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
     <div className="relative min-h-48 flex-1 bg-canvas-1">
       <SceneCanvas experience="driver" model={model} placements={model.placements} flags={flags} preset={preset} focus={focus}
         selectedId={selected?.id ?? null} onSelect={setSelectedId} step={0} semantics={semantics} animateLoading={false}
-        decoration={false} showDistribution onPerfSample={search.has('debug') ? perf.publish : undefined}
+        decoration={false} onFocus={handleFocus} warningSignal={unload.warning} onPerfSample={search.has('debug') ? perf.publish : undefined}
         unloadMotion={{ cursor: unload.cursor, placement: unload.ordered[unload.cursor - 1], durationMs: 520 / speed }} />
       {search.has('debug') ? <DebugOverlay store={perf} className="top-2 bottom-auto left-2 translate-x-0" /> : null}
     </div>
@@ -67,12 +68,15 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
         <p>{selected.id} · Điểm {selected.stop} · {ORIENTATION_LABELS[selected.orientation]}</p>
         <p>Cách cửa {formatInteger(measurements.rearMm)} mm · vách trái {formatInteger(measurements.leftMm)} mm · Lớp {measurements.layer}</p>
         {retainedIds.has(selected.id) ? <p>Kiện khách từ chối, còn trên xe; không đưa vào mô phỏng dỡ.</p> : null}
-        {inspect ? <BlockerPanel target={selected} blockers={semantics.blockers} onSelect={handleFocus} /> : null}
+        {selected.id !== unload.current?.id && unload.current ? <Button variant="secondary" size="touch" onClick={() => handleFocus(unload.current!)}>Quay lại kiện cần dỡ</Button> : null}
+        {unload.warning ? <p className="text-badge-warning-fg">Có khả năng bị cản đường. Mô phỏng tạm dừng để xem cảnh báo.</p> : null}
+        {unload.warning ? <Button variant="secondary" size="touch" onClick={() => unload.setCursor(unload.cursor + 1)}>Bỏ qua bước trong mô phỏng</Button> : null}
+        {inspect ? <BlockerPanel target={unload.current} blockers={semantics.blockers} onSelect={handleFocus} /> : null}
       </> : null}
     </div>
     <Timeline placements={available} orderedOverride={unload.ordered} kind="unloading" step={unload.cursor} totalSteps={unload.ordered.length}
       playing={unload.playing} speed={speed} onSpeedChange={setSpeed} onStepChange={unload.setCursor}
-      onStepForward={() => unload.setCursor(unload.cursor + 1)} onStepBackward={() => unload.setCursor(unload.cursor - 1)}
+      onStepForward={unload.advance} onStepBackward={() => unload.setCursor(unload.cursor - 1)}
       onGoToStart={() => { unload.stop(); unload.setCursor(0) }} onTogglePlaying={unload.toggle} />
   </div>
 }

@@ -69,3 +69,39 @@ export async function instancePoint(page, index) {
     return { x: r.x + (p.x + 1) * r.width / 2, y: r.y + (1 - p.y) * r.height / 2 }
   }, index)
 }
+
+export async function cameraPreset(page, label) {
+  const values = { 'Trên': 'tren', 'Cửa sau': 'cua-sau', 'Bên hông': 'ben-hong', 'Trước': 'truoc', 'Góc chéo': 'goc-cheo' }
+  await page.getByRole('combobox', { name: 'Góc nhìn', exact: true }).selectOption(values[label] ?? label)
+}
+export async function openInspector(page, tab = 'operations') {
+  let dialog = page.getByRole('dialog')
+  if (!await dialog.count()) {
+    if (tab === 'package') await page.getByRole('button', { name: 'Chọn kiện', exact: true }).click()
+    else if (tab === 'display') await page.getByRole('button', { name: 'Hiển thị', exact: true }).click()
+    else await page.getByRole('button', { name: 'Chi tiết / Hiển thị', exact: true }).click()
+  }
+  dialog = page.getByRole('dialog')
+  await dialog.getByRole('button', { name: { package: 'Kiện', operations: 'Vận hành', display: 'Hiển thị', packages: 'Danh sách' }[tab], exact: true }).click()
+  return dialog
+}
+export async function closeInspector(page) {
+  const dialog = page.getByRole('dialog')
+  if (await dialog.count()) await dialog.getByRole('button', { name: 'Đóng', exact: true }).click()
+}
+export async function selectPlacement(page, id) {
+  const select = page.getByRole('combobox', { name: 'Chọn kiện', exact: true })
+  const opened = !await select.count()
+  if (opened) await openInspector(page, 'package')
+  await select.selectOption(id)
+  if (opened) await closeInspector(page)
+}
+export async function selectedPlacementId(page) {
+  const select = page.getByRole('combobox', { name: 'Chọn kiện', exact: true })
+  return await select.count() ? select.inputValue() : (await page.getByRole('button', { name: 'Chọn kiện', exact: true }).innerText()).trim()
+}
+export async function enterEdit(page) {
+  const button = page.getByRole('button', { name: 'Chỉnh sửa', exact: true })
+  if (await button.count()) await button.click()
+  else await page.getByRole('button', { name: 'Chỉnh sửa kiện', exact: true }).click()
+}

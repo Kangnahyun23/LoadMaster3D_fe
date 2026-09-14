@@ -10,6 +10,7 @@ import { snapPosition } from './snapping'
 import { PLANE_AXES, type ManualEditor } from './useManualEditor'
 import type { GeometryResult } from './geometry'
 import { EditorAxes } from './EditorGuides'
+import { EditorSpatialFeedback } from './EditorSpatialFeedback'
 
 /** Exactly one proxy. Native captured gestures bypass instance raycasts after picking. */
 export function EditorProxy({ placement, state, editor }: {
@@ -76,13 +77,13 @@ export function EditorProxy({ placement, state, editor }: {
         z: Math.round(placement.position.z + (hit.y - initialHit.y) / MM),
       }
       const snapped = editor.snapping ? snapPosition(placement, requested, state.placements, state.sceneModel.vehicle, PLANE_AXES[editor.plane])
-        : { position: requested, sources: [] }
+        : { position: requested, sources: [], targets: [] }
       candidate = { ...placement, position: snapped.position }
       moved = true
       const result = editor.inspect(candidate)
       object!.position.set(...boxCenter(candidate))
       material.current?.color.set(colorFor(result))
-      editor.preview.publish({ id: placement.id, position: candidate.position, result, sources: snapped.sources, dragging: true })
+      editor.preview.publish({ id: placement.id, position: candidate.position, result, sources: snapped.sources, targets: snapped.targets, dragging: true })
       invalidate()
     }
     function finish(commit: boolean) {
@@ -129,6 +130,8 @@ export function EditorProxy({ placement, state, editor }: {
   }
 
   return (
+    <>
+    <EditorSpatialFeedback placement={placement} state={state} editor={editor} />
     <group ref={group} name="editor-proxy" position={boxCenter(placement)}>
       <EditorAxes />
       <mesh scale={boxSize(placement)} onPointerDown={handlePointerDown} onClick={(e) => e.stopPropagation()}>
@@ -142,5 +145,6 @@ export function EditorProxy({ placement, state, editor }: {
         </span>
       </Html>
     </group>
+    </>
   )
 }

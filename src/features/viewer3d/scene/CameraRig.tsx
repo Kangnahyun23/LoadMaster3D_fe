@@ -34,7 +34,7 @@ export function CameraRig({
 }: {
   preset: CameraPreset
   reducedMotion: boolean
-  focus?: { placement: Placement; request: number } | null
+  focus?: { placement: Placement; request: number; follow?: boolean } | null
   vehicle?: VehicleSpec
   fit?: boolean
   vehicleDecoration?: boolean
@@ -44,6 +44,7 @@ export function CameraRig({
   const applied = useRef<{ preset: CameraPreset; vehicle?: VehicleSpec } | null>(null)
   const size = useThree((state) => state.size)
   const camera = useThree((state) => state.camera)
+  const beforeFocus = useRef<{ position: Vector3; target: Vector3 } | null>(null)
 
   useEffect(() => {
     const controls = controlsRef.current
@@ -52,6 +53,7 @@ export function CameraRig({
     // only an explicit preset or a new vehicle requests a fresh framing.
     if (applied.current?.preset === preset && applied.current.vehicle === vehicle) return
     applied.current = { preset, vehicle }
+    beforeFocus.current = null
     let [x, y, z] = PRESET_POSITIONS[preset]
     if (fit && vehicle && camera instanceof PerspectiveCamera) {
       const center = containerCenter(vehicle)
@@ -82,12 +84,33 @@ export function CameraRig({
 
   useEffect(() => {
     const controls = controlsRef.current
-    if (!controls || !focus || !vehicle) return
+    if (!controls || !vehicle) return
+    if (!focus) {
+      const saved = beforeFocus.current
+      beforeFocus.current = null
+      if (saved) void controls.setLookAt(saved.position.x, saved.position.y, saved.position.z, saved.target.x, saved.target.y, saved.target.z, !reducedMotion)
+      return
+    }
     const center = containerCenter(vehicle)
     const target = boxCenter(focus.placement).map((value, i) => value - center[i]!) as Vec3
-    // moveTo translates target AND camera, preserving the user's viewing direction.
+    if (!beforeFocus.current) beforeFocus.current = { position: controls.getPosition(new Vector3()), target: controls.getTarget(new Vector3()) }
+    // Keep orientation, with a contextual dolly rather than fitToBox's automatic rotation.
     void controls.moveTo(...target, !reducedMotion)
+    const diagonal = Math.hypot(focus.placement.lengthMm, focus.placement.widthMm, focus.placement.heightMm) / 1000
+    void controls.dollyTo(focus.follow ? Math.max(6, diagonal * 3) : Math.max(3, Math.min(6, diagonal * 3)), !reducedMotion)
   }, [focus, vehicle, reducedMotion])
+
+  useEffect(() => {
+    function handleKey(event: KeyboardEvent) {
+      const controls = controlsRef.current, saved = beforeFocus.current
+      if (event.key !== 'Escape' || !controls?.enabled || !saved || (event.target instanceof Element && event.target.closest('[role="dialog"]'))) return
+      beforeFocus.current = null
+      onUserControl?.()
+      void controls.setLookAt(saved.position.x, saved.position.y, saved.position.z, saved.target.x, saved.target.y, saved.target.z, !reducedMotion)
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [onUserControl, reducedMotion])
 
   return (
     <CameraControls
