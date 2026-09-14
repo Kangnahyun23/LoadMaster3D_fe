@@ -1,12 +1,9 @@
 import type { z } from 'zod'
-import { gt } from '@/domain/geometry'
+import { gt, isUpright, ORIENTATION_CODES } from '@/domain/geometry'
 import { finiteNumber, flag, listOf, nonNegative, objectOf, oneOf, positive, ratio, text } from './fields'
 import { report, rule, type ModelIssueCode } from './issue-codes'
 
-export const orientationCodeSchema = oneOf(['LWH', 'LHW', 'WLH', 'WHL', 'HLW', 'HWL'])
-
-/** Hướng giữ nguyên chiều cao H ở trục Z (Spec 6: keepUpright). LM-012 đưa ra dùng chung khi có `isUpright`. */
-const UPRIGHT_ORIENTATIONS: readonly OrientationCode[] = ['LWH', 'WLH']
+export const orientationCodeSchema = oneOf(ORIENTATION_CODES)
 
 const fragilityLevelSchema = oneOf(['NONE', 'LOW', 'MEDIUM', 'HIGH'])
 
@@ -47,7 +44,7 @@ export const cargoPackageSchema = objectOf({
   // D-25: schema từ chối dữ liệu xung đột; tự đồng bộ là việc của form (LM-045)
   if (pkg.keepUpright) {
     pkg.allowedOrientations.forEach((code, index) => {
-      if (!UPRIGHT_ORIENTATIONS.includes(code)) report(ctx, 'package.keepUpright.orientation', ['allowedOrientations', index])
+      if (!isUpright(code)) report(ctx, 'package.keepUpright.orientation', ['allowedOrientations', index])
     })
   }
   if (!pkg.stackable && gt(pkg.maxTopLoadKg, 0)) report(ctx, 'package.maxTopLoadKg.notStackable', ['maxTopLoadKg'])
