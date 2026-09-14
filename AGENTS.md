@@ -224,6 +224,11 @@ trong hộp thoại. Luôn dùng JetBrains Mono. Không phát sinh thêm cỡ ng
 
 Spacing bội số 4px.
 
+**Token cỡ chữ và `cn()`** *(bổ sung 15/09/2026, LM-055)*: `cn()` trong `lib/utils.ts` dùng
+tailwind-merge đã khai báo các cỡ chữ của `@theme` (`display`, `h1`, `h2`, `h3`, `body-lg`, `body`,
+`caption`). Thiếu khai báo thì tailwind-merge coi `text-body` là màu chữ và **bỏ mất `text-white`**
+của nút. Thêm token `--text-*` mới vào `@theme` thì phải thêm tên vào `THEME_FONT_SIZES`.
+
 ## 5. Luật thành phần
 
 ### Nút
