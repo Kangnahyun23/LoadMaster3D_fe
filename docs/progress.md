@@ -16,22 +16,41 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI | 3 / 6 | ~4 ngày | 🟦 Đang làm |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 3 / 19 | ~18,5 ngày | 🟦 Đang làm |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 4 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor | 0 / 9 | ~10 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **6 / 55 issue** | **~55 ngày công** | |
+| **Tổng** | | **7 / 56 issue** | **~55,5 ngày công** | |
 
-**Đang làm song song (15/09/2026):** LM-005 (Playwright), LM-027 (i18n) — agent trong git worktree riêng. LM-010 đã gộp.
+**Đang làm song song (15/09/2026):** LM-005 (Playwright) — agent trong git worktree riêng. LM-010 và LM-027 đã gộp.
 
-**Làm được ngay:** LM-012, LM-013, LM-014 (đủ phụ thuộc sau LM-010). Chờ: LM-006 (cần LM-005) · LM-028 (cần LM-014 + LM-027).
+**Làm được ngay:** LM-012, LM-013, LM-014, LM-016 (đủ phụ thuộc) · LM-055 (bug màu chữ nút, mới mở). Chờ: LM-006 (cần LM-005) · LM-028 (cần LM-014).
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 0–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 15/09/2026 — Gộp LM-027: hạ tầng i18n; mở LM-055
+
+**Đã làm**
+
+- Agent LM-027 xong (commit `241fa26`, `013b4d4`); xem diff rồi cherry-pick vào `feat/spec-mvp` → `e00b097`, `53a205e`.
+- `@/lib/i18n`: `I18nProvider` bọc ngoài cùng, `useT` (key và tham số có kiểu, số nhiều), `useFormat`, `useLocale`; thiếu hoặc thừa key ở `en.ts` là lỗi build (TS2741 / TS2353). Ngôn ngữ: `?lang` → `sessionStorage['loadmaster.ngon-ngu']` → `vi`.
+- `@/lib/format`: `createFormatter('vi-VN' | 'en-US')` cho cm, kg, cm³/m³, %, tỷ lệ, ngày, giờ; hàm cũ còn nơi gọi giữ nguyên đầu ra vi-VN.
+- `LanguageSwitch` trong nav rail; dịch mẫu nav rail, trang đăng nhập, 404. `AuthError` mang mã thay câu.
+- Kiểm chứng lỗi agent phát hiện: `cn()` bỏ `text-white`/`text-text` của nút khi gặp `text-body`/`text-body-lg` → mở **LM-055** (phase 0, 0,5 ngày).
+
+**Kiểm tra trên nhánh gộp**
+
+- `pnpm test`: 116/116 ✅ (92 + 24 mới) · `pnpm lint`: ✅ · `pnpm build`: ✅
+
+**Vướng mắc / quyết định mới**
+
+- Agent chốt: ngày tiếng Anh dạng `Sep 14, 2026`, giờ 24h ở cả hai ngôn ngữ; formatter là object (`format.weight`) thay tên `formatWeight`. Ghi trong issue LM-027.
+- Chưa có nút chuyển ngôn ngữ trên trang đăng nhập (chỉ `?lang`), header Planner 3D (LM-070), kho và tài xế (LM-071).
 
 ### 15/09/2026 — Gộp LM-010: domain models + zod
 
@@ -170,6 +189,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-004](issues/LM-004-them-vitest-rtl.md) | Vitest + RTL | ✅ | 14/09/2026 | 14/09/2026 | 39/39 test, Vitest 5.0.0 |
 | [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | 🟦 | 15/09/2026 | | Agent trong worktree |
 | [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ⬜ | | | |
+| [LM-055](issues/LM-055-tailwind-merge-bo-mau-chu.md) | Bug `cn()` bỏ màu chữ nút | ⬜ | | | Mở 15/09/2026, phát hiện ở LM-027 |
 
 ### Phase 1 — Domain, service, dữ liệu, i18n nền
 
@@ -192,7 +212,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-024](issues/LM-024-mock-optimization-service.md) | MockOptimizationService | ⬜ | | | |
 | [LM-025](issues/LM-025-worker-tien-trinh-huy-loi.md) | Web Worker | ⬜ | | | |
 | [LM-026](issues/LM-026-mock-repository-revision.md) | Mock repository, revision | ⬜ | | | |
-| [LM-027](issues/LM-027-ha-tang-i18n.md) | Hạ tầng i18n | 🟦 | 15/09/2026 | | Agent trong worktree (TDD) |
+| [LM-027](issues/LM-027-ha-tang-i18n.md) | Hạ tầng i18n | ✅ | 15/09/2026 | 15/09/2026 | `e00b097`, `53a205e`, 24 test |
 | [LM-028](issues/LM-028-tu-dien-thong-bao-rang-buoc.md) | Thông báo ràng buộc vi/en | ⬜ | | | |
 
 ### Phase 2 — Engine 3D sang cm
