@@ -2,6 +2,20 @@ export { vehicleBoundaryExcess, type AxisAmountCm, type BoundaryExcess, type Veh
 export { overlaps, volumeCm3, type Box } from './box'
 export { EPSILON, eq, gt, lt, roundCm, roundKg } from './numeric'
 export {
+  effectiveOrientations,
+  isUpright,
+  matchesOrientation,
+  nextOrientation,
+  orientDimensions,
+  ORIENTATION_CODES,
+  UPRIGHT_ORIENTATIONS,
+  type OrientationCode,
+  type OrientationRules,
+  type OrientedPlacement,
+  type PackageDimensions,
+  type PlacedDimensions,
+} from './orientation'
+export {
   CONTACT_TOLERANCE_CM,
   createSpatialGrid,
   DEFAULT_GRID_CELL_CM,
