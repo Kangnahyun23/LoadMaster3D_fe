@@ -23,6 +23,7 @@ FE làm theo type Spec mục 6 nhưng contract chưa chốt (D-02). Một số q
 - [ ] `constraintWarnings: string[]` có đổi sang mã lỗi có cấu trúc `{ code, severity, params }` (D-28) không?
 - [ ] Ngưỡng trọng tâm D-36 (10% ngang, 50% cao) có được nghiệp vụ xác nhận không?
 - [ ] Khi nào backend trả tải trục đáng tin cậy?
+- [ ] Trường tuỳ chọn gửi `null` hay bỏ hẳn khỏi JSON? Schema FE (LM-010) hiện **từ chối** `null` (`common.*.invalid`) và **bỏ** trường ngoài hợp đồng.
 
 ## Tiêu chí nghiệm thu
 
