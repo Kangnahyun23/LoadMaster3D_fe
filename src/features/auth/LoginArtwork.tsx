@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useT } from '@/lib/i18n'
 import {
   boxFaces,
   containerShell,
@@ -29,6 +30,7 @@ const HOLD_STEPS = 80
  * trước lớp trên — nên nó minh hoạ luôn nguyên tắc LIFO của sản phẩm.
  */
 export function LoginArtwork() {
+  const t = useT()
   const reducedMotion = usePrefersReducedMotion()
 
   const { frame, project, shell, roof, shadow, boxes } = useMemo(() => {
@@ -56,7 +58,7 @@ export function LoginArtwork() {
   useEffect(() => {
     if (reducedMotion) return
     const cycle = boxes.length + HOLD_STEPS
-    const id = window.setInterval(() => setTick((t) => (t + 1) % cycle), STEP_MS)
+    const id = window.setInterval(() => setTick((previous) => (previous + 1) % cycle), STEP_MS)
     return () => window.clearInterval(id)
   }, [reducedMotion, boxes.length])
 
@@ -79,7 +81,7 @@ export function LoginArtwork() {
       // dưới ra ngoài vùng nhìn thấy (cột phải có `overflow-hidden`).
       className="block max-h-[58vh] w-full"
       role="img"
-      aria-label="Mô phỏng thùng xe được xếp hàng theo thứ tự dỡ"
+      aria-label={t('auth.showcase.artworkLabel')}
     >
       <defs>
         <filter id="lm-login-blur" x="-30%" y="-60%" width="160%" height="240%">

@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Toaster } from 'sonner'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { AuthProvider } from '@/features/auth/AuthProvider'
+import { I18nProvider } from '@/lib/i18n'
 
 /**
  * Toast theo mục "Phản hồi" của bản design: thẻ trắng viền 1px, bóng --e2
@@ -37,24 +38,28 @@ export function Providers({ children }: { children: ReactNode }) {
       }),
   )
 
+  // Ngôn ngữ bọc ngoài cùng: đổi ngôn ngữ chỉ render lại chữ, không dựng lại
+  // router hay cache query nên không mất dữ liệu đang nhập.
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
-      </AuthProvider>
-      <Toaster
-        position="top-right"
-        closeButton
-        gap={12}
-        offset={16}
-        icons={{
-          success: <CircleCheck className="text-success" strokeWidth={1.5} />,
-          warning: <TriangleAlert className="text-warning" strokeWidth={1.5} />,
-          error: <OctagonAlert className="text-danger" strokeWidth={1.5} />,
-          info: <Info className="text-info" strokeWidth={1.5} />,
-        }}
-        toastOptions={{ unstyled: true, classNames: TOAST_CLASSES, duration: 5000 }}
-      />
-    </QueryClientProvider>
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+        </AuthProvider>
+        <Toaster
+          position="top-right"
+          closeButton
+          gap={12}
+          offset={16}
+          icons={{
+            success: <CircleCheck className="text-success" strokeWidth={1.5} />,
+            warning: <TriangleAlert className="text-warning" strokeWidth={1.5} />,
+            error: <OctagonAlert className="text-danger" strokeWidth={1.5} />,
+            info: <Info className="text-info" strokeWidth={1.5} />,
+          }}
+          toastOptions={{ unstyled: true, classNames: TOAST_CLASSES, duration: 5000 }}
+        />
+      </QueryClientProvider>
+    </I18nProvider>
   )
 }
