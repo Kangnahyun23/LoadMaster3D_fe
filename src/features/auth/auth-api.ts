@@ -9,18 +9,29 @@ import { DEMO_PASSWORD, findDemoUser } from './auth.mock'
 
 const NETWORK_DELAY_MS = 600
 
-export class AuthError extends Error {}
+/** Lỗi trả về dạng mã; màn đăng nhập dịch mã sang câu theo ngôn ngữ đang chọn. */
+export type AuthErrorCode = 'invalid-credentials' | 'account-suspended'
+
+export class AuthError extends Error {
+  readonly code: AuthErrorCode
+
+  constructor(code: AuthErrorCode) {
+    super(code)
+    this.name = 'AuthError'
+    this.code = code
+  }
+}
 
 export async function login(email: string, password: string): Promise<User> {
   await new Promise((resolve) => setTimeout(resolve, NETWORK_DELAY_MS))
 
   const user = findDemoUser(email)
-  // Thông báo chung cho cả hai trường hợp, không tiết lộ email nào có thật.
+  // Một mã chung cho cả hai trường hợp, không tiết lộ email nào có thật.
   if (!user || password !== DEMO_PASSWORD) {
-    throw new AuthError('Email hoặc mật khẩu không đúng')
+    throw new AuthError('invalid-credentials')
   }
   if (user.status === 'suspended') {
-    throw new AuthError('Tài khoản đã bị khoá. Liên hệ quản trị hệ thống.')
+    throw new AuthError('account-suspended')
   }
   return user
 }

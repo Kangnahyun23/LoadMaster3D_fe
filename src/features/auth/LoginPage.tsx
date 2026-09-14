@@ -6,34 +6,58 @@ import { Navigate, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { AuthError } from './auth-api'
+import { useT, type MessageKey, type TFunction } from '@/lib/i18n'
+import { AuthError, type AuthErrorCode } from './auth-api'
 import { DemoAccounts } from './DemoAccounts'
 import { LoginArtwork } from './LoginArtwork'
 import { useAuth } from './AuthProvider'
 
+/**
+ * Schema giữ key từ điển thay vì câu chữ; màn dịch lúc hiển thị, nên đổi ngôn ngữ
+ * khi lỗi đang hiện thì lỗi cũng đổi theo mà không phải kiểm tra lại form.
+ */
+const FIELD_ERRORS = {
+  emailRequired: 'auth.login.emailRequired',
+  emailInvalid: 'auth.login.emailInvalid',
+  passwordRequired: 'auth.login.passwordRequired',
+} as const satisfies Record<string, MessageKey>
+
 const schema = z.object({
-  email: z.string().min(1, 'Nhập email').email('Email không đúng định dạng'),
-  password: z.string().min(1, 'Nhập mật khẩu'),
+  email: z.string().min(1, FIELD_ERRORS.emailRequired).email(FIELD_ERRORS.emailInvalid),
+  password: z.string().min(1, FIELD_ERRORS.passwordRequired),
 })
 
 type FormValues = z.infer<typeof schema>
 
+function translateFieldError(t: TFunction, message: string | undefined): string | undefined {
+  const key = Object.values(FIELD_ERRORS).find((candidate) => candidate === message)
+  return key ? t(key) : undefined
+}
+
+const AUTH_ERRORS = {
+  'invalid-credentials': 'auth.login.invalidCredentials',
+  'account-suspended': 'auth.login.accountSuspended',
+} as const satisfies Record<AuthErrorCode, MessageKey>
+
+type ServerErrorKey = (typeof AUTH_ERRORS)[AuthErrorCode] | 'auth.login.serverUnreachable'
+
 /** Ba giá trị sản phẩm, hiện ở cột phải. */
 const HIGHLIGHTS = [
-  { icon: Gauge, text: 'Tăng tỷ lệ lấp đầy xe, giảm số chuyến phải chạy' },
-  { icon: Layers, text: 'Xếp ngược thứ tự giao — tới điểm nào lấy hàng điểm đó' },
-  { icon: Boxes, text: 'Kiểm soát tải trọng từng trục trước khi xe lăn bánh' },
-]
+  { icon: Gauge, textKey: 'auth.showcase.fillRate' },
+  { icon: Layers, textKey: 'auth.showcase.reverseOrder' },
+  { icon: Boxes, textKey: 'auth.showcase.axleLoad' },
+] as const
 
 /**
  * Đăng nhập. Đây là một trong số ít màn không có dữ liệu nghiệp vụ, nên được
  * phép dùng bố cục hai cột có hình minh hoạ — xem ngoại lệ ở CLAUDE.md mục 5.
  */
 export function LoginPage() {
+  const t = useT()
   const { user, signIn } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [serverError, setServerError] = useState<string | null>(null)
+  const [serverError, setServerError] = useState<ServerErrorKey | null>(null)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -52,9 +76,7 @@ export function LoginPage() {
       void navigate(from, { replace: true })
     } catch (error) {
       setServerError(
-        error instanceof AuthError
-          ? error.message
-          : 'Không kết nối được máy chủ. Thử lại sau.',
+        error instanceof AuthError ? AUTH_ERRORS[error.code] : 'auth.login.serverUnreachable',
       )
     }
   }
@@ -72,27 +94,25 @@ export function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <h1 className="text-h1 font-semibold tracking-[-0.01em]">Đăng nhập</h1>
-              <p className="text-body text-text-2">
-                Hệ thống lập kế hoạch và tối ưu chất xếp hàng hoá 3D.
-              </p>
+              <h1 className="text-h1 font-semibold tracking-[-0.01em]">{t('auth.login.title')}</h1>
+              <p className="text-body text-text-2">{t('auth.login.subtitle')}</p>
             </div>
           </div>
 
           <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <Input
-              label="Email"
+              label={t('auth.login.email')}
               type="email"
               autoComplete="username"
-              placeholder="ten@loadmaster.vn"
-              error={form.formState.errors.email?.message}
+              placeholder={t('auth.login.emailPlaceholder')}
+              error={translateFieldError(t, form.formState.errors.email?.message)}
               {...form.register('email')}
             />
             <Input
-              label="Mật khẩu"
+              label={t('auth.login.password')}
               type="password"
               autoComplete="current-password"
-              error={form.formState.errors.password?.message}
+              error={translateFieldError(t, form.formState.errors.password?.message)}
               {...form.register('password')}
             />
 
@@ -101,12 +121,12 @@ export function LoginPage() {
                 role="alert"
                 className="rounded-md border border-badge-danger-border bg-badge-danger-bg px-3 py-2 text-body text-badge-danger-fg"
               >
-                {serverError}
+                {t(serverError)}
               </p>
             ) : null}
 
             <Button type="submit" variant="primary" block loading={form.formState.isSubmitting}>
-              Đăng nhập
+              {t('auth.login.submit')}
             </Button>
           </form>
 
@@ -127,13 +147,13 @@ export function LoginPage() {
 
           <div className="flex flex-col gap-5">
             <p className="max-w-160 text-h1 leading-9 font-semibold text-pretty text-white">
-              Mỗi chuyến xe chở được nhiều hơn, và dỡ hàng đúng thứ tự.
+              {t('auth.showcase.tagline')}
             </p>
             <ul className="m-0 flex list-none flex-col gap-3 p-0">
-              {HIGHLIGHTS.map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-start gap-3 text-body-lg text-white/75">
+              {HIGHLIGHTS.map(({ icon: Icon, textKey }) => (
+                <li key={textKey} className="flex items-start gap-3 text-body-lg text-white/75">
                   <Icon className="mt-0.5 size-5 flex-none text-white/50" strokeWidth={1.5} aria-hidden />
-                  {text}
+                  {t(textKey)}
                 </li>
               ))}
             </ul>

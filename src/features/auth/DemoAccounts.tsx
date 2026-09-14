@@ -1,4 +1,4 @@
-import { ROLE_LABELS } from '@/types/user'
+import { useT } from '@/lib/i18n'
 import { DEMO_HINTS, DEMO_PASSWORD } from './auth.mock'
 
 /**
@@ -10,12 +10,14 @@ export function DemoAccounts({
 }: {
   onPick: (email: string, password: string) => void
 }) {
+  const t = useT()
+
   return (
     <div className="flex flex-col gap-2 rounded-md border border-dashed border-switch-off bg-surface p-4">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-caption font-medium text-text-2">Tài khoản dùng thử</span>
+        <span className="text-caption font-medium text-text-2">{t('auth.demo.title')}</span>
         <span className="font-mono text-caption text-text-3">
-          mật khẩu {DEMO_PASSWORD}
+          {t('auth.demo.password', { password: DEMO_PASSWORD })}
         </span>
       </div>
 
@@ -28,7 +30,7 @@ export function DemoAccounts({
               className="flex w-full items-baseline justify-between gap-3 rounded-sm px-2 py-1.5 text-left transition-colors duration-(--dur-fast) ease-standard hover:bg-bg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <span className="text-body font-medium text-text">
-                {ROLE_LABELS[hint.role]}
+                {t(`roles.${hint.role}`)}
               </span>
               <span className="truncate font-mono text-caption text-text-3">
                 {hint.email}
