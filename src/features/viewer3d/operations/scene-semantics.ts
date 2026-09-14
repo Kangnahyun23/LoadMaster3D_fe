@@ -1,5 +1,5 @@
 import type { Placement, VehicleSpec } from '@/types/load-plan'
-import { potentialBlockers } from './operations-model.ts'
+import { potentialBlockers } from './operations-model'
 
 export type CargoAppearance = {
   visibility: 'opaque' | 'dim' | 'hidden'

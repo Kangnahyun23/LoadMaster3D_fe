@@ -1,5 +1,5 @@
 import type { Placement, VehicleSpec } from '@/types/load-plan'
-import { findBelow, layerOf } from '../../../lib/placement.ts'
+import { findBelow, layerOf } from '@/lib/placement'
 
 /** Domain-mm distances; below/layer are guidance, not a support/stability solver. */
 export function placementMeasurements(p: Placement, placements: readonly Placement[], vehicle: VehicleSpec) {

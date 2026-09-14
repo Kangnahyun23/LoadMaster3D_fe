@@ -1,12 +1,11 @@
-import assert from 'node:assert/strict'
-import test from 'node:test'
-import { createBenchmarkPlan } from '../src/features/viewer3d/benchmark.mock.ts'
-import { adaptLoadPlan } from '../src/features/viewer3d/viewer-scene-model.ts'
-import { resolveEffectiveScene } from '../src/features/viewer3d/viewer-draft.ts'
-import { commitCommand, createDraftHistory, travelHistory } from '../src/features/viewer3d/editor/draft-history.ts'
-import { EDITOR_RULES, overlaps, supportCoverage, validatePlacement } from '../src/features/viewer3d/editor/geometry.ts'
-import { snapPosition } from '../src/features/viewer3d/editor/snapping.ts'
-import type { Placement } from '../src/types/load-plan.ts'
+import { expect, test } from 'vitest'
+import { createBenchmarkPlan } from '@/features/viewer3d/benchmark.mock'
+import { adaptLoadPlan } from '@/features/viewer3d/viewer-scene-model'
+import { resolveEffectiveScene } from '@/features/viewer3d/viewer-draft'
+import { commitCommand, createDraftHistory, travelHistory } from '@/features/viewer3d/editor/draft-history'
+import { EDITOR_RULES, overlaps, supportCoverage, validatePlacement } from '@/features/viewer3d/editor/geometry'
+import { snapPosition } from '@/features/viewer3d/editor/snapping'
+import type { Placement } from '@/types/load-plan'
 
 const plan = createBenchmarkPlan(1000)
 const vehicle = plan.vehicle
@@ -17,55 +16,55 @@ const box = (id: string, x = 0, y = 0, z = 0, extra: Partial<Placement> = {}): P
 
 test('touching faces are valid; even 1 mm penetration is a hard overlap', () => {
   const a = box('a'), b = box('b', 100)
-  assert.equal(overlaps(a, b), false)
-  assert.equal(validatePlacement(a, [a, b], vehicle).valid, true)
+  expect(overlaps(a, b)).toBe(false)
+  expect(validatePlacement(a, [a, b], vehicle).valid).toBe(true)
   b.position.x = 99
-  assert.deepEqual(validatePlacement(a, [a, b], vehicle).overlapIds, ['b'])
-  assert.equal(validatePlacement(a, [a, b], vehicle).valid, false)
+  expect(validatePlacement(a, [a, b], vehicle).overlapIds).toStrictEqual(['b'])
+  expect(validatePlacement(a, [a, b], vehicle).valid).toBe(false)
 })
 
 test('every container boundary, finite integer positions, and self exclusion', () => {
   for (const [x, y, z] of [[-1, 0, 0], [7101, 0, 0], [0, -1, 0], [0, 2251, 0], [0, 0, -1], [0, 0, 2301], [0.5, 0, 0], [NaN, 0, 0]]) {
-    assert.equal(validatePlacement(box('a', x, y, z), [], vehicle).valid, false)
+    expect(validatePlacement(box('a', x, y, z), [], vehicle).valid).toBe(false)
   }
   const a = box('a', 7100, 2250, 2300)
-  assert.equal(validatePlacement(a, [a], vehicle).valid, true)
+  expect(validatePlacement(a, [a], vehicle).valid).toBe(true)
 })
 
 test('support is the union of contacts, including partial and multiple surfaces', () => {
   const top = box('top', 0, 0, 100)
   const left = box('left', 0, 0, 0, { lengthMm: 60 })
   const right = box('right', 40, 0, 0, { lengthMm: 60 })
-  assert.equal(supportCoverage(top, [left, right]).ratio, 1, 'overlapping projected areas cannot exceed 100%')
-  assert.equal(supportCoverage(top, [box('partial', 0, 0, 0, { lengthMm: 43 })]).ratio, 0.43)
-  assert.equal(supportCoverage(box('floor'), []).ratio, 1)
-  assert.equal(supportCoverage(box('floating', 0, 0, 110), [left, right]).ratio, 0, '10 mm gap is not contact')
+  expect(supportCoverage(top, [left, right]).ratio, 'overlapping projected areas cannot exceed 100%').toBe(1)
+  expect(supportCoverage(top, [box('partial', 0, 0, 0, { lengthMm: 43 })]).ratio).toBe(0.43)
+  expect(supportCoverage(box('floor'), []).ratio).toBe(1)
+  expect(supportCoverage(box('floating', 0, 0, 110), [left, right]).ratio, '10 mm gap is not contact').toBe(0)
 })
 
 test('weak support, fragile loads and manual edits remain advisories', () => {
   const fragile = box('fragile', 0, 0, 0, { fragile: true })
   const top = box('top', 0, 0, 100)
   const onFragile = validatePlacement(top, [fragile], vehicle, true)
-  assert.equal(onFragile.valid, true)
-  assert.ok(onFragile.advisories.some((text) => text.includes('Đặt trên kiện dễ vỡ')))
-  assert.ok(onFragile.advisories.some((text) => text.includes('thủ công')))
-  assert.ok(validatePlacement(fragile, [top], vehicle).advisories.some((text) => text.includes('đỡ hàng')))
-  assert.equal(validatePlacement(box('floating', 0, 0, 500), [], vehicle).valid, true)
+  expect(onFragile.valid).toBe(true)
+  expect(onFragile.advisories.some((text) => text.includes('Đặt trên kiện dễ vỡ'))).toBeTruthy()
+  expect(onFragile.advisories.some((text) => text.includes('thủ công'))).toBeTruthy()
+  expect(validatePlacement(fragile, [top], vehicle).advisories.some((text) => text.includes('đỡ hàng'))).toBeTruthy()
+  expect(validatePlacement(box('floating', 0, 0, 500), [], vehicle).valid).toBe(true)
 })
 
 test('snapping chooses floor/walls/grid/cargo faces in integer mm with fixed axes', () => {
   const p = box('a')
-  assert.deepEqual(snapPosition(p, { x: 8, y: 2258, z: 12 }, [], vehicle).position, { x: 0, y: 2250, z: 0 })
-  assert.deepEqual(snapPosition(p, { x: 151.4, y: 500, z: 0 }, [], vehicle).position, { x: 150, y: 500, z: 0 })
+  expect(snapPosition(p, { x: 8, y: 2258, z: 12 }, [], vehicle).position).toStrictEqual({ x: 0, y: 2250, z: 0 })
+  expect(snapPosition(p, { x: 151.4, y: 500, z: 0 }, [], vehicle).position).toStrictEqual({ x: 150, y: 500, z: 0 })
   const neighbor = box('b', 267, 0, 0)
   const snapped = snapPosition(p, { x: 172, y: 0, z: 0 }, [neighbor], vehicle)
-  assert.equal(snapped.position.x, 167)
-  assert.ok(snapped.sources.some((s) => s.includes('Mặt kiện b')))
-  assert.equal(overlaps({ ...p, position: snapped.position }, neighbor), false)
-  assert.equal(snapPosition(p, { x: 172, y: 700, z: 0 }, [neighbor], vehicle).position.x, 172, 'remote face does not attract')
-  assert.equal(snapPosition(p, { x: 8, y: 8, z: 12 }, [], vehicle, ['x', 'y']).position.z, 12)
+  expect(snapped.position.x).toBe(167)
+  expect(snapped.sources.some((s) => s.includes('Mặt kiện b'))).toBeTruthy()
+  expect(overlaps({ ...p, position: snapped.position }, neighbor)).toBe(false)
+  expect(snapPosition(p, { x: 172, y: 700, z: 0 }, [neighbor], vehicle).position.x, 'remote face does not attract').toBe(172)
+  expect(snapPosition(p, { x: 8, y: 8, z: 12 }, [], vehicle, ['x', 'y']).position.z).toBe(12)
   const first = snapPosition(p, { x: 172.2, y: 0, z: 0 }, [neighbor], vehicle)
-  assert.deepEqual(snapPosition(p, first.position, [neighbor], vehicle).position, first.position, 'no conversion drift')
+  expect(snapPosition(p, first.position, [neighbor], vehicle).position, 'no conversion drift').toStrictEqual(first.position)
 })
 
 test('mixed history commands undo/redo exact patches without mutating 1,000-placement snapshot', () => {
@@ -79,33 +78,33 @@ test('mixed history commands undo/redo exact patches without mutating 1,000-plac
   h = commitCommand(model, h, 'UNPIN', id, { pinned: false })
   const edited = h.draft
   h = commitCommand(model, h, 'RESET_PLACEMENT', id)
-  assert.equal(h.draft.patches.size, 0)
+  expect(h.draft.patches.size).toBe(0)
   h = travelHistory(h, 'undo')
-  assert.deepEqual(h.draft, edited)
+  expect(h.draft).toStrictEqual(edited)
   h = commitCommand(model, h, 'MOVE', model.placements[2]!.id, { position: { x: 35, y: 500, z: 0 } })
-  assert.equal(h.future.length, 0)
+  expect(h.future.length).toBe(0)
   const twoEdits = h.draft
   h = commitCommand(model, h, 'RESET_DRAFT')
-  assert.equal(h.draft.patches.size, 0)
+  expect(h.draft.patches.size).toBe(0)
   h = travelHistory(h, 'undo')
-  assert.deepEqual(h.draft, twoEdits)
+  expect(h.draft).toStrictEqual(twoEdits)
   h = travelHistory(h, 'redo')
-  assert.equal(h.draft.patches.size, 0)
-  assert.equal(resolveEffectiveScene(model, h.draft).placements[999], model.placements[999])
-  assert.deepEqual(plan, before)
+  expect(h.draft.patches.size).toBe(0)
+  expect(resolveEffectiveScene(model, h.draft).placements[999]).toBe(model.placements[999])
+  expect(plan).toStrictEqual(before)
 })
 
 test('history ignores no-ops, branches after undo, and stays bounded', () => {
   const model = adaptLoadPlan(plan), id = model.placements[0]!.id
   let h = createDraftHistory()
-  assert.equal(commitCommand(model, h, 'RESET_DRAFT'), h)
-  assert.equal(commitCommand(model, h, 'MOVE', 'missing', { pinned: true }), h)
+  expect(commitCommand(model, h, 'RESET_DRAFT')).toBe(h)
+  expect(commitCommand(model, h, 'MOVE', 'missing', { pinned: true })).toBe(h)
   for (let i = 0; i < EDITOR_RULES.historyLimit + 5; i++) h = commitCommand(model, h, 'MOVE', id, { position: { x: i, y: 0, z: 0 } })
-  assert.equal(h.past.length, EDITOR_RULES.historyLimit)
-  assert.equal(h.past.at(-1)!.changes.length, 1)
+  expect(h.past.length).toBe(EDITOR_RULES.historyLimit)
+  expect(h.past.at(-1)!.changes.length).toBe(1)
   h = travelHistory(h, 'undo')
   h = commitCommand(model, h, 'PIN', id, { pinned: true })
-  assert.equal(h.future.length, 0)
+  expect(h.future.length).toBe(0)
 })
 
 test('measure scan + snapping at each benchmark count (no hardware-dependent assertion)', () => {

@@ -1,5 +1,5 @@
 import type { Placement, PositionMm, VehicleSpec } from '@/types/load-plan'
-import { AXES, EDITOR_RULES, extent, integerPosition, limit, type Axis } from './geometry.ts'
+import { AXES, EDITOR_RULES, extent, integerPosition, limit, type Axis } from './geometry'
 export type SnapTarget = { axis: Axis; coordinateMm: number; source: string; placementId?: string }
 
 /** All thresholds and face distances are mm. Fixed axes stay fixed during a gesture. */

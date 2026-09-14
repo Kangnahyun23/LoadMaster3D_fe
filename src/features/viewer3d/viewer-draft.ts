@@ -1,5 +1,5 @@
 import type { Orientation, Placement, PositionMm } from '@/types/load-plan'
-import { orientDimensions, type ViewerSceneModel } from './viewer-scene-model.ts'
+import { orientDimensions, type ViewerSceneModel } from './viewer-scene-model'
 
 export type PlacementPatch = {
   readonly position?: PositionMm

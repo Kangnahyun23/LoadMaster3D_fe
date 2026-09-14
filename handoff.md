@@ -168,7 +168,7 @@ Raw data: [benchmark cuối](docs/benchmarks/viewer-scene-first-2026-09-14.json)
 ```powershell
 pnpm lint
 pnpm build
-node --experimental-strip-types --test tests/*.test.ts
+pnpm test            # Vitest: project unit (tests/**/*.test.ts, src/**/*.test.ts) + dom (src/**/*.dom.test.tsx); từ 14/09/2026 thay cho node --test
 # Browser cần dev server và Playwright/Chromium có sẵn; không tự thêm dependency.
 $env:PLAYWRIGHT_MODULE = '<đường dẫn module playwright đã cài>'
 $env:CHROMIUM_EXECUTABLE = '<đường dẫn Chromium tương thích>'

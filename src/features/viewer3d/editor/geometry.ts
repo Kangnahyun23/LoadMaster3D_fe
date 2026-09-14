@@ -1,5 +1,5 @@
 import type { Placement, PositionMm, VehicleSpec } from '@/types/load-plan'
-import { formatRatioAsPercent } from '../../../lib/format.ts'
+import { formatRatioAsPercent } from '@/lib/format'
 
 export type Axis = keyof PositionMm
 export const AXES: readonly Axis[] = ['x', 'y', 'z']

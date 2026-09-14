@@ -1,5 +1,5 @@
 import type { Placement, VehicleSpec } from '@/types/load-plan'
-import { stopDistribution } from './operations-model.ts'
+import { stopDistribution } from './operations-model'
 
 /** Three-space millimetres: X along length, Y up, Z across width.
  * A 100 mm lane inset inside the floor; never vehicle/chassis geometry.
