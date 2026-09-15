@@ -126,6 +126,25 @@ export const en = {
     measurements: {
       summary: '{rear} from the door · {left} from the left wall · Layer {layer}',
     },
+    obstacles: {
+      types: {
+        WHEEL_ARCH: 'Wheel arch',
+        COOLING_UNIT: 'Cooling unit',
+        PARTITION: 'Partition',
+        RESERVED_ZONE: 'Reserved zone',
+      },
+      corner: 'Corner at X {x} · Y {y} · Z {z}',
+      notBearing: 'Not load bearing',
+      bearing: 'Load bearing',
+      bearingMax: 'Load bearing up to {maxLoad}',
+      listLabel: 'Obstacles in the cargo space',
+      description: '{type} {id}: {corner}, size {size}, {bearing}.',
+      legendTitle: 'Obstacles',
+      legendNotBearing: 'Obstacle, not load bearing',
+      legendBearing: 'Load-bearing obstacle',
+      legendReserved: 'Reserved zone: hatched, see-through',
+      legendHint: 'Click an obstacle to see its size and load bearing.',
+    },
     unplacedReasons: {
       NO_SPACE: 'No free space fits the package',
       OVER_PAYLOAD: 'Exceeds the vehicle max payload',

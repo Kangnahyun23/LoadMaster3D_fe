@@ -136,6 +136,26 @@ export const vi = {
     measurements: {
       summary: 'Cách cửa {rear} · vách trái {left} · Lớp {layer}',
     },
+    /** Vật cản trong thùng (LM-033). */
+    obstacles: {
+      types: {
+        WHEEL_ARCH: 'Hốc bánh xe',
+        COOLING_UNIT: 'Dàn lạnh',
+        PARTITION: 'Vách ngăn',
+        RESERVED_ZONE: 'Vùng dành riêng',
+      },
+      corner: 'Góc tại X {x} · Y {y} · Z {z}',
+      notBearing: 'Không chịu tải',
+      bearing: 'Chịu tải',
+      bearingMax: 'Chịu tải tối đa {maxLoad}',
+      listLabel: 'Vật cản trong thùng',
+      description: '{type} {id}: {corner}, kích thước {size}, {bearing}.',
+      legendTitle: 'Vật cản',
+      legendNotBearing: 'Vật cản không chịu tải',
+      legendBearing: 'Vật cản chịu tải',
+      legendReserved: 'Vùng dành riêng: có vạch, nhìn xuyên được',
+      legendHint: 'Bấm vào vật cản để xem kích thước và khả năng chịu tải.',
+    },
     /** Mã `UnplacedPackage.reasonCode` của Spec. */
     unplacedReasons: {
       NO_SPACE: 'Không còn chỗ trống vừa kiện',

@@ -9,6 +9,7 @@ import { SelectedPackagePanel } from './SelectedPackagePanel'
 import { PackageListPanel } from './PackageListPanel'
 import { SlicePanel } from '../overlays/SlicePanel'
 import { StopLegend } from '../overlays/StopLegend'
+import { ObstacleLegend } from '../overlays/ObstacleLegend'
 import { COLOR_MODES } from '../viewer-options'
 import type { ColorContext } from '../colors'
 import type { InspectorTab } from './WorkspaceToolbar'
@@ -54,6 +55,7 @@ export function SceneInspector({ state, operations, tripId, colorContext, onEdit
           <SegmentedControl ariaLabel="Chế độ tô màu" options={COLOR_MODES} value={state.colorMode} onChange={state.setColorMode}
             className="flex-col [&_button]:min-h-14 [&_button]:text-body-lg xl:[&_button]:min-h-11 xl:[&_button]:text-body" floating={false} />
           <StopLegend stops={[...state.sceneModel.stops]} colorMode={state.colorMode} colorContext={colorContext} />
+          <ObstacleLegend obstacles={state.sceneModel.vehicle.obstacles} />
           <SlicePanel sliceCm={state.sliceCm} maxCm={state.sceneModel.vehicle.innerLengthCm} onChange={state.setSliceCm} />
           <p>Space: phát/dừng · ←/→: từng bước · Esc: thoát tập trung. Kéo mô hình để xoay, chụm hai ngón để phóng to.</p>
         </div> : null}

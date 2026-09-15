@@ -65,6 +65,11 @@
   --panel-dark: #1e2228;
   --border-dark: #2d323b;
 
+  /* vật cản trong thùng (hốc bánh, dàn lạnh, vách ngăn, vùng dành riêng) trên canvas tối —
+     xám lam, không trùng tám màu điểm giao; nhạt hơn khi vật cản chịu tải (LM-033) */
+  --obstacle: #64748b;
+  --obstacle-bearing: #a3b1c2;
+
   /* màu định danh điểm giao, an toàn cho người mù màu */
   --stop-1: #e69f00;
   --stop-2: #56b4e9;

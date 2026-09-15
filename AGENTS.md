@@ -182,6 +182,10 @@ Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-tex
   --panel-dark: #1E2228;
   --border-dark: #2D323B;
 
+  /* vật cản trong thùng trên canvas tối (LM-033), không trùng màu điểm giao */
+  --obstacle: #64748B;          /* không chịu tải */
+  --obstacle-bearing: #A3B1C2;  /* chịu tải */
+
   /* màu định danh điểm giao, an toàn cho người mù màu (Okabe–Ito) */
   --stop-1: #E69F00;  --stop-2: #56B4E9;  --stop-3: #009E73;  --stop-4: #F0E442;
   --stop-5: #0072B2;  --stop-6: #D55E00;  --stop-7: #CC79A7;  --stop-8: #555555;
@@ -376,6 +380,7 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
 
 - Toàn bộ code Three.js nằm trong `src/features/viewer3d`. Không import `three` ở nơi khác. Màn khác cần 3D thì import component từ `viewer3d` (ví dụ `PositionViewer` cho màn kho).
 - Kiện hàng render bằng **InstancedMesh** với `setColorAt`, không tạo mesh riêng từng kiện. Tối đa 3 InstancedMesh cargo: solid, ghost và vỏ viền. Tier low tắt viền chung nhưng giữ viền cảnh báo khi có blocker. Mapping `instanceId ↔ placementId` nằm trong `scene/instance-layout.ts`, không lấy index của danh sách UI để picking. Editor và animation dỡ mỗi loại dùng tối đa một proxy tạm; bánh xe dùng instancing riêng, không nhân theo cargo count.
+- *(bổ sung, LM-033)* Vật cản `vehicle.obstacles` vẽ trong `scene/ObstacleInstances.tsx`: đúng 2 draw call dù 1 hay 20 vật cản (một InstancedMesh thân màu `--obstacle`/`--obstacle-bearing` theo `loadBearing` + một `LineSegments` gộp cạnh), 0 vật cản không vẽ gì, không đổ bóng. `RESERVED_ZONE` có vạch nhìn xuyên bằng thuộc tính instance + `discard` trong shader, không thêm vật liệu trong suốt. Bấm vật cản ở chế độ Xem mở `ObstacleCallout`; chế độ Chỉnh sửa tắt raycast vật cản. `SceneCanvas` kèm danh sách `sr-only` mô tả vật cản; chú giải vật cản nằm dưới chú giải điểm giao. Đo bằng `?debug&packages=N&obstacles=0|1|20` (`benchmark-obstacles.mock.ts`).
 - Nền Canvas luôn tối, kể cả khi phần còn lại của app sáng.
 - Target chức năng/performance là 1.000 placements với draw calls dưới 100, số mesh/nhãn không tăng tuyến tính theo cargo. Đã kiểm tra selection, editor, playback và các vai trò trên Chromium; mục tiêu thiết bị thật: desktop hướng tới 60 FPS, tablet 45–60 FPS, phone khoảng ≥30 FPS bằng quality adaptation. Số đo SwiftShader không phải cam kết FPS trên thiết bị thật. Thêm `?debug` để đo trước khi thêm hiệu ứng.
 - Mọi hiệu ứng nâng cao (post-processing, shadow, AO) phải có cờ tắt được trong `usePerformanceFlags`. Ba tier `high / balanced / low` điều khiển DPR, bóng, viền chung, trang trí, bề mặt cargo và animation; viền kiện đang chọn luôn được giữ. Runtime bỏ qua idle, hạ tier sau 3 mẫu chậm (>28 ms), nâng sau 8 mẫu nhanh (<18 ms), cooldown 12 giây. Debug quality override khóa tier để đo lặp lại.
@@ -422,7 +427,7 @@ Các mục "Foundation engine", "Manual editor", "Operations" phía trên mô t�
 - Engine nhận view model dựng từ `OptimizationResult` + `CargoPackage` + chuyến (LM-030),
   đơn vị cm, `SCENE_SCALE = 0.01` chỉ trong `scene/units.ts` (LM-031).
 - 6 hướng đặt `LWH … HWL`; xoay chỉ vòng qua `allowedOrientations`, tôn trọng `keepUpright` (LM-032).
-- Vật cản vẽ bằng số draw call cố định (tối đa 2), màu token riêng, không raycast khi kéo kiện (LM-033).
+- Vật cản vẽ bằng số draw call cố định (tối đa 2), màu token riêng, không raycast khi kéo kiện (LM-033 — đã làm, xem mục 7 đầu).
 - Editor: nudge 1/5/10 cm, lưới 5 cm, snap 2 cm, commit qua `roundCm` (LM-034). Mỗi lần thả/xoay
   chạy constraint engine của `src/domain`; lỗi chặn commit, cảnh báo vẫn commit (LM-035).
   Ngân sách: constraint engine 1.000 kiện p95 ≤ 50 ms, một lần thả p95 ≤ 8 ms (D-29).
