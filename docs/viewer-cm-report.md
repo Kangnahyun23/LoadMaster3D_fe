@@ -35,11 +35,14 @@ Draw call lúc nghỉ (không vật cản):
 - Một lần kiểm khi thả ở 1.000 kiện (đồng bộ + constraint engine) trong trình duyệt: trung vị ≈ 1 ms, p95 ≈ 2 ms, lớn nhất 6,3 ms —
   trong ngân sách 8 ms của D-29 (đồng hồ trình duyệt làm tròn ~0,1 ms). Node: p95 ≈ 2,7 ms kể cả snap.
 
+## Nợ đã trả sau báo cáo phase
+
+- Bộ ảnh cm [screenshots/viewer-cm/](screenshots/viewer-cm/): cùng tỷ lệ, cùng góc với `scene-first/`; khác do dữ liệu seed.
+- Xe seed HD210 có hai hốc bánh, Planner mặc định thấy vật cản; seed vẫn xếp đủ 132/132.
+- React commit khi kéo: 31–34 commit trong ~3,2 s cho 60 lần di chuyển (nhịp 100 ms), E2E `viewer-editor-renders.spec.ts`; đỏ khi bỏ giới hạn.
+
 ## Rủi ro còn lại
 
-- Chưa chụp lại bộ ảnh `docs/screenshots/scene-first/` với dữ liệu seed cm (tiêu chí ảnh của LM-031): so tỷ lệ bằng mắt vẫn còn nợ.
-- Seed Planner không có vật cản; vật cản chỉ thấy trên route benchmark `?debug&obstacles=1|20`. Phase 3 (đội xe) thêm xe có hốc bánh.
-- Seed không có ca LIFO; fixture benchmark cố ý đổi điểm giao của hai kiện để có đúng một ca `LIFO_BLOCKED`.
-- Chưa đo React Profiler cho "không cập nhật state mỗi pointer frame" (LM-035); cơ chế preview imperative không đổi so với trước.
+- Seed đã duyệt không có ca LIFO — đúng mong đợi với phương án hợp lệ; ca `LIFO_BLOCKED` nằm ở fixture benchmark (cố ý đổi điểm giao của hai kiện).
 - `engineInput` của scene giữ tham chiếu request/result của revision (kho đã sao chép khi đọc) — không đóng băng sâu.
 - Số FPS SwiftShader không phải cam kết thiết bị thật.

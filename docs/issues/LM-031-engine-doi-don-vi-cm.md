@@ -25,7 +25,7 @@ Rủi ro lớn nhất của tích hợp: nhầm hệ số 10 âm thầm. Chỉ `
 
 ## Tiêu chí nghiệm thu
 
-- [ ] Ảnh chụp Planner mặc định, focus điểm giao, dỡ hàng khớp bộ ảnh `docs/screenshots/scene-first/` về tỷ lệ (sai lệch chỉ do dữ liệu seed khác).
+- [x] Ảnh chụp Planner mặc định, focus điểm giao, dỡ hàng khớp bộ ảnh `docs/screenshots/scene-first/` về tỷ lệ (sai lệch chỉ do dữ liệu seed khác).
 - [x] `?debug&packages=1000&quality=low`: draw call vẫn 16, không tăng theo số kiện.
 - [x] Test đơn vị: thùng 600 × 240 × 250 cm → kích thước scene 6 × 2,5 × 2,4.
 
@@ -37,4 +37,4 @@ Rủi ro lớn nhất của tích hợp: nhầm hệ số 10 âm thầm. Chỉ `
 - Kho/tài xế vẫn `LoadPlan` mm; viewer của chúng qua `adaptLoadPlan`. Quan hệ trên/dưới cm tách ra [panels/placement-relations.ts](../../src/features/viewer3d/panels/placement-relations.ts) (bản mm `lib/placement.ts` còn cho kho).
 - Test: 4 file `tests/viewer-*.test.ts` viết lại theo cm (helper [src/test/scene.ts](../../src/test/scene.ts): `benchmarkScene`, `seedScene`, `sceneBox`); test 6 × 6 cặp hướng thay test 9 cặp 0/1/2. E2E đổi toạ độ/kéo sang cm, mã `-01`, dữ liệu seed đọc qua `SOURCE_MODULES.scene`.
 - Rà `mm`/`/ 1000`/`* 0.001` trong engine: không còn (`length / 1000` trong stop-map là tỉ lệ, không phải đổi đơn vị).
-- Ảnh so bộ `docs/screenshots/scene-first/` và số draw call để ở LM-038.
+- Ảnh: bộ mới [docs/screenshots/viewer-cm/](../screenshots/viewer-cm/) chụp bằng `E2E_SCREENSHOT_DIR=docs/screenshots/viewer-cm pnpm test:e2e e2e/viewer-scene-first-ui.spec.ts`. So với `scene-first/`: xe, thùng và kiện cùng tỷ lệ, cùng góc camera; khác do dữ liệu seed (lấp đầy 40,8% thay vì 87,4%, có hai hốc bánh). Draw call ghi ở LM-038.
