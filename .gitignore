@@ -29,3 +29,8 @@ yarn.lock
 
 # thư mục dist build
 dist
+
+# kết quả Playwright (pnpm test:e2e)
+test-results/
+playwright-report/
+blob-report/

@@ -1,12 +1,12 @@
-import { createRequire } from 'node:module'
+// Benchmark chạy tay, không nằm trong `pnpm test:e2e` hay CI (AGENTS mục 7: SwiftShader không đại diện thiết bị thật).
+// Cần dev server đang chạy riêng: `pnpm dev --host 127.0.0.1 --port 5175 --strictPort`, rồi
+// `node tests/viewer-benchmark.mjs [--low-only]`. Đổi địa chỉ server bằng VIEWER_TEST_URL nếu cần.
+import { chromium } from '@playwright/test'
 import { mkdir, writeFile } from 'node:fs/promises'
-import { cameraPreset, metrics, sceneSnapshot, waitIdle } from './viewer-browser-helpers.mjs'
 import assert from 'node:assert/strict'
-const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE ?? 'playwright')
 const output = 'node_modules/.tmp/viewer-final'
 await mkdir(output, { recursive: true })
-const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_EXECUTABLE, headless: true,
-  args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
+const browser = await chromium.launch({ headless: true, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
 const context = await browser.newContext({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 })
 const page = await context.newPage()
 const origin = process.env.VIEWER_TEST_URL ?? 'http://127.0.0.1:5175'
@@ -14,7 +14,28 @@ const route = origin + '/chuyen/TRIP-2026-0914/phuong-an'
 const errors = [], report = { renderer: 'Chromium SwiftShader; emulated desktop 1600×1000; not a physical-device benchmark', samples: [] }
 const lowOnly = process.argv.includes('--low-only')
 page.on('pageerror', (e) => errors.push(e.message))
+
+// Bản rút gọn của e2e/viewer-helpers.ts, giữ nguyên dạng số đo đã lưu trong docs/benchmarks.
+async function sceneSnapshot(p) {
+  return p.evaluate(async () => {
+    const { _roots } = await import('/node_modules/.vite/deps/@react-three_fiber.js')
+    const s = _roots.get(document.querySelector('canvas')).store.getState()
+    const proxy = s.scene.getObjectByName('editor-proxy'), instances = []
+    let meshes = 0
+    s.scene.traverse((o) => {
+      if (o.isInstancedMesh) instances.push({ name: o.name, count: o.count })
+      if (o.isMesh && !o.isInstancedMesh) meshes++
+    })
+    const target = s.controls.getTarget(s.camera.position.clone())
+    return { instances, meshes, proxy: proxy?.position.toArray(), target: target.toArray(),
+      direction: s.camera.position.clone().sub(target).normalize().toArray(),
+      eventsEnabled: s.events.enabled, controlsEnabled: s.controls.enabled }
+  })
+}
+const metrics = (p) => p.locator('[data-viewer-performance]').evaluate((el) => ({ ...el.dataset }))
+const waitIdle = (p) => p.waitForFunction(() => document.querySelector('[data-viewer-performance]')?.dataset.idle === 'true')
 async function settle() { await page.waitForTimeout(700); await waitIdle(page) }
+
 try {
   await page.goto(route + '?debug&packages=132&quality=low')
   await page.getByLabel('Email', { exact: true }).fill('dieuphoi@loadmaster.vn')
@@ -45,7 +66,7 @@ try {
   } else {
   await page.goto(route + '?debug&quality=high'); await settle()
   await page.screenshot({ path: `${output}/planner-overview.png` })
-  await cameraPreset(page, 'Trước'); await settle()
+  await page.getByRole('combobox', { name: 'Góc nhìn', exact: true }).selectOption('truoc'); await settle()
   const r = await page.locator('canvas').boundingBox()
   await page.mouse.move(r.x + 45, r.y + r.height / 2); await page.mouse.down()
   await page.mouse.move(r.x + 165, r.y + r.height / 2, { steps: 15 }); await page.mouse.up(); await settle()
