@@ -1,4 +1,7 @@
-@import 'tailwindcss';
+/* Chỉ quét class trong `src/` (thư mục của file này). Mặc định Tailwind quét cả gốc repo —
+   gồm AGENTS.md, docs/, design/ và .claude/worktrees/ — rồi bắt trình duyệt tải lại toàn trang mỗi
+   khi một file ngoài app đổi, làm mất state đang dùng và làm E2E đỏ ngẫu nhiên. */
+@import 'tailwindcss' source('.');
 
 /* ---------------------------------------------------------------------------
    Design tokens — nguồn sự thật duy nhất cho màu, khoảng cách, bo góc.

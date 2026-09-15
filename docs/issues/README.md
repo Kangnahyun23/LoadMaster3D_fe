@@ -76,6 +76,7 @@ Mỗi issue là một file `LM-0xx-ten-ngan.md` với frontmatter:
 | [LM-036](LM-036-timeline-thu-tu-service-lifo.md) | Timeline theo thứ tự service, LIFO | 1d | 020, 030 |
 | [LM-037](LM-037-tai-truc-se-co-sau.md) | Tải trục "Sẽ có sau" | 0,5d | 030 |
 | [LM-038](LM-038-e2e-3d-sang-cm-hieu-nang.md) | E2E 3D sang cm, hồi quy hiệu năng | 1d | 005, 031–037 |
+| [LM-056](LM-056-camera-giam-chuyen-dong-khong-ve-lai.md) | Bug: camera không vẽ lại khi giảm chuyển động *(mở 15/09/2026)* | 0,5d | 005 |
 
 ### Phase 3 — Màn luồng Spec (~16,5 ngày)
 

@@ -229,6 +229,12 @@ tailwind-merge đã khai báo các cỡ chữ của `@theme` (`display`, `h1`, `
 `caption`). Thiếu khai báo thì tailwind-merge coi `text-body` là màu chữ và **bỏ mất `text-white`**
 của nút. Thêm token `--text-*` mới vào `@theme` thì phải thêm tên vào `THEME_FONT_SIZES`.
 
+**Nguồn quét class của Tailwind** *(bổ sung 15/09/2026, LM-005)*: `src/index.css` khai báo
+`@import 'tailwindcss' source('.')` — chỉ quét `src/`. Không bỏ `source('.')`: mặc định Tailwind v4 quét
+cả gốc repo (`AGENTS.md`, `docs/`, `design/`, `.claude/worktrees/`) và **tải lại toàn trang** dev server
+mỗi khi một file ngoài app đổi, làm mất state và làm E2E đỏ ngẫu nhiên. Class chỉ được sinh từ code
+trong `src/`; muốn dùng class từ nơi khác thì thêm `@source` tường minh.
+
 ## 5. Luật thành phần
 
 ### Nút
@@ -497,7 +503,12 @@ Màn nào còn giữ dữ liệu ở `useState` (Đội xe, Người dùng) thì
 - Logic domain làm theo TDD: một test đỏ → cài đặt tối thiểu → xanh, rồi mới sang test sau.
   Giá trị kỳ vọng lấy từ nguồn độc lập (literal trong Spec, số đã kiểm bằng máy), không tính lại
   theo cách code tính.
-- Benchmark domain: `pnpm test:bench` (file `*.bench.ts`). E2E: `pnpm test:e2e` sau LM-005.
+- Benchmark domain: `pnpm test:bench` (file `*.bench.ts`). Vitest 5 lấy `bench` từ context của
+  `test` (`test(name, async ({ bench }) => …)`), không còn `import { bench } from 'vitest'`.
+- E2E: `pnpm test:e2e` (Playwright, `e2e/*.spec.ts`, project `desktop`/`tablet`/`phone` theo tag
+  `@tablet`/`@phone`). Tự bật Vite ở `127.0.0.1:5175`; cổng đang do checkout khác giữ thì đặt
+  `E2E_PORT`. Trước khi so tư thế camera phải chờ camera đã vẽ xong (`waitCameraSettled`) —
+  overlay debug có thể báo nghỉ sớm. CI: `.github/workflows/ci.yml` (LM-006).
 
 ### Chia chunk theo route
 

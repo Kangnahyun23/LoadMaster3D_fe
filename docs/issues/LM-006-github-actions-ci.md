@@ -12,12 +12,23 @@ prd: [D-39]
 
 ## Việc cần làm
 
-- [ ] `.github/workflows/ci.yml` chạy trên push và pull request vào `main`, `feat/**`.
-- [ ] Node 22, pnpm 11.2.2, cache store pnpm, `pnpm install --frozen-lockfile`.
-- [ ] Job `lint` (`pnpm lint`), `typecheck` (`tsc -b`), `unit` (`pnpm test`, gồm benchmark domain có ngưỡng ở LM-023), `build` (`pnpm build`, upload `dist`), `e2e` (cài Chromium, `pnpm test:e2e`, upload report khi lỗi).
-- [ ] Không chạy benchmark FPS 3D trên CI (SwiftShader không đại diện thiết bị thật, AGENTS mục 7).
+- [x] `.github/workflows/ci.yml` chạy trên push và pull request vào `main`, `feat/**`.
+- [x] Node 22, pnpm 11.2.2, cache store pnpm, `pnpm install --frozen-lockfile`.
+- [x] Job `lint` (`pnpm lint`), `typecheck` (`tsc -b`), `unit` (`pnpm test`), `build` (`pnpm build`, upload `dist`), `e2e` (cài Chromium, `pnpm test:e2e`, upload report khi lỗi). Ngưỡng benchmark domain sẽ thêm vào job `unit` ở LM-023.
+- [x] Không chạy benchmark FPS 3D trên CI (SwiftShader không đại diện thiết bị thật, AGENTS mục 7).
 
 ## Tiêu chí nghiệm thu
 
-- [ ] Pull request thử trên `feat/spec-mvp` hiện đủ 5 check xanh.
-- [ ] Cố ý làm hỏng một test thì đúng job đó đỏ.
+- [ ] Pull request thử trên `feat/spec-mvp` hiện đủ 5 check xanh. **Chờ push** — cần người dùng đồng ý đẩy nhánh lên `origin` (`github.com/Kangnahyun23/LoadMaster3D_fe`).
+- [ ] Cố ý làm hỏng một test thì đúng job đó đỏ. **Chờ push.**
+
+## Kết quả — 15/09/2026
+
+- [.github/workflows/ci.yml](../../.github/workflows/ci.yml): 5 job `lint`, `typecheck`, `unit`, `build`, `e2e` trên `ubuntu-latest`.
+  - `pnpm/action-setup@v4` đọc phiên bản pnpm từ `packageManager` (11.2.2); `actions/setup-node@v4` Node 22 với `cache: pnpm`.
+  - `typecheck` chạy `pnpm exec tsc -b` — kiểm cả app, config Vite/Vitest/Playwright, `e2e/` và các file `*.test-d.ts`.
+  - `build` upload `dist` (giữ 7 ngày).
+  - `e2e` chạy sau `lint` + `typecheck`, cài `pnpm exec playwright install --with-deps chromium` (đúng phiên bản `@playwright/test` trong lockfile), `CI=true` nên Playwright bật server Vite mới, retries 1, `forbidOnly`; upload `playwright-report` + `test-results` khi lỗi; timeout job 45 phút.
+  - `concurrency` huỷ lượt cũ cùng nhánh; `permissions: contents: read`.
+- Chưa kiểm được cú pháp YAML tại máy (không có Python hay thư viện YAML trong `node_modules`, không cài thêm công cụ). Kiểm thật khi push lần đầu.
+- Khác máy dev: runner Linux không cần `E2E_PORT`; Chromium Linux headless vẫn dùng SwiftShader nên các test đo frame/idle giữ nguyên ngưỡng.

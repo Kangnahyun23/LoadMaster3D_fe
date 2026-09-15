@@ -34,3 +34,6 @@ dist
 test-results/
 playwright-report/
 blob-report/
+
+# git worktree tạm của agent chạy song song (xem AGENTS.md mục 12)
+.claude/worktrees/
