@@ -16,14 +16,14 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 12 / 19 | ~18,5 ngày | 🟦 Đang làm |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 13 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **18 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **19 / 57 issue** | **~56 ngày công** | |
 
-**Phase 1 đang làm (15/09/2026).** Đã có LM-010 → LM-018, LM-021, LM-027, LM-028. Đang làm: LM-019 (tự làm), LM-020 (agent). Sau đó LM-022 → LM-023 → LM-024 → LM-025, LM-026.
+**Phase 1 đang làm (15/09/2026).** Đã có LM-010 → LM-019, LM-021, LM-027, LM-028. Đang làm: LM-020 (agent). Sau đó LM-022 → LM-023 → LM-024 → LM-025, LM-026.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
@@ -31,7 +31,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
-### 15/09/2026 — Phase 1: benchmark LM-016, LM-021 metrics và trọng tâm, LM-028 câu thông báo vi/en, gộp LM-018 và LM-017
+### 15/09/2026 — Phase 1: benchmark LM-016, LM-021, LM-028, gộp LM-018 và LM-017, LM-019 tải xếp chồng
 
 **Đã làm**
 
@@ -42,6 +42,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - LM-018 (agent, TDD 19 test): review code và test, cherry-pick sạch → `31b378e`. `overlapArea2D`/`overlapVolume`, `obstacleIssues`, `createPlacementLayout` (Map + lưới dựng một lần), `supportRatio` (hợp diện tích mặt đỡ, không tính trùng, chặn ở 1), `supportIssues`. Đo tham khảo: `supportIssues` × 1.000 kiện 18,9 ms, gần hết nằm ở `queryBelow` của lưới. Sau gộp: test support dùng chung issue PKG-008 với bảng Spec §13 (`SPEC_13_PKG_008_LOW_SUPPORT`).
 - LM-017 (agent, TDD 33 test): review, cherry-pick → `dfe2d5f` (xung đột barrel `constraints/index.ts`). `validateVehicle`, `validatePackages`, `checkDoorClearance`, `checkPayload`, `validateRequest` (sắp error → blockApproval → warning). Khi gộp: đổi tên hàm nội bộ trùng tên `obstacleIssues` → `vehicleObstacleIssues`; `formatIssue` khớp dạng issue thật (nhãn theo đoạn cuối `field` dạng react-hook-form, "0 kg" cho `maxPayloadKg`, chủ ngữ dòng vật cản từ `relatedIds[0]`) — bắt được nhờ test mới chạy validator thật rồi dịch mọi issue (đỏ trước khi sửa). Quy ước chủ thể ghi vào JSDoc `ConstraintIssue`.
 - LM-020 giao agent (worktree từ `8dc7418`).
+- LM-019 theo TDD (seam `@/domain/constraints`, 12 vòng, 14 test + 2 test dịch câu): `createStackGraph` truyền tải toàn stack theo diện tích tiếp xúc (D-18, ghi rõ là ước tính), vật cản chịu tải nhận phần tải của nó; `stackIssues` (`maxTopLoadKg = 0` là không chịu tải, gồm ca HIGH; `stackable = false` chỉ báo `NOT_STACKABLE`; số tầng theo nhánh dài nhất; vật cản chịu tải bỏ trống giới hạn = không giới hạn, chủ thể ở `relatedIds[0]`); `movePlacement` + `recomputeColumn` tính lại cục bộ — bằng dựng lại toàn bộ sau mỗi lần trong 200 lần dời ngẫu nhiên tất định, test đỏ dưới 2 đột biến. Đo tham khảo 1.000 thùng: dựng đồ thị 17,6 ms, dời một kiện + tính lại p95 0,107 ms. Helper test chung `src/test/placements.ts`.
 
 **Kiểm tra**
 
@@ -307,7 +308,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-016](issues/LM-016-luoi-khong-gian.md) | Lưới không gian | ✅ | 15/09/2026 | 15/09/2026 | `f26fb1b`, 9 test; benchmark `1b0a8af`: thả 0,47 ms, xếp kín 35,1 ms |
 | [LM-017](issues/LM-017-validation-dau-vao-xe-kien.md) | Validation đầu vào | ✅ | 15/09/2026 | 15/09/2026 | Agent, `dfe2d5f`, 33 test; `field` dạng react-hook-form |
 | [LM-018](issues/LM-018-vat-can-va-ty-le-do-day.md) | Vật cản, tỷ lệ đỡ đáy | ✅ | 15/09/2026 | 15/09/2026 | Agent, `31b378e`, 19 test; `PlacementLayout` dùng lại cho LM-019/023 |
-| [LM-019](issues/LM-019-tai-xep-chong-toan-stack.md) | Truyền tải toàn stack | ⬜ | | | |
+| [LM-019](issues/LM-019-tai-xep-chong-toan-stack.md) | Truyền tải toàn stack | ✅ | 15/09/2026 | 15/09/2026 | TDD 14 test; tính lại cục bộ = toàn bộ trên 200 lần dời |
 | [LM-020](issues/LM-020-kiem-tra-lifo.md) | Kiểm tra LIFO | ⬜ | | | |
 | [LM-021](issues/LM-021-metrics-trong-tam.md) | Metrics, trọng tâm | ✅ | 15/09/2026 | 15/09/2026 | TDD 15 test; thể tích không trừ vật cản |
 | [LM-022](issues/LM-022-thu-tu-xep-kha-thi.md) | Thứ tự xếp khả thi | ⬜ | | | |

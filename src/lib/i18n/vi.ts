@@ -109,7 +109,7 @@ export const vi = {
     OBSTACLE_OVERLAP: '{id} chồng lấn vật cản {obstacleId}.',
     NON_BEARING_SUPPORT: '{id} đặt lên vật cản {obstacleId} không chịu tải.',
     SUPPORT_BELOW_MIN: '{id} có tỷ lệ đỡ đáy {ratio}, thấp hơn mức yêu cầu {required}.',
-    TOP_LOAD_EXCEEDED: '{id} chịu {loadKg} bên trên, vượt mức chịu tải {maxKg}.',
+    TOP_LOAD_EXCEEDED: '{subject} chịu {loadKg} bên trên, vượt mức chịu tải {maxKg}.',
     NOT_STACKABLE: '{id} không được xếp chồng nhưng đang đỡ {related}.',
     STACK_COUNT_EXCEEDED: '{id} nằm trong chồng {layers} tầng, vượt giới hạn {maxStackCount} tầng.',
     LIFO_BLOCKED: '{id} bị kiện giao sau che kín lối dỡ.',
