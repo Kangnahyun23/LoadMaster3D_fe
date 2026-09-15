@@ -1,3 +1,4 @@
+import type { ConstraintIssue } from '@/domain/constraints'
 import type { CargoPackage } from '@/domain/models'
 
 /**
@@ -16,19 +17,12 @@ export type PackageInstance = Omit<CargoPackage, 'id' | 'name' | 'quantity' | 'g
 }
 
 /**
- * Lỗi trùng ID trong request. Kiểu tạm của LM-013, dùng đúng tên trường của `ConstraintIssue` (LM-014) để
- * LM-014 thay bằng kiểu dùng chung mà không phải đổi tên.
+ * Lỗi trùng ID trong request (kiểu dùng chung của LM-014):
+ * - `packageInstanceId`: chính ID bị trùng — mã một instance, hoặc mã kiện gốc khi nhiều dòng kiện cùng mã;
+ * - `relatedIds`: mã các kiện gốc đang dùng ID này (làm mã của chính nó hoặc mã một instance), theo thứ tự request, không lặp;
+ * - `params.occurrences`: số dòng kiện đang dùng ID này.
  */
-export interface DuplicateInstanceIdIssue {
-  code: 'DUPLICATE_INSTANCE_ID'
-  severity: 'error'
-  /** Chính ID bị trùng: mã một instance, hoặc mã kiện gốc khi nhiều dòng kiện cùng mã. */
-  packageInstanceId: string
-  /** Mã các kiện gốc đang dùng ID này (làm mã của chính nó hoặc mã một instance), theo thứ tự request, không lặp. */
-  relatedIds: string[]
-  /** `occurrences`: số dòng kiện đang dùng ID này. */
-  params: { occurrences: number }
-}
+export type DuplicateInstanceIdIssue = ConstraintIssue<'DUPLICATE_INSTANCE_ID'>
 
 export interface ExpandedPackages {
   /** Theo thứ tự dòng kiện trong request, rồi theo số thứ tự instance. */

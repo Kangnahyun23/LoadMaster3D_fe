@@ -15,23 +15,40 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | Phase | Nội dung | Xong / Tổng | Ước lượng | Trạng thái |
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
-| 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — còn LM-002 chờ backend; CI chờ push để chạy thật |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 6 / 19 | ~18,5 ngày | 🟦 Đang làm |
+| 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 8 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **12 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **14 / 57 issue** | **~56 ngày công** | |
 
-**Phase 0 đã xong, dừng để báo cáo (15/09/2026).** Phase 1 tiếp theo.
+**Phase 1 đang làm (15/09/2026).** Đã có LM-010, 011, 012, 013, 014, 015, 016, 027. Làm được ngay: LM-017, LM-018, LM-021, LM-028. Sau đó LM-019, LM-020 → LM-022 → LM-023 → LM-024 → LM-025, LM-026.
 
-**Phần việc dở của phase 1 còn giữ trong worktree** (agent dừng vì hết giới hạn phiên, chưa commit, chưa gộp): LM-013 `src/domain/cargo` gần xong kèm ghi chép issue; LM-014 `src/domain/constraints` làm được một phần. Làm được ngay: LM-018, LM-021; LM-017 chờ LM-013; LM-028 chờ LM-014.
-
-**Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3. LM-006 cần người dùng đồng ý push để CI chạy lần đầu.
+**Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 15/09/2026 — Xong nốt phase 0 (CI thật); phase 1: gộp LM-013, hoàn tất LM-014
+
+**Đã làm**
+
+- Người dùng đồng ý làm tiếp việc dở phase 0. Push `feat/spec-mvp` lên `origin` (lần đầu). CI run `34949580777`: **5/5 job xanh** (E2E 8 phút 16 giây trên Linux).
+- Kiểm tra CI báo đúng job: nhánh tạm `feat/ci-verify-red` với một kỳ vọng sai trong `src/lib/utils.test.ts` → run `34950525027` **chỉ Unit đỏ**, Lint/Typecheck/Build xanh, E2E huỷ chủ động; xoá nhánh tạm trên remote và worktree tạm. (Nhánh `ci/...` không kích hoạt CI vì workflow chỉ nghe `main`, `feat/**`.)
+- Chốt seam phase 1 theo module: `@/domain/constraints` (LM-017/018/019/020/022/023), `@/domain/metrics` (LM-021), `@/services/optimization` (LM-024/025), `@/lib/mock-db` (LM-026), `@/lib/i18n` (LM-028).
+- LM-013 (agent đã làm gần xong trước khi dừng): xem code, commit trong worktree, cherry-pick → `e4cad8c`. `expandPackages`, `nextPackageId`, 16 test.
+- LM-014: chép phần agent làm dở (boundary, contract warnings, bảng Spec §13) sang nhánh chính và làm tiếp theo TDD — danh mục đủ 22 mã với kiểu tham số theo từng mã (test kiểu đỏ khi mới 8 mã → xanh); thay kiểu lỗi tạm của LM-013 bằng `ConstraintIssue<'DUPLICATE_INSTANCE_ID'>` (test kiểu đỏ → xanh).
+- Dọn toàn bộ worktree agent cũ.
+
+**Kiểm tra**
+
+- `pnpm lint` ✅ · `pnpm build` ✅ · Vitest **167/167** ✅.
+
+**Việc tiếp theo**
+
+- LM-017, LM-018 (agent song song, tối đa 2), LM-021, LM-028 (tự làm); chạy benchmark LM-016 khi máy rảnh.
 
 ### 15/09/2026 — Hoàn tất phase 0: LM-005, LM-006; sửa E2E đỏ ngẫu nhiên do Tailwind; mở LM-056
 
@@ -251,7 +268,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-003](issues/LM-003-cap-nhat-agents-claude-md.md) | Cập nhật AGENTS.md, CLAUDE.md | ✅ | 15/09/2026 | 15/09/2026 | CLAUDE.md import `@AGENTS.md` |
 | [LM-004](issues/LM-004-them-vitest-rtl.md) | Vitest + RTL | ✅ | 14/09/2026 | 14/09/2026 | 39/39 test, Vitest 5.0.0 |
 | [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | ✅ | 15/09/2026 | 15/09/2026 | `6c4287a`, 23/23 E2E (CI mode); sửa Tailwind `source('.')` |
-| [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ✅ | 15/09/2026 | 15/09/2026 | Workflow xong; CI chạy thật chờ push |
+| [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ✅ | 15/09/2026 | 15/09/2026 | Run 34949580777 xanh 5/5; job đỏ đúng chỗ đã kiểm |
 | [LM-055](issues/LM-055-tailwind-merge-bo-mau-chu.md) | Bug `cn()` bỏ màu chữ nút | ✅ | 15/09/2026 | 15/09/2026 | TDD, 5 test; `/thanh-phan` chờ E2E |
 
 ### Phase 1 — Domain, service, dữ liệu, i18n nền
@@ -261,8 +278,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-010](issues/LM-010-domain-models-schema.md) | Domain models + zod | ✅ | 15/09/2026 | 15/09/2026 | `4901e6f`, 39 test, 34 mã lỗi |
 | [LM-011](issues/LM-011-numeric-roundcm-epsilon.md) | `roundCm` + EPSILON | ✅ | 14/09/2026 | 14/09/2026 | TDD 6 test; quy ước AGENTS chờ LM-003 |
 | [LM-012](issues/LM-012-orientation-6-huong.md) | 6 hướng đặt | ✅ | 15/09/2026 | 15/09/2026 | `32012e5`, 12 test; mã mismatch → LM-014/023 |
-| [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | 🟨 | 15/09/2026 | | Agent dừng (giới hạn phiên); việc gần xong, chưa commit trong worktree |
-| [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | 🟨 | 15/09/2026 | | Agent dừng (giới hạn phiên); làm một phần trong worktree |
+| [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | ✅ | 15/09/2026 | 15/09/2026 | `e4cad8c`, 16 test |
+| [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | ✅ | 15/09/2026 | 15/09/2026 | 22 mã, test kiểu; hoàn tất sau khi agent dừng |
 | [LM-015](issues/LM-015-geometry-boundary-overlap-volume.md) | Biên, chồng lấn, thể tích | ✅ | 14/09/2026 | 14/09/2026 | TDD 8 test; phần diện tích giao → LM-018 |
 | [LM-016](issues/LM-016-luoi-khong-gian.md) | Lưới không gian | ✅ | 15/09/2026 | 15/09/2026 | `f26fb1b`, 9 test; số benchmark chờ chạy |
 | [LM-017](issues/LM-017-validation-dau-vao-xe-kien.md) | Validation đầu vào | ⬜ | | | |

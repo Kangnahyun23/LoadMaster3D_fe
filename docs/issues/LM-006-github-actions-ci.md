@@ -19,8 +19,8 @@ prd: [D-39]
 
 ## Tiêu chí nghiệm thu
 
-- [ ] Pull request thử trên `feat/spec-mvp` hiện đủ 5 check xanh. **Chờ push** — cần người dùng đồng ý đẩy nhánh lên `origin` (`github.com/Kangnahyun23/LoadMaster3D_fe`).
-- [ ] Cố ý làm hỏng một test thì đúng job đó đỏ. **Chờ push.**
+- [x] `feat/spec-mvp` hiện đủ 5 check xanh — run `34949580777` (push, 15/09/2026): Build, Lint, Unit, Typecheck xanh trong ~30 s; E2E xanh sau 8 phút 16 giây.
+- [x] Cố ý làm hỏng một test thì đúng job đó đỏ — nhánh tạm `feat/ci-verify-red` (sai kỳ vọng trong `src/lib/utils.test.ts`), run `34950525027`: **chỉ Unit tests (Vitest) đỏ** ở bước `pnpm test`; Lint, Typecheck, Build xanh; E2E được huỷ chủ động để tiết kiệm phút CI. Đã xoá nhánh tạm trên remote.
 
 ## Kết quả — 15/09/2026
 
@@ -30,5 +30,6 @@ prd: [D-39]
   - `build` upload `dist` (giữ 7 ngày).
   - `e2e` chạy sau `lint` + `typecheck`, cài `pnpm exec playwright install --with-deps chromium` (đúng phiên bản `@playwright/test` trong lockfile), `CI=true` nên Playwright bật server Vite mới, retries 1, `forbidOnly`; upload `playwright-report` + `test-results` khi lỗi; timeout job 45 phút.
   - `concurrency` huỷ lượt cũ cùng nhánh; `permissions: contents: read`.
-- Chưa kiểm được cú pháp YAML tại máy (không có Python hay thư viện YAML trong `node_modules`, không cài thêm công cụ). Kiểm thật khi push lần đầu.
+- Cú pháp YAML không kiểm được tại máy; lần push đầu (15/09/2026) GitHub nhận workflow và chạy đủ 5 job.
+- Workflow chỉ chạy khi push/PR vào `main` hoặc `feat/**`: nhánh tên khác (ví dụ `ci/...`) không có CI.
 - Khác máy dev: runner Linux không cần `E2E_PORT`; Chromium Linux headless vẫn dùng SwiftShader nên các test đo frame/idle giữ nguyên ngưỡng.
