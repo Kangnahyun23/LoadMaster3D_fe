@@ -87,7 +87,8 @@ export function createBenchmarkInput(count: BenchmarkCount): BenchmarkInput {
       fragilityLevel: index % 11 === 0 ? 'HIGH' : 'NONE',
       stackable: true,
       maxTopLoadKg: 500,
-      minSupportRatio: 0,
+      // Kiện tầng trên nhỏ hơn ô có thể thiếu đỡ: chỉ là cảnh báo, fixture vẫn đo được editor (LM-035).
+      minSupportRatio: 0.8,
       deliveryStop: 4 - Math.min(3, Math.floor((column * 4) / along)),
       priority: 0,
       mustLoad: false,

@@ -3,7 +3,8 @@ import { nextOrientation, type OrientationCode } from '@/domain/geometry'
 import type { ScenePlacement, PositionCm } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import { orientedSize } from '@/features/viewer3d/scene-input'
-import { roundPosition, validatePlacement, type Axis } from './geometry'
+import { roundPosition, type Axis } from './geometry'
+import { useEditorValidation } from './useEditorValidation'
 import { createPreviewStore } from './preview-store'
 import { snapPosition } from './snapping'
 
@@ -20,22 +21,14 @@ export function useManualEditor(state: LoadPlanViewerState) {
   const { selected, placements, sceneModel, draft } = state
   const patch = selected ? draft.patches.get(selected.id) : undefined
   const manual = Boolean(patch?.position || patch?.orientation !== undefined)
-  const validation = useMemo(() => selected
-    ? validatePlacement(selected, placements, sceneModel.vehicle, manual) : null,
-  [selected, placements, sceneModel, manual])
+  const inspect = useEditorValidation(sceneModel, placements)
+  const validation = useMemo(() => selected ? inspect(selected) : null, [selected, inspect])
 
   const setMode = (next: 'view' | 'edit') => {
     state.stopPlaying()
     preview.publish(null, true)
     setModeState(next)
   }
-  const inspect = useCallback((p: ScenePlacement) => {
-    const source = sceneModel.placementById.get(p.id)!
-    const changed = p.orientation !== source.orientation ||
-      p.position.x !== source.position.x || p.position.y !== source.position.y || p.position.z !== source.position.z
-    return validatePlacement(p, placements, sceneModel.vehicle, changed)
-  }, [placements, sceneModel])
-
   const commitMove = (id: string, position: PositionCm) => {
     const p = placements.find((item) => item.id === id)
     if (!p || p.pinned || mode !== 'edit') return false

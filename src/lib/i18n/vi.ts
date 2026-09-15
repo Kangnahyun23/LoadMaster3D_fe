@@ -129,6 +129,10 @@ export const vi = {
       pending: 'Chờ backend tính tải trục; không hiển thị số ước lượng.',
       axle: '{name} · cách vách trước {position} · tối đa {maxLoad}',
     },
+    orientation: {
+      allowed: 'Hướng được phép: {codes}',
+      keepUpright: 'Giữ thẳng đứng',
+    },
     measurements: {
       summary: 'Cách cửa {rear} · vách trái {left} · Lớp {layer}',
     },

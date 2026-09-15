@@ -3,7 +3,8 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { formatDecimal, formatInteger } from '@/lib/format'
-import { useFormat } from '@/lib/i18n'
+import { effectiveOrientations, type OrientationRules } from '@/domain/geometry'
+import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
 import type { SceneStop, ScenePlacement } from '@/features/viewer3d/scene-input'
@@ -13,6 +14,7 @@ import { findAbove, findBelow, layerOf } from './placement-relations'
 export function SelectedPackagePanel({
   placement,
   placements,
+  orientationRules,
   totalSteps,
   stops,
   tripId,
@@ -22,6 +24,8 @@ export function SelectedPackagePanel({
 }: {
   placement: ScenePlacement | undefined
   placements: ScenePlacement[]
+  /** Luật xoay của kiện gốc (LM-032); vắng thì chỉ hiện hướng hiện tại. */
+  orientationRules?: OrientationRules
   totalSteps: number
   stops: readonly SceneStop[]
   tripId: string
@@ -52,6 +56,7 @@ export function SelectedPackagePanel({
         <PackageDetails
           placement={placement}
           placements={placements}
+          orientationRules={orientationRules}
           totalSteps={totalSteps}
           stops={stops}
           tripId={tripId}
@@ -70,6 +75,7 @@ export function SelectedPackagePanel({
 function PackageDetails({
   placement,
   placements,
+  orientationRules,
   totalSteps,
   stops,
   tripId,
@@ -78,6 +84,8 @@ function PackageDetails({
 }: {
   placement: ScenePlacement
   placements: ScenePlacement[]
+  /** Luật xoay của kiện gốc (LM-032); vắng thì chỉ hiện hướng hiện tại. */
+  orientationRules?: OrientationRules
   totalSteps: number
   stops: readonly SceneStop[]
   tripId: string
@@ -85,6 +93,7 @@ function PackageDetails({
   onFocus: () => void
 }) {
   const format = useFormat()
+  const t = useT()
   const stopName = stops.find((s) => s.number === placement.stop)?.name ?? ''
   const layer = layerOf(placement, placements)
   const below = findBelow(placement, placements)
@@ -147,6 +156,10 @@ function PackageDetails({
         <div className="flex flex-col gap-2">
           <span className="text-body-lg xl:text-caption font-medium text-text-3">Hướng xoay</span>
           <span className="font-mono text-body">{placement.orientation}</span>
+          {orientationRules ? <span className="text-body-lg xl:text-caption text-text-2">
+            {t('viewer.orientation.allowed', { codes: format.list(effectiveOrientations(orientationRules)) })}
+            {orientationRules.keepUpright ? ` · ${t('viewer.orientation.keepUpright')}` : ''}
+          </span> : null}
         </div>
 
         <div className="flex flex-col gap-2">

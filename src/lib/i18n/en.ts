@@ -119,6 +119,10 @@ export const en = {
       pending: 'Waiting for the backend to compute axle loads; no estimated figures are shown.',
       axle: '{name} · {position} from the front wall · max {maxLoad}',
     },
+    orientation: {
+      allowed: 'Allowed orientations: {codes}',
+      keepUpright: 'Keep upright',
+    },
     measurements: {
       summary: '{rear} from the door · {left} from the left wall · Layer {layer}',
     },

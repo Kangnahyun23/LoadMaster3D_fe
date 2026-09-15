@@ -70,7 +70,7 @@ test('nudge, history, pin, rotation, reset, focus and pointer drags on 1,000 pac
   expect(await status.getAttribute('data-orientation')).toBe('LWH')
   expect(await position(page)).toStrictEqual(initial)
   await button(page, 'Tăng Z').click()
-  expect(await status.innerText()).toMatch(/nâng đỡ/)
+  expect(await status.innerText(), 'floating lift is a SUPPORT_BELOW_MIN warning from the domain').toMatch(/tỷ lệ đỡ đáy/)
   await button(page, 'Khôi phục mọi chỉnh sửa').click()
   await button(page, 'Giữ chỉnh sửa').click()
   expect((await position(page))[2]).toBe(initial[2]! + 1)
@@ -106,7 +106,7 @@ test('nudge, history, pin, rotation, reset, focus and pointer drags on 1,000 pac
   expect(await status.innerText()).toMatch(/Không thể đặt/)
   expect(await position(page), 'invalid drop restores original placement').toStrictEqual(initial)
   await drag(page, [-30, 0, 0])
-  expect(await status.innerText()).toMatch(/Chồng lấn/)
+  expect(await status.innerText()).toMatch(/chồng lấn/)
   expect(await position(page)).toStrictEqual(initial)
   const framesAfterDrop = (await metrics(page)).renderedFrames
   await page.waitForTimeout(1800)
