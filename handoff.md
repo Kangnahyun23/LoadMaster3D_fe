@@ -148,7 +148,7 @@ Invariants: không mutate `plan.placements`; không lấy index danh sách UI l�
 
 Kết quả gần nhất của đợt code trước bàn giao: **37 tests TypeScript pass**, 7 suite browser pass, `pnpm lint` và `pnpm build` pass. Lần bàn giao này chỉ kiểm tra hiện trạng và viết tài liệu, không chạy lại toàn bộ suite hoặc sửa ứng dụng.
 
-Browser suites: `viewer-ui`, `viewer-editor-ui`, `viewer-operations-ui`, `viewer-visuals`, `viewer-demand-quality`, `viewer-benchmark`, `viewer-scene-first-ui` trong `tests/`. Kiểm tra bao gồm picking 1.000 kiện, editor/history, camera/capture, slice/màu, xếp/dỡ, kho/driver lazy, reduced motion, quality và idle. Bằng chứng này chủ yếu bao phủ viewer và tích hợp kho/tài xế, không phải chứng nhận QA toàn bộ FE.
+Browser suites: `viewer-ui`, `viewer-editor-ui`, `viewer-operations-ui`, `viewer-visuals`, `viewer-demand-quality`, `viewer-scene-first-ui` nay là `e2e/*.spec.ts` chạy bằng `@playwright/test` (LM-005); `viewer-benchmark` vẫn là script chạy tay trong `tests/`. Kiểm tra bao gồm picking 1.000 kiện, editor/history, camera/capture, slice/màu, xếp/dỡ, kho/driver lazy, reduced motion, quality và idle. Bằng chứng này chủ yếu bao phủ viewer và tích hợp kho/tài xế, không phải chứng nhận QA toàn bộ FE.
 
 Benchmark cuối: Chromium headless 149 + SwiftShader, viewport 1600×1000, DPR thiết bị 1; **không phải thiết bị vật lý**.
 
@@ -169,20 +169,15 @@ Raw data: [benchmark cuối](docs/benchmarks/viewer-scene-first-2026-09-14.json)
 pnpm lint
 pnpm build
 pnpm test            # Vitest: project unit (tests/**/*.test.ts, src/**/*.test.ts) + dom (src/**/*.dom.test.tsx); từ 14/09/2026 thay cho node --test
-# Browser cần dev server và Playwright/Chromium có sẵn; không tự thêm dependency.
-$env:PLAYWRIGHT_MODULE = '<đường dẫn module playwright đã cài>'
-$env:CHROMIUM_EXECUTABLE = '<đường dẫn Chromium tương thích>'
-$env:VIEWER_TEST_URL = 'http://127.0.0.1:5175'
-node tests/viewer-scene-first-ui.mjs
-node tests/viewer-editor-ui.mjs
-node tests/viewer-operations-ui.mjs
-node tests/viewer-ui.mjs
-node tests/viewer-visuals.mjs
-node tests/viewer-demand-quality.mjs
-node tests/viewer-benchmark.mjs
+pnpm test:e2e        # Playwright (LM-005): tự bật Vite ở 127.0.0.1:5175 (dùng lại server đang chạy nếu không phải CI); project desktop/tablet/phone
+pnpm test:e2e:ui     # chế độ UI của Playwright
+# Máy mới: pnpm exec playwright install chromium (Chromium 149, revision 1228)
+# Benchmark FPS chạy tay, không nằm trong test:e2e hay CI; cần dev server chạy riêng:
+pnpm dev --host 127.0.0.1 --port 5175 --strictPort
+node tests/viewer-benchmark.mjs          # thêm --low-only để chỉ đo tier low; VIEWER_TEST_URL nếu server ở địa chỉ khác
 ```
 
-Chạy benchmark tách khỏi build hoặc browser suite khác để giảm nhiễu CPU/GPU. Output tạm trong `node_modules/.tmp`; bằng chứng cần giữ đã copy vào `docs`.
+Chạy benchmark tách khỏi build hoặc browser suite khác để giảm nhiễu CPU/GPU. Ảnh, số đo và báo cáo E2E nằm trong `test-results/` và `playwright-report/`; output benchmark tạm trong `node_modules/.tmp/viewer-final`; bằng chứng cần giữ đã copy vào `docs`.
 
 ## 7. Source / Derived / Advisory / Chưa có backend
 
