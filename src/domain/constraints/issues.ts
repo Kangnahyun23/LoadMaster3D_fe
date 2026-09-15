@@ -28,6 +28,7 @@ export const CONSTRAINT_CODES = [
   'LOADING_ORDER_INFEASIBLE',
   'DUPLICATE_INSTANCE_ID',
   'ORIENTATION_MISMATCH',
+  'ORIENTATION_NOT_ALLOWED',
 ] as const
 
 export type ConstraintCode = (typeof CONSTRAINT_CODES)[number]
@@ -82,6 +83,8 @@ export type ConstraintParams = {
   DUPLICATE_INSTANCE_ID: { occurrences: number }
   /** Spec 7.5: kích thước đã xếp không khớp hướng `orientation` khai báo. */
   ORIENTATION_MISMATCH: { orientation: OrientationCode }
+  /** Spec 7.5, PRD mục 8 (LM-023): hướng đặt của placement không nằm trong `effectiveOrientations` của kiện (`allowedOrientations`, `keepUpright`). */
+  ORIENTATION_NOT_ALLOWED: { orientation: OrientationCode }
 }
 
 /**

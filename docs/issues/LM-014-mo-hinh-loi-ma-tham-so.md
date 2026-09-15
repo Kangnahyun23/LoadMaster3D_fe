@@ -77,3 +77,6 @@ Mức ở bảng là quy ước để các issue LM-017 → LM-023 dùng thống
 **Test:** 9 test chạy (boundary 3, contract warnings 4, Spec §13 2) + test kiểu trong [issues.test-d.ts](../../src/domain/constraints/issues.test-d.ts) chạy qua `tsc -b`: danh mục đúng 22 mã (đỏ khi mới có 8 → xanh sau khi bổ sung) và kiểu lỗi LM-013 (đỏ khi còn kiểu tạm → xanh sau khi thay).
 
 **Kiểm tra:** `tsc -b` ✅ · Vitest domain 99/99 ✅ · tìm chuỗi tiếng Việt trong `src/domain` (ngoài test): chỉ còn chú thích và tên benchmark.
+
+**Bổ sung ở LM-023 (15/09/2026):** thêm mã thứ 23 `ORIENTATION_NOT_ALLOWED` (`{ orientation }`, error) — hướng đặt của placement không thuộc `effectiveOrientations`
+của kiện gốc (PRD mục 8). `ORIENTATION_MISMATCH` giữ nghĩa kích thước đã xếp không khớp hướng khai báo.

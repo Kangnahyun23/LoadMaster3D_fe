@@ -125,7 +125,7 @@ src/
     cargo/              mở rộng quantity thành instance, trùng ID, mã kiện mới (LM-013)
   services/
     optimization/       interface OptimizationService, MockOptimizationService, worker (LM-024 →)
-  test/                 setup và dữ liệu test dùng chung (setup-dom.ts, spec-13.ts, placements.ts)
+  test/                 setup và dữ liệu test dùng chung (setup-dom.ts, spec-13.ts, placements.ts, engine-plans.ts)
 tests/                  unit test cũ của viewer3d (Vitest)
 e2e/                    Playwright (LM-005)
 ```
@@ -509,6 +509,12 @@ Màn nào còn giữ dữ liệu ở `useState` (Đội xe, Người dùng) thì
   theo cách code tính.
 - Benchmark domain: `pnpm test:bench` (file `*.bench.ts`). Vitest 5 lấy `bench` từ context của
   `test` (`test(name, async ({ bench }) => …)`), không còn `import { bench } from 'vitest'`.
+- **Cổng ngân sách constraint engine** (D-29, LM-023): `constraint-engine.bench.ts` **fail** khi p95 của dựng + `evaluateAll`
+  1.000 kiện vượt 50 ms hoặc `evaluateMove`/`commitMove` vượt 8 ms (75/12 ms khi có biến `CI`). p95 tính từ mẫu
+  (`retainSamples`), không lấy p99 thay. Ghi số đo: `BENCH_RECORD=docs/benchmarks/<tên>-<ngày>.json pnpm test:bench`.
+  Đổi engine hoặc lưới không gian thì chạy lại cổng này.
+- File `*.bench.ts` được kiểm kiểu bằng `tsconfig.bench.json` (có kiểu Node để ghi file); `tsconfig.app.json` loại chúng
+  ra để code app không thấy kiểu Node.
 - E2E: `pnpm test:e2e` (Playwright, `e2e/*.spec.ts`, project `desktop`/`tablet`/`phone` theo tag
   `@tablet`/`@phone`). Tự bật Vite ở `127.0.0.1:5175`; cổng đang do checkout khác giữ thì đặt
   `E2E_PORT`. Trước khi so tư thế camera phải chờ camera đã vẽ xong (`waitCameraSettled`) —

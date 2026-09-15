@@ -10,7 +10,7 @@ import type { ConstraintCode, ConstraintIssue } from '@/domain/constraints'
 // LM-013 báo trùng ID bằng đúng kiểu dùng chung, không còn kiểu tạm riêng.
 expectTypeOf<ExpandedPackages['issues'][number]>().toEqualTypeOf<ConstraintIssue<'DUPLICATE_INSTANCE_ID'>>()
 
-// Danh mục mã đúng bằng danh sách trong docs/issues/LM-014 (chép nguyên văn), không thiếu, không thừa.
+// Danh mục mã đúng bằng danh sách trong docs/issues/LM-014 (chép nguyên văn) cộng mã LM-023 thêm, không thiếu, không thừa.
 expectTypeOf<ConstraintCode>().toEqualTypeOf<
   | 'DIMENSION_NOT_POSITIVE'
   | 'DOOR_EXCEEDS_INNER'
@@ -34,4 +34,5 @@ expectTypeOf<ConstraintCode>().toEqualTypeOf<
   | 'LOADING_ORDER_INFEASIBLE'
   | 'DUPLICATE_INSTANCE_ID'
   | 'ORIENTATION_MISMATCH'
+  | 'ORIENTATION_NOT_ALLOWED'
 >()

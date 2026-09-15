@@ -69,18 +69,35 @@ export function createSpatialGrid(entries: readonly SpatialEntry[], cellCm = DEF
     return [Math.floor(start / cellCm), Math.floor((start + size - EPSILON) / cellCm)]
   }
 
+  /** Ô 3 chiều: một cột nhiều tầng không dồn vào cùng ô, nên truy vấn chỉ xét đúng lát Z liên quan (LM-023). */
   function forEachCell(box: Box, visit: (key: string) => void) {
     const [x0, x1] = cellRange(box.xCm, box.lengthCm)
     const [y0, y1] = cellRange(box.yCm, box.widthCm)
-    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) visit(`${x}:${y}`)
+    const [z0, z1] = cellRange(box.zCm, box.heightCm)
+    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) for (let z = z0; z <= z1; z++) visit(`${x}:${y}:${z}`)
   }
 
-  function candidates(region: Box, { excludeId }: SpatialQueryOptions = {}): string[] {
-    const ids = new Set<string>()
-    forEachCell(region, (key) => cells.get(key)?.forEach((id) => ids.add(id)))
-    if (excludeId !== undefined) ids.delete(excludeId)
-    // Chỉ sắp các ứng viên, không duyệt toàn bộ hộp: kết quả tất định theo thứ tự thêm vào.
-    return [...ids].sort((a, b) => order.get(a)! - order.get(b)!)
+  /** Lát mỏng quanh độ cao `zCm` (± dung sai tiếp xúc) trên đáy của `query`: nơi có mặt trên/đáy của hộp chạm nó. */
+  function contactSlab(query: Box, zCm: number): Box {
+    const reach = CONTACT_TOLERANCE_CM + EPSILON
+    return { ...query, zCm: zCm - reach, heightCm: 2 * reach + EPSILON }
+  }
+
+  /**
+   * Hộp trong các ô của `region` thoả `keep`, theo thứ tự thêm vào (tất định). Lọc trước rồi mới sắp: hành lang dỡ
+   * phủ nhiều ô nên có hàng trăm ứng viên nhưng chỉ vài hộp đạt — sắp cả ứng viên từng chiếm gần hết thời gian LIFO (LM-020).
+   */
+  function matching(region: Box, { excludeId }: SpatialQueryOptions, keep: (other: Box) => boolean): string[] {
+    const seen = new Set<string>()
+    const found: string[] = []
+    forEachCell(region, (key) =>
+      cells.get(key)?.forEach((id) => {
+        if (id === excludeId || seen.has(id)) return
+        seen.add(id)
+        if (keep(boxes.get(id)!)) found.push(id)
+      }),
+    )
+    return found.sort((a, b) => order.get(a)! - order.get(b)!)
   }
 
   function leaveCells(id: string) {
@@ -104,23 +121,20 @@ export function createSpatialGrid(entries: readonly SpatialEntry[], cellCm = DEF
   for (const { id, box } of entries) place(id, box)
 
   return {
-    queryAabb: (query, options) => candidates(query, options).filter((id) => overlaps(boxes.get(id)!, query)),
-    queryBelow: (query, options) => candidates(query, options).filter((id) => {
-      const other = boxes.get(id)!
-      return footprintsOverlap(other, query) && touchesVertically(other.zCm + other.heightCm, query.zCm)
-    }),
-    queryAbove: (query, options) => candidates(query, options).filter((id) => {
-      const other = boxes.get(id)!
-      return footprintsOverlap(other, query) && touchesVertically(query.zCm + query.heightCm, other.zCm)
-    }),
-    queryRearCorridor: (query, options) => {
+    queryAabb: (query, options = {}) => matching(query, options, (other) => overlaps(other, query)),
+    queryBelow: (query, options = {}) =>
+      matching(contactSlab(query, query.zCm), options, (other) =>
+        footprintsOverlap(other, query) && touchesVertically(other.zCm + other.heightCm, query.zCm),
+      ),
+    queryAbove: (query, options = {}) =>
+      matching(contactSlab(query, query.zCm + query.heightCm), options, (other) =>
+        footprintsOverlap(other, query) && touchesVertically(query.zCm + query.heightCm, other.zCm),
+      ),
+    queryRearCorridor: (query, options = {}) => {
       const rearFaceXCm = query.xCm + query.lengthCm
       if (!gt(farthestEndXCm, rearFaceXCm)) return []
       const corridor = { ...query, xCm: rearFaceXCm, lengthCm: farthestEndXCm - rearFaceXCm }
-      return candidates(corridor, options).filter((id) => {
-        const other = boxes.get(id)!
-        return !lt(other.xCm, rearFaceXCm) && sectionsOverlap(other, query)
-      })
+      return matching(corridor, options, (other) => !lt(other.xCm, rearFaceXCm) && sectionsOverlap(other, query))
     },
     update: place,
     remove: (id) => {

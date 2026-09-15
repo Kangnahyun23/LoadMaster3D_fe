@@ -1,0 +1,51 @@
+import { expect, test } from 'vitest'
+import { approvalBlockers, type ConstraintIssue } from '@/domain/constraints'
+import { SPEC_CARTON_A } from '@/domain/fixtures/spec-samples'
+import type { CargoPackage, UnplacedPackage } from '@/domain/models'
+
+const OVERLAP: ConstraintIssue = { code: 'OVERLAP', severity: 'error', packageInstanceId: 'PKG-001-02', relatedIds: ['PKG-001-01'], params: {} }
+const LEANING: ConstraintIssue = { code: 'COG_LATERAL', severity: 'warning', params: { offsetCm: 90, limitCm: 24 } }
+/** Carton A is mustLoad; the leaflets are not. */
+const OPTIONAL: CargoPackage = { ...SPEC_CARTON_A, id: 'PKG-002', name: 'Tờ rơi khuyến mãi', quantity: 2, mustLoad: false }
+
+function unplaced(...ids: string[]): UnplacedPackage[] {
+  return ids.map((packageInstanceId) => ({ packageInstanceId, reasonCode: 'NO_SPACE', message: 'Hết chỗ' }))
+}
+
+test('a clean, current plan with every must-load package placed can be approved, warnings included', () => {
+  expect(approvalBlockers({ issues: [LEANING], packages: [SPEC_CARTON_A], unplacedPackages: [], stale: false })).toStrictEqual({
+    canApprove: true,
+    issues: [],
+    stale: false,
+  })
+})
+
+test('engine errors block approval', () => {
+  expect(approvalBlockers({ issues: [LEANING, OVERLAP], packages: [SPEC_CARTON_A], unplacedPackages: [], stale: false })).toStrictEqual({
+    canApprove: false,
+    issues: [OVERLAP],
+    stale: false,
+  })
+})
+
+test('unplaced instances of a must-load package block approval once per package; optional packages left behind do not', () => {
+  const blockers = approvalBlockers({
+    issues: [],
+    packages: [SPEC_CARTON_A, OPTIONAL],
+    unplacedPackages: unplaced('PKG-001-02', 'PKG-002-01', 'PKG-001-04'),
+    stale: false,
+  })
+  expect(blockers).toStrictEqual({
+    canApprove: false,
+    issues: [{ code: 'MUST_LOAD_UNPLACED', severity: 'blockApproval', params: { packageId: 'PKG-001' } }],
+    stale: false,
+  })
+})
+
+test('a stale revision cannot be approved even without any issue', () => {
+  expect(approvalBlockers({ issues: [], packages: [SPEC_CARTON_A], unplacedPackages: [], stale: true })).toStrictEqual({
+    canApprove: false,
+    issues: [],
+    stale: true,
+  })
+})

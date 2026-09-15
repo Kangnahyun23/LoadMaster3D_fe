@@ -74,3 +74,7 @@ Nhận xét:
 - **Toàn bộ 1.000 hộp chưa đạt ước lượng < 5 ms.** Lưới chỉ chia X–Y: một cột 10 tầng rơi cả vào cùng ô, nên mỗi truy vấn xét khoảng 100 ứng viên. Ứng viên tối ưu đầu tiên nếu LM-023 vượt 50 ms: thêm chiều Z vào khoá ô (vùng truy vấn below/above/hành lang đều có biên Z).
 - Vitest cảnh báo "module export getters" (`lt`, `gt`, `overlaps`, `EPSILON`) làm số đo cao hơn bundle thật; số ở đây là cận trên.
 - Không tối ưu ngay: theo AGENTS mục 12, đo toàn engine ở LM-023 trước.
+
+**Cập nhật ở LM-023 (15/09/2026):** `candidates()` lọc trước rồi mới sắp theo thứ tự thêm vào; khoá ô thêm trục Z (ô 50 cm cả 3 chiều), `queryBelow`/`queryAbove`
+chỉ xét lát mỏng ± `CONTACT_TOLERANCE_CM` quanh đáy/đỉnh. Bench xếp kín 1.000 thùng (`queryAabb` + `queryBelow` × 1.000): 35,1 → 25,6 ms (lọc trước) → **8,9 ms** (ô 3 chiều).
+API không đổi; test đối chiếu với lưới một ô vẫn xanh và đỏ khi lát tiếp xúc mỏng bằng 0.
