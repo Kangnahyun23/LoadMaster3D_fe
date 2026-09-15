@@ -110,6 +110,7 @@ export const en = {
     LOADING_ORDER_INFEASIBLE: '{id} is loaded before the packages supporting it: {related}.',
     DUPLICATE_INSTANCE_ID: 'ID {id} is used by {occurrences} package lines: {related}.',
     ORIENTATION_MISMATCH: 'Placed dimensions of {id} do not match orientation {orientation}.',
+    ORIENTATION_NOT_ALLOWED: '{id} is placed in orientation {orientation}, which its package does not allow.',
   },
   fields: {
     innerLengthCm: 'Inner length',

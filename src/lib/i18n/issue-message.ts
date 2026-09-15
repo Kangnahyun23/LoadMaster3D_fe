@@ -106,7 +106,8 @@ export function formatIssue(issue: ConstraintIssue, t: TFunction, format: Format
         related: relatedOf(issue, format),
       })
     case 'ORIENTATION_MISMATCH':
-      return t('issues.ORIENTATION_MISMATCH', { id: subjectOf(issue), orientation: issue.params.orientation })
+    case 'ORIENTATION_NOT_ALLOWED':
+      return t(`issues.${issue.code}`, { id: subjectOf(issue), orientation: issue.params.orientation })
     default:
       return unreachable(issue)
   }

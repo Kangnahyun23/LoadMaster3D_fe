@@ -16,14 +16,14 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 15 / 19 | ~18,5 ngày | 🟦 Đang làm |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 16 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **21 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **22 / 57 issue** | **~56 ngày công** | |
 
-**Phase 1 đang làm (15/09/2026).** Đã có LM-010 → LM-022, LM-027, LM-028. Còn LM-023 (facade + benchmark) → LM-024 → LM-025, LM-026.
+**Phase 1 đang làm (15/09/2026).** Đã có LM-010 → LM-023, LM-027, LM-028. Đang làm: LM-026 phần 1 (agent). Còn LM-024 → LM-025, phần còn lại của LM-026.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
@@ -31,7 +31,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
-### 15/09/2026 — Phase 1: benchmark LM-016, LM-021, LM-028, gộp LM-018/017/020, LM-019 tải xếp chồng, LM-022 thứ tự xếp
+### 15/09/2026 — Phase 1: LM-021, LM-028, gộp LM-018/017/020, LM-019, LM-022, LM-023 constraint engine + cổng benchmark
 
 **Đã làm**
 
@@ -45,6 +45,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - LM-019 theo TDD (seam `@/domain/constraints`, 12 vòng, 14 test + 2 test dịch câu): `createStackGraph` truyền tải toàn stack theo diện tích tiếp xúc (D-18, ghi rõ là ước tính), vật cản chịu tải nhận phần tải của nó; `stackIssues` (`maxTopLoadKg = 0` là không chịu tải, gồm ca HIGH; `stackable = false` chỉ báo `NOT_STACKABLE`; số tầng theo nhánh dài nhất; vật cản chịu tải bỏ trống giới hạn = không giới hạn, chủ thể ở `relatedIds[0]`); `movePlacement` + `recomputeColumn` tính lại cục bộ — bằng dựng lại toàn bộ sau mỗi lần trong 200 lần dời ngẫu nhiên tất định, test đỏ dưới 2 đột biến. Đo tham khảo 1.000 thùng: dựng đồ thị 17,6 ms, dời một kiện + tính lại p95 0,107 ms. Helper test chung `src/test/placements.ts`.
 - LM-022 theo TDD (6 test, chỉ cần đồ thị đỡ LM-019 nên làm song song LM-020): `loadingOrderIssues` (kiện đỡ xếp sau hoặc cùng lượt → cảnh báo), `recomputeOrders` sắp xếp topo có ưu tiên cho cả xếp và dỡ, cờ `recomputedOnFrontend`. Bộ dựng tay bản đầu trùng thứ tự ưu tiên nên không bắt được lỗi bỏ ràng buộc đỡ (lộ ra khi thử đột biến) → thêm cặp ngược ưu tiên. Thuộc tính trên 50 phương án ngẫu nhiên; ca biên chạm mặt. Đo 1.000 kiện: 26,7 ms → 5,1 ms sau khi đổi sang đếm kiện chặn.
 - LM-020 (agent, TDD 13 test): review, cherry-pick → `42d97ae` (xung đột barrel). `lifoIssues` trên `PlacementLayout` + `queryRearCorridor`, `coveredArea`/`Rect` lên `@/domain/geometry` (tỷ lệ đỡ LM-018 dùng chung, test LM-018 không đổi). Sửa khi gộp: thiếu điểm giao → `throw` thay vì bỏ qua (bỏ qua giấu vi phạm khỏi bước chặn Duyệt; thống nhất với LM-019/021/022). Agent đo `lifoIssues` × 1.000 ≈ 71–76 ms, gần hết ở `candidates()` của lưới sắp trước khi lọc (lọc trước ≈ 34–38 ms) → xử lý ở LM-023. Thay `potentialBlockers` của viewer dời sang LM-036 (engine 3D còn mm).
+- `applyPose`/`PlacementPose`/`PlacementPatch` (`e7c9a2a`) dùng chung cho engine, Duyệt và editor; giao **LM-026 phần 1** (store, revision bất biến, `approveRevision`, seed) cho agent từ commit này — revision seed đã duyệt và `supportRatio`/`constraintWarnings` khi Duyệt chờ LM-023/LM-024.
+- **LM-023** theo TDD (11 test + cổng bench): `createConstraintEngine` (`evaluateAll`, `evaluateMove`, `commitMove`, `placements`), `approvalBlockers`. Mã mới `ORIENTATION_NOT_ALLOWED` (23 mã; PRD coi hướng ngoài `effectiveOrientations` là lỗi). Tỷ lệ đỡ dùng cạnh đồ thị đỡ. 500 lần commit ngẫu nhiên = dựng lại (đỏ dưới 3 đột biến; bản đầu có assert rỗng với `Set` và bộ sinh không tạo chồng lấn — đã sửa). Cổng benchmark lần đầu **đỏ thật**: dựng + kiểm 1.000 kiện p95 93,5 ms > 50 ms → lưới lọc trước khi sắp + ô 3 chiều → **32,8 ms**; `evaluateMove` p95 1,9 ms, `commitMove` 1,5 ms (`docs/benchmarks/constraint-engine-2026-09-15.json`). `tsconfig.bench.json` cho file bench cần kiểu Node. Chưa đưa cổng vào CI (runner dao động).
 
 **Kiểm tra**
 
@@ -55,10 +57,11 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - Sau LM-019: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **314/314** ✅.
 - Sau LM-022: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **320/320** ✅.
 - Sau gộp LM-020: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **333/333** ✅.
+- Sau LM-023: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **347/347** ✅ · `pnpm test:bench` ✅ (cổng ngân sách đạt).
 
 **Việc tiếp theo**
 
-- LM-023 (facade + cổng benchmark; tối ưu `candidates()` của lưới, dùng chung cạnh đỡ giữa tỷ lệ đỡ và đồ thị tải) → LM-024 → LM-025, LM-026.
+- LM-024 (mock service qua engine) → LM-025 (worker); gộp LM-026 phần 1 khi agent xong rồi làm seed revision đã duyệt.
 
 ### 15/09/2026 — Xong nốt phase 0 (CI thật); phase 1: gộp LM-013, hoàn tất LM-014
 
@@ -317,10 +320,10 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-020](issues/LM-020-kiem-tra-lifo.md) | Kiểm tra LIFO | ✅ | 15/09/2026 | 15/09/2026 | Agent, `42d97ae`, 13 test; thiếu điểm giao → throw |
 | [LM-021](issues/LM-021-metrics-trong-tam.md) | Metrics, trọng tâm | ✅ | 15/09/2026 | 15/09/2026 | TDD 15 test; thể tích không trừ vật cản |
 | [LM-022](issues/LM-022-thu-tu-xep-kha-thi.md) | Thứ tự xếp khả thi | ✅ | 15/09/2026 | 15/09/2026 | TDD 6 test; `recomputeOrders` 5,1 ms / 1.000 kiện |
-| [LM-023](issues/LM-023-constraint-engine-facade-benchmark.md) | Constraint engine + benchmark | ⬜ | | | |
+| [LM-023](issues/LM-023-constraint-engine-facade-benchmark.md) | Constraint engine + benchmark | ✅ | 15/09/2026 | 15/09/2026 | TDD 11 test; p95 32,8 ms / 1,9 ms / 1,5 ms; lưới 3 chiều |
 | [LM-024](issues/LM-024-mock-optimization-service.md) | MockOptimizationService | ⬜ | | | |
 | [LM-025](issues/LM-025-worker-tien-trinh-huy-loi.md) | Web Worker | ⬜ | | | |
-| [LM-026](issues/LM-026-mock-repository-revision.md) | Mock repository, revision | ⬜ | | | |
+| [LM-026](issues/LM-026-mock-repository-revision.md) | Mock repository, revision | 🟦 | 15/09/2026 | | Phần 1 agent trong worktree |
 | [LM-027](issues/LM-027-ha-tang-i18n.md) | Hạ tầng i18n | ✅ | 15/09/2026 | 15/09/2026 | `e00b097`, `53a205e`, 24 test |
 | [LM-028](issues/LM-028-tu-dien-thong-bao-rang-buoc.md) | Thông báo ràng buộc vi/en | ✅ | 15/09/2026 | 15/09/2026 | TDD 59 test, 22 mã × vi/en; `issueField` → LM-041 |
 

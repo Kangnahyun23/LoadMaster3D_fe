@@ -118,6 +118,12 @@ const SAMPLE_ISSUES: { readonly [C in ConstraintCode]: ConstraintIssue<C> } = {
     packageInstanceId: 'PKG-001-01',
     params: { orientation: 'WLH' },
   },
+  ORIENTATION_NOT_ALLOWED: {
+    code: 'ORIENTATION_NOT_ALLOWED',
+    severity: 'error',
+    packageInstanceId: 'PKG-001-02',
+    params: { orientation: 'HWL' },
+  },
 }
 
 describe.each(LOCALES)('every constraint code has a finished sentence in %s', (locale) => {

@@ -1,6 +1,13 @@
+export { approvalBlockers, type ApprovalBlockers, type ApprovalInput } from './approval'
 export { boundaryIssues } from './boundary'
 export { fromContractWarnings, toContractWarnings, type ContractWarning } from './contract-warnings'
 export { checkDoorClearance } from './door'
+export {
+  createConstraintEngine,
+  type ConstraintEngine,
+  type ConstraintEngineInput,
+  type EngineEvaluation,
+} from './engine'
 export {
   CONSTRAINT_CODES,
   type ConstraintCode,
