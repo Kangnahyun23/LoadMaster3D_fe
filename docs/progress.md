@@ -17,7 +17,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
 | 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 19 / 19 | ~18,5 ngày | ✅ Xong 15/09/2026 — 403 test, cổng benchmark đạt |
-| 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 10 / 10 | ~10,5 ngày | ✅ Xong 15/09/2026 — 427 unit, 27 E2E, draw call không đổi |
+| 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 10 / 10 | ~10,5 ngày | ✅ Xong 15/09/2026 — 427 unit, 28 E2E, draw call không đổi |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
@@ -51,8 +51,16 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - Blocker hẹp hơn trước: chỉ kiện giao sau nằm hẳn sau mặt sau (D-26); hoạt ảnh dỡ vẫn mờ tại chỗ khi có hộp bất kỳ trên hành lang.
 - Còn nợ: ảnh so tỷ lệ `docs/screenshots/scene-first/` (LM-031); seed Planner chưa có vật cản và ca LIFO; đo React Profiler (LM-035).
 
+**Trả nợ sau báo cáo (người dùng hỏi "còn nợ không làm được hả")**
+- Ảnh so tỷ lệ: bộ `docs/screenshots/viewer-cm/` (`E2E_SCREENSHOT_DIR`), cùng tỷ lệ và góc với `scene-first/`.
+- Seed HD210 thêm hai hốc bánh không chịu tải; mock vẫn xếp 132/132, revision duyệt không issue.
+- LM-035: E2E `viewer-editor-renders` đếm React commit bằng hook DevTools giả — 31–34 commit/60 lần di chuyển (nhịp 100 ms); đỏ khi bỏ throttle (68).
+- Seed không có ca LIFO là đúng (phương án hợp lệ); ca LIFO ở fixture benchmark.
+- Kiểm tra: lint ✅ · build ✅ · test 427/427 · E2E 27 pass + 1 flaky do mình xoá thư mục worktree giữa lúc chạy làm dev server tải lại trang (chạy lại riêng: xanh). Không thao tác file lớn trong repo khi E2E đang chạy.
+- Dọn worktree agent.
+
 **Việc tiếp theo**
-- Báo cáo phase 2, chờ người dùng xác nhận trước phase 3.
+- Push, chờ CI; chờ người dùng xác nhận trước phase 3.
 
 
 ### 15/09/2026 — Xong phase 1: LM-017 → LM-026, LM-028 (domain, engine + cổng benchmark, mock service, worker, mock repository)
@@ -364,7 +372,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
 |---|---|---|---|---|---|
 | [LM-030](issues/LM-030-view-model-scene-cm.md) | View model từ result | ✅ | 15/09/2026 | 15/09/2026 | f02a540 |
-| [LM-031](issues/LM-031-engine-doi-don-vi-cm.md) | Engine sang cm | ✅ | 15/09/2026 | 15/09/2026 | f02a540 · còn nợ ảnh so tỷ lệ |
+| [LM-031](issues/LM-031-engine-doi-don-vi-cm.md) | Engine sang cm | ✅ | 15/09/2026 | 15/09/2026 | f02a540 · ảnh viewer-cm/ |
 | [LM-032](issues/LM-032-engine-6-huong-dat.md) | 6 hướng trong engine | ✅ | 15/09/2026 | 15/09/2026 | de12ef7 |
 | [LM-033](issues/LM-033-ve-vat-can-3d.md) | Vẽ vật cản | ✅ | 15/09/2026 | 15/09/2026 | 5fbc6ba (agent) |
 | [LM-034](issues/LM-034-editor-do-chinh-xac-cm.md) | Editor theo cm | ✅ | 15/09/2026 | 15/09/2026 | de12ef7 · sửa chồng lấn giả do số thực |

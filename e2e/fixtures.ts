@@ -53,6 +53,8 @@ export async function attachJson(testInfo: TestInfo, name: string, value: unknow
   await testInfo.attach(name, { body: JSON.stringify(value, null, 2), contentType: 'application/json' })
 }
 
+/** `E2E_SCREENSHOT_DIR=docs/screenshots/<bộ>` thì ghi thêm file `<tên>.png` để cập nhật bộ ảnh tài liệu. */
 export async function attachScreenshot(page: Page, testInfo: TestInfo, name: string, options: PageScreenshotOptions = {}) {
-  await testInfo.attach(name, { body: await page.screenshot(options), contentType: 'image/png' })
+  const dir = process.env.E2E_SCREENSHOT_DIR
+  await testInfo.attach(name, { body: await page.screenshot(dir ? { ...options, path: `${dir}/${name}.png` } : options), contentType: 'image/png' })
 }

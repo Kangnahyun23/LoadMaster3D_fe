@@ -19,7 +19,11 @@ export function seedVehicles(): VehicleConfig[] {
       doorHeightCm: 230,
       doorPosition: 'REAR',
       clearanceCm: 0,
-      obstacles: [],
+      // Hai hốc bánh sau sát hai vách: chuyến seed mở trên Planner có vật cản thật để xem và để editor chặn (LM-033, LM-035)
+      obstacles: [
+        { id: 'OBS-001', type: 'WHEEL_ARCH', xCm: 420, yCm: 0, zCm: 0, lengthCm: 110, widthCm: 25, heightCm: 32, loadBearing: false },
+        { id: 'OBS-002', type: 'WHEEL_ARCH', xCm: 420, yCm: 210, zCm: 0, lengthCm: 110, widthCm: 25, heightCm: 32, loadBearing: false },
+      ],
     },
     {
       id: 'VEHICLE-003',

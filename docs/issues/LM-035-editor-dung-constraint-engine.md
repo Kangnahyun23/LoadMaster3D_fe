@@ -27,9 +27,9 @@ Spec chỉ cho kéo thả khi mọi thay đổi được validate lại. Editor 
 
 ## Tiêu chí nghiệm thu
 
-- [ ] Ở 1.000 kiện, đo trong trình duyệt: thời gian xử lý thả p95 ≤ 8 ms (ghi vào report).
+- [x] Ở 1.000 kiện, đo trong trình duyệt: thời gian xử lý thả p95 ≤ 8 ms (ghi vào report).
 - [x] Kéo kiện lên hốc bánh không chịu tải bị chặn; kéo lên kiện `stackable = false` bị chặn; đặt thiếu đỡ dưới `minSupportRatio` commit kèm cảnh báo.
-- [ ] Không có React state cập nhật mỗi pointer frame (kiểm bằng React Profiler hoặc đếm render).
+- [x] Không có React state cập nhật mỗi pointer frame (kiểm bằng React Profiler hoặc đếm render).
 
 ## Kết quả (15/09/2026)
 
@@ -38,3 +38,4 @@ Spec chỉ cho kéo thả khi mọi thay đổi được validate lại. Editor 
 - Lệch có chủ ý: không có issue riêng cho "đặt trên kiện dễ vỡ" — domain không có mã này; tải lên kiện dựa `maxTopLoadKg`/`stackable`.
 - Test TDD ([viewer-editor-engine.test.ts](../../tests/viewer-editor-engine.test.ts), đỏ trước khi có module): thả lên kiện `stackable = false` → `NOT_STACKABLE`; lên hốc bánh không chịu tải → `NON_BEARING_SUPPORT`; thiếu đỡ 0,4 < 0,8 → cảnh báo `SUPPORT_BELOW_MIN`, vẫn hợp lệ; vượt thùng; hướng cấm; `sync` rồi hoàn tác. Fixture benchmark nay `minSupportRatio 0,8` để editor có cảnh báo đỡ.
 - Hiệu năng: Node, snap + sync + kiểm ở 1.000 kiện p95 ≈ 2,7 ms (132: 0,6 · 300: 1,0 · 500: 1,5). Số đo trong trình duyệt ghi ở LM-038.
+- *(bổ sung sau báo cáo phase)* Hai tiêu chí còn lại: đo trong trình duyệt ở LM-038 (p95 ≈ 2 ms). Không dùng React Profiler mà E2E [viewer-editor-renders.spec.ts](../../e2e/viewer-editor-renders.spec.ts) đặt hook DevTools giả trước khi React nạp và đếm commit: 60 lần di chuyển trong ~3,2 s → 31–34 commit react-dom + 1 R3F, tức theo nhịp 100 ms của `preview-store`, không theo pointer frame. Kiểm đột biến: bỏ giới hạn 100 ms thì test đỏ (68 commit).
