@@ -16,6 +16,7 @@ export {
   type PackageDimensions,
   type PlacedDimensions,
 } from './orientation'
+export { coveredArea, type Rect } from './rect'
 export {
   CONTACT_TOLERANCE_CM,
   createSpatialGrid,

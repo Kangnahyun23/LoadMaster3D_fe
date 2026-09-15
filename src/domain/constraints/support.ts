@@ -1,45 +1,12 @@
-import { gt, lt, type Box } from '@/domain/geometry'
+import { coveredArea, lt, type Box, type Rect } from '@/domain/geometry'
 import { obstacleToBox, placementToBox, type PackagePlacement } from '@/domain/models'
 import { restsOn, touchesTop } from './contact'
 import type { ConstraintIssue } from './issues'
 import type { PlacementLayout } from './layout'
 
-/** Hình chữ nhật trên mặt sàn, chiếm [x1, x2) × [y1, y2), cm. */
-type Rect = { x1: number; x2: number; y1: number; y2: number }
-
-/** Phần đáy `box` nằm trên đáy `support`; `null` khi hai đáy không giao nhau thật (chỉ chạm cạnh). */
-function clipFootprint(box: Box, support: Box): Rect | null {
-  const x1 = Math.max(box.xCm, support.xCm)
-  const x2 = Math.min(box.xCm + box.lengthCm, support.xCm + support.lengthCm)
-  const y1 = Math.max(box.yCm, support.yCm)
-  const y2 = Math.min(box.yCm + box.widthCm, support.yCm + support.widthCm)
-  return gt(x2, x1) && gt(y2, y1) ? { x1, x2, y1, y2 } : null
-}
-
-/** Độ dài hợp các đoạn Y của những hình chữ nhật phủ dải X [left, right). */
-function coveredLength(rects: readonly Rect[], left: number, right: number): number {
-  const spans = rects.filter(({ x1, x2 }) => lt(x1, right) && gt(x2, left)).sort((a, b) => a.y1 - b.y1)
-  let covered = 0
-  let end = -Infinity
-  for (const { y1, y2 } of spans) {
-    covered += Math.max(0, y2 - Math.max(end, y1))
-    end = Math.max(end, y2)
-  }
-  return covered
-}
-
-/**
- * Diện tích hợp của các hình chữ nhật, cm²: quét theo các mép X, mỗi dải nhân bề rộng với độ dài hợp theo Y,
- * nên phần các mặt đỡ chồng nhau chỉ tính một lần. Dải hẹp hơn EPSILON (mép trôi dấu phẩy động) không phủ gì.
- */
-function unionArea(rects: readonly Rect[]): number {
-  const xs = [...new Set(rects.flatMap(({ x1, x2 }) => [x1, x2]))].sort((a, b) => a - b)
-  let area = 0
-  xs.forEach((right, index) => {
-    const left = xs[index - 1]
-    if (left !== undefined) area += (right - left) * coveredLength(rects, left, right)
-  })
-  return area
+/** Đáy hộp trên mặt sàn: u = X, v = Y. */
+function footprint(box: Box): Rect {
+  return { u1: box.xCm, u2: box.xCm + box.lengthCm, v1: box.yCm, v2: box.yCm + box.widthCm }
 }
 
 /**
@@ -60,9 +27,8 @@ export function supportRatio(placement: PackagePlacement, layout: PlacementLayou
       .map(obstacleToBox)
       .filter((obstacleBox) => restsOn(box, obstacleBox)),
   ]
-  const rects = supports.flatMap((support) => clipFootprint(box, support) ?? [])
   // Hợp diện tích không âm; chỉ chặn trên, vì mép trôi dấu phẩy động có thể đẩy tỷ lệ lên 1.0000000000000002
-  return Math.min(1, unionArea(rects) / (box.lengthCm * box.widthCm))
+  return Math.min(1, coveredArea(footprint(box), supports.map(footprint)) / (box.lengthCm * box.widthCm))
 }
 
 /** Spec 7.7: tỷ lệ đỡ dưới `minSupportRatio` của kiện gốc → `SUPPORT_BELOW_MIN` (cảnh báo), tham số là tỷ lệ thô 0..1. */
