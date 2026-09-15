@@ -16,20 +16,36 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 8 / 19 | ~18,5 ngày | 🟦 Đang làm |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 9 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **14 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **15 / 57 issue** | **~56 ngày công** | |
 
-**Phase 1 đang làm (15/09/2026).** Đã có LM-010, 011, 012, 013, 014, 015, 016, 027. Làm được ngay: LM-017, LM-018, LM-021, LM-028. Sau đó LM-019, LM-020 → LM-022 → LM-023 → LM-024 → LM-025, LM-026.
+**Phase 1 đang làm (15/09/2026).** Đã có LM-010, 011, 012, 013, 014, 015, 016, 021, 027. Đang làm: LM-017, LM-018 (agent), LM-028. Sau đó LM-019, LM-020 → LM-022 → LM-023 → LM-024 → LM-025, LM-026.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 15/09/2026 — Phase 1: benchmark LM-016, LM-021 metrics và trọng tâm
+
+**Đã làm**
+
+- LM-016: chạy benchmark khi máy rảnh (`1b0a8af`) — một lần thả editor **0,47 ms** (p99 0,81); xếp kín 1.000 kiện, 2.000 truy vấn **35,1 ms** (quét cặp 129,9 ms). Chưa đạt ước lượng < 5 ms của issue; ngân sách thật đo ở LM-023, tối ưu đầu tiên nếu cần là thêm trục Z vào khoá ô.
+- LM-021 theo TDD (seam `@/domain/metrics`, 9 vòng, 15 test): `computeMetrics` (thể tích không trừ vật cản, phần trăm nhân trước rồi chia, thiếu khối lượng là `throw`), trọng tâm có trọng số (không kiện → vắng trường), `COG_THRESHOLDS` + `checkCenterOfGravity` → `COG_LATERAL` / `COG_HIGH` với `params` qua `roundCm`. Mọi số thực trong test đã kiểm bằng Node.
+- LM-017 và LM-018 giao 2 agent chạy song song trong worktree riêng từ `1b0a8af`.
+
+**Kiểm tra**
+
+- `pnpm lint` ✅ · `pnpm build` ✅ · Vitest **182/182** ✅.
+
+**Việc tiếp theo**
+
+- Review và gộp LM-017, LM-018; LM-028; rồi LM-019, LM-020 → LM-022 → LM-023.
 
 ### 15/09/2026 — Xong nốt phase 0 (CI thật); phase 1: gộp LM-013, hoàn tất LM-014
 
@@ -281,12 +297,12 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | ✅ | 15/09/2026 | 15/09/2026 | `e4cad8c`, 16 test |
 | [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | ✅ | 15/09/2026 | 15/09/2026 | 22 mã, test kiểu; hoàn tất sau khi agent dừng |
 | [LM-015](issues/LM-015-geometry-boundary-overlap-volume.md) | Biên, chồng lấn, thể tích | ✅ | 14/09/2026 | 14/09/2026 | TDD 8 test; phần diện tích giao → LM-018 |
-| [LM-016](issues/LM-016-luoi-khong-gian.md) | Lưới không gian | ✅ | 15/09/2026 | 15/09/2026 | `f26fb1b`, 9 test; số benchmark chờ chạy |
-| [LM-017](issues/LM-017-validation-dau-vao-xe-kien.md) | Validation đầu vào | ⬜ | | | |
-| [LM-018](issues/LM-018-vat-can-va-ty-le-do-day.md) | Vật cản, tỷ lệ đỡ đáy | ⬜ | | | Nhận thêm `overlapArea2D`/`overlapVolume` |
+| [LM-016](issues/LM-016-luoi-khong-gian.md) | Lưới không gian | ✅ | 15/09/2026 | 15/09/2026 | `f26fb1b`, 9 test; benchmark `1b0a8af`: thả 0,47 ms, xếp kín 35,1 ms |
+| [LM-017](issues/LM-017-validation-dau-vao-xe-kien.md) | Validation đầu vào | 🟦 | 15/09/2026 | | Agent trong worktree |
+| [LM-018](issues/LM-018-vat-can-va-ty-le-do-day.md) | Vật cản, tỷ lệ đỡ đáy | 🟦 | 15/09/2026 | | Agent trong worktree; nhận thêm `overlapArea2D`/`overlapVolume` |
 | [LM-019](issues/LM-019-tai-xep-chong-toan-stack.md) | Truyền tải toàn stack | ⬜ | | | |
 | [LM-020](issues/LM-020-kiem-tra-lifo.md) | Kiểm tra LIFO | ⬜ | | | |
-| [LM-021](issues/LM-021-metrics-trong-tam.md) | Metrics, trọng tâm | ⬜ | | | |
+| [LM-021](issues/LM-021-metrics-trong-tam.md) | Metrics, trọng tâm | ✅ | 15/09/2026 | 15/09/2026 | TDD 15 test; thể tích không trừ vật cản |
 | [LM-022](issues/LM-022-thu-tu-xep-kha-thi.md) | Thứ tự xếp khả thi | ⬜ | | | |
 | [LM-023](issues/LM-023-constraint-engine-facade-benchmark.md) | Constraint engine + benchmark | ⬜ | | | |
 | [LM-024](issues/LM-024-mock-optimization-service.md) | MockOptimizationService | ⬜ | | | |
