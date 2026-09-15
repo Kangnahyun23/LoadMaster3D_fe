@@ -13,6 +13,7 @@ export { lifoIssues, type LifoRules } from './lifo'
 export { loadingOrderIssues, recomputeOrders, type RecomputedOrders } from './loading-order'
 export { obstacleIssues } from './obstacles'
 export { checkPayload } from './payload'
+export { applyPose, type PlacementPatch, type PlacementPose } from './pose'
 export { stackIssues } from './stack-issues'
 export {
   createStackGraph,
