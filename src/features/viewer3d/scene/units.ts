@@ -1,4 +1,4 @@
-import type { VehicleConfig } from '@/domain/models'
+import type { VehicleConfig, VehicleObstacle } from '@/domain/models'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 
 /**
@@ -29,6 +29,27 @@ export function boxCenter(p: ScenePlacement): Vec3 {
 /** Kích thước theo trục Three.js: [dài, cao, ngang] */
 export function boxSize(p: ScenePlacement): Vec3 {
   return [toScene(p.lengthCm), toScene(p.heightCm), toScene(p.widthCm)]
+}
+
+/** Hộp cm của vật cản: góc (x, y, z) sát vách trước – vách trái – sàn và ba kích thước theo trục nghiệp vụ. */
+export type ObstacleBox = Pick<VehicleObstacle, 'xCm' | 'yCm' | 'zCm' | 'lengthCm' | 'widthCm' | 'heightCm'>
+
+/** Tâm vật cản theo trục Three.js (LM-033). */
+export function obstacleCenter(o: ObstacleBox): Vec3 {
+  return [toScene(o.xCm + o.lengthCm / 2), toScene(o.zCm + o.heightCm / 2), toScene(o.yCm + o.widthCm / 2)]
+}
+
+/** Kích thước vật cản theo trục Three.js: [dài, cao, ngang] */
+export function obstacleSize(o: ObstacleBox): Vec3 {
+  return [toScene(o.lengthCm), toScene(o.heightCm), toScene(o.widthCm)]
+}
+
+/** Hai góc đối của hộp vật cản trong scene: [min, max]. Dùng cho viền, không đổi đơn vị ở nơi khác. */
+export function obstacleCorners(o: ObstacleBox): [Vec3, Vec3] {
+  return [
+    [toScene(o.xCm), toScene(o.zCm), toScene(o.yCm)],
+    [toScene(o.xCm + o.lengthCm), toScene(o.zCm + o.heightCm), toScene(o.yCm + o.widthCm)],
+  ]
 }
 
 export function containerSize(v: Pick<VehicleConfig, 'innerLengthCm' | 'innerWidthCm' | 'innerHeightCm'>) {

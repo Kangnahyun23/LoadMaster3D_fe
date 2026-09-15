@@ -5,7 +5,8 @@ import { WorkspaceToolbar, type InspectorTab } from './panels/WorkspaceToolbar'
 import { SceneHud } from './operations/SceneHud'
 import { Button } from '@/components/ui/Button'
 import { PLANS } from '@/lib/plan-comparison.mock'
-import { benchmarkCountFromSearch, createBenchmarkInput } from './benchmark.mock'
+import { benchmarkCountFromSearch, createBenchmarkInput, type BenchmarkCount } from './benchmark.mock'
+import { benchmarkObstacleCountFromSearch, withBenchmarkObstacles, type BenchmarkObstacleCount } from './benchmark-obstacles.mock'
 import { adaptResult, type ViewerSceneModel } from './scene-input'
 import { usePlanSourceQuery } from './usePlanSourceQuery'
 import type { PlanSource } from './viewer-api'
@@ -39,16 +40,17 @@ const LoadPlanViewer = lazy(() =>
 export function ViewerPage() {
   const [searchParams] = useSearchParams()
   const count = benchmarkCountFromSearch(searchParams.toString())
-  return count ? <BenchmarkSession count={count} /> : <ResultSession />
+  const obstacles = benchmarkObstacleCountFromSearch(searchParams.toString()) ?? 0
+  return count ? <BenchmarkSession count={count} obstacles={obstacles} /> : <ResultSession />
 }
 
-/** `?debug&packages=N`: fixture renderer, không đọc kho. */
-function BenchmarkSession({ count }: { count: NonNullable<ReturnType<typeof benchmarkCountFromSearch>> }) {
+/** `?debug&packages=N[&obstacles=0|1|20]`: fixture renderer, không đọc kho. */
+function BenchmarkSession({ count, obstacles }: { count: BenchmarkCount; obstacles: BenchmarkObstacleCount }) {
   const model = useMemo(() => {
-    const input = createBenchmarkInput(count)
+    const input = withBenchmarkObstacles(createBenchmarkInput(count), obstacles)
     return adaptResult({ trip: input.trip, revision: input })
-  }, [count])
-  return <ViewerSession key={model.tripId} model={model} />
+  }, [count, obstacles])
+  return <ViewerSession key={`${model.tripId}:${obstacles}`} model={model} />
 }
 
 /** Phương án đã lưu của chuyến (LM-030): revision đã duyệt mới nhất, hoặc `?revision=<jobId>`. */

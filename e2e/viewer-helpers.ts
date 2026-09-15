@@ -163,17 +163,18 @@ export function visibleCargo(page: Page): Promise<VisibleCargo> {
   }, R3F_DEPS)
 }
 
-export function instancePoint(page: Page, index: number): Promise<ScreenPoint> {
-  return page.evaluate(async ({ url, index }) => {
+/** Toạ độ màn hình của tâm một instance; `name` là tên InstancedMesh (mặc định kiện đặc, `obstacle-body` cho vật cản). */
+export function instancePoint(page: Page, index: number, name = 'cargo-opaque'): Promise<ScreenPoint> {
+  return page.evaluate(async ({ url, index, name }) => {
     const { _roots } = (await import(url)) as R3FModule
     const canvas = document.querySelector('canvas')!
     const s = _roots.get(canvas)!.store.getState()
-    const mesh = s.scene.getObjectByName('cargo-opaque') as InstancedMesh, matrix = s.camera.matrixWorld.clone()
+    const mesh = s.scene.getObjectByName(name) as InstancedMesh, matrix = s.camera.matrixWorld.clone()
     mesh.getMatrixAt(index, matrix)
     const p = s.camera.position.clone().setFromMatrixPosition(matrix).applyMatrix4(mesh.matrixWorld).project(s.camera)
     const r = canvas.getBoundingClientRect()
     return { x: r.x + (p.x + 1) * r.width / 2, y: r.y + (1 - p.y) * r.height / 2 }
-  }, { url: R3F_DEPS, index })
+  }, { url: R3F_DEPS, index, name })
 }
 
 export function hasSceneObject(page: Page, name: string): Promise<boolean> {
