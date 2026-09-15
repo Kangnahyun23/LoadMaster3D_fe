@@ -1,49 +1,28 @@
 import { expect, test } from 'vitest'
 import { resolveEffectiveScene } from '@/features/viewer3d/viewer-draft'
 import { commitCommand, createDraftHistory, travelHistory } from '@/features/viewer3d/editor/draft-history'
-import { EDITOR_RULES, overlaps, supportCoverage, validatePlacement } from '@/features/viewer3d/editor/geometry'
+import { createEditorEngine } from '@/features/viewer3d/editor/editor-engine'
+import { EDITOR_RULES, overlaps } from '@/features/viewer3d/editor/geometry'
 import { snapPosition } from '@/features/viewer3d/editor/snapping'
+import { seededRandom } from '@/test/placements'
 import { benchmarkScene, sceneBox as box } from '@/test/scene'
 
 const model = benchmarkScene(1000)
 const vehicle = model.vehicle
 
-test('touching faces are valid; even 0.1 cm penetration is a hard overlap', () => {
-  const a = box('a'), b = box('b', 10)
-  expect(overlaps(a, b)).toBe(false)
-  expect(validatePlacement(a, [a, b], vehicle).valid).toBe(true)
-  const sunk = box('b', 9.9)
-  expect(validatePlacement(a, [a, sunk], vehicle).overlapIds).toStrictEqual(['b'])
-  expect(validatePlacement(a, [a, sunk], vehicle).valid).toBe(false)
+test('touching faces do not overlap; even 0.1 cm penetration does', () => {
+  expect(overlaps(box('a'), box('b', 10))).toBe(false)
+  expect(overlaps(box('a'), box('b', 9.9))).toBe(true)
 })
 
-test('every container boundary, 0.1 cm positions, and self exclusion', () => {
-  for (const [x, y, z] of [[-0.1, 0, 0], [710.1, 0, 0], [0, -0.1, 0], [0, 225.1, 0], [0, 0, -0.1], [0, 0, 230.1], [0.05, 0, 0], [NaN, 0, 0]]) {
-    expect(validatePlacement(box('a', x, y, z), [], vehicle).valid).toBe(false)
-  }
-  const a = box('a', 710, 225, 230)
-  expect(validatePlacement(a, [a], vehicle).valid).toBe(true)
-})
-
-test('support is the union of contacts, including partial and multiple surfaces', () => {
-  const top = box('top', 0, 0, 10)
-  const left = box('left', 0, 0, 0, { lengthCm: 6 })
-  const right = box('right', 4, 0, 0, { lengthCm: 6 })
-  expect(supportCoverage(top, [left, right]).ratio, 'overlapping projected areas cannot exceed 100%').toBe(1)
-  expect(supportCoverage(top, [box('partial', 0, 0, 0, { lengthCm: 4.3 })]).ratio).toBe(0.43)
-  expect(supportCoverage(box('floor'), []).ratio).toBe(1)
-  expect(supportCoverage(box('floating', 0, 0, 11), [left, right]).ratio, '1 cm gap is not contact').toBe(0)
-})
-
-test('weak support, fragile loads and manual edits remain advisories', () => {
-  const fragile = box('fragile', 0, 0, 0, { fragile: true })
-  const top = box('top', 0, 0, 10)
-  const onFragile = validatePlacement(top, [fragile], vehicle, true)
-  expect(onFragile.valid).toBe(true)
-  expect(onFragile.advisories.some((text) => text.includes('Đặt trên kiện dễ vỡ'))).toBeTruthy()
-  expect(onFragile.advisories.some((text) => text.includes('thủ công'))).toBeTruthy()
-  expect(validatePlacement(fragile, [top], vehicle).advisories.some((text) => text.includes('đỡ hàng'))).toBeTruthy()
-  expect(validatePlacement(box('floating', 0, 0, 50), [], vehicle).valid).toBe(true)
+test('snapping attracts only load-bearing obstacle faces; a non-bearing obstacle never invites a drop', () => {
+  const obstacle = { id: 'O', type: 'COOLING_UNIT' as const, xCm: 100, yCm: 0, zCm: 0, lengthCm: 50, widthCm: 50, heightCm: 46 }
+  const p = box('a', 100, 0, 0)
+  // 47,6 cm: mặt trên vật cản 46 cách 1,6 cm (≤ 2), mốc lưới gần nhất 50 cách 2,4 cm (> 2).
+  const bearing = snapPosition(p, { x: 100, y: 0, z: 47.6 }, [], { ...vehicle, obstacles: [{ ...obstacle, loadBearing: true }] }, ['z'])
+  const plain = snapPosition(p, { x: 100, y: 0, z: 47.6 }, [], { ...vehicle, obstacles: [{ ...obstacle, loadBearing: false }] }, ['z'])
+  expect([bearing.position.z, bearing.sources]).toStrictEqual([46, ['Z: Mặt vật cản O']])
+  expect([plain.position.z, plain.sources]).toStrictEqual([47.6, []])
 })
 
 test('snapping chooses floor/walls/5 cm grid/cargo faces within 2 cm, with fixed axes', () => {
@@ -59,6 +38,20 @@ test('snapping chooses floor/walls/5 cm grid/cargo faces within 2 cm, with fixed
   expect(snapPosition(p, { x: 0.8, y: 0.8, z: 1.2 }, [], vehicle, ['x', 'y']).position.z).toBe(1.2)
   const first = snapPosition(p, { x: 17.22, y: 0, z: 0 }, [neighbor], vehicle)
   expect(snapPosition(p, first.position, [neighbor], vehicle).position, 'no conversion drift').toStrictEqual(first.position)
+})
+
+test('200 back-and-forth drags that end on a 120.7 cm package face land on 0.1 cm multiples with no false overlap', () => {
+  // 100,4 + 120,7 = 221,10000000000002 trong máy: mặt kiện phải được làm tròn, không tạo chồng lấn giả.
+  const p = box('a', 0, 0, 0, { lengthCm: 120.7 }), neighbor = box('b', 221.1, 0, 0, { lengthCm: 50 })
+  const random = seededRandom(7)
+  let position = p.position
+  for (let i = 0; i < 200; i++) {
+    const requested = { ...position, x: 100.4 + (random() - 0.5) * 3 }
+    position = snapPosition({ ...p, position }, requested, [neighbor], vehicle, ['x']).position
+    expect(Math.round(position.x * 10) / 10, `drag ${i}`).toBe(position.x)
+  }
+  const dropped = snapPosition({ ...p, position }, { ...position, x: 100.9 }, [neighbor], vehicle, ['x']).position
+  expect([dropped.x, overlaps({ ...p, position: dropped }, neighbor)]).toStrictEqual([100.4, false])
 })
 
 test('mixed history commands undo/redo exact patches without mutating 1,000-placement snapshot', () => {
@@ -100,19 +93,21 @@ test('history ignores no-ops, branches after undo, and stays bounded', () => {
   expect(h.future.length).toBe(0)
 })
 
-test('measure scan + snapping at each benchmark count (no hardware-dependent assertion)', () => {
+test('measure snapping + constraint-engine check at each benchmark count (no hardware-dependent assertion)', () => {
   const results = []
   for (const count of [132, 300, 500, 1000] as const) {
-    const data = benchmarkScene(count), times: number[] = []
-    for (let i = 0; i < 1100; i++) {
+    const data = benchmarkScene(count), engine = createEditorEngine(data)!, times: number[] = []
+    for (let i = 0; i < 600; i++) {
       const p = data.placements[i % count]!
       const start = performance.now()
       const position = snapPosition(p, { ...p.position, x: p.position.x + (i % 20) / 10 }, data.placements, data.vehicle).position
-      validatePlacement({ ...p, position }, data.placements, data.vehicle, true)
+      engine.sync(data.placements)
+      engine.check({ ...p, position })
       if (i >= 100) times.push(performance.now() - start)
     }
     times.sort((a, b) => a - b)
-    results.push({ count, medianMs: times[500], p95Ms: times[950], maxMs: times.at(-1) })
+    results.push({ count, medianMs: times[250], p95Ms: times[475], maxMs: times.at(-1) })
   }
   console.log('EDITOR_BENCHMARK', JSON.stringify(results))
-})
+  // Engine thật mỗi lần kiểm: vượt mặc định 5 s khi máy/CI đang tải nặng.
+}, 30_000)

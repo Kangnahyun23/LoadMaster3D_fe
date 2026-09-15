@@ -1,4 +1,5 @@
 import { expandPackages } from '@/domain/cargo'
+import type { ConstraintEngineInput } from '@/domain/constraints'
 import {
   orientDimensions,
   roundCm,
@@ -76,6 +77,8 @@ export type ViewerSceneModel = {
   readonly isMockResult: boolean
   /** Thứ tự xếp/dỡ được tính lại ở FE khi Duyệt (D-32) */
   readonly ordersRecomputed: boolean
+  /** Đầu vào constraint engine cho editor (LM-035); `null` với `LoadPlan` mm cũ — kho/tài xế không chỉnh sửa. */
+  readonly engineInput: ConstraintEngineInput | null
 }
 
 /** Kích thước đã xoay của kiện theo tên trường scene; luôn áp lên kích thước danh nghĩa. */
@@ -163,6 +166,12 @@ export function adaptResult({ trip, revision }: ResultSceneSource): ViewerSceneM
     orientationRulesById: new Map(instances.map(({ packageInstanceId, allowedOrientations, keepUpright }) => [packageInstanceId, Object.freeze({ allowedOrientations, keepUpright })])),
     isMockResult: result.isMockResult,
     ordersRecomputed: revision.ordersRecomputed,
+    engineInput: Object.freeze({
+      vehicle: request.vehicle,
+      packages: request.packages,
+      placements: result.placements,
+      settings: { enforceLifo: request.settings.enforceLifo },
+    }),
   })
 }
 
@@ -226,6 +235,7 @@ export function adaptLoadPlan(plan: LoadPlan): ViewerSceneModel {
     orientationRulesById: new Map(placements.map((p) => [p.id, LEGACY_RULES])),
     isMockResult: false,
     ordersRecomputed: false,
+    engineInput: null,
   })
 }
 

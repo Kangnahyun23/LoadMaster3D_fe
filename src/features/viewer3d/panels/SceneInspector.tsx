@@ -40,6 +40,7 @@ export function SceneInspector({ state, operations, tripId, colorContext, onEdit
             </select>
           </label>
           <SelectedPackagePanel placement={state.selected} placements={state.placements} totalSteps={state.totalSteps}
+            orientationRules={state.selected ? state.sceneModel.orientationRulesById.get(state.selected.id) : undefined}
             stops={[...state.sceneModel.stops]} tripId={tripId} onClose={() => state.select(null)}
             onEdit={() => { onClose(); onEdit() }} onFocus={() => { onClose(); onFocus() }} />
         </> : null}
