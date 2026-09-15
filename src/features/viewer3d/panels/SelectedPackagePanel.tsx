@@ -145,10 +145,17 @@ function PackageDetails({
               {placement.stop} · {stopName}
             </span>
           </Row>
-          <Row label="Xếp ở bước" last>
+          <Row label={t('viewer.operations.loadingOrder')}>
             <span className="font-mono font-medium">
               {formatInteger(placement.step)}{' '}
               <span className="font-normal text-text-3">/ {formatInteger(totalSteps)}</span>
+            </span>
+          </Row>
+          {/* Spec 7.11: thứ tự dỡ riêng; phương án cũ không có `unloadingOrder` thì không hiện số */}
+          <Row label={t('viewer.operations.unloadingOrder')} last>
+            <span className="font-mono font-medium">
+              {placement.unloadingOrder > 0 ? formatInteger(placement.unloadingOrder) : '—'}{' '}
+              {placement.unloadingOrder > 0 ? <span className="font-normal text-text-3">/ {formatInteger(placements.length)}</span> : null}
             </span>
           </Row>
         </dl>

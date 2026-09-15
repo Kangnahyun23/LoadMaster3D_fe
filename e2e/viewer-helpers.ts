@@ -239,5 +239,6 @@ export const SOURCE_MODULES = {
   benchmark: '/src/features/viewer3d/benchmark.mock.ts',
   /** `benchmarkScene` và `seedScene`: scene cm đúng như Planner dựng. */
   scene: '/src/test/scene.ts',
-  operations: '/src/features/viewer3d/operations/operations-model.ts',
+  /** `unloadSequence`, `createLifoIndex`: thứ tự dỡ và kiểm LIFO đúng như mô phỏng dỡ. */
+  operations: '/src/features/viewer3d/operations/unloading.ts',
 } as const

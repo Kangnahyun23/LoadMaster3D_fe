@@ -30,7 +30,16 @@ test('planner defaults to the scene; follow step, stop focus, unloading advisory
   expect((await page.locator('canvas').boundingBox())!.width).toBeGreaterThanOrEqual(1580)
   expect(await hasSceneObject(page, 'stop-distribution')).toBe(false)
   await shot('01-planner-default')
+  const seedOrders = await page.evaluate(async ({ scene, operations }) => {
+    const plan = await ((await import(scene)) as typeof import('@/test/scene')).seedScene()
+    const { unloadSequence } = (await import(operations)) as typeof import('@/features/viewer3d/operations/unloading')
+    const { ordered, fromResult } = unloadSequence(plan.placements)
+    return { fromResult, unloading: ordered.map((p) => p.id), loading: plan.placements.toSorted((a, b) => a.step - b.step).map((p) => p.id) }
+  }, SOURCE_MODULES)
+  expect(seedOrders.fromResult).toBe(true)
   await page.getByRole('slider', { name: 'Bước xếp', exact: true }).fill('47'); await shot('02-loading-middle')
+  // Phát xếp theo `loadingOrder` của revision seed
+  expect(await page.locator('[data-operation-timeline]').innerText()).toContain(`· ${seedOrders.loading[46]}`)
   await button(page, 'Theo bước: Tắt').click(); await settle(page)
   const before = await sceneSnapshot(page)
   await button(page, 'Tiến một bước').click(); await settle(page)
@@ -48,17 +57,19 @@ test('planner defaults to the scene; follow step, stop focus, unloading advisory
     return (await seedScene()).placements.find((p) => p.step === Number(document.querySelector<HTMLInputElement>('input[aria-label="Bước xếp"]')!.value))?.stop
   }, SOURCE_MODULES.scene), 'stop focus must not leave the current label on a different stop').toBe(2)
   await button(page, 'Dỡ hàng').click(); await shot('04-unloading-clear')
-  const blocked = await page.evaluate(async ({ scene, operations }) => {
-    const plan = await ((await import(scene)) as typeof import('@/test/scene')).seedScene()
-    const { suggestedUnloadOrder, potentialBlockers } = (await import(operations)) as typeof import('@/features/viewer3d/operations/operations-model')
-    const ordered = suggestedUnloadOrder(plan.placements)
-    return ordered.findIndex((p, i) => potentialBlockers(p, ordered.slice(i), plan.vehicle).length)
-  }, SOURCE_MODULES)
-  expect(blocked, 'canonical plan contains an advisory case').toBeGreaterThanOrEqual(0)
-  await page.getByRole('slider', { name: 'Đã dỡ (gợi ý)', exact: true }).fill(String(blocked))
-  await button(page, 'Tiến một bước').click(); await shot('05-unloading-blocked')
-  expect(await page.getByRole('slider', { name: 'Đã dỡ (gợi ý)', exact: true }).inputValue()).toBe(String(blocked))
-  await button(page, 'Bỏ qua bước trong mô phỏng').waitFor()
+  // LM-036: phát dỡ đi đúng `unloadingOrder` của revision seed; seed đã duyệt không có ca LIFO nên mô phỏng không dừng
+  const timeline = page.locator('[data-operation-timeline]')
+  const unloadSlider = page.getByRole('slider', { name: 'Đã dỡ', exact: true })
+  expect(await timeline.innerText()).toContain(`· ${seedOrders.unloading[0]}`)
+  for (let i = 1; i <= 3; i++) {
+    await button(page, 'Tiến một bước').click()
+    await expect.poll(() => unloadSlider.inputValue()).toBe(String(i))
+    expect(await timeline.innerText()).toContain(`· ${seedOrders.unloading[i]}`)
+  }
+  await shot('05-unloading-order')
+  await openInspector(page, 'operations')
+  expect(await page.getByRole('dialog').innerText(), 'approved seed orders were recomputed on approval (D-32)').toMatch(/tính lại ở FE/)
+  await closeInspector(page)
   await openInspector(page, 'display'); await page.getByRole('dialog').getByRole('button', { name: 'Hiện tâm khối lượng hàng', exact: true }).click()
   await closeInspector(page); await cameraPreset(page, 'Góc chéo'); await shot('06-center-of-mass')
   await attachJson(testInfo, 'report', { scenes })

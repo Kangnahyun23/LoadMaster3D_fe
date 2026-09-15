@@ -1,17 +1,18 @@
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
-import type { VehicleConfig } from '@/domain/models'
-import { formatInteger } from '@/lib/format'
+import type { TFunction } from '@/lib/i18n'
 import type { ApprovalCheck } from '../ApprovePlanDialog'
-import { accessibilitySummary, stopOrderConsistent } from './operations-model'
+import { stopOrderConsistent } from './operations-model'
+import { countLifoIssues } from './unloading'
 
-export function operationApprovalChecks(placements: readonly ScenePlacement[], vehicle: VehicleConfig, edited: boolean): ApprovalCheck[] {
+export function operationApprovalChecks(placements: readonly ScenePlacement[], edited: boolean, t: TFunction): ApprovalCheck[] {
   const consistent = stopOrderConsistent(placements)
   const checks: ApprovalCheck[] = [{ tone: consistent ? 'success' : 'warning', text: consistent
     ? 'Thứ tự xếp phù hợp thứ tự điểm giao' : 'Thứ tự xếp chưa phù hợp thứ tự điểm giao' }]
-  const count = accessibilitySummary(placements, vehicle)
-  checks.push({ tone: 'warning', text: count
-    ? `${formatInteger(count)} kiện có khả năng bị cản đường khi bắt đầu điểm giao (ước lượng hình học)`
-    : 'Chưa thấy giao cắt hành lang dỡ thẳng; chưa xác nhận khả năng dỡ thực tế' })
+  // Kiểm LIFO của domain (Spec 7.11, D-26): chỉ nói kiện giao sau có che lối dỡ hay không, không khẳng định dỡ được thực tế.
+  const { blocked, partial } = countLifoIssues(placements)
+  if (blocked) checks.push({ tone: 'warning', text: t('viewer.operations.approval.lifoBlocked', { count: blocked }) })
+  if (partial) checks.push({ tone: 'warning', text: t('viewer.operations.approval.lifoPartial', { count: partial }) })
+  if (!blocked && !partial) checks.push({ tone: 'warning', text: t('viewer.operations.approval.lifoClear') })
   // Spec 7.10: không có số tải trục khi backend chưa tính (LM-037), nên Duyệt không kiểm tải trục.
   if (edited) checks.push({ tone: 'warning', text: 'Có chỉnh sửa thủ công' })
   return checks

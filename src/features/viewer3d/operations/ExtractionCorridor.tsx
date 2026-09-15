@@ -4,14 +4,16 @@ import { useThree } from '@react-three/fiber'
 import { useMemo } from 'react'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import type { VehicleConfig } from '@/domain/models'
+import { useT } from '@/lib/i18n'
 import { readToken } from '@/lib/tokens'
 import { boxCenter, SCENE_SCALE, type Vec3 } from '../scene/units'
 import { SceneCallout } from '../scene/SceneCallout'
 
-/** Straight extraction is an advisory corridor, not a physically proven route. */
+/** Hành lang dỡ thẳng về cửa sau (hình ảnh, không phải lộ trình đã chứng minh). `blockers`: kiện giao sau che lối dỡ theo kiểm LIFO của domain, gần kiện đích trước. */
 export function ExtractionCorridor({ target, vehicle, blockers, reducedMotion }: {
   target: ScenePlacement; vehicle: VehicleConfig; blockers: readonly ScenePlacement[]; reducedMotion: boolean
 }) {
+  const t = useT()
   const invalidate = useThree((s) => s.invalidate)
   const spring = useSpring({ from: { opacity: 0.05 }, opacity: 0.22, config: { duration: reducedMotion ? 100 : 180 }, onChange: () => invalidate() })
   const start = (target.position.x + target.lengthCm) * SCENE_SCALE, end = vehicle.innerLengthCm * SCENE_SCALE + 0.6
@@ -40,7 +42,7 @@ export function ExtractionCorridor({ target, vehicle, blockers, reducedMotion }:
     </mesh>
     <Line points={points} segments color={color} lineWidth={2} raycast={() => null} />
     {blockers[0] ? <SceneCallout position={boxCenter(blockers[0])} offset={[150, 36]} width={180}>
-      <span className="inline-block rounded-sm border border-warning bg-panel-dark px-2 py-1 text-body text-bg">{blockers.length} kiện có thể cản</span>
+      <span className="inline-block rounded-sm border border-warning bg-panel-dark px-2 py-1 text-body text-bg">{t('viewer.operations.blockers.callout', { count: blockers.length })}</span>
     </SceneCallout> : null}
   </group>
 }

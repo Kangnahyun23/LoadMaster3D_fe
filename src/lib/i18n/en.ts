@@ -145,6 +145,46 @@ export const en = {
       legendReserved: 'Reserved zone: hatched, see-through',
       legendHint: 'Click an obstacle to see its size and load bearing.',
     },
+    operations: {
+      loadingOrder: 'Loading order',
+      unloadingOrder: 'Unloading order',
+      suggestedUnloadingOrder: 'Suggested unloading order',
+      unloaded: 'Unloaded',
+      suggestedUnloaded: 'Unloaded (suggested)',
+      unloading: 'Unloading',
+      suggestedUnloading: 'Suggested unloading',
+      ordersRecomputed: 'Loading and unloading orders were recomputed in the frontend on approval.',
+      blockers: {
+        title: 'Packages blocking the unloading path',
+        toggleShow: 'Show packages blocking the path',
+        toggleHide: 'Hide packages blocking the path',
+        pick: 'Select a package to see its unloading path',
+        blocked: {
+          one: '{count} package delivered later fully blocks the path:',
+          other: '{count} packages delivered later fully block the path:',
+        },
+        partial: {
+          one: '{count} package delivered later blocks {coverage} of the path:',
+          other: '{count} packages delivered later block {coverage} of the path:',
+        },
+        clear: 'No package delivered later blocks the path.',
+        scope: 'The LIFO check only considers packages delivered later between the package and the rear door. Handling clearance, people, forklifts and rotating packages while unloading are not considered.',
+        callout: { one: '{count} package blocking', other: '{count} packages blocking' },
+        paused: 'Unloading path fully blocked · Paused',
+        corridor: 'Arrows toward the door show the straight unloading corridor. The simulation pauses when packages delivered later fully block the path; partial blocking is only marked.',
+      },
+      approval: {
+        lifoBlocked: {
+          one: '{count} package is fully blocked by packages delivered later (LIFO check)',
+          other: '{count} packages are fully blocked by packages delivered later (LIFO check)',
+        },
+        lifoPartial: {
+          one: '{count} package is partly blocked by packages delivered later (LIFO check)',
+          other: '{count} packages are partly blocked by packages delivered later (LIFO check)',
+        },
+        lifoClear: 'The LIFO check found no package blocked by packages delivered later; actual unloading is not confirmed',
+      },
+    },
     unplacedReasons: {
       NO_SPACE: 'No free space fits the package',
       OVER_PAYLOAD: 'Exceeds the vehicle max payload',

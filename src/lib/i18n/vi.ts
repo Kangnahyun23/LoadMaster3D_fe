@@ -156,6 +156,41 @@ export const vi = {
       legendReserved: 'Vùng dành riêng: có vạch, nhìn xuyên được',
       legendHint: 'Bấm vào vật cản để xem kích thước và khả năng chịu tải.',
     },
+    /** Xếp/dỡ theo thứ tự của kết quả và kiểm LIFO của domain (LM-036). "gợi ý" chỉ khi thứ tự dỡ do FE suy ra cho phương án cũ. */
+    operations: {
+      loadingOrder: 'Thứ tự xếp',
+      unloadingOrder: 'Thứ tự dỡ',
+      suggestedUnloadingOrder: 'Thứ tự dỡ gợi ý',
+      unloaded: 'Đã dỡ',
+      suggestedUnloaded: 'Đã dỡ (gợi ý)',
+      unloading: 'Dỡ hàng',
+      suggestedUnloading: 'Dỡ hàng gợi ý',
+      ordersRecomputed: 'Thứ tự xếp và dỡ được tính lại ở FE khi Duyệt.',
+      blockers: {
+        title: 'Kiện chắn lối dỡ',
+        toggleShow: 'Xem kiện chắn lối dỡ',
+        toggleHide: 'Ẩn kiện chắn lối dỡ',
+        pick: 'Chọn kiện để xem lối dỡ',
+        blocked: { one: '{count} kiện giao sau che kín lối dỡ:', other: '{count} kiện giao sau che kín lối dỡ:' },
+        partial: { one: '{count} kiện giao sau che {coverage} lối dỡ:', other: '{count} kiện giao sau che {coverage} lối dỡ:' },
+        clear: 'Không có kiện giao sau che lối dỡ.',
+        scope: 'Kiểm tra LIFO chỉ xét kiện giao sau nằm giữa kiện và cửa sau. Chưa tính khoảng hở thao tác, người, xe nâng hoặc xoay kiện khi dỡ.',
+        callout: { one: '{count} kiện chắn lối dỡ', other: '{count} kiện chắn lối dỡ' },
+        paused: 'Lối dỡ bị che kín · Đã tạm dừng',
+        corridor: 'Mũi tên về cửa biểu diễn hành lang dỡ thẳng. Mô phỏng tạm dừng khi kiện giao sau che kín lối dỡ; che một phần chỉ được đánh dấu.',
+      },
+      approval: {
+        lifoBlocked: {
+          one: '{count} kiện bị kiện giao sau che kín lối dỡ (kiểm tra LIFO)',
+          other: '{count} kiện bị kiện giao sau che kín lối dỡ (kiểm tra LIFO)',
+        },
+        lifoPartial: {
+          one: '{count} kiện bị kiện giao sau che một phần lối dỡ (kiểm tra LIFO)',
+          other: '{count} kiện bị kiện giao sau che một phần lối dỡ (kiểm tra LIFO)',
+        },
+        lifoClear: 'Kiểm tra LIFO không thấy kiện giao sau che lối dỡ; chưa xác nhận khả năng dỡ thực tế',
+      },
+    },
     /** Mã `UnplacedPackage.reasonCode` của Spec. */
     unplacedReasons: {
       NO_SPACE: 'Không còn chỗ trống vừa kiện',

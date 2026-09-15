@@ -8,12 +8,12 @@ import { stopColor } from '@/lib/stops'
 import { readToken } from '@/lib/tokens'
 import { boxCenter, boxSize, SCENE_SCALE } from '../scene/units'
 import type { AnimationQuality } from '../usePerformanceFlags'
-import { potentialBlockers } from './operations-model'
+import { createLifoIndex } from './unloading'
 
 export type UnloadMotionStep = { placement: ScenePlacement | undefined; cursor: number; durationMs: number }
 
 /** One temporary visual for a completed step; never a draggable/pickable placement.
- * A blocked corridor fades in place, so animation cannot imply proven accessibility.
+ * A corridor holding any remaining box fades in place, so animation never passes through cargo or implies proven accessibility.
  */
 export function UnloadMotion({ motion, remaining, vehicle, quality, reducedMotion }: {
   motion: UnloadMotionStep; remaining: readonly ScenePlacement[]; vehicle: VehicleConfig
@@ -33,7 +33,8 @@ export function UnloadMotion({ motion, remaining, vehicle, quality, reducedMotio
     mesh.current.visible = false
     const p = motion.placement
     if (!p || motion.cursor !== before.cursor + 1 || (quality === 'none' && !reducedMotion)) { invalidate(); return }
-    const blocked = potentialBlockers(p, remaining, vehicle).length > 0
+    // Hình ảnh: bất kỳ kiện còn lại nào nằm trên hành lang thẳng (mọi điểm giao) thì kiện mờ tại chỗ, không trượt xuyên qua
+    const blocked = createLifoIndex([...remaining.filter((q) => q.id !== p.id), p]).corridor(p).length > 0
     const [x, y, z] = boxCenter(p)
     mesh.current.position.set(x, y, z); mesh.current.scale.set(...boxSize(p)); mesh.current.visible = true
     material.current.color.set(blocked ? readToken('--warning') : stopColor(p.stop))

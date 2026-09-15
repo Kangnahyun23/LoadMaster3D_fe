@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, Pause, Play, SkipBack } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Button } from '@/components/ui/Button'
 import { formatInteger } from '@/lib/format'
+import { useT } from '@/lib/i18n'
 import { stopColor } from '@/lib/stops'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import type { PlaybackSpeed } from '@/types/load-plan'
@@ -12,11 +13,14 @@ export type TimelineProps = {
   onStepChange: (step: number) => void; onStepForward: () => void; onStepBackward: () => void
   onGoToStart: () => void; onTogglePlaying: () => void; onSpeedChange: (speed: PlaybackSpeed) => void
   kind?: 'loading' | 'unloading'; orderedOverride?: readonly ScenePlacement[]
+  /** Thứ tự dỡ do FE suy ra (phương án cũ không có `unloadingOrder`): nhãn ghi "gợi ý" */
+  suggested?: boolean
 }
 
 /** Equal-height operation cells; density follows available rail width, never cargo count. */
 export function Timeline({ placements, step, totalSteps, playing, speed, onStepChange, onStepForward,
-  onStepBackward, onGoToStart, onTogglePlaying, onSpeedChange, kind = 'loading', orderedOverride }: TimelineProps) {
+  onStepBackward, onGoToStart, onTogglePlaying, onSpeedChange, kind = 'loading', orderedOverride, suggested = false }: TimelineProps) {
+  const t = useT()
   const rail = useRef<HTMLDivElement>(null)
   const [budget, setBudget] = useState(32)
   useEffect(() => {
@@ -30,7 +34,7 @@ export function Timeline({ placements, step, totalSteps, playing, speed, onStepC
   const currentIndex = kind === 'unloading' ? progress : progress - 1
   const minimum = kind === 'loading' && totalSteps ? 1 : 0
   const percent = totalSteps ? Math.round(step / totalSteps * 100) : 0
-  const label = kind === 'loading' ? 'Bước xếp' : 'Đã dỡ (gợi ý)'
+  const label = kind === 'loading' ? 'Bước xếp' : t(suggested ? 'viewer.operations.suggestedUnloaded' : 'viewer.operations.unloaded')
   const current = ordered[currentIndex], next = ordered[currentIndex + 1]
   return <div className="flex flex-none flex-wrap items-center gap-x-4 gap-y-1 border-t border-border bg-bg px-3 py-2 text-body-lg sm:flex-nowrap xl:px-5 xl:text-body" data-operation-timeline>
     <div className="flex shrink-0 items-center gap-1">
