@@ -420,10 +420,10 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
 - Viền/nhãn selected/current/next/hover là tập nhỏ cố định; `SceneCallout` giữ nhãn trong khung và đường chỉ dẫn neo đúng vị trí 3D. Editor có ba hướng đo, mặt phẳng kéo, tối đa ba mặt snap và bốn vùng overlap bằng hai InstancedMesh phụ cố định. Geometry/nhãn của preview cập nhật imperative, không đưa pointer frames qua React. Phone giữ trạng thái/snap/invalid, lược nhãn đo phụ để dành chỗ cho kiện.
 - Three của kho và driver được lazy-load từ `viewer3d`. Driver chỉ tải khi mở “Xem vị trí hàng”; mô phỏng không đánh dấu giao hàng và không có editor. Phone dùng panel dưới/drawer, nút thao tác 56px, không phụ thuộc hover/gizmo nhỏ.
 
-### Tích hợp Spec vào engine *(bổ sung 15/09/2026 — đích, làm theo issue)*
+### Tích hợp Spec vào engine *(bổ sung 15/09/2026 — đã xong ở phase 2)*
 
-Các mục "Foundation engine", "Manual editor", "Operations" phía trên mô tả code **hiện tại**
-(mm, 3 hướng, `placement.step`). Đích sau phase 2 của [docs/issues](docs/issues/README.md):
+Các mục "Foundation engine", "Manual editor", "Operations" phía trên đã cập nhật theo phase 2 của
+[docs/issues](docs/issues/README.md) (báo cáo: [docs/viewer-cm-report.md](docs/viewer-cm-report.md)). Tóm tắt đích đã đạt:
 
 - Engine nhận view model dựng từ `OptimizationResult` + `CargoPackage` + chuyến (LM-030),
   đơn vị cm, `SCENE_SCALE = 0.01` chỉ trong `scene/units.ts` (LM-031).
