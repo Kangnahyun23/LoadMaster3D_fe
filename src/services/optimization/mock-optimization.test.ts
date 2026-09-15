@@ -1,0 +1,151 @@
+import { describe, expect, test } from 'vitest'
+import { createConstraintEngine } from '@/domain/constraints'
+import { SPEC_CARTON_A, SPEC_TRUCK_6M } from '@/domain/fixtures/spec-samples'
+import type { CargoPackage, OptimizationRequest, VehicleConfig } from '@/domain/models'
+import { MockOptimizationService, runMockOptimization, type OptimizationProgress } from '@/services/optimization'
+
+const SPEC_REQUEST: OptimizationRequest = {
+  vehicle: SPEC_TRUCK_6M,
+  packages: [SPEC_CARTON_A],
+  settings: { method: 'MOCK', timeLimitSeconds: 10, randomSeed: 42, enforceLifo: true, prioritizeLowCenterOfGravity: false },
+}
+
+/** A clock that advances 5 ms per reading, so runtimeMs is deterministic. */
+function fakeClock(): () => number {
+  let now = 1_000
+  return () => (now += 5)
+}
+
+function run(request: OptimizationRequest) {
+  return runMockOptimization(request, { clock: fakeClock() })
+}
+
+test('the Spec §12 request completes as a mock result with all four Carton A placed and no error in the constraint engine', () => {
+  const result = run(SPEC_REQUEST)
+  const { issues } = createConstraintEngine({ ...SPEC_REQUEST, placements: result.placements }).evaluateAll()
+  expect({
+    status: result.status,
+    method: result.method,
+    isMockResult: result.isMockResult,
+    placed: result.placements.map(({ packageInstanceId }) => packageInstanceId).sort(),
+    unplaced: result.unplacedPackages,
+    errors: issues.filter(({ severity }) => severity === 'error'),
+  }).toStrictEqual({
+    status: 'COMPLETED',
+    method: 'MOCK',
+    isMockResult: true,
+    placed: ['PKG-001-01', 'PKG-001-02', 'PKG-001-03', 'PKG-001-04'],
+    unplaced: [],
+    errors: [],
+  })
+})
+
+test('Carton A stacks three high beside the wheel arch (maxStackCount 3), the fourth opens a second column, metrics follow', () => {
+  const { placements, metrics } = run(SPEC_REQUEST)
+  // the arch fills y 0..30 at x 0..120, so the first column starts at y = 30; the second at y = 30 + 60
+  expect({
+    spots: placements.map(({ xCm, yCm, zCm, orientation }) => [xCm, yCm, zCm, orientation]),
+    metrics: { ...metrics, runtimeMs: 'fake' },
+  }).toStrictEqual({
+    spots: [[0, 30, 0, 'LWH'], [0, 30, 45, 'LWH'], [0, 30, 90, 'LWH'], [0, 90, 0, 'LWH']],
+    metrics: {
+      totalVehicleVolumeCm3: 36_000_000,
+      usedVolumeCm3: 1_296_000, // 4 × 120 × 60 × 45
+      volumeUtilizationPercent: 3.6,
+      maxPayloadKg: 5000,
+      usedPayloadKg: 120,
+      payloadUtilizationPercent: 2.4,
+      placedCount: 4,
+      unplacedCount: 0,
+      centerOfGravityCm: { x: 60, y: 75, z: 56.25 }, // centres y 60, 60, 60, 120 and z 22.5, 67.5, 112.5, 22.5
+      runtimeMs: 'fake',
+    },
+  })
+})
+
+test('orders come from the support relation: the floor carton of column 2 first, then column 1 bottom up; unloading reverses', () => {
+  const { placements } = run(SPEC_REQUEST)
+  expect(placements.map(({ zCm, yCm, loadingOrder, unloadingOrder }) => [yCm, zCm, loadingOrder, unloadingOrder])).toStrictEqual([
+    [30, 0, 2, 4],
+    [30, 45, 3, 2],
+    [30, 90, 4, 1],
+    [90, 0, 1, 3],
+  ])
+})
+
+test('the same request and seed give the same result; another seed gives another job ID', () => {
+  const again = run(SPEC_REQUEST)
+  const otherSeed = run({ ...SPEC_REQUEST, settings: { ...SPEC_REQUEST.settings, randomSeed: 7 } })
+  expect({ same: again, otherJob: otherSeed.jobId === again.jobId }).toStrictEqual({ same: run(SPEC_REQUEST), otherJob: false })
+})
+
+/** A small van: 130 × 70 cm floor, rear door as large as the interior. */
+function van(heightCm: number, maxPayloadKg = 5000): VehicleConfig {
+  return {
+    ...SPEC_TRUCK_6M,
+    id: 'VEHICLE-VAN',
+    name: 'Xe van 1 tấn',
+    innerLengthCm: 130,
+    innerWidthCm: 70,
+    innerHeightCm: heightCm,
+    doorWidthCm: 70,
+    doorHeightCm: heightCm,
+    maxPayloadKg,
+    obstacles: [],
+  }
+}
+
+function reasons(vehicle: VehicleConfig, packages: CargoPackage[]) {
+  return run({ ...SPEC_REQUEST, vehicle, packages }).unplacedPackages.map(({ packageInstanceId, reasonCode }) => [packageInstanceId, reasonCode])
+}
+
+describe('packages left behind say why', () => {
+  const carton = (overrides: Partial<CargoPackage>): CargoPackage => ({ ...SPEC_CARTON_A, mustLoad: false, ...overrides })
+
+  test('a package no orientation brings through the 220 × 230 cm door: DOOR_TOO_SMALL for every instance', () => {
+    const crate = carton({ id: 'PKG-009', name: 'Kiện máy phát', lengthCm: 250, widthCm: 235, heightCm: 235, quantity: 2, keepUpright: false, allowedOrientations: ['LWH', 'WLH', 'LHW', 'WHL', 'HLW', 'HWL'] })
+    expect(reasons(SPEC_TRUCK_6M, [crate])).toStrictEqual([['PKG-009-01', 'DOOR_TOO_SMALL'], ['PKG-009-02', 'DOOR_TOO_SMALL']])
+  })
+
+  test('cartons beyond a 100 kg payload: OVER_PAYLOAD once three 30 kg cartons are in', () => {
+    expect(reasons(van(200, 100), [carton({ quantity: 5, maxStackCount: 5, maxTopLoadKg: 200 })]).map(([, reason]) => reason)).toStrictEqual(['OVER_PAYLOAD', 'OVER_PAYLOAD'])
+  })
+
+  test('a second carton with no floor left and no headroom to stack: NO_SPACE', () => {
+    expect(reasons(van(50), [carton({ quantity: 2 })]).map(([, reason]) => reason)).toStrictEqual(['NO_SPACE'])
+  })
+
+  test('a second carton that would fit on top of a non-stackable one: STACKING_VIOLATION', () => {
+    expect(reasons(van(100), [carton({ quantity: 2, stackable: false, maxTopLoadKg: 0 })]).map(([, reason]) => reason)).toStrictEqual(['STACKING_VIOLATION'])
+  })
+})
+
+describe('MockOptimizationService behind the OptimizationService interface', () => {
+  test('resolves to the pure mock result and reports progress up to every instance', async () => {
+    const progress: OptimizationProgress[] = []
+    const result = await new MockOptimizationService(fakeClock()).optimize(SPEC_REQUEST, { onProgress: (step) => progress.push(step) })
+    expect({ result, last: progress.at(-1) }).toStrictEqual({ result: run(SPEC_REQUEST), last: { placed: 4, total: 4 } })
+  })
+
+  test('an already aborted signal rejects without running', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    await expect(new MockOptimizationService(fakeClock()).optimize(SPEC_REQUEST, { signal: controller.signal })).rejects.toThrow()
+  })
+})
+
+describe('requests the mock cannot run at all fail as a mock result', () => {
+  test('a request breaking the LM-010 schema fails with nothing placed', () => {
+    const result = run({ ...SPEC_REQUEST, packages: [{ ...SPEC_CARTON_A, quantity: 0 }] })
+    expect([result.status, result.isMockResult, result.placements, result.unplacedPackages]).toStrictEqual(['FAILED', true, [], []])
+  })
+
+  test('must-load cargo alone over the payload fails, every instance left UNKNOWN', () => {
+    const result = run({ ...SPEC_REQUEST, vehicle: { ...SPEC_TRUCK_6M, maxPayloadKg: 100 } })
+    expect([result.status, result.unplacedPackages.map(({ reasonCode }) => reasonCode), result.metrics.unplacedCount]).toStrictEqual([
+      'FAILED',
+      ['UNKNOWN', 'UNKNOWN', 'UNKNOWN', 'UNKNOWN'],
+      4,
+    ])
+  })
+})
