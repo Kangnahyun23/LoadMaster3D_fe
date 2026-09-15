@@ -493,6 +493,9 @@ Màn nào còn giữ dữ liệu ở `useState` (Đội xe, Người dùng) thì
 - Tối ưu đi qua interface `OptimizationService` (`src/services/optimization`). Hiện chỉ có
   `MockOptimizationService`; API thật sau này thay tại `-api.ts`, UI không đổi. Kết quả mock luôn
   `isMockResult: true`.
+  Mock thuần là `runMockOptimization` (tất định theo request + `randomSeed`, `runtimeMs` qua `clock` tiêm vào);
+  `FAILED` chỉ khi request sai schema hoặc có lỗi toàn cục — contract không có `warnings`, nên UI chạy `validateRequest`
+  trước khi gọi. `message` của kiện chưa xếp là `reasonCode`, UI dịch mã (LM-024).
 - Kết quả là **revision bất biến** theo `jobId`. Duyệt tạo revision approved mới; sửa xe/kiện sau
   khi tối ưu làm revision lỗi thời và chặn Duyệt. Kho và tài xế chỉ đọc revision đã duyệt.
 - Trạng thái demo lỗi service bật bằng tham số URL (`?mo-phong=loi`), đọc ở `-api.ts`, không đưa
