@@ -51,7 +51,7 @@ spec: [7.6, 7.7]
 - **Hợp diện tích:** chuyển thuật toán quét dải của editor cũ sang cm; dải hẹp hơn EPSILON không phủ gì; tỷ lệ chặn trên ở 1 vì mép trôi cho ra 1,0000000000000002 (hợp diện tích không âm nên không cần chặn dưới). Thuật toán là chi tiết nội bộ của `support.ts`, không đưa lên seam geometry. Quy tắc tiếp xúc dùng chung nằm trong `constraints/contact.ts` (không export).
 - So tỷ lệ với `minSupportRatio` qua `lt`: 49,6 / 62 cm đúng 80% nhưng tính ra 0,7999999999999998 — không cảnh báo.
 - Không dùng `placement.supportRatio` của contract (Spec 7.7 cho phép nhận từ mock): luôn tính lại từ hình học, vì chỉnh tay trong editor làm số cũ lỗi thời.
-- Câu Spec §13 của PKG-008 được kiểm trong `support.test.ts`, không sửa `spec-messages.test.ts` vì LM-017 làm song song trong cùng thư mục.
+- Câu Spec §13 của PKG-008 được kiểm trong `support.test.ts`, không sửa `spec-messages.test.ts` vì LM-017 làm song song trong cùng thư mục. Khi gộp (15/09/2026), issue kỳ vọng chuyển thành `SPEC_13_PKG_008_LOW_SUPPORT` của `src/test/spec-13.ts`, dùng chung với bảng câu của LM-028.
 
 **Hình học tái hiện Spec §13 (số đã chạy thử bằng Node):** PKG-008 đáy 100 × 50 cm tại (300, 100, 60) trên PKG-009 120 × 60 × 60 cm tại (242, 90, 0). Phần được đỡ x 300..362 × y 100..150 = 3.100 / 5.000 cm² → `0.62` đúng bằng literal. Hai mặt đỡ chồng nhau dưới PKG-008: 1.800 + 2.450 − 450 = 3.800 cm² → 0,76 (cộng thẳng ra 0,85).
 
@@ -74,7 +74,7 @@ Gần như toàn bộ chi phí nằm ở lưới X–Y (đúng nhận xét LM-01
 - **LM-020:** LIFO cần hợp diện tích trên mặt cắt Y–Z — lúc đó mới đưa `unionArea` lên `@/domain/geometry` dạng tổng quát.
 - **LM-023:** ngân sách D-29 cho toàn engine; nếu vượt, thêm chiều Z vào khoá ô lưới. Khi kéo/thả phải tính lại tỷ lệ đỡ của các kiện phía trên vị trí cũ và mới.
 - **LM-024:** mock service ghi `placement.supportRatio` bằng `supportRatio(placement, layout)`.
-- **LM-028:** câu hiển thị vi/en cho `OBSTACLE_OVERLAP`, `NON_BEARING_SUPPORT`, `SUPPORT_BELOW_MIN`.
+- ~~**LM-028:** câu hiển thị vi/en cho `OBSTACLE_OVERLAP`, `NON_BEARING_SUPPORT`, `SUPPORT_BELOW_MIN`.~~ Đã có trong `formatIssue` (LM-028 xong trước khi gộp).
 - **LM-035:** gỡ `supportCoverage` / `validatePlacement` cũ của editor sau khi chuyển sang engine.
 - Layout giả định `packageInstanceId` không trùng (Map giữ bản cuối); trùng ID do `DUPLICATE_INSTANCE_ID` của LM-013 báo trước.
 

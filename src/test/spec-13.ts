@@ -14,6 +14,14 @@ export const SPEC_13_PKG_004_TOO_TALL: ConstraintIssue<'EXCEEDS_BOUNDARY'> = {
   params: { axis: 'z', side: 'beyondInterior', overCm: 12.5 },
 }
 
+/** PKG-008 (đáy 100 × 50 cm) nhô 38 cm khỏi PKG-009: 62 × 50 cm được đỡ, tỷ lệ 0,62 (dựng hình ở `support.test.ts`). */
+export const SPEC_13_PKG_008_LOW_SUPPORT: ConstraintIssue<'SUPPORT_BELOW_MIN'> = {
+  code: 'SUPPORT_BELOW_MIN',
+  severity: 'warning',
+  packageInstanceId: 'PKG-008',
+  params: { ratio: 0.62, required: 0.8 },
+}
+
 export const SPEC_13_EXAMPLES: readonly Spec13Example[] = [
   {
     sentence: 'Inner length must be greater than 0 cm.',
@@ -50,13 +58,5 @@ export const SPEC_13_EXAMPLES: readonly Spec13Example[] = [
     sentence: 'PKG-006 overlaps PKG-007.',
     issue: { code: 'OVERLAP', severity: 'error', packageInstanceId: 'PKG-006', relatedIds: ['PKG-007'], params: {} },
   },
-  {
-    sentence: 'PKG-008 support ratio 0.62 is below the required 0.80.',
-    issue: {
-      code: 'SUPPORT_BELOW_MIN',
-      severity: 'warning',
-      packageInstanceId: 'PKG-008',
-      params: { ratio: 0.62, required: 0.8 },
-    },
-  },
+  { sentence: 'PKG-008 support ratio 0.62 is below the required 0.80.', issue: SPEC_13_PKG_008_LOW_SUPPORT },
 ]

@@ -2,6 +2,7 @@ import { expect, test } from 'vitest'
 import { SPEC_CARTON_A_PLACEMENT, SPEC_TRUCK_6M } from '@/domain/fixtures/spec-samples'
 import { createPlacementLayout, supportIssues, supportRatio } from '@/domain/constraints'
 import type { PackagePlacement, VehicleConfig, VehicleObstacle } from '@/domain/models'
+import { SPEC_13_PKG_008_LOW_SUPPORT } from '@/test/spec-13'
 
 type Triple = [number, number, number]
 
@@ -61,9 +62,7 @@ test('a package resting on a support with the same base never exceeds a ratio of
 
 test('Spec §13 "PKG-008 support ratio 0.62 is below the required 0.80." is exactly what supportIssues reports', () => {
   const layout = createPlacementLayout(SPEC_TRUCK_6M, [PKG_009, PKG_008])
-  expect(supportIssues(PKG_008, 0.8, layout)).toStrictEqual([
-    { code: 'SUPPORT_BELOW_MIN', severity: 'warning', packageInstanceId: 'PKG-008', params: { ratio: 0.62, required: 0.8 } },
-  ])
+  expect(supportIssues(PKG_008, 0.8, layout)).toStrictEqual([SPEC_13_PKG_008_LOW_SUPPORT])
 })
 
 test('a package supported on exactly its required 80% gets no warning, even when the computed ratio drifts below 0.8', () => {
