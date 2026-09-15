@@ -32,6 +32,16 @@ test('dimensions read length × width × height with one cm unit at the end', ()
   expect(en.dimensions(1203.5, 235, 239.2)).toBe('1,203.5 × 235 × 239.2 cm')
 })
 
+test('a door opening reads width × height with one cm unit at the end, as in "the 220 × 230 cm door"', () => {
+  expect(vi.widthByHeight(220, 230.5)).toBe('220 × 230,5 cm')
+  expect(en.widthByHeight(1220, 230.5)).toBe('1,220 × 230.5 cm')
+})
+
+test('a list of package IDs joins with the conjunction of each locale', () => {
+  expect(vi.list(['PKG-007', 'PKG-008', 'PKG-009'])).toBe('PKG-007, PKG-008 và PKG-009')
+  expect(en.list(['PKG-007', 'PKG-008'])).toBe('PKG-007 and PKG-008')
+})
+
 test('volume stays in cm³, rounded to whole cm³', () => {
   expect(vi.volume(324_000)).toBe('324.000 cm³')
   expect(en.volume(324_000)).toBe('324,000 cm³')

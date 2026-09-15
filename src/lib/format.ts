@@ -20,6 +20,10 @@ export type Formatter = {
   length(centimeters: number): string
   /** Dài × rộng × cao, một đơn vị ở cuối: "1.203,5 × 235 × 239,2 cm" */
   dimensions(lengthCm: number, widthCm: number, heightCm: number): string
+  /** Rộng × cao của cửa, một đơn vị ở cuối: "220 × 230 cm" */
+  widthByHeight(widthCm: number, heightCm: number): string
+  /** Ghép danh sách bằng liên từ của ngôn ngữ: "PKG-007, PKG-008 và PKG-009" · "PKG-007 and PKG-008" */
+  list(items: readonly string[]): string
   /** Bước 0,01 kg: 5320 → "5.320 kg" · "5,320 kg" */
   weight(kilograms: number): string
   /** Nguyên cm³, đơn vị của Spec: 324000 → "324.000 cm³" */
@@ -76,6 +80,7 @@ export function createFormatter(locale: FormatLocale): Formatter {
   })
   const date = new Intl.DateTimeFormat(locale, DATE_OPTIONS[locale])
   const time = new Intl.DateTimeFormat(locale, TIME_OPTIONS)
+  const conjunction = new Intl.ListFormat(locale, { type: 'conjunction' })
 
   return {
     integer: (value) => whole.format(value),
@@ -83,6 +88,8 @@ export function createFormatter(locale: FormatLocale): Formatter {
     length: (value) => centimeters.format(value),
     dimensions: (lengthCm, widthCm, heightCm) =>
       `${upToOneDecimal.format(lengthCm)} × ${upToOneDecimal.format(widthCm)} × ${centimeters.format(heightCm)}`,
+    widthByHeight: (widthCm, heightCm) => `${upToOneDecimal.format(widthCm)} × ${centimeters.format(heightCm)}`,
+    list: (items) => conjunction.format(items),
     weight: (value) => kilograms.format(value),
     volume: (value) => `${whole.format(value)} cm³`,
     volumeM3: (value) => `${oneDecimal.format(value / CUBIC_CENTIMETERS_PER_CUBIC_METER)} m³`,
