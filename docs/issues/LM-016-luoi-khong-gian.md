@@ -24,7 +24,7 @@ Chồng lấn, tìm kiện đỡ, truyền tải và LIFO đều cần tìm ki�
 ## Tiêu chí nghiệm thu
 
 - [x] Test đối chiếu: fixture ngẫu nhiên tất định 1.000 hộp — lưới 50 cm trả kết quả **giống hệt** lưới một ô (tương đương quét thẳng) cho cả 4 truy vấn, trước và sau 200 lần dời.
-- [ ] Benchmark `queryAabb` 1.000 lần trên 1.000 hộp < 5 ms (máy dev) — file bench đã có, **chưa chạy** (chờ máy rảnh; không đo khi 3 agent đang chạy E2E/Vitest vì số sẽ sai).
+- [ ] Benchmark `queryAabb` 1.000 lần trên 1.000 hộp < 5 ms (máy dev) — **chưa đạt**, xem "Benchmark" bên dưới. Ngưỡng thật chuyển về cổng ngân sách D-29 của **LM-023**.
 
 ## Kết quả — 15/09/2026 (TDD)
 
@@ -56,3 +56,21 @@ Kết quả luôn theo thứ tự thêm vào (tất định cho mock service).
 Test đối chiếu đã chứng minh đỏ: cho mỗi hộp chỉ đăng ký ô đầu tiên → 4 test đỏ. Timeout 30 s vì lưới một ô là quét thẳng 4 triệu phép so, vượt 5 s khi máy tải nặng.
 
 **Kiểm tra:** Vitest 142/142 ✅ (sau khi gộp LM-012) · `tsc -b` ✅ · `oxlint` ✅.
+
+## Benchmark — 15/09/2026
+
+Máy dev Windows, 16 luồng, không chạy việc khác. `npx vitest bench --run --project "unit (bench)" --reporter=verbose src/domain/geometry/spatial-grid.bench.ts` (reporter mặc định không in bảng khi không có TTY; tên project ở chế độ bench có hậu tố ` (bench)`).
+
+| Kịch bản (1.000 hộp) | Trung bình | p99 | So quét thẳng |
+|---|---:|---:|---:|
+| Một lần thả editor: `update` + 4 truy vấn | **0,47 ms** | 0,81 ms | — |
+| Dựng lưới | 0,95 ms | 1,64 ms | — |
+| Xếp kín 40 × 30 × 25 cm (gần thật): `queryAabb` + `queryBelow` cho mọi hộp (2.000 truy vấn) | **35,1 ms** | 38,2 ms | quét 999.000 cặp: 129,9 ms (nhanh hơn 3,7×) |
+| Ngẫu nhiên chồng chéo dày đặc (xấu nhất): `queryAabb` × 1.000 | 105,1 ms | 118,0 ms | 137,3 ms (1,3×) |
+
+Nhận xét:
+
+- **Đường editor** đạt xa ngân sách một lần thả p95 ≤ 8 ms (D-29).
+- **Toàn bộ 1.000 hộp chưa đạt ước lượng < 5 ms.** Lưới chỉ chia X–Y: một cột 10 tầng rơi cả vào cùng ô, nên mỗi truy vấn xét khoảng 100 ứng viên. Ứng viên tối ưu đầu tiên nếu LM-023 vượt 50 ms: thêm chiều Z vào khoá ô (vùng truy vấn below/above/hành lang đều có biên Z).
+- Vitest cảnh báo "module export getters" (`lt`, `gt`, `overlaps`, `EPSILON`) làm số đo cao hơn bundle thật; số ở đây là cận trên.
+- Không tối ưu ngay: theo AGENTS mục 12, đo toàn engine ở LM-023 trước.

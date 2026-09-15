@@ -26,6 +26,8 @@ export default mergeConfig(
             environment: 'jsdom',
             include: ['src/**/*.dom.test.tsx'],
             setupFiles: ['./src/test/setup-dom.ts'],
+            // Benchmark domain chỉ chạy một lần, ở project unit (node). `include: []` bị coi là mặc định nên dùng exclude.
+            benchmark: { exclude: ['**/*'] },
           },
         },
       ],

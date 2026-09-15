@@ -27,6 +27,38 @@ function randomEntries(count: number): SpatialEntry[] {
 
 const ENTRIES = randomEntries(1000)
 
+/**
+ * Gần phương án thật: 1.000 thùng 40 × 30 × 25 cm xếp kín theo hàng/tầng trong Truck 6m (600 × 240 × 250 cm),
+ * chạm mặt nhau, không chồng lấn. Dữ liệu ngẫu nhiên ở trên chồng chéo dày đặc nên là trường hợp xấu nhất.
+ */
+function packedEntries(count: number): SpatialEntry[] {
+  const perRow = 600 / 40, perLayer = perRow * (240 / 30)
+  return Array.from({ length: count }, (_, i) => {
+    const box: Box = {
+      xCm: (i % perRow) * 40, yCm: (Math.floor(i / perRow) % 8) * 30, zCm: Math.floor(i / perLayer) * 25,
+      lengthCm: 40, widthCm: 30, heightCm: 25,
+    }
+    return { id: `P${i}`, box }
+  })
+}
+
+const PACKED = packedEntries(1000)
+
+test('1.000 thùng xếp kín — kiểm chồng lấn và tìm kiện đỡ cho mọi thùng', async ({ bench }) => {
+  const grid = createSpatialGrid(PACKED)
+  await bench.compare(
+    bench('lưới 50 cm: queryAabb + queryBelow × 1.000', () => {
+      for (const { id, box } of PACKED) {
+        grid.queryAabb(box, { excludeId: id })
+        grid.queryBelow(box, { excludeId: id })
+      }
+    }),
+    bench('quét thẳng: overlaps × 999.000', () => {
+      for (const a of PACKED) for (const b of PACKED) if (a.id !== b.id) overlaps(a.box, b.box)
+    }),
+  )
+})
+
 // Vitest 5: `bench` lấy từ context của test; `bench.compare` in bảng so sánh.
 test('1.000 hộp — kiểm chồng lấn cho mọi hộp', async ({ bench }) => {
   const grid = createSpatialGrid(ENTRIES)
