@@ -59,6 +59,14 @@ export function createBenchmarkInput(count: BenchmarkCount): BenchmarkInput {
   const cellHeight = Math.floor(vehicle.innerHeightCm / layers)
   const packages: CargoPackage[] = []
   const placements: PackagePlacement[] = []
+  // Cột sát vách trước giao cuối (điểm 4), cột sát cửa giao đầu (điểm 1).
+  const columnStop = (column: number) => 4 - Math.min(3, Math.floor((column * 4) / along))
+  // LM-036: đúng một ca LIFO che kín cho browser suite. Kiện tầng trên cùng ở cột cuối của điểm 3 đổi thành điểm 2, kiện cùng ô
+  // ở cột ngay sau (phía cửa) đổi thành điểm 3; số kiện mỗi điểm giữ nguyên. Hàng ngang được chọn để kiện chắn (dạng kế tiếp
+  // trong SIZES) rộng và cao hơn, phủ trọn mặt sau kiện bị chắn.
+  const lifoColumn = Array.from({ length: along }, (_, column) => column).findLast((column) => columnStop(column) === 3) ?? 0
+  const lifoIndex = lifoColumn * across * layers + (layers - 1) * across + ((lifoColumn + layers - 1) % SIZES.length === 1 ? 1 : 0)
+  const swappedStops = new Map([[lifoIndex, 2], [lifoIndex + across * layers, 3]])
 
   for (let index = 0; index < count; index++) {
     const column = Math.floor(index / (across * layers))
@@ -89,7 +97,7 @@ export function createBenchmarkInput(count: BenchmarkCount): BenchmarkInput {
       maxTopLoadKg: 500,
       // Kiện tầng trên nhỏ hơn ô có thể thiếu đỡ: chỉ là cảnh báo, fixture vẫn đo được editor (LM-035).
       minSupportRatio: 0.8,
-      deliveryStop: 4 - Math.min(3, Math.floor((column * 4) / along)),
+      deliveryStop: swappedStops.get(index) ?? columnStop(column),
       priority: 0,
       mustLoad: false,
     })
@@ -103,12 +111,16 @@ export function createBenchmarkInput(count: BenchmarkCount): BenchmarkInput {
       placedWidthCm: placed.widthCm,
       placedHeightCm: placed.heightCm,
       loadingOrder: index + 1,
-      unloadingOrder: count - index,
+      unloadingOrder: 0,
       supportRatio: 1,
       constraintWarnings: [],
     })
   }
 
+  // Dỡ theo điểm giao tăng, trong một điểm từ cửa vào (chỉ số giảm): ca LIFO ở trên thành một lần mô phỏng dỡ bị chặn.
+  placements.map((_, index) => index)
+    .sort((a, b) => packages[a]!.deliveryStop - packages[b]!.deliveryStop || b - a)
+    .forEach((index, rank) => { placements[index]!.unloadingOrder = rank + 1 })
   const weightByInstanceId = new Map(packages.map((pkg) => [`${pkg.id}-01`, pkg.weightKg]))
   return {
     trip: {

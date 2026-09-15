@@ -1,5 +1,5 @@
 import { LOAD_PLAN } from '@/lib/load-plan.mock'
-import { suggestedUnloadOrder } from '@/features/viewer3d/operations/operations-model'
+import { unloadSequence } from '@/features/viewer3d/operations/unloading'
 import { adaptLoadPlan } from '@/features/viewer3d/scene-input'
 
 /**
@@ -56,7 +56,8 @@ function whereText(xCm: number, zCm: number, lengthCm: number): string {
   return `${area}, ${layer}`
 }
 
-const items: DeliveryItem[] = suggestedUnloadOrder(adaptLoadPlan(LOAD_PLAN).placements.filter((p) => p.stop === STOP_NUMBER))
+// Phương án mm cũ không có unloadingOrder: unloadSequence dùng thứ tự dỡ suy ra, cùng thứ tự với mô phỏng 3D của tài xế.
+const items: DeliveryItem[] = unloadSequence(adaptLoadPlan(LOAD_PLAN).placements.filter((p) => p.stop === STOP_NUMBER)).ordered
   .map((p, index) => {
     const goods = GOODS_BY_ORDER[p.packageId] ?? ['Hàng tổng hợp']
     return {

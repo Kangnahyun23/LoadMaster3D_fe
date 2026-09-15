@@ -18,7 +18,7 @@ export function PositionViewer({ plan, current }: { plan: LoadPlan; current: Pic
   const [search] = useSearchParams()
   const flags = usePerformanceFlags(debugQualityTier(search), 'warehouse')
   const perf = useMemo(() => createPerfStore(), [])
-  const semantics = useMemo(() => deriveSceneSemantics(model.placements, model.vehicle, {
+  const semantics = useMemo(() => deriveSceneSemantics(model.placements, {
     kind: 'loading', step: current.step, isolateId: isolate ? current.id : null,
   }), [model, current.id, current.step, isolate])
   const next = model.placements.find((p) => p.id === semantics.nextId)

@@ -1,37 +1,8 @@
 import type { ScenePlacement, PositionCm } from '@/features/viewer3d/scene-input'
-import type { VehicleConfig } from '@/domain/models'
 
 export function stopOrderConsistent(placements: readonly ScenePlacement[]): boolean {
   const ordered = [...placements].sort((a, b) => a.step - b.step || a.id.localeCompare(b.id))
   return ordered.every((p, i) => i === 0 || ordered[i - 1]!.stop >= p.stop)
-}
-
-/** Suggested only: stops ascend; within a stop prefer high boxes, then rearward faces. */
-export function suggestedUnloadOrder(placements: readonly ScenePlacement[]): ScenePlacement[] {
-  return [...placements].sort((a, b) => a.stop - b.stop ||
-    b.position.z + b.heightCm - a.position.z - a.heightCm ||
-    b.position.x + b.lengthCm - a.position.x - a.lengthCm ||
-    a.position.y - b.position.y || a.id.localeCompare(b.id))
-}
-
-/**
- * Straight +X extraction corridor from the rear face to the rear door, in cm.
- * Strict overlap of Y/Z projections; touching a horizontal/side face is not a blocker.
- * This ignores handling clearance, people, forklifts and rotations: advisory, not feasibility proof.
- */
-export function potentialBlockers(target: ScenePlacement, placements: readonly ScenePlacement[], vehicle: VehicleConfig): ScenePlacement[] {
-  const start = target.position.x + target.lengthCm
-  if (start >= vehicle.innerLengthCm) return []
-  return placements.filter((p) => p.id !== target.id && p.position.x < vehicle.innerLengthCm &&
-    p.position.x + p.lengthCm > start &&
-    p.position.y < target.position.y + target.widthCm && p.position.y + p.widthCm > target.position.y &&
-    p.position.z < target.position.z + target.heightCm && p.position.z + p.heightCm > target.position.z)
-    .sort((a, b) => a.position.x - b.position.x || a.id.localeCompare(b.id))
-}
-
-/** At the start of each stop, earlier stops are assumed delivered. No official unload sequence exists. */
-export function accessibilitySummary(placements: readonly ScenePlacement[], vehicle: VehicleConfig): number {
-  return placements.filter((p) => potentialBlockers(p, placements.filter((q) => q.stop >= p.stop), vehicle).length > 0).length
 }
 
 export function cargoCenterOfMass(placements: readonly ScenePlacement[]): { position: PositionCm; weightKg: number } | null {

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { PLANS } from '@/lib/plan-comparison.mock'
 import { benchmarkCountFromSearch, createBenchmarkInput, type BenchmarkCount } from './benchmark.mock'
 import { benchmarkObstacleCountFromSearch, withBenchmarkObstacles, type BenchmarkObstacleCount } from './benchmark-obstacles.mock'
+import { useT } from '@/lib/i18n'
 import { adaptResult, type ViewerSceneModel } from './scene-input'
 import { usePlanSourceQuery } from './usePlanSourceQuery'
 import type { PlanSource } from './viewer-api'
@@ -86,6 +87,7 @@ function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
   const selectedPlan = PLANS.find((p) => p.key === searchParams.get('plan')) ?? PLANS[2]
 
   const flags = usePerformanceFlags(debugQualityTier(searchParams))
+  const t = useT()
   const state = useLoadPlanViewer(plan, { initialSelectedId: plan.placements[0]?.id })
   const editor = useManualEditor(state)
   const operations = useOperations(state)
@@ -104,8 +106,8 @@ function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
   const totalPackages = plan.placements.length + plan.unplaced.length
 
   const approvalChecks = useMemo(() => approveOpen
-    ? operationApprovalChecks(state.placements, plan.vehicle, state.draft.patches.size > 0) : [],
-  [approveOpen, state.placements, plan.vehicle, state.draft.patches.size])
+    ? operationApprovalChecks(state.placements, state.draft.patches.size > 0, t) : [],
+  [approveOpen, state.placements, state.draft.patches.size, t])
 
   const { togglePlaying, stepForward, stepBackward, goToStart } = operations
   useEffect(() => {
@@ -179,6 +181,7 @@ function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
         placements={state.placements}
         kind={operations.kind}
         orderedOverride={operations.kind === 'unloading' ? operations.unload.ordered : undefined}
+        suggested={!operations.unload.fromResult}
         step={operations.kind === 'unloading' ? operations.unload.cursor : state.step}
         totalSteps={operations.kind === 'unloading' ? operations.unload.ordered.length : state.totalSteps}
         playing={operations.playing}

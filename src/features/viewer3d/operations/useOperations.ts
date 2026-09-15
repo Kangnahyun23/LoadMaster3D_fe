@@ -10,7 +10,7 @@ export function useOperations(state: LoadPlanViewerState) {
   const [showDistribution, setShowDistribution] = useState(false)
   const [inspectBlockers, setInspectBlockers] = useState(false)
   const [follow, setFollow] = useState<'off' | 'on' | 'paused'>('off')
-  const unload = useUnloadPlayback(state.placements, state.speed, state.sceneModel.vehicle)
+  const unload = useUnloadPlayback(state.placements, state.speed)
   const stop = () => { state.stopPlaying(); unload.stop() }
   const setKind = (next: 'loading' | 'unloading') => {
     stop(); setKindState(next); setInspectBlockers(next === 'unloading')
@@ -34,10 +34,11 @@ export function useOperations(state: LoadPlanViewerState) {
     if (value !== null) state.setCameraPreset('cua-sau')
   }
   const inspected = kind === 'unloading' ? unload.current?.id : state.selectedId
-  const semantics = useMemo(() => deriveSceneSemantics(state.placements, state.sceneModel.vehicle, {
+  const semantics = useMemo(() => deriveSceneSemantics(state.placements, {
     kind, step: state.step, focusStop, unloadedIds: kind === 'unloading' ? unload.unloadedIds : undefined,
     currentId: unload.current?.id, nextId: unload.next?.id, inspectId: inspectBlockers || (kind === 'unloading' && unload.warning) ? inspected : null,
-  }), [state.placements, state.sceneModel.vehicle, state.step, inspected, kind, focusStop, unload.unloadedIds, unload.current, unload.next, unload.warning, inspectBlockers])
+    lifo: unload.lifo,
+  }), [state.placements, state.step, inspected, kind, focusStop, unload.unloadedIds, unload.current, unload.next, unload.warning, unload.lifo, inspectBlockers])
   const current = state.placements.find((p) => p.id === semantics.currentId)
   const next = state.placements.find((p) => p.id === semantics.nextId)
   const togglePlaying = kind === 'loading' ? state.togglePlaying : unload.toggle

@@ -1,6 +1,5 @@
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
-import type { VehicleConfig } from '@/domain/models'
-import { potentialBlockers } from './operations-model'
+import { createLifoIndex, type LifoBlockage, type LifoIndex } from './unloading'
 
 export type CargoAppearance = {
   visibility: 'opaque' | 'dim' | 'hidden'
@@ -11,7 +10,10 @@ export type SceneSemantics = {
   appearanceById: ReadonlyMap<string, CargoAppearance>
   currentId: string | null
   nextId: string | null
+  /** Kiện giao sau che lối dỡ của kiện đang xem, gần kiện đó trước (`lifo.blockers`) */
   blockers: readonly ScenePlacement[]
+  /** Kiểm LIFO của domain cho kiện đang xem trên các kiện còn hiện */
+  lifo: LifoBlockage
   massPlacements: readonly ScenePlacement[]
   inspectionId: string | null
 }
@@ -24,10 +26,12 @@ export type OperationsInput = {
   focusStop?: number | null
   inspectId?: string | null
   isolateId?: string | null
+  /** Chỉ mục LIFO dựng từ đúng `placements` này (dùng lại của mô phỏng dỡ); thiếu thì dựng khi có kiện cần xem. */
+  lifo?: LifoIndex
 }
 
 /** Shared semantic state for planner/warehouse/driver, with no Three.js or role-specific branches. */
-export function deriveSceneSemantics(placements: readonly ScenePlacement[], vehicle: VehicleConfig, input: OperationsInput): SceneSemantics {
+export function deriveSceneSemantics(placements: readonly ScenePlacement[], input: OperationsInput): SceneSemantics {
   const currentId = input.kind === 'loading' ? placements.find((p) => p.step === input.step)?.id ?? null : input.currentId ?? null
   const nextId = input.kind === 'loading'
     ? [...placements].filter((p) => p.step > input.step).sort((a, b) => a.step - b.step)[0]?.id ?? null : input.nextId ?? null
@@ -45,7 +49,10 @@ export function deriveSceneSemantics(placements: readonly ScenePlacement[], vehi
       : input.kind === 'loading' && p.step < input.step ? 'loaded' : 'future' })
   }
   const target = placements.find((p) => p.id === input.inspectId && appearanceById.get(p.id)?.visibility !== 'hidden')
-  const blockers = target ? potentialBlockers(target, placements.filter((p) => appearanceById.get(p.id)?.visibility !== 'hidden'), vehicle) : []
+  // Kiện đang ẩn (đã dỡ, chưa xếp, điểm trước) được coi như không còn trên xe
+  const hiddenIds = target ? new Set([...appearanceById].filter(([, a]) => a.visibility === 'hidden').map(([id]) => id)) : undefined
+  const lifo = target ? (input.lifo ?? createLifoIndex(placements)).blockage(target, hiddenIds) : null
+  const blockers = lifo?.blockers ?? []
   if (target) {
     const ids = new Set(blockers.map((p) => p.id))
     for (const [id, appearance] of appearanceById) {
@@ -57,5 +64,5 @@ export function deriveSceneSemantics(placements: readonly ScenePlacement[], vehi
   if (input.isolateId) for (const [id, appearance] of appearanceById) {
     appearance.visibility = id === input.isolateId ? 'opaque' : 'hidden'
   }
-  return { appearanceById, currentId, nextId, blockers, massPlacements, inspectionId: target?.id ?? null }
+  return { appearanceById, currentId, nextId, blockers, lifo, massPlacements, inspectionId: target?.id ?? null }
 }
