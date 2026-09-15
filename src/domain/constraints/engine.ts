@@ -56,6 +56,19 @@ function groupByInstance(issues: readonly ConstraintIssue[], placements: Readonl
 }
 
 /**
+ * Placement mang `supportRatio` và `constraintWarnings` (mã issue của kiện, không lặp, theo thứ tự issue) do engine tính trên
+ * chính phương án này — dùng khi service trả kết quả (LM-024) và khi Duyệt áp draft (LM-026), không giữ số cũ.
+ */
+export function annotatePlacements(input: ConstraintEngineInput): PackagePlacement[] {
+  const { supportRatioById, byInstanceId } = createConstraintEngine(input).evaluateAll()
+  return input.placements.map((placement) => ({
+    ...placement,
+    supportRatio: supportRatioById.get(placement.packageInstanceId) ?? placement.supportRatio,
+    constraintWarnings: [...new Set((byInstanceId.get(placement.packageInstanceId) ?? []).map(({ code }) => code))],
+  }))
+}
+
+/**
  * Constraint engine của Spec mục 7 cho một phương án (D-29): dựng lưới, đồ thị đỡ và issue từng kiện một lần; khi dời một
  * kiện chỉ tính lại kiện đó, các kiện chồng lấn / tựa lên / có nó trong hành lang dỡ ở vị trí cũ và mới, cột đỡ của nó.
  * Xếp chồng, thứ tự xếp và trọng tâm tính lại toàn bộ mỗi lần kiểm (O(N), rẻ).

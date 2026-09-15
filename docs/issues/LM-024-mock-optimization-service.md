@@ -50,7 +50,10 @@ Seam `@/services/optimization`: `mock-optimization.test.ts` 12 test, `mock-optim
 - **Lỗi riêng từng kiện** (`DOOR_TOO_SMALL`, `NO_ALLOWED_ORIENTATION`) không làm hỏng job: mọi instance của kiện đó chưa xếp với lý do tương ứng.
   `NO_ALLOWED_ORIENTATION` thực tế bị schema chặn trước (danh sách rỗng, `keepUpright` + hướng nằm) nên chỉ còn đường `FAILED`.
 - **`message` = `reasonCode`:** service không sinh câu hiển thị (AGENTS mục 6); UI dịch `reasonCode`.
-- **Thứ tự xếp:** `mustLoad` → `priority` cao → điểm giao muộn → thể tích lớn → hoà thì băm FNV-1a theo `randomSeed` → mã. `jobId` = `MOCK-<seed>-<FNV-1a của request>`.
+- **Thứ tự chọn kiện lên xe (D-23):** `mustLoad` → `priority` cao → điểm giao muộn → thể tích lớn → hoà thì băm FNV-1a theo `randomSeed` → mã; tải trọng
+  được dành theo thứ tự này trước khi đặt chỗ (phần vượt → `OVER_PAYLOAD`). **Thứ tự đặt chỗ:** khi `enforceLifo`, điểm giao muộn vào sâu trước rồi mới tới
+  thứ tự chọn; không bật thì theo đúng thứ tự chọn. *(Sửa khi làm LM-026: bản đầu đặt chỗ theo `priority` trước điểm giao, chuyến seed thật ra 67
+  `LIFO_BLOCKED`.)* `jobId` = `MOCK-<seed>-<FNV-1a của request>`.
 - **Xếp kệ** (`shelf-packer.ts`): vách theo X từ vách trong ra cửa, cột theo Y, chồng theo Z; kiện chỉ chồng lên kiện đỉnh cột khi đáy nằm gọn trong đáy
   kiện đó — tỷ lệ đỡ luôn 1 và tải dồn đúng một cột, nên mô hình tải của bộ xếp khớp engine. Kiểm `stackable`, `maxTopLoadKg`, `maxStackCount` của cả
   cột; nhảy qua vật cản theo Y; vách đã qua không quay lại. `prioritizeLowCenterOfGravity` → mở cột trên sàn trước khi xếp chồng.

@@ -79,6 +79,41 @@ test('the same request and seed give the same result; another seed gives another
   expect({ same: again, otherJob: otherSeed.jobId === again.jobId }).toStrictEqual({ same: run(SPEC_REQUEST), otherJob: false })
 })
 
+describe('priority decides what gets on board, delivery stops decide where it goes', () => {
+  const line = (id: string, deliveryStop: number, priority: number, overrides: Partial<CargoPackage> = {}): CargoPackage => ({
+    ...SPEC_CARTON_A,
+    id,
+    name: `Hàng giao điểm ${deliveryStop}`,
+    quantity: 9,
+    deliveryStop,
+    priority,
+    mustLoad: false,
+    ...overrides,
+  })
+  // Nine Carton A fill the first wall three high beside the wheel arch; the next nine fill the second wall in front of them
+  const packages = [line('PKG-001', 1, 3), line('PKG-002', 3, 0)]
+
+  test('with enforceLifo the later stop goes in deep first even at a lower priority, so the mock result has no LIFO block', () => {
+    const result = run({ ...SPEC_REQUEST, packages })
+    const { issues } = createConstraintEngine({ ...SPEC_REQUEST, packages, placements: result.placements }).evaluateAll()
+    expect({ placed: result.placements.length, lifo: issues.filter(({ code }) => code.startsWith('LIFO')) }).toStrictEqual({ placed: 18, lifo: [] })
+  })
+
+  test('with enforceLifo off, priority also orders positions: the stop 1 cargo takes the deep wall', () => {
+    const request = { ...SPEC_REQUEST, packages, settings: { ...SPEC_REQUEST.settings, enforceLifo: false } }
+    const deepest = (prefix: string) => Math.min(...run(request).placements.filter(({ packageInstanceId }) => packageInstanceId.startsWith(prefix)).map(({ xCm }) => xCm))
+    expect([deepest('PKG-001'), deepest('PKG-002')]).toStrictEqual([0, 120])
+  })
+
+  test('over the payload, the higher priority line keeps its place even though the other line is loaded first by stop', () => {
+    // 100 kg van: priority 3 (stop 1, 2 × 30 kg) is chosen first, then one 40 kg carton of priority 0 (stop 3) fits, the other does not
+    const heavyLate = line('PKG-001', 3, 0, { quantity: 2, weightKg: 40 })
+    const lightEarly = line('PKG-002', 1, 3, { quantity: 2, weightKg: 30 })
+    const unplaced = run({ ...SPEC_REQUEST, vehicle: { ...SPEC_TRUCK_6M, maxPayloadKg: 100 }, packages: [heavyLate, lightEarly] }).unplacedPackages
+    expect(unplaced.map(({ packageInstanceId, reasonCode }) => [packageInstanceId.slice(0, 7), reasonCode])).toStrictEqual([['PKG-001', 'OVER_PAYLOAD']])
+  })
+})
+
 /** A small van: 130 × 70 cm floor, rear door as large as the interior. */
 function van(heightCm: number, maxPayloadKg = 5000): VehicleConfig {
   return {

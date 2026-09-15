@@ -23,7 +23,8 @@ test('approving with a draft creates a new approved revision and leaves the sour
   expect(await db.getRevision(source.id)).toStrictEqual(source)
   expect(await db.listRevisions(trip.id)).toStrictEqual([source, approved])
   expect(approved).toMatchObject({
-    id: 'REV-002',
+    // REV-001/002 are the seeded sample trip, REV-003 the source added above
+    id: 'REV-004',
     jobId: source.jobId,
     tripId: trip.id,
     request: source.request,
@@ -38,13 +39,13 @@ test('approving with a draft creates a new approved revision and leaves the sour
   expect(approved.result.isMockResult).toBe(true)
 })
 
-test('approval applies the draft and recomputes the orders, so the package underneath now loads first', async () => {
+test('approval applies the draft and recomputes orders, support ratio and warnings: the package underneath loads first', async () => {
   const db = createMockDb()
   const { revision: source } = await optimizedTwoCartonTrip(db)
   const approved = await db.approveRevision(source.id, [LIFT_ONTO_PKG_002])
   // Service orders were PKG-001-01 loaded 1st / unloaded 2nd and PKG-002-01 loaded 2nd / unloaded 1st. Stop 3 still ranks first
   // for loading, but PKG-001-01 now rests on PKG-002-01, so PKG-002-01 must go in first and come out last.
-  // supportRatio and constraintWarnings keep the service values until the constraint engine (LM-023) recomputes them.
+  // The lifted 60 × 120 cm base touches only 60 × 60 cm of PKG-002-01: support ratio 0.5, below Carton A's 0.8.
   expect(approved.result.placements).toStrictEqual([
     {
       ...SPEC_CARTON_A_PLACEMENT,
@@ -58,6 +59,8 @@ test('approval applies the draft and recomputes the orders, so the package under
       placedHeightCm: 45,
       loadingOrder: 2,
       unloadingOrder: 1,
+      supportRatio: 0.5,
+      constraintWarnings: ['SUPPORT_BELOW_MIN'],
     },
     { ...SPEC_CARTON_A_PLACEMENT, packageInstanceId: 'PKG-002-01', xCm: 240, yCm: 0, zCm: 0, loadingOrder: 1, unloadingOrder: 2 },
   ])
@@ -86,7 +89,7 @@ test('approving an approved revision again without a new draft gives the same re
   const { revision: source } = await optimizedTwoCartonTrip(db)
   const edited = await db.approveRevision(source.id, [LIFT_ONTO_PKG_002])
   const again = await db.approveRevision(edited.id, [])
-  expect(again).toMatchObject({ id: 'REV-003', sourceRevisionId: edited.id, draftPatches: [], manuallyEdited: true })
+  expect(again).toMatchObject({ id: 'REV-005', sourceRevisionId: edited.id, draftPatches: [], manuallyEdited: true })
   expect(again.result).toStrictEqual(edited.result)
 })
 

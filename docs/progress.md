@@ -16,14 +16,14 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 18 / 19 | ~18,5 ngày | 🟦 Đang làm |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 19 / 19 | ~18,5 ngày | ✅ Xong 15/09/2026 — 403 test, cổng benchmark đạt |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **24 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **25 / 57 issue** | **~56 ngày công** | |
 
-**Phase 1 đang làm (15/09/2026).** Đã có LM-010 → LM-025, LM-027, LM-028. Còn LM-026 (gộp phần 1 của agent, seed chuyến đã duyệt).
+**Phase 1 xong (15/09/2026).** LM-010 → LM-028 đủ 19 issue. Phase 2 (engine 3D sang cm, LM-030 → LM-038, LM-056) chờ người dùng xác nhận sau báo cáo phase.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
@@ -31,7 +31,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
-### 15/09/2026 — Phase 1: LM-021, LM-028, gộp LM-018/017/020, LM-019, LM-022, LM-023 engine + cổng benchmark, LM-024 mock service, LM-025 worker
+### 15/09/2026 — Xong phase 1: LM-017 → LM-026, LM-028 (domain, engine + cổng benchmark, mock service, worker, mock repository)
 
 **Đã làm**
 
@@ -49,6 +49,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - **LM-023** theo TDD (11 test + cổng bench): `createConstraintEngine` (`evaluateAll`, `evaluateMove`, `commitMove`, `placements`), `approvalBlockers`. Mã mới `ORIENTATION_NOT_ALLOWED` (23 mã; PRD coi hướng ngoài `effectiveOrientations` là lỗi). Tỷ lệ đỡ dùng cạnh đồ thị đỡ. 500 lần commit ngẫu nhiên = dựng lại (đỏ dưới 3 đột biến; bản đầu có assert rỗng với `Set` và bộ sinh không tạo chồng lấn — đã sửa). Cổng benchmark lần đầu **đỏ thật**: dựng + kiểm 1.000 kiện p95 93,5 ms > 50 ms → lưới lọc trước khi sắp + ô 3 chiều → **32,8 ms**; `evaluateMove` p95 1,9 ms, `commitMove` 1,5 ms (`docs/benchmarks/constraint-engine-2026-09-15.json`). `tsconfig.bench.json` cho file bench cần kiểu Node. Chưa đưa cổng vào CI (runner dao động).
 - **LM-024** theo TDD (13 test + property 500 request + bench): `OptimizationService`, `runMockOptimization` thuần tất định, `MockOptimizationService`. Xếp kệ vách/cột/chồng với luật xếp chồng khớp engine (chỉ chồng khi đáy nằm gọn trong kiện đỉnh cột); thứ tự LM-022, `supportRatio`/`constraintWarnings` từ engine LM-023, metrics LM-021. `FAILED` chỉ khi sai schema hoặc lỗi toàn cục (contract không có `warnings`); lỗi riêng kiện → `reasonCode`; `message` = `reasonCode`. Mẫu Spec khớp vị trí/metrics/thứ tự tính tay; property: không placement sai, đủ instance, chạy lại giống hệt (đỏ dưới 2 đột biến); 5 test lý do/FAILED đỏ dưới 3 đột biến. 1.000 instance: xếp đủ, 83,3% thể tích, trung bình 49 ms.
 - **LM-025** theo TDD (9 test, worker giả + fake timers): `WorkerOptimizationService` (message có kiểu, tiến trình, huỷ, hết giờ → `TIME_LIMIT_EXCEEDED`, độ trễ tối thiểu 600 ms, luôn `terminate`), `UnavailableOptimizationService` (`SERVICE_UNAVAILABLE`, D-12), `createOptimizationService` (Worker / luồng gọi / lỗi). Đột biến "bỏ terminate khi huỷ" ban đầu lọt → sửa test. Kiểm trên Chromium thật: Worker thật, 1.000 kiện, 601 ms, không long task trên main thread. Phần cuộn/bấm khi đang tối ưu cần UI → LM-048.
+- LM-026 phần 1 (agent, TDD 28 test): review, cherry-pick sạch → `2050a7b`. Kho in-memory (xe, chuyến, revision bất biến `REV-NNN`, `isStale` theo nội dung, `approveRevision` tạo bản mới, lỗi có mã), seed 4 xe + chuyến 132 kiện. Người điều phối làm nốt phần hoãn: Duyệt tính lại `supportRatio`/`constraintWarnings` qua `annotatePlacements` (dùng chung với mock service); seed `REV-001` (mock, seed cố định) + `REV-002` đã duyệt.
+- **Lỗi thật khi seed:** bản "đã duyệt" đầu tiên có 67 `LIFO_BLOCKED` nên không qua chính `approvalBlockers` — mock đặt chỗ theo `priority` trước điểm giao. Sửa LM-024: `priority` chỉ chọn kiện lên xe (dành tải trọng trước), `enforceLifo` thì đặt chỗ theo điểm giao muộn trước. Seed giờ 132/132 kiện, không issue, duyệt được; test seed khoá lại (đỏ khi bỏ thứ tự LIFO). AGENTS.md cập nhật service và `lib/mock-db`.
 
 **Kiểm tra**
 
@@ -62,10 +64,12 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - Sau LM-023: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **347/347** ✅ · `pnpm test:bench` ✅ (cổng ngân sách đạt).
 - Sau LM-024: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **360/360** ✅ · bench mock ✅.
 - Sau LM-025: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **369/369** ✅.
+- **Cuối phase 1:** `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **403/403** ✅ (51 file) · `pnpm test:bench` **7/7** ✅ (cổng engine và mock đạt).
 
 **Việc tiếp theo**
 
-- Gộp LM-026 phần 1 (agent đã xong), seed chuyến đã tối ưu + đã duyệt bằng mock service, `supportRatio`/`constraintWarnings` khi Duyệt qua engine → xong phase 1, báo cáo.
+- Báo cáo phase 1 cho người dùng; chờ xác nhận trước khi sang phase 2 (LM-030 → LM-038, LM-056).
+- Còn mở: đưa cổng benchmark vào CI (runner dao động); E2E cuộn/bấm khi đang tối ưu (LM-048); push nhánh để CI chạy lượt phase 1.
 
 ### 15/09/2026 — Xong nốt phase 0 (CI thật); phase 1: gộp LM-013, hoàn tất LM-014
 
@@ -327,7 +331,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-023](issues/LM-023-constraint-engine-facade-benchmark.md) | Constraint engine + benchmark | ✅ | 15/09/2026 | 15/09/2026 | TDD 11 test; p95 32,8 ms / 1,9 ms / 1,5 ms; lưới 3 chiều |
 | [LM-024](issues/LM-024-mock-optimization-service.md) | MockOptimizationService | ✅ | 15/09/2026 | 15/09/2026 | TDD 13 test + property 500; 1.000 instance 49 ms |
 | [LM-025](issues/LM-025-worker-tien-trinh-huy-loi.md) | Web Worker | ✅ | 15/09/2026 | 15/09/2026 | TDD 9 test; Chromium thật không long task; E2E UI → LM-048 |
-| [LM-026](issues/LM-026-mock-repository-revision.md) | Mock repository, revision | 🟦 | 15/09/2026 | | Phần 1 agent trong worktree |
+| [LM-026](issues/LM-026-mock-repository-revision.md) | Mock repository, revision | ✅ | 15/09/2026 | 15/09/2026 | Agent `2050a7b` + seed đã duyệt; 29 test |
 | [LM-027](issues/LM-027-ha-tang-i18n.md) | Hạ tầng i18n | ✅ | 15/09/2026 | 15/09/2026 | `e00b097`, `53a205e`, 24 test |
 | [LM-028](issues/LM-028-tu-dien-thong-bao-rang-buoc.md) | Thông báo ràng buộc vi/en | ✅ | 15/09/2026 | 15/09/2026 | TDD 59 test, 22 mã × vi/en; `issueField` → LM-041 |
 

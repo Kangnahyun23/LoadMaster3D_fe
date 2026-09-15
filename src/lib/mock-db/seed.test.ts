@@ -1,8 +1,9 @@
 import { expect, test } from 'vitest'
 import { expandPackages } from '@/domain/cargo'
+import { approvalBlockers, createConstraintEngine } from '@/domain/constraints'
 import { SPEC_TRUCK_6M } from '@/domain/fixtures/spec-samples'
 import { cargoPackageSchema, vehicleConfigSchema } from '@/domain/models'
-import { createMockDb } from '@/lib/mock-db'
+import { createMockDb, isStale } from '@/lib/mock-db'
 
 test('a new database starts with the Spec Truck 6m followed by three Vietnamese trucks, all valid vehicle configs', async () => {
   const vehicles = await createMockDb().listVehicles()
@@ -25,7 +26,7 @@ test('every new database starts from the same seed, with the same ids and data, 
   expect((await second.listVehicles()).map(({ id }) => id)).toContain('VEHICLE-004')
 })
 
-test('the sample trip carries 132 valid package instances to four real stops on the Hyundai HD210, not yet optimized', async () => {
+test('the sample trip carries 132 valid package instances to four real stops on the Hyundai HD210', async () => {
   const db = createMockDb()
   expect((await db.listTrips()).map(({ id }) => id)).toStrictEqual(['TRIP-2026-0914'])
   const trip = await db.getTrip('TRIP-2026-0914')
@@ -44,5 +45,47 @@ test('the sample trip carries 132 valid package instances to four real stops on 
   expect(new Set(instances.map(({ deliveryStop }) => deliveryStop))).toStrictEqual(new Set([1, 2, 3, 4]))
   // 38 × 48 + 35 × 52 + 11 × 13.5 + 16 × 45 + 11 × 6.5 + 21 × 60 kg, within the 9,500 kg payload of the HD210
   expect(instances.reduce((sum, { weightKg }) => sum + weightKg, 0)).toBe(5844)
-  expect(await db.listRevisions(trip.id)).toStrictEqual([])
+})
+
+test('the sample trip is already optimized by the mock service and approved without edits, so warehouse and driver have data', async () => {
+  const db = createMockDb()
+  const trip = await db.getTrip('TRIP-2026-0914')
+  const [optimized, approved, ...more] = await db.listRevisions(trip.id)
+  const seededRequest = optimized?.request
+  expect({
+    more,
+    optimized: optimized && { id: optimized.id, status: optimized.result.status, mock: optimized.result.isMockResult, stale: isStale(optimized, trip) },
+    approved: approved && {
+      id: approved.id,
+      sourceRevisionId: approved.sourceRevisionId,
+      approvedAt: approved.approvedAt,
+      manuallyEdited: approved.manuallyEdited,
+      ordersRecomputed: approved.ordersRecomputed,
+      stale: isStale(approved, trip),
+    },
+    // the approval of an unedited mock result keeps every value: the mock already takes orders and warnings from the domain
+    sameResult: approved?.result === undefined ? false : JSON.stringify(approved.result) === JSON.stringify(optimized?.result),
+    request: seededRequest && { vehicle: seededRequest.vehicle.id, packages: seededRequest.packages === undefined ? 0 : seededRequest.packages.length },
+    accountedFor: (optimized?.result.placements.length ?? 0) + (optimized?.result.unplacedPackages.length ?? 0),
+  }).toStrictEqual({
+    more: [],
+    optimized: { id: 'REV-001', status: 'COMPLETED', mock: true, stale: false },
+    approved: { id: 'REV-002', sourceRevisionId: 'REV-001', approvedAt: '2026-09-14T02:00:00.000Z', manuallyEdited: false, ordersRecomputed: true, stale: false },
+    sameResult: true,
+    request: { vehicle: 'VEHICLE-002', packages: trip.packages.length },
+    accountedFor: 132,
+  })
+  expect(await createMockDb().listRevisions(trip.id)).toStrictEqual(await db.listRevisions(trip.id))
+})
+
+test('the seeded approved plan passes the approval check: no engine error and no must-load package left behind', async () => {
+  const [, approved] = await createMockDb().listRevisions('TRIP-2026-0914')
+  if (approved === undefined) throw new Error('the sample trip has no approved revision')
+  const { request, result } = approved
+  const { issues } = createConstraintEngine({ ...request, placements: result.placements }).evaluateAll()
+  expect(approvalBlockers({ issues, packages: request.packages, unplacedPackages: result.unplacedPackages, stale: false })).toStrictEqual({
+    canApprove: true,
+    issues: [],
+    stale: false,
+  })
 })
