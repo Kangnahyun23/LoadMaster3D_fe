@@ -122,6 +122,7 @@ src/
     constraints/        validation và ràng buộc, trả mã lỗi (LM-014 →)
     metrics/            tỷ lệ sử dụng, trọng tâm (LM-021)
     fixtures/           dữ liệu mẫu Spec mục 12
+    cargo/              mở rộng quantity thành instance, trùng ID, mã kiện mới (LM-013)
   services/
     optimization/       interface OptimizationService, MockOptimizationService, worker (LM-024 →)
   test/                 setup dùng chung cho Vitest (setup-dom.ts)
