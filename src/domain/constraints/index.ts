@@ -7,3 +7,6 @@ export {
   type ConstraintParams,
   type ConstraintSeverity,
 } from './issues'
+export { createPlacementLayout, type PlacementLayout } from './layout'
+export { obstacleIssues } from './obstacles'
+export { supportIssues, supportRatio } from './support'
