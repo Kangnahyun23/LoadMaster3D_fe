@@ -9,6 +9,7 @@ export {
   type ConstraintSeverity,
 } from './issues'
 export { createPlacementLayout, movePlacement, type PlacementLayout } from './layout'
+export { loadingOrderIssues, recomputeOrders, type RecomputedOrders } from './loading-order'
 export { obstacleIssues } from './obstacles'
 export { checkPayload } from './payload'
 export { stackIssues } from './stack-issues'
