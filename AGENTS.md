@@ -499,7 +499,8 @@ Màn nào còn giữ dữ liệu ở `useState` (Đội xe, Người dùng) thì
 - Kết quả là **revision bất biến** theo `jobId`. Duyệt tạo revision approved mới; sửa xe/kiện sau
   khi tối ưu làm revision lỗi thời và chặn Duyệt. Kho và tài xế chỉ đọc revision đã duyệt.
 - Trạng thái demo lỗi service bật bằng tham số URL (`?mo-phong=loi`), đọc ở `-api.ts`, không đưa
-  công tắc kỹ thuật lên UI vận hành.
+  công tắc kỹ thuật lên UI vận hành. `-api.ts` lấy service qua `createOptimizationService({ simulateFailure })`:
+  Web Worker trong trình duyệt, chạy trên luồng gọi khi không có Worker (jsdom), mọi đường kết thúc đều `terminate` (LM-025).
 
 ### Kiểm thử *(bổ sung 15/09/2026, D-15, D-39)*
 

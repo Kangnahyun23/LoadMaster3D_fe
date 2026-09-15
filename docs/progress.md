@@ -16,14 +16,14 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 17 / 19 | ~18,5 ngày | 🟦 Đang làm |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 18 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **23 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **24 / 57 issue** | **~56 ngày công** | |
 
-**Phase 1 đang làm (15/09/2026).** Đã có LM-010 → LM-024, LM-027, LM-028. Đang làm: LM-026 phần 1 (agent). Còn LM-025 và phần còn lại của LM-026.
+**Phase 1 đang làm (15/09/2026).** Đã có LM-010 → LM-025, LM-027, LM-028. Còn LM-026 (gộp phần 1 của agent, seed chuyến đã duyệt).
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
@@ -31,7 +31,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
-### 15/09/2026 — Phase 1: LM-021, LM-028, gộp LM-018/017/020, LM-019, LM-022, LM-023 engine + cổng benchmark, LM-024 mock service
+### 15/09/2026 — Phase 1: LM-021, LM-028, gộp LM-018/017/020, LM-019, LM-022, LM-023 engine + cổng benchmark, LM-024 mock service, LM-025 worker
 
 **Đã làm**
 
@@ -48,6 +48,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - `applyPose`/`PlacementPose`/`PlacementPatch` (`e7c9a2a`) dùng chung cho engine, Duyệt và editor; giao **LM-026 phần 1** (store, revision bất biến, `approveRevision`, seed) cho agent từ commit này — revision seed đã duyệt và `supportRatio`/`constraintWarnings` khi Duyệt chờ LM-023/LM-024.
 - **LM-023** theo TDD (11 test + cổng bench): `createConstraintEngine` (`evaluateAll`, `evaluateMove`, `commitMove`, `placements`), `approvalBlockers`. Mã mới `ORIENTATION_NOT_ALLOWED` (23 mã; PRD coi hướng ngoài `effectiveOrientations` là lỗi). Tỷ lệ đỡ dùng cạnh đồ thị đỡ. 500 lần commit ngẫu nhiên = dựng lại (đỏ dưới 3 đột biến; bản đầu có assert rỗng với `Set` và bộ sinh không tạo chồng lấn — đã sửa). Cổng benchmark lần đầu **đỏ thật**: dựng + kiểm 1.000 kiện p95 93,5 ms > 50 ms → lưới lọc trước khi sắp + ô 3 chiều → **32,8 ms**; `evaluateMove` p95 1,9 ms, `commitMove` 1,5 ms (`docs/benchmarks/constraint-engine-2026-09-15.json`). `tsconfig.bench.json` cho file bench cần kiểu Node. Chưa đưa cổng vào CI (runner dao động).
 - **LM-024** theo TDD (13 test + property 500 request + bench): `OptimizationService`, `runMockOptimization` thuần tất định, `MockOptimizationService`. Xếp kệ vách/cột/chồng với luật xếp chồng khớp engine (chỉ chồng khi đáy nằm gọn trong kiện đỉnh cột); thứ tự LM-022, `supportRatio`/`constraintWarnings` từ engine LM-023, metrics LM-021. `FAILED` chỉ khi sai schema hoặc lỗi toàn cục (contract không có `warnings`); lỗi riêng kiện → `reasonCode`; `message` = `reasonCode`. Mẫu Spec khớp vị trí/metrics/thứ tự tính tay; property: không placement sai, đủ instance, chạy lại giống hệt (đỏ dưới 2 đột biến); 5 test lý do/FAILED đỏ dưới 3 đột biến. 1.000 instance: xếp đủ, 83,3% thể tích, trung bình 49 ms.
+- **LM-025** theo TDD (9 test, worker giả + fake timers): `WorkerOptimizationService` (message có kiểu, tiến trình, huỷ, hết giờ → `TIME_LIMIT_EXCEEDED`, độ trễ tối thiểu 600 ms, luôn `terminate`), `UnavailableOptimizationService` (`SERVICE_UNAVAILABLE`, D-12), `createOptimizationService` (Worker / luồng gọi / lỗi). Đột biến "bỏ terminate khi huỷ" ban đầu lọt → sửa test. Kiểm trên Chromium thật: Worker thật, 1.000 kiện, 601 ms, không long task trên main thread. Phần cuộn/bấm khi đang tối ưu cần UI → LM-048.
 
 **Kiểm tra**
 
@@ -60,10 +61,11 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - Sau gộp LM-020: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **333/333** ✅.
 - Sau LM-023: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **347/347** ✅ · `pnpm test:bench` ✅ (cổng ngân sách đạt).
 - Sau LM-024: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **360/360** ✅ · bench mock ✅.
+- Sau LM-025: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **369/369** ✅.
 
 **Việc tiếp theo**
 
-- LM-025 (worker); gộp LM-026 phần 1 khi agent xong rồi seed chuyến đã tối ưu + đã duyệt bằng mock service.
+- Gộp LM-026 phần 1 (agent đã xong), seed chuyến đã tối ưu + đã duyệt bằng mock service, `supportRatio`/`constraintWarnings` khi Duyệt qua engine → xong phase 1, báo cáo.
 
 ### 15/09/2026 — Xong nốt phase 0 (CI thật); phase 1: gộp LM-013, hoàn tất LM-014
 
@@ -324,7 +326,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-022](issues/LM-022-thu-tu-xep-kha-thi.md) | Thứ tự xếp khả thi | ✅ | 15/09/2026 | 15/09/2026 | TDD 6 test; `recomputeOrders` 5,1 ms / 1.000 kiện |
 | [LM-023](issues/LM-023-constraint-engine-facade-benchmark.md) | Constraint engine + benchmark | ✅ | 15/09/2026 | 15/09/2026 | TDD 11 test; p95 32,8 ms / 1,9 ms / 1,5 ms; lưới 3 chiều |
 | [LM-024](issues/LM-024-mock-optimization-service.md) | MockOptimizationService | ✅ | 15/09/2026 | 15/09/2026 | TDD 13 test + property 500; 1.000 instance 49 ms |
-| [LM-025](issues/LM-025-worker-tien-trinh-huy-loi.md) | Web Worker | ⬜ | | | |
+| [LM-025](issues/LM-025-worker-tien-trinh-huy-loi.md) | Web Worker | ✅ | 15/09/2026 | 15/09/2026 | TDD 9 test; Chromium thật không long task; E2E UI → LM-048 |
 | [LM-026](issues/LM-026-mock-repository-revision.md) | Mock repository, revision | 🟦 | 15/09/2026 | | Phần 1 agent trong worktree |
 | [LM-027](issues/LM-027-ha-tang-i18n.md) | Hạ tầng i18n | ✅ | 15/09/2026 | 15/09/2026 | `e00b097`, `53a205e`, 24 test |
 | [LM-028](issues/LM-028-tu-dien-thong-bao-rang-buoc.md) | Thông báo ràng buộc vi/en | ✅ | 15/09/2026 | 15/09/2026 | TDD 59 test, 22 mã × vi/en; `issueField` → LM-041 |
