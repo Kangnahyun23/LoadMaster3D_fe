@@ -1,7 +1,8 @@
 import type { PackageInstance } from '@/domain/cargo'
-import { createConstraintEngine, createPlacementLayout, createStackGraph, recomputeOrders } from '@/domain/constraints'
+import { annotatePlacements, createPlacementLayout, createStackGraph, recomputeOrders } from '@/domain/constraints'
+import { gt, roundKg } from '@/domain/geometry'
 import { computeMetrics } from '@/domain/metrics'
-import type { OptimizationRequest, OptimizationResult, PackagePlacement } from '@/domain/models'
+import type { OptimizationRequest, OptimizationResult, PackagePlacement, UnplacedPackage } from '@/domain/models'
 import { preflight } from './mock-preflight'
 import type { OptimizationProgress } from './OptimizationService'
 import { packShelves } from './shelf-packer'
@@ -26,8 +27,8 @@ function volumeCm3({ lengthCm, widthCm, heightCm }: PackageInstance): number {
   return lengthCm * widthCm * heightCm
 }
 
-/** Thứ tự xếp: `mustLoad` trước, `priority` cao, điểm giao muộn (xếp sâu), thể tích lớn; hoà thì theo seed, rồi mã. */
-function packingOrder(instances: readonly PackageInstance[], seed: number): PackageInstance[] {
+/** D-23, thứ tự chọn kiện lên xe: `mustLoad` trước, `priority` cao, điểm giao muộn, thể tích lớn; hoà thì theo seed, rồi mã. */
+function selectionOrder(instances: readonly PackageInstance[], seed: number): PackageInstance[] {
   const tieBreak = (instance: PackageInstance) => fnv1a(`${seed}:${instance.packageInstanceId}`)
   return instances.toSorted(
     (a, b) =>
@@ -38,6 +39,35 @@ function packingOrder(instances: readonly PackageInstance[], seed: number): Pack
       tieBreak(a) - tieBreak(b) ||
       (a.packageInstanceId < b.packageInstanceId ? -1 : 1),
   )
+}
+
+/**
+ * Khi `enforceLifo`: điểm giao muộn vào sâu trước, trong cùng điểm giữ thứ tự chọn — ưu tiên chỉ quyết định kiện nào lên xe,
+ * không đẩy hàng giao sớm vào trong hàng giao muộn (D-26). Không bật thì đặt chỗ theo đúng thứ tự chọn.
+ */
+function lifoOrder(chosen: readonly PackageInstance[]): PackageInstance[] {
+  const rank = new Map(chosen.map((instance, index) => [instance.packageInstanceId, index]))
+  const rankOf = (instance: PackageInstance) => rank.get(instance.packageInstanceId) ?? 0
+  return chosen.toSorted((a, b) => b.deliveryStop - a.deliveryStop || rankOf(a) - rankOf(b))
+}
+
+/**
+ * D-23: dành tải trọng theo thứ tự chọn trước khi đặt chỗ, phần vượt trả `OVER_PAYLOAD` — nhờ vậy xếp theo điểm giao không để kiện
+ * ưu tiên thấp chiếm tải của kiện ưu tiên cao. Kiện đã dành tải mà hết chỗ vẫn giữ phần tải đó (ước tính thận trọng của mock).
+ */
+function overPayload(
+  chosen: readonly PackageInstance[],
+  known: ReadonlyMap<string, UnplacedPackage['reasonCode']>,
+  maxPayloadKg: number,
+): Map<string, UnplacedPackage['reasonCode']> {
+  const reasons = new Map(known)
+  let reservedKg = 0
+  for (const { packageInstanceId, weightKg } of chosen) {
+    if (reasons.has(packageInstanceId)) continue
+    if (gt(reservedKg + weightKg, maxPayloadKg)) reasons.set(packageInstanceId, 'OVER_PAYLOAD')
+    else reservedKg = roundKg(reservedKg + weightKg)
+  }
+  return reasons
 }
 
 /**
@@ -66,10 +96,11 @@ export function runMockOptimization(request: OptimizationRequest, { clock = () =
   }
 
   const { vehicle, packages, settings } = request
+  const chosen = selectionOrder(checked.instances, seed)
   const packed = packShelves({
     vehicle,
-    instances: packingOrder(checked.instances, seed),
-    reasons: checked.reasons,
+    instances: settings.enforceLifo ? lifoOrder(chosen) : chosen,
+    reasons: overPayload(chosen, checked.reasons, vehicle.maxPayloadKg),
     lowCenterOfGravity: settings.prioritizeLowCenterOfGravity,
     onProgress,
   })
@@ -77,14 +108,7 @@ export function runMockOptimization(request: OptimizationRequest, { clock = () =
   const graph = createStackGraph(createPlacementLayout(vehicle, packed.placements), instances)
   const { orders } = recomputeOrders(graph, new Map(checked.instances.map((instance) => [instance.packageInstanceId, instance.deliveryStop])))
   const ordered = packed.placements.map((placement): PackagePlacement => ({ ...placement, ...orders.get(placement.packageInstanceId) }))
-  const evaluation = createConstraintEngine({ vehicle, packages, placements: ordered, settings }).evaluateAll()
-  const placements = ordered.map(
-    (placement): PackagePlacement => ({
-      ...placement,
-      supportRatio: evaluation.supportRatioById.get(placement.packageInstanceId) ?? 1,
-      constraintWarnings: [...new Set((evaluation.byInstanceId.get(placement.packageInstanceId) ?? []).map(({ code }) => code))],
-    }),
-  )
+  const placements = annotatePlacements({ vehicle, packages, placements: ordered, settings })
   return {
     jobId,
     status: 'COMPLETED',

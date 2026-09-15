@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { applyPose, createConstraintEngine } from '@/domain/constraints'
+import { annotatePlacements, applyPose, createConstraintEngine } from '@/domain/constraints'
 import { SPEC_CARTON_A, SPEC_CARTON_A_PLACEMENT, SPEC_TRUCK_6M } from '@/domain/fixtures/spec-samples'
 import type { CargoPackage, PackagePlacement } from '@/domain/models'
 
@@ -23,6 +23,17 @@ test('the Spec §12 sample placement has no error, stands fully supported, carri
     supportRatio: 1,
     loadKg: 0,
   })
+})
+
+test('annotatePlacements replaces stale supportRatio and constraintWarnings with what the engine finds', () => {
+  const stale = { ...SPEC_CARTON_A_PLACEMENT, supportRatio: 0.3, constraintWarnings: ['OVERLAP'] }
+  // 60 cm up in the air at x 300: nothing below it
+  const floating = { ...SPEC_CARTON_A_PLACEMENT, packageInstanceId: 'PKG-001-02', xCm: 300, zCm: 60 }
+  const annotated = annotatePlacements({ vehicle: SPEC_TRUCK_6M, packages: [SPEC_CARTON_A], placements: [stale, floating], settings: { enforceLifo: true } })
+  expect(annotated.map(({ packageInstanceId, supportRatio, constraintWarnings }) => [packageInstanceId, supportRatio, constraintWarnings])).toStrictEqual([
+    ['PKG-001-01', 1, []],
+    ['PKG-001-02', 0, ['SUPPORT_BELOW_MIN']],
+  ])
 })
 
 /** Carton A (120 × 60 × 45 cm, LWH) instances on the floor at y 60, one per x. */

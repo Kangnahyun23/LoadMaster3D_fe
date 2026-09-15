@@ -115,6 +115,7 @@ src/
     admin/              người dùng
   lib/                  format, helper, mock dùng chung, api client
     i18n/               từ điển vi/en, provider, hook (LM-027)
+    mock-db/            kho in-memory: xe, chuyến, revision bất biến, Duyệt, seed chuyến đã duyệt (LM-026)
   types/                type dùng từ hai feature trở lên
   domain/               logic nghiệp vụ THUẦN theo Spec — không React, không Three.js
     geometry/           số (roundCm, EPSILON), hộp, chồng lấn, biên thùng, 6 hướng đặt, lưới không gian
@@ -490,8 +491,9 @@ Màn nào còn giữ dữ liệu ở `useState` (Đội xe, Người dùng) thì
 - Dữ liệu đi qua nhiều màn (xe, chuyến, kiện, revision kết quả) nằm trong **mock repository
   in-memory** (`src/lib/mock-db/`, LM-026) → `features/<tên>/<tên>-api.ts` → hook TanStack Query.
   Ghi bằng `useMutation` rồi invalidate. Không thêm store client (Zustand, Redux, Context giữ dữ liệu nghiệp vụ).
-- Tối ưu đi qua interface `OptimizationService` (`src/services/optimization`). Hiện chỉ có
-  `MockOptimizationService`; API thật sau này thay tại `-api.ts`, UI không đổi. Kết quả mock luôn
+- Tối ưu đi qua interface `OptimizationService` (`src/services/optimization`). Hiện có mock chạy trên luồng gọi
+  (`MockOptimizationService`), trong Web Worker (`WorkerOptimizationService`) và bản giả lập sự cố
+  (`UnavailableOptimizationService`); API thật sau này thay tại `-api.ts`, UI không đổi. Kết quả mock luôn
   `isMockResult: true`.
   Mock thuần là `runMockOptimization` (tất định theo request + `randomSeed`, `runtimeMs` qua `clock` tiêm vào);
   `FAILED` chỉ khi request sai schema hoặc có lỗi toàn cục — contract không có `warnings`, nên UI chạy `validateRequest`

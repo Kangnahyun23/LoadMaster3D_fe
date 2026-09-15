@@ -1,5 +1,5 @@
 import { expandPackages } from '@/domain/cargo'
-import { applyPose, createPlacementLayout, createStackGraph, recomputeOrders, type PlacementPatch } from '@/domain/constraints'
+import { annotatePlacements, applyPose, createPlacementLayout, createStackGraph, recomputeOrders, type PlacementPatch } from '@/domain/constraints'
 import { computeMetrics } from '@/domain/metrics'
 import type { OptimizationRequest, OptimizationResult } from '@/domain/models'
 import { MockDbError } from './errors'
@@ -15,10 +15,10 @@ export function isStale(revision: Pick<Revision, 'inputVersion'>, trip: Pick<Tri
  * 1. áp từng patch bằng `applyPose`, kích thước kiện lấy từ instance của `expandPackages(request.packages)`;
  * 2. tính lại `loadingOrder`/`unloadingOrder` bằng `recomputeOrders` trên đồ thị đỡ của placement đã áp draft, thuộc tính xếp chồng và
  *    điểm giao lấy từ instance;
- * 3. tính lại `metrics` bằng `computeMetrics`.
+ * 3. tính lại `supportRatio` và `constraintWarnings` của từng placement bằng constraint engine (`annotatePlacements`, LM-023);
+ * 4. tính lại `metrics` bằng `computeMetrics`.
  *
- * Các trường khác giữ nguyên, gồm `isMockResult`. `supportRatio` và `constraintWarnings` của placement giữ giá trị nguồn cho tới khi
- * Duyệt gọi được constraint engine (LM-023).
+ * Các trường khác giữ nguyên, gồm `isMockResult`.
  */
 export function approvedResult(
   request: OptimizationRequest,
@@ -42,7 +42,12 @@ export function approvedResult(
   const graph = createStackGraph(createPlacementLayout(request.vehicle, patched), instanceById)
   const deliveryStops = new Map(instances.map(({ packageInstanceId, deliveryStop }) => [packageInstanceId, deliveryStop]))
   const { orders } = recomputeOrders(graph, deliveryStops)
-  const placements = patched.map((placement) => ({ ...placement, ...orders.get(placement.packageInstanceId) }))
+  const placements = annotatePlacements({
+    vehicle: request.vehicle,
+    packages: request.packages,
+    placements: patched.map((placement) => ({ ...placement, ...orders.get(placement.packageInstanceId) })),
+    settings: request.settings,
+  })
   const metrics = computeMetrics({
     vehicle: request.vehicle,
     placements,

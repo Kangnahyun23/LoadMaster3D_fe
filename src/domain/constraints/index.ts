@@ -3,6 +3,7 @@ export { boundaryIssues } from './boundary'
 export { fromContractWarnings, toContractWarnings, type ContractWarning } from './contract-warnings'
 export { checkDoorClearance } from './door'
 export {
+  annotatePlacements,
   createConstraintEngine,
   type ConstraintEngine,
   type ConstraintEngineInput,

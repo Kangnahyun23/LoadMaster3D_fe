@@ -1,5 +1,6 @@
 import { MockDbError, type MockDbCollection } from './errors'
 import { approvedResult, isStale } from './revisions'
+import { seedRevisions } from './seed-revisions'
 import { seedTrip } from './seed-trip'
 import { seedVehicles } from './seed-vehicles'
 import type { MockDb, MockDbOptions, Revision } from './types'
@@ -46,7 +47,7 @@ function sameData(a: unknown, b: unknown): boolean {
 export function createMockDb({ latencyMs = 0 }: MockDbOptions = {}): MockDb {
   const vehicles = new Map(seedVehicles().map((vehicle) => [vehicle.id, vehicle]))
   const trips = new Map([seedTrip()].map((trip) => [trip.id, trip]))
-  const revisions = new Map<string, Revision>()
+  const revisions = new Map<string, Revision>(seedRevisions().map((revision) => [revision.id, revision]))
 
   /**
    * Một lượt gọi như qua mạng: chờ `latencyMs` rồi mới đọc/ghi. Kết quả luôn là bản sao, nên nơi gọi không sửa được dữ liệu

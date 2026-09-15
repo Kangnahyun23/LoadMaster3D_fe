@@ -20,7 +20,7 @@ D-06: dữ liệu dùng chung đi qua mock repository → `-api.ts` → TanStack
 - [x] Bộ sưu tập: `vehicles` (VehicleConfig), `trips` (điểm giao, `vehicleId`, danh sách `CargoPackage`, `inputVersion` tăng mỗi khi xe/kiện đổi), `revisions` (`{ jobId, tripId, request, result, inputVersion, createdAt, draftPatches?, approvedAt?, manuallyEdited, ordersRecomputed }`).
 - [x] `isStale(revision, trip) = revision.inputVersion !== trip.inputVersion` (cũng tăng khi xe gắn với chuyến bị sửa).
 - [x] `approveRevision(jobId, patches)` tạo revision approved **mới** (áp draft, tính lại thứ tự LM-022, giữ `isMockResult`), không sửa revision nguồn. *(nhận mã revision thay `jobId` — xem Kết quả)*
-- [ ] Seed: xe mẫu Spec "Truck 6m" + 2–3 xe khác; một chuyến mẫu có ~130 kiện đã tối ưu và đã duyệt (thay `LOAD_PLAN` mm) để `/kho`, `/tai-xe` có dữ liệu ngay. *(xe và chuyến ~130 kiện đã có; bản đã tối ưu + đã duyệt chờ LM-024)*
+- [x] Seed: xe mẫu Spec "Truck 6m" + 2–3 xe khác; một chuyến mẫu có ~130 kiện đã tối ưu và đã duyệt (thay `LOAD_PLAN` mm) để `/kho`, `/tai-xe` có dữ liệu ngay. *(màn `/kho`, `/tai-xe` chuyển sang đọc revision ở LM-060/LM-061)*
 - [x] Dữ liệu tên người/địa điểm tiếng Việt thật, không Lorem.
 
 ## Tiêu chí nghiệm thu
@@ -112,9 +112,7 @@ trong 5 file `src/lib/mock-db/*.test.ts`, chỉ import từ seam và từ các s
 
 **Hoãn lại**
 
-- **Revision seed "đã tối ưu và đã duyệt"** cần `MockOptimizationService` (LM-024), chưa có. Chuyến seed hiện chưa có revision; `/kho`, `/tai-xe` vẫn
-  đọc `LOAD_PLAN` mm. Khi có LM-024: seed chạy service (thuần, tất định theo `randomSeed`) cho `TRIP-2026-0914` rồi `approveRevision(id, [])`.
-- **Tính lại `supportRatio` / `constraintWarnings` khi Duyệt** cần engine LM-023. Hiện giữ giá trị của revision nguồn.
+- ~~**Revision seed "đã tối ưu và đã duyệt"**~~ và ~~**tính lại `supportRatio` / `constraintWarnings` khi Duyệt**~~ — đã làm khi gộp, xem dưới.
 - **Chưa làm:** hook TanStack Query, `-api.ts` và UI; chưa thay `src/lib/load-plan.mock.ts` (LM-060 → LM-062).
 
 **Chuyển tiếp**
@@ -124,3 +122,17 @@ trong 5 file `src/lib/mock-db/*.test.ts`, chỉ import từ seam và từ các s
 - **LM-048:** `addRevision` đóng dấu `inputVersion` lúc lưu. Nếu cho sửa xe/kiện trong lúc chạy tối ưu, phải truyền version lúc dựng request.
   Route `?revision=` nên dùng `Revision.id`, vì `jobId` có thể trùng (D-38).
 - **LM-050:** dịch 5 mã `MockDbError`; `approvalBlockers` dùng `isStale`.
+
+## Gộp vào `feat/spec-mvp` và phần hoãn (15/09/2026, người điều phối)
+
+Cherry-pick `2f42ed7` → `2050a7b`, không xung đột. Sau đó làm nốt hai phần hoãn theo TDD:
+
+- **Duyệt tính lại `supportRatio` / `constraintWarnings` bằng engine LM-023:** helper domain `annotatePlacements` (mock service LM-024 dùng chung). Test nhấc
+  thùng đổi kỳ vọng: đáy 60 × 120 cm chỉ tiếp xúc 60 × 60 cm → `supportRatio` 0,5, `['SUPPORT_BELOW_MIN']` (đỏ trước khi sửa).
+- **Seed revision đã tối ưu + đã duyệt** (`seed-revisions.ts`): `runMockOptimization` cho `TRIP-2026-0914` với `randomSeed` 20260914 và đồng hồ cố định
+  (`runtimeMs` 0) → `REV-001`; `approvedResult` không patch → `REV-002` (`approvedAt` 2026-09-14T02:00Z). Tính một lần, nhân bản cho mỗi kho. Mã revision
+  tạo mới bắt đầu từ `REV-003` (3 test đổi kỳ vọng mã).
+- **Lỗi thật tìm được:** bản seed "đã duyệt" đầu tiên có **67 `LIFO_BLOCKED`** nên chính `approvalBlockers` không cho duyệt — mock (LM-024) đặt chỗ theo
+  `priority` trước điểm giao. Sửa ở LM-024: `priority` chỉ chọn kiện lên xe (dành tải trọng trước), khi `enforceLifo` đặt chỗ theo điểm giao muộn trước.
+  Seed giờ: 132/132 kiện, không issue, `canApprove` = true (40,8% thể tích, 61,5% tải). Test seed mới khoá điều này (đỏ khi bỏ thứ tự LIFO).
+
