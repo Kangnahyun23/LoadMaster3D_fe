@@ -111,12 +111,13 @@ test('two later packages tiling the rear face block it with coverage exactly 1, 
   ])
 })
 
-test('a package missing from the delivery stop table is not judged, and blocks nobody', () => {
+test('a package missing from the delivery stop table fails loudly, as the package or as a blocker, rather than skipping LIFO', () => {
+  // skipping would hide a real block from the approval check
   const layout = createPlacementLayout(SPEC_TRUCK_6M, [SUBJECT, placed('PKG-003-01', [420, 0, 0], [120, 60, 50])])
   const withoutStopOf = (missingId: string) => ({
     deliveryStopByInstanceId: new Map([...DELIVERY_STOPS].filter(([id]) => id !== missingId)),
     enforceLifo: true,
   })
-  const issues = [withoutStopOf('PKG-002-01'), withoutStopOf('PKG-003-01')].map((rules) => lifoIssues(SUBJECT, rules, layout))
-  expect(issues).toStrictEqual([[], []])
+  expect(() => lifoIssues(SUBJECT, withoutStopOf('PKG-002-01'), layout)).toThrow(/PKG-002-01/)
+  expect(() => lifoIssues(SUBJECT, withoutStopOf('PKG-003-01'), layout)).toThrow(/PKG-003-01/)
 })

@@ -9,7 +9,7 @@ type LifoIssue = ConstraintIssue<'LIFO_BLOCKED' | 'LIFO_PARTIAL'>
 export type LifoRules = {
   /**
    * Điểm giao theo `packageInstanceId`: placement không mang `deliveryStop`, lấy từ instance của `expandPackages`.
-   * Kiện vắng mặt trong bảng không được kiểm và không chắn kiện nào.
+   * Kiện được kiểm hoặc kiện chắn vắng mặt trong bảng → `throw`: bỏ qua sẽ giấu vi phạm LIFO khỏi bước chặn Duyệt.
    */
   readonly deliveryStopByInstanceId: ReadonlyMap<string, number>
   /** `settings.enforceLifo` của request (D-13). */
@@ -36,15 +36,15 @@ function section(box: Box): Rect {
  */
 export function lifoIssues(placement: PackagePlacement, rules: LifoRules, layout: PlacementLayout): LifoIssue[] {
   const { packageInstanceId } = placement
-  const stops = rules.deliveryStopByInstanceId
-  const stop = stops.get(packageInstanceId)
-  if (stop === undefined) return []
+  const stopOf = (id: string): number => {
+    const stop = rules.deliveryStopByInstanceId.get(id)
+    if (stop === undefined) throw new Error(`Không có điểm giao cho placement ${id}`)
+    return stop
+  }
+  const stop = stopOf(packageInstanceId)
   const box = placementToBox(placement)
-  const blockerIds = layout.grid.queryRearCorridor(box, { excludeId: packageInstanceId }).filter((id) => {
-    const blockerStop = stops.get(id)
-    // Điểm giao là số nguyên từ 1 (schema), không phải toạ độ: so trực tiếp
-    return blockerStop !== undefined && blockerStop > stop
-  })
+  // Điểm giao là số nguyên từ 1 (schema), không phải toạ độ: so trực tiếp
+  const blockerIds = layout.grid.queryRearCorridor(box, { excludeId: packageInstanceId }).filter((id) => stopOf(id) > stop)
   const covers = blockerIds.map((id) => section(placementToBox(layout.placements.get(id)!)))
   // Hợp đã cắt theo mặt sau nên không vượt mặt sau quá nhiễu dấu phẩy động; 1.0000000000000002 vẫn là che kín
   const coverage = coveredArea(section(box), covers) / (box.widthCm * box.heightCm)
