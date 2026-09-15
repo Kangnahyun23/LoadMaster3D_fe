@@ -12,35 +12,16 @@ import {
 } from '@/domain/constraints'
 import { SPEC_TRUCK_6M } from '@/domain/fixtures/spec-samples'
 import type { PackagePlacement, VehicleConfig, VehicleObstacle } from '@/domain/models'
-import { placed, stackingProfile, type Triple } from '@/test/placements'
-
-/** Park–Miller generator: the same sequence on every run. */
-function seededRandom(seed: number): () => number {
-  let state = seed
-  return () => {
-    state = (state * 48_271) % 2_147_483_647
-    return state / 2_147_483_647
-  }
-}
+import { dropAt, seededRandom, stackingProfile, type Triple } from '@/test/placements'
 
 const [WHEEL_ARCH] = SPEC_TRUCK_6M.obstacles as [VehicleObstacle]
 /** A load-bearing arch rated for 60 kg, so obstacle loads and their issues move too. */
 const TRUCK: VehicleConfig = { ...SPEC_TRUCK_6M, obstacles: [{ ...WHEEL_ARCH, loadBearing: true, maxTopLoadKg: 60 }] }
 const SIZES: Triple[] = [[40, 30, 25], [60, 40, 30], [80, 60, 40]]
 
-/** Drops a box of `size` at a random spot of a 120 × 90 cm area onto whatever is below: floor, arch top or package tops. */
+/** Drops a box at a random corner of a 90 × 60 cm area onto whatever is below: floor, arch top or package tops. */
 function drop(id: string, size: Triple, others: Iterable<PackagePlacement>, random: () => number): PackagePlacement {
-  const [length, width] = size
-  const x = 10 * Math.floor(random() * 9)
-  const y = 10 * Math.floor(random() * 6)
-  const overlapsBase = (bx: number, by: number, bl: number, bw: number) => x < bx + bl && bx < x + length && y < by + bw && by < y + width
-  let z = overlapsBase(WHEEL_ARCH.xCm, WHEEL_ARCH.yCm, WHEEL_ARCH.lengthCm, WHEEL_ARCH.widthCm) ? WHEEL_ARCH.heightCm : 0
-  for (const other of others) {
-    if (other.packageInstanceId !== id && overlapsBase(other.xCm, other.yCm, other.placedLengthCm, other.placedWidthCm)) {
-      z = Math.max(z, other.zCm + other.placedHeightCm)
-    }
-  }
-  return placed(id, [x, y, z], size)
+  return dropAt(id, [10 * Math.floor(random() * 9), 10 * Math.floor(random() * 6)], size, others, TRUCK.obstacles)
 }
 
 function expectSameAsFullRebuild(graph: StackGraph, profiles: ReadonlyMap<string, StackingProfile>): void {
