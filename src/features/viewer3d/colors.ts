@@ -1,39 +1,40 @@
 import { Color } from 'three'
 import { stopColor } from '@/lib/stops'
 import { readToken } from '@/lib/tokens'
-import type { ColorMode, Placement } from '@/types/load-plan'
+import type { ColorMode } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 
 /**
  * Màu kiện theo chế độ tô:
  * - theo điểm giao: 8 màu Okabe–Ito, đúng vai trò định danh điểm giao (mục 5)
- * - theo đơn hàng: giữ sắc của điểm giao, đổi độ sáng theo đơn trong điểm đó,
+ * - theo kiện gốc (LM-030, contract không có đơn hàng): giữ sắc của điểm giao, đổi độ sáng theo `packageId` trong điểm đó,
  *   nên vẫn đọc được điểm giao mà không cần thêm bảng màu mới
  * - theo khối lượng: dải một sắc từ `--primary-bg` tới `--primary` rồi tối dần,
  *   toàn bộ suy ra từ token
  */
 
 export type ColorContext = {
-  orderIndexByStop: Map<string, number>
-  orderCountByStop: Map<number, number>
+  packageIndexById: Map<string, number>
+  packageCountByStop: Map<number, number>
   minWeightKg: number
   maxWeightKg: number
 }
 
-export function createColorContext(plan: { placements: readonly Placement[] }): ColorContext {
-  const orderIndexByStop = new Map<string, number>()
-  const orderCountByStop = new Map<number, number>()
+export function createColorContext(plan: { placements: readonly ScenePlacement[] }): ColorContext {
+  const packageIndexById = new Map<string, number>()
+  const packageCountByStop = new Map<number, number>()
 
   for (const p of plan.placements) {
-    if (orderIndexByStop.has(p.orderId)) continue
-    const index = orderCountByStop.get(p.stop) ?? 0
-    orderIndexByStop.set(p.orderId, index)
-    orderCountByStop.set(p.stop, index + 1)
+    if (packageIndexById.has(p.packageId)) continue
+    const index = packageCountByStop.get(p.stop) ?? 0
+    packageIndexById.set(p.packageId, index)
+    packageCountByStop.set(p.stop, index + 1)
   }
 
   const weights = plan.placements.map((p) => p.weightKg)
   return {
-    orderIndexByStop,
-    orderCountByStop,
+    packageIndexById,
+    packageCountByStop,
     minWeightKg: weights.length ? Math.min(...weights) : 0,
     maxWeightKg: weights.length ? Math.max(...weights) : 0,
   }
@@ -58,7 +59,7 @@ export function weightColor(t: number): string {
 }
 
 export function placementColor(
-  placement: Placement,
+  placement: ScenePlacement,
   mode: ColorMode,
   context: ColorContext,
 ): string {
@@ -66,10 +67,10 @@ export function placementColor(
     case 'diem-giao':
       return stopColor(placement.stop)
 
-    case 'don-hang': {
-      const index = context.orderIndexByStop.get(placement.orderId) ?? 0
-      const count = context.orderCountByStop.get(placement.stop) ?? 1
-      // Đơn đầu giữ nguyên màu, các đơn sau tối dần từng nấc.
+    case 'kien-goc': {
+      const index = context.packageIndexById.get(placement.packageId) ?? 0
+      const count = context.packageCountByStop.get(placement.stop) ?? 1
+      // Kiện gốc đầu giữ nguyên màu, các kiện gốc sau tối dần từng nấc.
       const factor = count <= 1 ? 1 : 1 - (index / (count - 1)) * 0.35
       scratch.set(stopColor(placement.stop)).multiplyScalar(factor)
       return `#${scratch.getHexString()}`

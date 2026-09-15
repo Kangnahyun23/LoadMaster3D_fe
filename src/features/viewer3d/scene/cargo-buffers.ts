@@ -1,6 +1,6 @@
 import { Box3, InstancedMesh, Object3D, Sphere, Vector3 } from 'three'
-import type { Placement } from '@/types/load-plan'
-import { boxCenter, boxSize, MM } from './units'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import { boxCenter, boxSize, SCENE_SCALE } from './units'
 
 export const HULL_PADDING = 0.012
 export const DROP_HEIGHT = 0.22
@@ -8,7 +8,7 @@ const dummy = new Object3D()
 const corner = new Vector3()
 
 export function writeCargoMatrix(
-  mesh: InstancedMesh, index: number, placement: Placement,
+  mesh: InstancedMesh, index: number, placement: ScenePlacement,
   visible: boolean, yOffset = 0, padding = 0,
 ) {
   if (visible) {
@@ -31,18 +31,18 @@ export function writeCargoMatrix(
  * Cover all effective boxes AND their drop path, including future cargo.
  * Rebuild only on geometry changes; step/slice/spring never scan bounds.
  */
-export function cargoBounds(placements: readonly Placement[]): Sphere {
+export function cargoBounds(placements: readonly ScenePlacement[]): Sphere {
   const bounds = new Box3()
   for (const p of placements) {
     bounds.expandByPoint(corner.set(
-      p.position.x * MM - HULL_PADDING,
-      p.position.z * MM - HULL_PADDING,
-      p.position.y * MM - HULL_PADDING,
+      p.position.x * SCENE_SCALE - HULL_PADDING,
+      p.position.z * SCENE_SCALE - HULL_PADDING,
+      p.position.y * SCENE_SCALE - HULL_PADDING,
     ))
     bounds.expandByPoint(corner.set(
-      (p.position.x + p.lengthMm) * MM + HULL_PADDING,
-      (p.position.z + p.heightMm) * MM + DROP_HEIGHT + HULL_PADDING,
-      (p.position.y + p.widthMm) * MM + HULL_PADDING,
+      (p.position.x + p.lengthCm) * SCENE_SCALE + HULL_PADDING,
+      (p.position.z + p.heightCm) * SCENE_SCALE + DROP_HEIGHT + HULL_PADDING,
+      (p.position.y + p.widthCm) * SCENE_SCALE + HULL_PADDING,
     ))
   }
   return placements.length ? bounds.getBoundingSphere(new Sphere()) : new Sphere(new Vector3(), 0)

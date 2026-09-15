@@ -1,7 +1,8 @@
 import { Canvas } from '@react-three/fiber'
 import { useCallback, useMemo, type ReactNode } from 'react'
-import type { CameraPreset, ColorMode, Placement } from '@/types/load-plan'
-import type { ViewerSceneModel } from '../viewer-scene-model'
+import type { CameraPreset, ColorMode } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { ViewerSceneModel } from '@/features/viewer3d/scene-input'
 import type { ExperienceMode, PerformanceFlags } from '../usePerformanceFlags'
 import type { SceneSemantics } from '../operations/scene-semantics'
 import { CargoMassMarker, RearDoorCue, InteriorStopMap } from '../operations/OperationsCues'
@@ -20,17 +21,17 @@ import { containerCenter } from './units'
 export type SceneCanvasProps = {
   experience: ExperienceMode
   model: Pick<ViewerSceneModel, 'vehicle' | 'stops' | 'placements'>
-  placements: readonly Placement[]
+  placements: readonly ScenePlacement[]
   flags: PerformanceFlags
   preset: CameraPreset
-  focus?: { placement: Placement; request: number; follow?: boolean } | null
+  focus?: { placement: ScenePlacement; request: number; follow?: boolean } | null
   onUserControl?: () => void
   selectedId: string | null
   onSelect: (id: string | null) => void
-  onFocus?: (p: Placement) => void
+  onFocus?: (p: ScenePlacement) => void
   warningSignal?: number
   colorMode?: ColorMode
-  sliceMm?: number
+  sliceCm?: number
   step: number
   semantics?: SceneSemantics
   hiddenId?: string | null
@@ -47,7 +48,7 @@ export type SceneCanvasProps = {
 /** Shared renderer; experience wrappers own controls/workflows, not another scene engine. */
 export function SceneCanvas({
   experience, model, placements, flags, preset, focus, onUserControl, selectedId, onSelect, onFocus, warningSignal = 0,
-  colorMode = 'diem-giao', sliceMm = model.vehicle.innerLengthMm, step, semantics, hiddenId,
+  colorMode = 'diem-giao', sliceCm = model.vehicle.innerLengthCm, step, semantics, hiddenId,
   animateLoading = true, decoration = true, xraySelection, showMass, showDistribution, unloadMotion, onPerfSample, children,
 }: SceneCanvasProps) {
   const materials = useMemo(() => sceneMaterials(), [])
@@ -72,7 +73,7 @@ export function SceneCanvas({
     <group position={[-cx, -cy, -cz]}>
       <Container vehicle={model.vehicle} materials={materials} detail={flags.decoration} reducedMotion={flags.reducedMotion} />
       {decoration && flags.decoration ? <TruckCab vehicle={model.vehicle} materials={materials} shadows={flags.shadows} /> : null}
-      <CargoInstances placements={placements} colorMode={colorMode} colorContext={colorContext} sliceMm={sliceMm}
+      <CargoInstances placements={placements} colorMode={colorMode} colorContext={colorContext} sliceCm={sliceCm}
         step={step} selectedId={selected?.id ?? null} onSelect={onSelect} onFocus={onFocus} outlines={flags.outlines} outlineColor={materials.outline}
         reducedMotion={flags.reducedMotion} animationQuality={animateLoading ? flags.animationQuality : 'none'} hiddenId={hiddenId}
         semantics={semantics} warningSignal={warningSignal} xraySelection={xraySelection} surfaceDetail={flags.decoration} />

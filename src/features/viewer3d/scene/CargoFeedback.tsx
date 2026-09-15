@@ -2,7 +2,7 @@ import { Line } from '@react-three/drei'
 import { animated, useSpring } from '@react-spring/three'
 import { useThree } from '@react-three/fiber'
 import { readToken } from '@/lib/tokens'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import { boxCenter, boxSize, type Vec3 } from './units'
 import { SelectionLabel } from './SelectionLabel'
 
@@ -14,7 +14,7 @@ for (const y of [-0.5, 0.5]) for (const z of [-0.5, 0.5]) EDGES.push([-0.5, y, z
 
 /** A bounded set of semantic outlines, never one React object for every cargo. */
 export function CargoFeedback({ placement, role, reducedMotion, xray = false }: {
-  placement: Placement; role: 'selected' | 'current' | 'next' | 'hover'; reducedMotion: boolean; xray?: boolean
+  placement: ScenePlacement; role: 'selected' | 'current' | 'next' | 'hover'; reducedMotion: boolean; xray?: boolean
 }) {
   const invalidate = useThree((s) => s.invalidate)
   const spring = useSpring({ from: { opacity: 0.35 }, opacity: 1, config: { duration: reducedMotion ? 100 : 180 }, onChange: () => invalidate() })

@@ -3,14 +3,15 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Button } from '@/components/ui/Button'
 import { formatInteger } from '@/lib/format'
 import { stopColor } from '@/lib/stops'
-import type { Placement, PlaybackSpeed } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { PlaybackSpeed } from '@/types/load-plan'
 import { timelineBins } from './operations/operations-model'
 
 export type TimelineProps = {
-  placements: readonly Placement[]; step: number; totalSteps: number; playing: boolean; speed: PlaybackSpeed
+  placements: readonly ScenePlacement[]; step: number; totalSteps: number; playing: boolean; speed: PlaybackSpeed
   onStepChange: (step: number) => void; onStepForward: () => void; onStepBackward: () => void
   onGoToStart: () => void; onTogglePlaying: () => void; onSpeedChange: (speed: PlaybackSpeed) => void
-  kind?: 'loading' | 'unloading'; orderedOverride?: readonly Placement[]
+  kind?: 'loading' | 'unloading'; orderedOverride?: readonly ScenePlacement[]
 }
 
 /** Equal-height operation cells; density follows available rail width, never cargo count. */

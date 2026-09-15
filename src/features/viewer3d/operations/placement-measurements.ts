@@ -1,12 +1,13 @@
-import type { Placement, VehicleSpec } from '@/types/load-plan'
-import { findBelow, layerOf } from '@/lib/placement'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { VehicleConfig } from '@/domain/models'
+import { findBelow, layerOf } from '../panels/placement-relations'
 
-/** Domain-mm distances; below/layer are guidance, not a support/stability solver. */
-export function placementMeasurements(p: Placement, placements: readonly Placement[], vehicle: VehicleSpec) {
+/** Distances in cm; below/layer are guidance, not a support/stability solver. */
+export function placementMeasurements(p: ScenePlacement, placements: readonly ScenePlacement[], vehicle: VehicleConfig) {
   return {
-    frontMm: p.position.x, rearMm: vehicle.innerLengthMm - p.position.x - p.lengthMm,
-    leftMm: p.position.y, rightMm: vehicle.innerWidthMm - p.position.y - p.widthMm,
-    floorMm: p.position.z, ceilingMm: vehicle.innerHeightMm - p.position.z - p.heightMm,
+    frontCm: p.position.x, rearCm: vehicle.innerLengthCm - p.position.x - p.lengthCm,
+    leftCm: p.position.y, rightCm: vehicle.innerWidthCm - p.position.y - p.widthCm,
+    floorCm: p.position.z, ceilingCm: vehicle.innerHeightCm - p.position.z - p.heightCm,
     layer: layerOf(p, placements), belowId: findBelow(p, placements)?.id,
   }
 }

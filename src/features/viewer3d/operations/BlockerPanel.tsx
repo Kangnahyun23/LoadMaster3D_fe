@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/Button'
 import { formatInteger } from '@/lib/format'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 
 export function BlockerPanel({ target, blockers, onSelect }: {
-  target?: Placement; blockers: readonly Placement[]; onSelect: (placement: Placement) => void
+  target?: ScenePlacement; blockers: readonly ScenePlacement[]; onSelect: (placement: ScenePlacement) => void
 }) {
   return <section aria-label="Kiện có khả năng cản đường" className="flex flex-col gap-2 text-body-lg xl:text-body">
     <h3 className="font-medium">{target?.id ?? 'Chọn kiện để xem đường dỡ'}</h3>

@@ -1,7 +1,8 @@
 import { useLayoutEffect, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import { Color, DynamicDrawUsage, type InstancedMesh } from 'three'
-import type { ColorMode, Placement } from '@/types/load-plan'
+import type { ColorMode } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import { dimColor, placementColor, type ColorContext } from '../colors'
 import type { InstanceLayout } from './instance-layout'
 import type { CargoMeshes } from './useCargoMatrices'
@@ -9,7 +10,7 @@ import { readToken } from '@/lib/tokens'
 import type { CargoAppearance, SceneSemantics } from '../operations/scene-semantics'
 
 const color = new Color()
-type ColorSlot = Pick<Placement, 'id' | 'stop' | 'orderId' | 'weightKg'> & { tone?: CargoAppearance['tone'] }
+type ColorSlot = Pick<ScenePlacement, 'id' | 'stop' | 'packageId' | 'weightKg'> & { tone?: CargoAppearance['tone'] }
 
 export function useCargoColors(meshes: CargoMeshes, layout: InstanceLayout, mode: ColorMode, context: ColorContext, outlineColor: string, showHull: boolean, semantics?: SceneSemantics) {
   const invalidate = useThree((state) => state.invalidate)
@@ -26,7 +27,7 @@ export function useCargoColors(meshes: CargoMeshes, layout: InstanceLayout, mode
       const p = layout.placementById.get(id)!
       const old = previous.slots[index]
       const tone = semantics?.appearanceById.get(id)?.tone
-      if (reset || old?.id !== id || old.stop !== p.stop || old.orderId !== p.orderId || old.weightKg !== p.weightKg || old.tone !== tone) {
+      if (reset || old?.id !== id || old.stop !== p.stop || old.packageId !== p.packageId || old.weightKg !== p.weightKg || old.tone !== tone) {
         const hex = placementColor(p, mode, context)
         color.set(tone === 'current' ? readToken('--highlight') : hex)
         if (tone === 'muted') color.multiplyScalar(0.68)
@@ -38,7 +39,7 @@ export function useCargoColors(meshes: CargoMeshes, layout: InstanceLayout, mode
         hull?.instanceColor?.addUpdateRange(index * 3, 3)
         changed = true
       }
-      return { id, stop: p.stop, orderId: p.orderId, weightKg: p.weightKg, tone }
+      return { id, stop: p.stop, packageId: p.packageId, weightKg: p.weightKg, tone }
     })
     if (changed) {
       for (const mesh of [opaque, dim, hull]) {

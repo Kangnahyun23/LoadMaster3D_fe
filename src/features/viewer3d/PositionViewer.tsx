@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
-import type { CameraPreset, LoadPlan, Placement } from '@/types/load-plan'
-import { adaptLoadPlan } from './viewer-scene-model'
+import type { CameraPreset, LoadPlan } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import { adaptLoadPlan } from '@/features/viewer3d/scene-input'
 import { deriveSceneSemantics } from './operations/scene-semantics'
 import { SceneCanvas } from './scene/SceneCanvas'
 import { usePerformanceFlags } from './usePerformanceFlags'
@@ -10,7 +11,7 @@ import { CAMERA_PRESETS, debugQualityTier } from './viewer-options'
 import { createPerfStore, DebugOverlay } from './DebugOverlay'
 
 /** Warehouse uses the same scene/units/instances as Planner, without editor UI. */
-export function PositionViewer({ plan, current }: { plan: LoadPlan; current: Placement }) {
+export function PositionViewer({ plan, current }: { plan: LoadPlan; current: Pick<ScenePlacement, 'id' | 'step' | 'stop'> }) {
   const model = useMemo(() => adaptLoadPlan(plan), [plan])
   const [preset, setPreset] = useState<CameraPreset>('goc-cheo')
   const [isolate, setIsolate] = useState(false)

@@ -1,5 +1,5 @@
 import { createViewerDraft, patchPlacement, type PlacementPatch, type ViewerDraft } from '../viewer-draft'
-import type { ViewerSceneModel } from '../viewer-scene-model'
+import type { ViewerSceneModel } from '@/features/viewer3d/scene-input'
 import { EDITOR_RULES } from './geometry'
 
 export type CommandType = 'MOVE' | 'ROTATE' | 'PIN' | 'UNPIN' | 'RESET_PLACEMENT' | 'RESET_DRAFT'

@@ -18,7 +18,15 @@ export const BODY_TYPE_LABELS: Record<BodyType, string> = {
   container: 'Container',
 }
 
+/** Dung lượng trục khai báo của xe (form Đội xe cũ) — cấu hình, không phải số tải đo được (Spec 7.10). */
+export type FleetAxle = {
+  loadKg: number
+  capacityKg: number
+}
+
 export type Vehicle = VehicleSpec & {
+  frontAxle: FleetAxle
+  rearAxle: FleetAxle
   id: string
   bodyType: BodyType
   status: VehicleStatus

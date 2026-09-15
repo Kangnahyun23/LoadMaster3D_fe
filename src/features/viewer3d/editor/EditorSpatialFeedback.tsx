@@ -3,19 +3,19 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, type ComponentRef } from 'react'
 import { BoxGeometry, EdgesGeometry, Object3D, type Group, type InstancedMesh, type Mesh, type MeshBasicMaterial } from 'three'
 import { readToken } from '@/lib/tokens'
-import { formatInteger } from '@/lib/format'
-import type { Placement, PositionMm } from '@/types/load-plan'
+import { useFormat } from '@/lib/i18n'
+import type { ScenePlacement, PositionCm } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
-import { boxCenter, boxSize, MM, type Vec3 } from '../scene/units'
+import { boxCenter, boxSize, SCENE_SCALE, type Vec3 } from '../scene/units'
 import { SceneCallout } from '../scene/SceneCallout'
 import type { ManualEditor } from './useManualEditor'
 import { editorMeasurements, overlapRegions, snapFeedbackBoxes, type FeedbackBox } from './spatial-feedback'
 
-const point = (p: PositionMm): Vec3 => [p.x * MM, p.z * MM, p.y * MM]
+const point = (p: PositionCm): Vec3 => [p.x * SCENE_SCALE, p.z * SCENE_SCALE, p.y * SCENE_SCALE]
 const EMPTY: Vec3[] = [[0, 0, 0], [0, 0, 0]]
 /** Only selected guides. Preview refs update geometry/DOM imperatively, with no React drag subscription. */
 export function EditorSpatialFeedback({ placement, state, editor }: {
-  placement: Placement; state: LoadPlanViewerState; editor: ManualEditor
+  placement: ScenePlacement; state: LoadPlanViewerState; editor: ManualEditor
 }) {
   const lines = useRef<ComponentRef<typeof Line>>(null)
   const original = useRef<Group>(null), plane = useRef<Mesh>(null)
@@ -24,6 +24,7 @@ export function EditorSpatialFeedback({ placement, state, editor }: {
   const labels = useRef<Array<Group | null>>([]), texts = useRef<Array<HTMLSpanElement | null>>([])
   const previous = useRef<unknown>(undefined)
   const invalidate = useThree((s) => s.invalidate)
+  const format = useFormat()
   const showMeasurements = useThree((s) => s.size.width >= 600)
   const source = state.sceneModel.placementById.get(placement.id)!
   const edges = useMemo(() => { const box = new BoxGeometry(); const e = new EdgesGeometry(box); box.dispose(); return e }, [])
@@ -47,7 +48,7 @@ export function EditorSpatialFeedback({ placement, state, editor }: {
     lines.current?.geometry.setPositions(points)
     guides.forEach((g, i) => {
       labels.current[i]?.position.set(...point({ x: (g.from.x + g.to.x) / 2, y: (g.from.y + g.to.y) / 2, z: (g.from.z + g.to.z) / 2 }))
-      if (texts.current[i]) texts.current[i]!.textContent = `${g.label} ${formatInteger(g.mm)} mm`
+      if (texts.current[i]) texts.current[i]!.textContent = `${g.label} ${format.length(g.cm)}`
     })
     const color = readToken(!result.valid ? '--danger' : result.advisories.length ? '--warning' : '--success')
     snapMaterial.current?.color.set(color)
@@ -56,8 +57,8 @@ export function EditorSpatialFeedback({ placement, state, editor }: {
       for (let i = 0; i < mesh.count; i++) {
         const box = boxes[i]
         if (box) {
-          dummy.position.set((box.position.x + box.lengthMm / 2) * MM, (box.position.z + box.heightMm / 2) * MM, (box.position.y + box.widthMm / 2) * MM)
-          dummy.scale.set(box.lengthMm * MM, box.heightMm * MM, box.widthMm * MM)
+          dummy.position.set((box.position.x + box.lengthCm / 2) * SCENE_SCALE, (box.position.z + box.heightCm / 2) * SCENE_SCALE, (box.position.y + box.widthCm / 2) * SCENE_SCALE)
+          dummy.scale.set(box.lengthCm * SCENE_SCALE, box.heightCm * SCENE_SCALE, box.widthCm * SCENE_SCALE)
         } else dummy.scale.set(0, 0, 0)
         dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix)
       }

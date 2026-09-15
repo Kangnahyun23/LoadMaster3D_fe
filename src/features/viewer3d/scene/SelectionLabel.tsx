@@ -1,12 +1,12 @@
 import { SceneCallout } from './SceneCallout'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import { boxCenter, boxSize } from './units'
 
 /**
  * Nhãn mã kiện neo trên đỉnh kiện đang chọn — trường hợp duy nhất mục 7
  * cho phép dùng `<Html>` của drei, vì nhãn phải bám theo vật thể 3D.
  */
-export function SelectionLabel({ placement, role = 'selected' }: { placement: Placement; role?: 'selected' | 'current' | 'next' }) {
+export function SelectionLabel({ placement, role = 'selected' }: { placement: ScenePlacement; role?: 'selected' | 'current' | 'next' }) {
   const [cx, cy, cz] = boxCenter(placement)
   const [, height] = boxSize(placement)
 

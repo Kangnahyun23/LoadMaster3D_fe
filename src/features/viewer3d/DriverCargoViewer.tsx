@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
-import { formatInteger } from '@/lib/format'
-import { ORIENTATION_LABELS, type CameraPreset, type LoadPlan, type Placement, type PlaybackSpeed } from '@/types/load-plan'
+import { useFormat, useT } from '@/lib/i18n'
+import type { CameraPreset, LoadPlan, PlaybackSpeed } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import { SceneCanvas } from './scene/SceneCanvas'
 import { usePerformanceFlags } from './usePerformanceFlags'
-import { adaptLoadPlan } from './viewer-scene-model'
+import { adaptLoadPlan } from '@/features/viewer3d/scene-input'
 import { deriveSceneSemantics } from './operations/scene-semantics'
 import { useUnloadPlayback } from './operations/useUnloadPlayback'
 import { BlockerPanel } from './operations/BlockerPanel'
@@ -18,6 +19,8 @@ import { Timeline } from './Timeline'
 export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedIds }: {
   plan: LoadPlan; stopNumber: number; doneIds: ReadonlySet<string>; retainedIds: ReadonlySet<string>
 }) {
+  const t = useT()
+  const format = useFormat()
   const [search] = useSearchParams()
   const count = benchmarkCountFromSearch(search.toString())
   const plan = useMemo(() => count ? createBenchmarkPlan(count) : source, [count, source])
@@ -29,7 +32,7 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
   const unload = useUnloadPlayback(available, speed, model.vehicle, unloadContext)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [preset, setPreset] = useState<CameraPreset>('cua-sau')
-  const [focus, setFocus] = useState<{ placement: Placement; request: number } | null>(null)
+  const [focus, setFocus] = useState<{ placement: ScenePlacement; request: number } | null>(null)
   const [inspect, setInspect] = useState(true)
   const flags = usePerformanceFlags(debugQualityTier(search), 'driver')
   const perf = useMemo(() => createPerfStore(), [])
@@ -41,7 +44,7 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
   }), [model, stopNumber, removed, unload.current, unload.next, inspect, unload.warning])
   const measurements = selected ? placementMeasurements(selected, model.placements, model.vehicle) : null
   const stop = model.stops.find((s) => s.number === stopNumber)
-  const handleFocus = (p: Placement) => { setSelectedId(p.id); setFocus((f) => ({ placement: p, request: (f?.request ?? 0) + 1 })) }
+  const handleFocus = (p: ScenePlacement) => { setSelectedId(p.id); setFocus((f) => ({ placement: p, request: (f?.request ?? 0) + 1 })) }
   return <div className="flex min-h-0 flex-1 flex-col text-body-lg">
     <div className="flex flex-none flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2">
       <p>Điểm {stopNumber} / {model.stops.length} · {stop?.name}</p>
@@ -65,8 +68,8 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
           <Button variant="secondary" size="touch" onClick={() => handleFocus(selected)}>Tập trung vào kiện</Button>
           <Button variant="secondary" size="touch" aria-pressed={inspect} onClick={() => setInspect(!inspect)}>{inspect ? 'Ẩn' : 'Xem'} kiện có thể cản đường</Button>
         </div>
-        <p>{selected.id} · Điểm {selected.stop} · {ORIENTATION_LABELS[selected.orientation]}</p>
-        <p>Cách cửa {formatInteger(measurements.rearMm)} mm · vách trái {formatInteger(measurements.leftMm)} mm · Lớp {measurements.layer}</p>
+        <p>{selected.id} · Điểm {selected.stop} · {selected.orientation}</p>
+        <p>{t('viewer.measurements.summary', { rear: format.length(measurements.rearCm), left: format.length(measurements.leftCm), layer: measurements.layer })}</p>
         {retainedIds.has(selected.id) ? <p>Kiện khách từ chối, còn trên xe; không đưa vào mô phỏng dỡ.</p> : null}
         {selected.id !== unload.current?.id && unload.current ? <Button variant="secondary" size="touch" onClick={() => handleFocus(unload.current!)}>Quay lại kiện cần dỡ</Button> : null}
         {unload.warning ? <p className="text-badge-warning-fg">Có khả năng bị cản đường. Mô phỏng tạm dừng để xem cảnh báo.</p> : null}

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import { readToken } from '@/lib/tokens'
 import type { ManualEditor } from './useManualEditor'
 
 /** Screen HUD stays outside Canvas; drag messages update DOM without scene rerenders. */
-export function EditorGestureHud({ placement, editor }: { placement: Placement; editor: ManualEditor }) {
+export function EditorGestureHud({ placement, editor }: { placement: ScenePlacement; editor: ManualEditor }) {
   const label = useRef<HTMLSpanElement>(null)
   useEffect(() => {
     function update() {

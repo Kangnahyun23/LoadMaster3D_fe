@@ -19,8 +19,6 @@ export const VEHICLE: VehicleSpec = {
   innerWidthMm: 2350,
   innerHeightMm: 2400,
   payloadKg: 9500,
-  frontAxle: { loadKg: 3120, capacityKg: 4000 },
-  rearAxle: { loadKg: 5120, capacityKg: 5500 },
 }
 
 /** Khe hở tối thiểu giữa các kiện và với vách, mm */

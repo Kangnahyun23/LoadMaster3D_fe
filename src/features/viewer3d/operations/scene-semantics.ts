@@ -1,4 +1,5 @@
-import type { Placement, VehicleSpec } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { VehicleConfig } from '@/domain/models'
 import { potentialBlockers } from './operations-model'
 
 export type CargoAppearance = {
@@ -10,8 +11,8 @@ export type SceneSemantics = {
   appearanceById: ReadonlyMap<string, CargoAppearance>
   currentId: string | null
   nextId: string | null
-  blockers: readonly Placement[]
-  massPlacements: readonly Placement[]
+  blockers: readonly ScenePlacement[]
+  massPlacements: readonly ScenePlacement[]
   inspectionId: string | null
 }
 export type OperationsInput = {
@@ -26,7 +27,7 @@ export type OperationsInput = {
 }
 
 /** Shared semantic state for planner/warehouse/driver, with no Three.js or role-specific branches. */
-export function deriveSceneSemantics(placements: readonly Placement[], vehicle: VehicleSpec, input: OperationsInput): SceneSemantics {
+export function deriveSceneSemantics(placements: readonly ScenePlacement[], vehicle: VehicleConfig, input: OperationsInput): SceneSemantics {
   const currentId = input.kind === 'loading' ? placements.find((p) => p.step === input.step)?.id ?? null : input.currentId ?? null
   const nextId = input.kind === 'loading'
     ? [...placements].filter((p) => p.step > input.step).sort((a, b) => a.step - b.step)[0]?.id ?? null : input.nextId ?? null

@@ -1,7 +1,6 @@
 import { ArrowRight, ArrowUp, Package, TriangleAlert } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { formatDecimal, formatInteger } from '@/lib/format'
-import { placementMeasurements } from '@/features/viewer3d/operations/placement-measurements'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
 import type { Placement, PlanStop, VehicleSpec } from '@/types/load-plan'
@@ -11,6 +10,7 @@ import {
   describePosition,
   stepNote,
 } from './describe-step'
+import { findBelow } from '@/lib/placement'
 import { OrientationFigure } from './OrientationFigure'
 
 /**
@@ -31,7 +31,13 @@ export function PackageInstructionCard({
 }) {
   const stopName = stops.find((s) => s.number === placement.stop)?.name ?? ''
   const note = stepNote(placement, placements)
-  const measurements = placementMeasurements(placement, placements, vehicle)
+  // Kho vẫn đọc LoadPlan mm tới LM-060; khoảng cách tới vách tính tại chỗ, không đi qua scene cm.
+  const { position: at } = placement
+  const measurements = {
+    frontMm: at.x, rearMm: vehicle.innerLengthMm - at.x - placement.lengthMm,
+    leftMm: at.y, rightMm: vehicle.innerWidthMm - at.y - placement.widthMm, floorMm: at.z,
+    belowId: findBelow(placement, placements)?.id,
+  }
 
   return (
     <Card className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto p-4">

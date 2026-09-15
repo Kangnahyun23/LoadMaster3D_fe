@@ -11,7 +11,7 @@ export const CAMERA_PRESETS: ReadonlyArray<{ value: CameraPreset; label: string 
 
 export const COLOR_MODES: ReadonlyArray<{ value: ColorMode; label: string }> = [
   { value: 'diem-giao', label: 'Theo điểm giao' },
-  { value: 'don-hang', label: 'Theo đơn hàng' },
+  { value: 'kien-goc', label: 'Theo kiện gốc' },
   { value: 'khoi-luong', label: 'Theo khối lượng' },
 ]
 

@@ -2,20 +2,21 @@ import { easings, useSpring } from '@react-spring/three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useLayoutEffect, useRef } from 'react'
 import { Mesh, MeshStandardMaterial } from 'three'
-import type { Placement, VehicleSpec } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { VehicleConfig } from '@/domain/models'
 import { stopColor } from '@/lib/stops'
 import { readToken } from '@/lib/tokens'
-import { boxCenter, boxSize, MM } from '../scene/units'
+import { boxCenter, boxSize, SCENE_SCALE } from '../scene/units'
 import type { AnimationQuality } from '../usePerformanceFlags'
 import { potentialBlockers } from './operations-model'
 
-export type UnloadMotionStep = { placement: Placement | undefined; cursor: number; durationMs: number }
+export type UnloadMotionStep = { placement: ScenePlacement | undefined; cursor: number; durationMs: number }
 
 /** One temporary visual for a completed step; never a draggable/pickable placement.
  * A blocked corridor fades in place, so animation cannot imply proven accessibility.
  */
 export function UnloadMotion({ motion, remaining, vehicle, quality, reducedMotion }: {
-  motion: UnloadMotionStep; remaining: readonly Placement[]; vehicle: VehicleSpec
+  motion: UnloadMotionStep; remaining: readonly ScenePlacement[]; vehicle: VehicleConfig
   quality: AnimationQuality; reducedMotion: boolean
 }) {
   const mesh = useRef<Mesh>(null), material = useRef<MeshStandardMaterial>(null)
@@ -38,7 +39,7 @@ export function UnloadMotion({ motion, remaining, vehicle, quality, reducedMotio
     material.current.color.set(blocked ? readToken('--warning') : stopColor(p.stop))
     material.current.opacity = 0.85
     const distance = reducedMotion || blocked ? 0 : quality === 'full'
-      ? (vehicle.innerLengthMm + p.lengthMm) * MM - x : 0.35
+      ? (vehicle.innerLengthCm + p.lengthCm) * SCENE_SCALE - x : 0.35
     active.current = { x, distance }
     void api.start({ from: { t: 0 }, to: { t: 1 },
       config: { duration: reducedMotion ? 100 : motion.durationMs, easing: easings.easeInOutCubic } })

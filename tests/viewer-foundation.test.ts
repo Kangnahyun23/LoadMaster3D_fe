@@ -1,64 +1,71 @@
 import { expect, test } from 'vitest'
-import { BENCHMARK_COUNTS, benchmarkCountFromSearch, createBenchmarkPlan } from '@/features/viewer3d/benchmark.mock'
-import { adaptLoadPlan, canonicalDimensions, orientDimensions } from '@/features/viewer3d/viewer-scene-model'
+import { matchesOrientation, type OrientationCode } from '@/domain/geometry'
+import { BENCHMARK_COUNTS, benchmarkCountFromSearch, createBenchmarkInput } from '@/features/viewer3d/benchmark.mock'
+import { adaptResult, type ScenePlacement } from '@/features/viewer3d/scene-input'
 import { createViewerDraft, patchPlacement, resolveEffectiveScene } from '@/features/viewer3d/viewer-draft'
 import { cargoVisibility, createInstanceLayout, sameGeometry } from '@/features/viewer3d/scene/instance-layout'
-import type { Orientation, Placement } from '@/types/load-plan'
+import { benchmarkScene } from '@/test/scene'
 
-const ORIENTATIONS: Orientation[] = [0, 1, 2]
-const BASE = { lengthMm: 600, widthMm: 400, heightMm: 250 }
-const EXPECTED = [BASE, { lengthMm: 400, widthMm: 600, heightMm: 250 }, { lengthMm: 250, widthMm: 400, heightMm: 600 }]
+const BASE = { lengthCm: 60, widthCm: 40, heightCm: 25 }
+/** Kích thước đã xoay của BASE theo từng mã, viết tay từ định nghĩa Spec 6 (chữ thứ nhất dọc X, thứ hai dọc Y, thứ ba dọc Z). */
+const EXPECTED: Record<OrientationCode, readonly [number, number, number]> = {
+  LWH: [60, 40, 25], LHW: [60, 25, 40], WLH: [40, 60, 25], WHL: [40, 25, 60], HLW: [25, 60, 40], HWL: [25, 40, 60],
+}
+const CODES = Object.keys(EXPECTED) as OrientationCode[]
+const sizeOf = (p: ScenePlacement) => [p.lengthCm, p.widthCm, p.heightCm]
 
-test('all nine source/target orientations respect already-oriented domain dimensions', () => {
-  for (const sourceOrientation of ORIENTATIONS) {
-    for (const targetOrientation of ORIENTATIONS) {
-      const plan = createBenchmarkPlan(132)
-      const source = plan.placements[0]!
-      Object.assign(source, EXPECTED[sourceOrientation], { orientation: sourceOrientation })
-      const model = adaptLoadPlan(plan)
-      const before = structuredClone(plan)
-      const draft = patchPlacement(model, createViewerDraft(), source.id, { orientation: targetOrientation })
-      const resolved = resolveEffectiveScene(model, draft).placementById.get(source.id)!
-      expect(canonicalDimensions(source)).toStrictEqual(BASE)
-      expect(orientDimensions(BASE, targetOrientation)).toStrictEqual(EXPECTED[targetOrientation])
-      expect({ lengthMm: resolved.lengthMm, widthMm: resolved.widthMm, heightMm: resolved.heightMm }).toStrictEqual(EXPECTED[targetOrientation])
-      expect(resolved.orientation).toBe(targetOrientation)
-      expect(plan).toStrictEqual(before)
+/** Fixture 132 kiện với kiện đầu có kích thước BASE, đang đặt theo `source`. */
+function inputWithFirst(source: OrientationCode) {
+  const input = createBenchmarkInput(132)
+  Object.assign(input.request.packages[0]!, BASE)
+  const [placedLengthCm, placedWidthCm, placedHeightCm] = EXPECTED[source]
+  Object.assign(input.result.placements[0]!, { orientation: source, placedLengthCm, placedWidthCm, placedHeightCm })
+  return input
+}
+
+test('every source/target pair of the 6 orientations re-orients from the nominal package size, not the placed size', () => {
+  for (const source of CODES) {
+    for (const target of CODES) {
+      const input = inputWithFirst(source)
+      const before = structuredClone(input)
+      const model = adaptResult({ trip: input.trip, revision: input })
+      const id = model.placements[0]!.id
+      const resolved = resolveEffectiveScene(model, patchPlacement(model, createViewerDraft(), id, { orientation: target })).placementById.get(id)!
+      expect(model.baseDimensionsById.get(id)).toStrictEqual(BASE)
+      expect([sizeOf(resolved), resolved.orientation]).toStrictEqual([[...EXPECTED[target]], target])
+      expect(input).toStrictEqual(before)
     }
   }
 })
 
-test('adapter detaches and freezes snapshot without freezing or mutating source plan', () => {
-  const plan = createBenchmarkPlan(132)
-  const original = structuredClone(plan)
-  const model = adaptLoadPlan(plan)
-  expect(model.placements).toStrictEqual(plan.placements)
-  expect(model.placements[0]).not.toBe(plan.placements[0])
-  expect(model.placements[0]!.position).not.toBe(plan.placements[0]!.position)
-  plan.placements[0]!.position.x = 999
-  plan.vehicle.frontAxle.loadKg = 0
-  plan.stops[0]!.name = 'Đã sửa dữ liệu nguồn'
-  expect(model.placements[0]!.position.x).toBe(original.placements[0]!.position.x)
-  expect(model.vehicle.frontAxle.loadKg).toBe(original.vehicle.frontAxle.loadKg)
-  expect(model.stops[0]!.name).toBe(original.stops[0]!.name)
+test('adapter detaches and freezes the snapshot without freezing or mutating the source result', () => {
+  const input = createBenchmarkInput(132)
+  const original = structuredClone(input)
+  const model = adaptResult({ trip: input.trip, revision: input })
+  input.result.placements[0]!.xCm = 999
+  input.request.vehicle.innerLengthCm = 1
+  input.trip.stops[0]!.name = 'Đã sửa dữ liệu nguồn'
+  expect(model.placements[0]!.position.x).toBe(original.result.placements[0]!.xCm)
+  expect(model.vehicle.innerLengthCm).toBe(original.request.vehicle.innerLengthCm)
+  expect(model.stops[0]!.name).toBe(original.trip.stops[0]!.name)
   expect(Object.isFrozen(model.placements)).toBeTruthy()
   expect(Object.isFrozen(model.placements[0]!.position)).toBeTruthy()
-  expect(!Object.isFrozen(plan)).toBeTruthy()
+  expect(Object.isFrozen(input.result.placements)).toBe(false)
 })
 
 test('draft merges by id, keeps unrelated source references, prunes resets and ignores unknown ids', () => {
-  const model = adaptLoadPlan(createBenchmarkPlan(132))
+  const model = benchmarkScene(132)
   const source = model.placements[0]!
   const empty = createViewerDraft()
   expect(patchPlacement(model, empty, 'missing', { pinned: true })).toBe(empty)
   expect(patchPlacement(model, empty, source.id, { pinned: source.pinned })).toBe(empty)
-  const position = { x: 120, y: 220, z: 320 }
-  let draft = patchPlacement(model, empty, source.id, { position, orientation: 2 })
+  const position = { x: 12, y: 22, z: 32 }
+  let draft = patchPlacement(model, empty, source.id, { position, orientation: 'HWL' })
   position.x = 999
   draft = patchPlacement(model, draft, source.id, { pinned: !source.pinned })
   const effective = resolveEffectiveScene(model, draft)
-  expect(effective.placementById.get(source.id)!.position).toStrictEqual({ x: 120, y: 220, z: 320 })
-  expect(effective.placementById.get(source.id)!.orientation).toBe(2)
+  expect(effective.placementById.get(source.id)!.position).toStrictEqual({ x: 12, y: 22, z: 32 })
+  expect(effective.placementById.get(source.id)!.orientation).toBe('HWL')
   expect(effective.placementById.get(source.id)!.pinned).toBe(!source.pinned)
   expect(effective.placements[1]).toBe(model.placements[1])
   expect(patchPlacement(model, draft, source.id, { pinned: !source.pinned })).toBe(draft)
@@ -70,47 +77,51 @@ test('draft merges by id, keeps unrelated source references, prunes resets and i
 })
 
 test('id lookup stays correct after source order changes; duplicate identities are rejected', () => {
-  const plan = createBenchmarkPlan(132)
-  const id = plan.placements[12]!.id
-  plan.placements.reverse()
-  const model = adaptLoadPlan(plan)
+  const input = createBenchmarkInput(132)
+  const id = input.result.placements[12]!.packageInstanceId
+  input.result.placements.reverse()
+  const model = adaptResult({ trip: input.trip, revision: input })
   const draft = patchPlacement(model, createViewerDraft(), id, { position: { x: 1, y: 2, z: 3 } })
   const effective = resolveEffectiveScene(model, draft)
   expect(effective.placementById.get(id)!.position).toStrictEqual({ x: 1, y: 2, z: 3 })
   expect(effective.placements.find((p) => p.id === id)).toBe(effective.placementById.get(id))
-  plan.placements.push(plan.placements[0]!)
-  expect(() => adaptLoadPlan(plan)).toThrow(/Mã kiện bị trùng/)
+  input.result.placements.push(input.result.placements[0]!)
+  expect(() => adaptResult({ trip: input.trip, revision: input })).toThrow(/Mã kiện bị trùng/)
 })
 
-function overlaps(a: Placement, b: Placement): boolean {
-  return a.position.x < b.position.x + b.lengthMm && b.position.x < a.position.x + a.lengthMm &&
-    a.position.y < b.position.y + b.widthMm && b.position.y < a.position.y + a.widthMm &&
-    a.position.z < b.position.z + b.heightMm && b.position.z < a.position.z + a.heightMm
+function overlaps(a: ScenePlacement, b: ScenePlacement): boolean {
+  return a.position.x < b.position.x + b.lengthCm && b.position.x < a.position.x + a.lengthCm &&
+    a.position.y < b.position.y + b.widthCm && b.position.y < a.position.y + a.widthCm &&
+    a.position.z < b.position.z + b.heightCm && b.position.z < a.position.z + a.heightCm
 }
 
 for (const count of BENCHMARK_COUNTS) {
-  test(`benchmark ${count}: deterministic, bounded, distinct identities, multiple sizes/stops and no overlaps`, () => {
-    const plan = createBenchmarkPlan(count)
-    expect(plan).toStrictEqual(createBenchmarkPlan(count))
-    expect(plan.placements.length).toBe(count)
-    expect(new Set(plan.placements.map((p) => p.id)).size).toBe(count)
-    expect(new Set(plan.placements.map((p) => p.step)).size).toBe(count)
-    expect(new Set(plan.placements.map((p) => p.stop)).size).toBe(4)
-    expect(new Set(plan.placements.map((p) => p.orientation)).size).toBe(3)
-    expect(new Set(plan.placements.map((p) => `${p.lengthMm}/${p.widthMm}/${p.heightMm}`)).size >= 3).toBeTruthy()
+  test(`benchmark ${count}: deterministic Spec contract in cm, bounded, distinct identities, multiple sizes/stops and no overlaps`, () => {
+    const input = createBenchmarkInput(count)
+    expect(input).toStrictEqual(createBenchmarkInput(count))
+    const { vehicle } = input.request
+    const model = adaptResult({ trip: input.trip, revision: input })
+    const placements = model.placements
+    expect(placements.length).toBe(count)
+    expect(new Set(placements.map((p) => p.id)).size).toBe(count)
+    expect(new Set(placements.map((p) => p.step)).size).toBe(count)
+    expect(new Set(placements.map((p) => p.stop)).size).toBe(4)
+    expect(new Set(placements.map((p) => p.orientation)).size).toBe(3)
+    expect(new Set(placements.map((p) => sizeOf(p).join('/'))).size >= 3).toBeTruthy()
+    input.result.placements.forEach((placement, index) => {
+      expect(matchesOrientation(placement, input.request.packages[index]!), placement.packageInstanceId).toBe(true)
+    })
     for (let index = 0; index < count; index++) {
-      const p = plan.placements[index]!
-      expect(Number.isInteger(p.lengthMm) && p.lengthMm > 0).toBeTruthy()
-      expect(Number.isInteger(p.widthMm) && p.widthMm > 0).toBeTruthy()
-      expect(Number.isInteger(p.heightMm) && p.heightMm > 0).toBeTruthy()
-      expect(p.position.x >= 0 && p.position.x + p.lengthMm <= plan.vehicle.innerLengthMm).toBeTruthy()
-      expect(p.position.y >= 0 && p.position.y + p.widthMm <= plan.vehicle.innerWidthMm).toBeTruthy()
-      expect(p.position.z >= 0 && p.position.z + p.heightMm <= plan.vehicle.innerHeightMm).toBeTruthy()
+      const p = placements[index]!
+      expect(sizeOf(p).every((size) => Number.isInteger(size) && size > 0)).toBeTruthy()
+      expect(p.position.x >= 0 && p.position.x + p.lengthCm <= vehicle.innerLengthCm).toBeTruthy()
+      expect(p.position.y >= 0 && p.position.y + p.widthCm <= vehicle.innerWidthCm).toBeTruthy()
+      expect(p.position.z >= 0 && p.position.z + p.heightCm <= vehicle.innerHeightCm).toBeTruthy()
       for (let other = index + 1; other < count; other++) {
-        expect(!overlaps(p, plan.placements[other]!), `${p.id} overlaps ${plan.placements[other]!.id}`).toBeTruthy()
+        expect(!overlaps(p, placements[other]!), `${p.id} overlaps ${placements[other]!.id}`).toBeTruthy()
       }
     }
-    expect(plan.stops.reduce((sum, stop) => sum + stop.packageCount, 0)).toBe(count)
+    expect(model.stops.reduce((sum, stop) => sum + stop.packageCount, 0)).toBe(count)
     // ~500.000 expect cho 1.000 kiện: vượt mặc định 5 s khi máy/CI đang tải nặng.
   }, 30_000)
 }
@@ -123,7 +134,7 @@ test('benchmark parameters cannot alter normal product flow', () => {
 })
 
 test('all 1,000 GPU slots round-trip through placement identity independent of source order', () => {
-  const placements = createBenchmarkPlan(1000).placements
+  const placements = benchmarkScene(1000).placements
   const originalOrder = placements.map((p) => p.id)
   const layout = createInstanceLayout(placements)
   const reversed = createInstanceLayout([...placements].reverse())
@@ -141,7 +152,7 @@ test('all 1,000 GPU slots round-trip through placement identity independent of s
 })
 
 test('filtered/replaced instance layouts preserve correct identity even when GPU slots change', () => {
-  const placements = createBenchmarkPlan(1000).placements
+  const placements = benchmarkScene(1000).placements
   const complete = createInstanceLayout(placements)
   const filteredPlacements = placements.filter((p) => p.step % 3 === 0)
   const filtered = createInstanceLayout(filteredPlacements)
@@ -152,7 +163,7 @@ test('filtered/replaced instance layouts preserve correct identity even when GPU
     expect(filtered.instanceToPlacementId[slot]).toBe(placement.id)
     expect(filtered.placementById.get(placement.id)).toBe(placement)
   }
-  const changed = { ...placements[0]!, position: { x: 120, y: 40, z: 200 } }
+  const changed = { ...placements[0]!, position: { x: 12, y: 4, z: 20 } }
   const replacement = createInstanceLayout([changed, ...placements.slice(1)])
   expect(replacement.placementIdToInstance.get(changed.id)).toBe(complete.placementIdToInstance.get(changed.id))
   expect(replacement.placementById.get(changed.id)).toBe(changed)
@@ -163,24 +174,24 @@ test('filtered/replaced instance layouts preserve correct identity even when GPU
 })
 
 test('matrix geometry dirty checks ignore metadata but detect every coordinate/dimension change', () => {
-  const placement = createBenchmarkPlan(132).placements[0]!
+  const placement = benchmarkScene(132).placements[0]!
   expect(!sameGeometry(undefined, placement)).toBeTruthy()
   expect(sameGeometry(placement, { ...placement, pinned: !placement.pinned, stop: 2, weightKg: 5 })).toBeTruthy()
   for (const axis of ['x', 'y', 'z'] as const) {
-    expect(!sameGeometry(placement, { ...placement, position: { ...placement.position, [axis]: placement.position[axis] + 1 } })).toBeTruthy()
+    expect(!sameGeometry(placement, { ...placement, position: { ...placement.position, [axis]: placement.position[axis] + 0.1 } })).toBeTruthy()
   }
-  for (const dimension of ['lengthMm', 'widthMm', 'heightMm'] as const) {
-    expect(!sameGeometry(placement, { ...placement, [dimension]: placement[dimension] + 1 })).toBeTruthy()
+  for (const dimension of ['lengthCm', 'widthCm', 'heightCm'] as const) {
+    expect(!sameGeometry(placement, { ...placement, [dimension]: placement[dimension] + 0.1 })).toBeTruthy()
   }
 })
 
 test('visibility respects full step resolution, exact slice boundary and effective geometry', () => {
-  const placement = createBenchmarkPlan(1000).placements[500]!
-  const end = placement.position.x + placement.lengthMm
+  const placement = benchmarkScene(1000).placements[500]!
+  const end = placement.position.x + placement.lengthCm
   expect(cargoVisibility(placement, placement.step - 1, end)).toBe('hidden')
-  expect(cargoVisibility(placement, placement.step - 1, end - 1)).toBe('hidden')
+  expect(cargoVisibility(placement, placement.step - 1, end - 0.1)).toBe('hidden')
   expect(cargoVisibility(placement, placement.step, end)).toBe('opaque')
-  expect(cargoVisibility(placement, placement.step, end - 1)).toBe('dim')
-  expect(cargoVisibility({ ...placement, position: { ...placement.position, x: placement.position.x + 1 } }, placement.step, end)).toBe('dim')
-  expect(cargoVisibility({ ...placement, lengthMm: placement.lengthMm + 1 }, placement.step, end)).toBe('dim')
+  expect(cargoVisibility(placement, placement.step, end - 0.1)).toBe('dim')
+  expect(cargoVisibility({ ...placement, position: { ...placement.position, x: placement.position.x + 0.1 } }, placement.step, end)).toBe('dim')
+  expect(cargoVisibility({ ...placement, lengthCm: placement.lengthCm + 0.1 }, placement.step, end)).toBe('dim')
 })

@@ -44,15 +44,15 @@ test('planner defaults to the scene; follow step, stop focus, unloading advisory
   await button(page, 'Xem toàn xe').click(); await settle(page)
   await page.getByRole('combobox', { name: 'Tập trung điểm giao', exact: true }).selectOption('2'); await shot('03-stop-two')
   expect(await page.evaluate(async (url) => {
-    const { LOAD_PLAN } = (await import(url)) as typeof import('@/lib/load-plan.mock')
-    return LOAD_PLAN.placements.find((p) => p.step === Number(document.querySelector<HTMLInputElement>('input[aria-label="Bước xếp"]')!.value))?.stop
-  }, SOURCE_MODULES.loadPlan), 'stop focus must not leave the current label on a different stop').toBe(2)
+    const { seedScene } = (await import(url)) as typeof import('@/test/scene')
+    return (await seedScene()).placements.find((p) => p.step === Number(document.querySelector<HTMLInputElement>('input[aria-label="Bước xếp"]')!.value))?.stop
+  }, SOURCE_MODULES.scene), 'stop focus must not leave the current label on a different stop').toBe(2)
   await button(page, 'Dỡ hàng').click(); await shot('04-unloading-clear')
-  const blocked = await page.evaluate(async ({ loadPlan, operations }) => {
-    const { LOAD_PLAN } = (await import(loadPlan)) as typeof import('@/lib/load-plan.mock')
+  const blocked = await page.evaluate(async ({ scene, operations }) => {
+    const plan = await ((await import(scene)) as typeof import('@/test/scene')).seedScene()
     const { suggestedUnloadOrder, potentialBlockers } = (await import(operations)) as typeof import('@/features/viewer3d/operations/operations-model')
-    const ordered = suggestedUnloadOrder(LOAD_PLAN.placements)
-    return ordered.findIndex((p, i) => potentialBlockers(p, ordered.slice(i), LOAD_PLAN.vehicle).length)
+    const ordered = suggestedUnloadOrder(plan.placements)
+    return ordered.findIndex((p, i) => potentialBlockers(p, ordered.slice(i), plan.vehicle).length)
   }, SOURCE_MODULES)
   expect(blocked, 'canonical plan contains an advisory case').toBeGreaterThanOrEqual(0)
   await page.getByRole('slider', { name: 'Đã dỡ (gợi ý)', exact: true }).fill(String(blocked))
@@ -84,14 +84,14 @@ test('hover and double-click focus keep the view; editor shows valid snap and ov
   const cameraReset = await sceneSnapshot(page)
   expect(cameraBefore.target.every((v, i) => Math.abs(v - cameraReset.target[i]!) < 0.001)).toBeTruthy()
 
-  await enterEdit(page); await selectPlacement(page, 'BENCH-01000'); await cameraPreset(page, 'Trên'); await settle(page)
+  await enterEdit(page); await selectPlacement(page, 'BENCH-01000-01'); await cameraPreset(page, 'Trên'); await settle(page)
   await button(page, 'Tập trung vào kiện').click(); await settle(page); await waitCameraSettled(page)
-  let start = await proxyPoint(page), end = await proxyPoint(page, [55, 0, 0])
+  let start = await proxyPoint(page), end = await proxyPoint(page, [5.5, 0, 0])
   await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y, { steps: 10 })
   expect(await status.getAttribute('data-valid')).toBe('true')
   await page.waitForTimeout(250)
   await shot('07-edit-valid-snap', false); await page.mouse.up(); await settle(page)
-  start = await proxyPoint(page); end = await proxyPoint(page, [-380, 0, 0])
+  start = await proxyPoint(page); end = await proxyPoint(page, [-38, 0, 0])
   await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y, { steps: 10 })
   await page.waitForTimeout(150)
   expect(await status.getAttribute('data-valid')).toBe('false')

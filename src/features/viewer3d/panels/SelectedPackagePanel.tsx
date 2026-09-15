@@ -2,11 +2,12 @@ import { AlertCircle, Focus, Pencil, X } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { formatDecimal, formatDimensions, formatInteger } from '@/lib/format'
+import { formatDecimal, formatInteger } from '@/lib/format'
+import { useFormat } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
-import { findAbove, findBelow, layerOf, PACKAGING_LABELS } from '@/lib/placement'
-import { ORIENTATION_LABELS, type Placement, type PlanStop } from '@/types/load-plan'
+import type { SceneStop, ScenePlacement } from '@/features/viewer3d/scene-input'
+import { findAbove, findBelow, layerOf } from './placement-relations'
 
 /** Panel phải: chi tiết kiện đang chọn, hướng xoay, vị trí, ghim. */
 export function SelectedPackagePanel({
@@ -19,10 +20,10 @@ export function SelectedPackagePanel({
   onEdit,
   onFocus,
 }: {
-  placement: Placement | undefined
-  placements: Placement[]
+  placement: ScenePlacement | undefined
+  placements: ScenePlacement[]
   totalSteps: number
-  stops: PlanStop[]
+  stops: readonly SceneStop[]
   tripId: string
   onClose: () => void
   onEdit: () => void
@@ -75,14 +76,15 @@ function PackageDetails({
   onEdit,
   onFocus,
 }: {
-  placement: Placement
-  placements: Placement[]
+  placement: ScenePlacement
+  placements: ScenePlacement[]
   totalSteps: number
-  stops: PlanStop[]
+  stops: readonly SceneStop[]
   tripId: string
   onEdit: () => void
   onFocus: () => void
 }) {
+  const format = useFormat()
   const stopName = stops.find((s) => s.number === placement.stop)?.name ?? ''
   const layer = layerOf(placement, placements)
   const below = findBelow(placement, placements)
@@ -108,7 +110,6 @@ function PackageDetails({
                   Dễ vỡ
                 </Badge>
               ) : null}
-              <Badge tone="neutral">{PACKAGING_LABELS[placement.packaging]}</Badge>
             </div>
           </div>
         </div>
@@ -116,8 +117,7 @@ function PackageDetails({
         <dl className="flex flex-col border-t border-border">
           <Row label="Kích thước (D × R × C)">
             <span className="font-mono font-medium">
-              {formatDimensions(placement.lengthMm, placement.widthMm, placement.heightMm).replace(' mm', '')}{' '}
-              <span className="font-normal text-text-3">mm</span>
+              {format.dimensions(placement.lengthCm, placement.widthCm, placement.heightCm)}
             </span>
           </Row>
           <Row label="Khối lượng">
@@ -125,9 +125,9 @@ function PackageDetails({
               {formatDecimal(placement.weightKg)} <span className="font-normal text-text-3">kg</span>
             </span>
           </Row>
-          <Row label="Đơn hàng">
+          <Row label="Kiện gốc">
             <Link to={`/chuyen/${tripId}`} className="font-mono font-medium text-primary">
-              {placement.orderId}
+              {placement.packageId}
             </Link>
           </Row>
           <Row label="Điểm giao">
@@ -146,15 +146,15 @@ function PackageDetails({
 
         <div className="flex flex-col gap-2">
           <span className="text-body-lg xl:text-caption font-medium text-text-3">Hướng xoay</span>
-          <span className="font-mono text-body">{ORIENTATION_LABELS[placement.orientation]}</span>
+          <span className="font-mono text-body">{placement.orientation}</span>
         </div>
 
         <div className="flex flex-col gap-2">
           <span className="text-body-lg xl:text-caption font-medium text-text-3">Vị trí (từ vách trước · vách trái · sàn)</span>
           <div className="grid grid-cols-3 gap-1.5">
-            <Coordinate axis="X" value={placement.position.x} />
-            <Coordinate axis="Y" value={placement.position.y} />
-            <Coordinate axis="Z" value={placement.position.z} />
+            <Coordinate axis="X" value={format.length(placement.position.x)} />
+            <Coordinate axis="Y" value={format.length(placement.position.y)} />
+            <Coordinate axis="Z" value={format.length(placement.position.z)} />
           </div>
           <span className="text-body-lg xl:text-caption text-text-3">
             Lớp {layer} · {below ? `đặt trên ${below.id}` : 'nằm trên sàn'}
@@ -181,11 +181,11 @@ function Row({ label, children, last = false }: { label: string; children: React
   )
 }
 
-function Coordinate({ axis, value }: { axis: string; value: number }) {
+function Coordinate({ axis, value }: { axis: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-md border border-border bg-surface px-2.5 py-2">
       <span className="text-body-lg xl:text-caption text-text-3">{axis}</span>
-      <span className="font-mono text-body-lg xl:text-body font-medium">{formatInteger(value)}</span>
+      <span className="font-mono text-body-lg xl:text-body font-medium">{value}</span>
     </div>
   )
 }

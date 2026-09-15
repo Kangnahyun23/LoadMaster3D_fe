@@ -1,23 +1,24 @@
 import type { CSSProperties } from 'react'
-import { formatInteger } from '@/lib/format'
+import { useFormat } from '@/lib/i18n'
 
-const SLICE_STEP_MM = 50
+const SLICE_STEP_CM = 5
 
 /**
  * Panel nổi góc dưới phải: thanh trượt cắt lớp theo chiều dài thùng.
  * Kéo về trái là bỏ dần các kiện gần cửa sau để nhìn vào trong.
  */
 export function SlicePanel({
-  sliceMm,
-  maxMm,
+  sliceCm,
+  maxCm,
   onChange,
 }: {
-  sliceMm: number
-  maxMm: number
-  onChange: (sliceMm: number) => void
+  sliceCm: number
+  maxCm: number
+  onChange: (sliceCm: number) => void
 }) {
-  const percent = (sliceMm / maxMm) * 100
-  const label = sliceMm >= maxMm ? 'Toàn bộ' : `${formatInteger(sliceMm)} mm`
+  const format = useFormat()
+  const percent = (sliceCm / maxCm) * 100
+  const label = sliceCm >= maxCm ? 'Toàn bộ' : format.length(sliceCm)
 
   return (
     <div className="flex w-full max-w-80 flex-col gap-2 rounded-md border border-border bg-bg p-3 xl:w-70">
@@ -31,9 +32,9 @@ export function SlicePanel({
         type="range"
         className="lm-range min-h-14 xl:min-h-0"
         min={0}
-        max={maxMm}
-        step={SLICE_STEP_MM}
-        value={sliceMm}
+        max={maxCm}
+        step={SLICE_STEP_CM}
+        value={sliceCm}
         onChange={(event) => onChange(Number(event.target.value))}
         aria-label="Cắt lớp theo chiều dài"
         aria-valuetext={label}

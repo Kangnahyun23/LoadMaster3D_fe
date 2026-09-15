@@ -2,6 +2,7 @@ import { Check, ChevronLeft, Columns2 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { StatusBadge } from '@/components/StatusBadge'
+import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { formatDecimal, formatInteger } from '@/lib/format'
 
@@ -14,6 +15,7 @@ export function ViewerHeader({
   fillRate,
   totalWeightKg,
   payloadKg,
+  isMockResult,
   placedCount,
   totalCount,
   onApprove,
@@ -22,6 +24,8 @@ export function ViewerHeader({
   fillRate: number
   totalWeightKg: number
   payloadKg: number
+  /** Spec: mọi kết quả từ mock mang nhãn MOCK RESULT, không dịch. */
+  isMockResult: boolean
   placedCount: number
   totalCount: number
   onApprove: () => void
@@ -42,6 +46,7 @@ export function ViewerHeader({
         </h1>
         <StatusBadge status="da_toi_uu" />
       </div>
+      {isMockResult ? <Badge tone="warning">MOCK RESULT</Badge> : null}
 
       <span aria-hidden className="hidden h-6 w-px bg-border xl:block" />
 

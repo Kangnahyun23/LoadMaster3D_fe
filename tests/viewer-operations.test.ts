@@ -1,17 +1,14 @@
 import { expect, test } from 'vitest'
-import { createBenchmarkPlan } from '@/features/viewer3d/benchmark.mock'
 import { accessibilitySummary, cargoCenterOfMass, potentialBlockers, stopDistribution, stopOrderConsistent, suggestedUnloadOrder, timelineBins } from '@/features/viewer3d/operations/operations-model'
 import { deriveSceneSemantics } from '@/features/viewer3d/operations/scene-semantics'
 import { placementMeasurements } from '@/features/viewer3d/operations/placement-measurements'
 import { createQualityPolicy, observeQuality, QUALITY_COOLDOWN_MS } from '@/features/viewer3d/quality-policy'
-import type { Placement } from '@/types/load-plan'
+import { benchmarkScene, sceneBox as box } from '@/test/scene'
 
-const plan = createBenchmarkPlan(1000)
-const box = (id: string, x = 0, y = 0, z = 0, extra: Partial<Placement> = {}): Placement => ({ ...plan.placements[0]!,
-  id, lengthMm: 100, widthMm: 100, heightMm: 100, position: { x, y, z }, weightKg: 10, stop: 1, ...extra })
+const plan = benchmarkScene(1000)
 
 test('stop-order consistency never implies extraction accessibility', () => {
-  const a = box('a', 0, 0, 0, { stop: 2, step: 1 }), b = box('b', 200, 0, 0, { stop: 2, step: 2 })
+  const a = box('a', 0, 0, 0, { stop: 2, step: 1 }), b = box('b', 20, 0, 0, { stop: 2, step: 2 })
   expect(stopOrderConsistent([b, a])).toBe(true)
   expect(potentialBlockers(a, [a, b], plan.vehicle).map((p) => p.id)).toStrictEqual(['b'])
   expect(accessibilitySummary([a, b], plan.vehicle)).toBe(1)
@@ -19,37 +16,37 @@ test('stop-order consistency never implies extraction accessibility', () => {
 })
 
 test('corridor points toward +X rear door, excludes touching side/top faces and previous stops when simulated removed', () => {
-  const target = box('target', 100), front = box('front'), rear = box('rear', 200), side = box('side', 200, 100), above = box('above', 200, 0, 100)
+  const target = box('target', 10), front = box('front'), rear = box('rear', 20), side = box('side', 20, 10), above = box('above', 20, 0, 10)
   expect(potentialBlockers(target, [front, rear, side, above], plan.vehicle).map((p) => p.id)).toStrictEqual(['rear'])
-  expect(potentialBlockers(box('door', 7100), [rear], plan.vehicle)).toStrictEqual([])
+  expect(potentialBlockers(box('door', 710), [rear], plan.vehicle)).toStrictEqual([])
   const semantics = deriveSceneSemantics([target, rear], plan.vehicle, { kind: 'unloading', step: 0, currentId: target.id,
     unloadedIds: new Set([rear.id]), inspectId: target.id, focusStop: 1 })
   expect(semantics.blockers.length).toBe(0)
 })
 
 test('suggested unload order is stable, by ascending stop, high then rearward, without mutating placements', () => {
-  const items = [box('stop2', 500, 0, 500, { stop: 2 }), box('low', 500), box('front-high', 0, 0, 200), box('rear-high', 400, 0, 200)]
+  const items = [box('stop2', 50, 0, 50, { stop: 2 }), box('low', 50), box('front-high', 0, 0, 20), box('rear-high', 40, 0, 20)]
   const before = structuredClone(items)
   expect(suggestedUnloadOrder(items).map((p) => p.id)).toStrictEqual(['rear-high', 'front-high', 'low', 'stop2'])
   expect(items).toStrictEqual(before)
 })
 
 test('cargo mass uses oriented box centers weighted by cargo mass, including empty/invalid-weight case', () => {
-  const a = box('a'), b = box('b', 200, 100, 100, { weightKg: 30, lengthMm: 200 })
-  expect(cargoCenterOfMass([a, b])).toStrictEqual({ position: { x: 237.5, y: 125, z: 125 }, weightKg: 40 })
+  const a = box('a'), b = box('b', 20, 10, 10, { weightKg: 30, lengthCm: 20 })
+  expect(cargoCenterOfMass([a, b])).toStrictEqual({ position: { x: 23.75, y: 12.5, z: 12.5 }, weightKg: 40 })
   expect(cargoCenterOfMass([])).toBe(null)
   expect(cargoCenterOfMass([{ ...a, weightKg: 0 }, { ...b, weightKg: NaN }])).toBe(null)
 })
 
 test('stop distribution keeps mixed stops and clips exact volume into bins', () => {
-  const bins = stopDistribution([box('a', 0), box('b', 0, 100, 0, { stop: 2 })], 200, 2)
+  const bins = stopDistribution([box('a', 0), box('b', 0, 10, 0, { stop: 2 })], 20, 2)
   expect(bins[0]!.portions).toStrictEqual([{ stop: 1, ratio: 0.5 }, { stop: 2, ratio: 0.5 }])
   expect(bins[1]!.portions).toStrictEqual([])
   expect(stopDistribution([], 0).length).toBe(0)
 })
 
 test('loading semantic states, focus and isolation preserve placement identity and source geometry', () => {
-  const a = box('a', 0, 0, 0, { step: 1, stop: 2 }), b = box('b', 200, 0, 0, { step: 2, stop: 1 }), c = box('c', 400, 0, 0, { step: 3 })
+  const a = box('a', 0, 0, 0, { step: 1, stop: 2 }), b = box('b', 20, 0, 0, { step: 2, stop: 1 }), c = box('c', 40, 0, 0, { step: 3 })
   const items = [a, b, c], before = structuredClone(items)
   const initial = deriveSceneSemantics(items, plan.vehicle, { kind: 'loading', step: 1 })
   expect(initial.appearanceById.get('a')!.state).toBe('current')
@@ -67,7 +64,7 @@ test('loading semantic states, focus and isolation preserve placement identity a
 })
 
 test('unloading focus hides previous/delivered cargo, ghosts future stops and warns on potential blockers', () => {
-  const target = box('target', 100, 0, 0, { stop: 2 }), blocker = box('blocker', 300, 0, 0, { stop: 3 }), past = box('past', 500)
+  const target = box('target', 10, 0, 0, { stop: 2 }), blocker = box('blocker', 30, 0, 0, { stop: 3 }), past = box('past', 50)
   const view = deriveSceneSemantics([target, blocker, past], plan.vehicle, { kind: 'unloading', step: 0, focusStop: 2, currentId: target.id })
   expect(view.appearanceById.get('past')!.visibility).toBe('hidden')
   expect(view.appearanceById.get('blocker')!.visibility).toBe('dim')
@@ -86,11 +83,10 @@ test('timeline bins stay bounded and cover all 1,000 placements exactly once', (
   expect(timelineBins([])).toStrictEqual([])
 })
 
-test('measurements use actual extents, not mock row spacing', () => {
-  const p = box('a', 200, 300, 400)
+test('measurements use actual extents in cm, not mock row spacing', () => {
+  const p = box('a', 20, 30, 40)
   const m = placementMeasurements(p, [p], plan.vehicle)
-  expect(m.frontMm).toBe(200); expect(m.leftMm).toBe(300); expect(m.floorMm).toBe(400)
-  expect(m.rearMm).toBe(6900); expect(m.rightMm).toBe(1950); expect(m.ceilingMm).toBe(1900)
+  expect([m.frontCm, m.leftCm, m.floorCm, m.rearCm, m.rightCm, m.ceilingCm]).toStrictEqual([20, 30, 40, 690, 195, 190])
 })
 
 test('quality adaptation has consecutive samples, hysteresis, cooldown and ignores idle/sparse intervals', () => {

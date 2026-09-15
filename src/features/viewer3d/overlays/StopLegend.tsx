@@ -1,10 +1,11 @@
 import { formatDecimal, formatInteger } from '@/lib/format'
 import { stopColor } from '@/lib/stops'
 import { weightColor, type ColorContext } from '../colors'
-import type { ColorMode, PlanStop } from '@/types/load-plan'
+import type { ColorMode } from '@/types/load-plan'
+import type { SceneStop } from '../scene-input'
 
 /**
- * Chú thích màu nổi góc trên phải. Theo điểm giao / đơn hàng: bảng 8 màu
+ * Chú thích màu nổi góc trên phải. Theo điểm giao / kiện gốc: bảng 8 màu
  * kèm tên và số kiện — màu luôn đi cùng số (mục 10). Theo khối lượng: dải
  * một sắc với hai đầu min/max.
  */
@@ -13,7 +14,7 @@ export function StopLegend({
   colorMode,
   colorContext,
 }: {
-  stops: PlanStop[]
+  stops: readonly SceneStop[]
   colorMode: ColorMode
   colorContext: ColorContext
 }) {
@@ -37,9 +38,9 @@ export function StopLegend({
 
   return (
     <div className="flex min-w-50 flex-col gap-1.5 rounded-md border border-border bg-bg px-3 py-2.5">
-      {colorMode === 'don-hang' ? (
+      {colorMode === 'kien-goc' ? (
         <span className="pb-0.5 text-body-lg xl:text-caption text-text-3">
-          Cùng điểm giao, đơn sau tối hơn một nấc
+          Cùng điểm giao, kiện gốc sau tối hơn một nấc
         </span>
       ) : null}
       {stops.map((stop) => (

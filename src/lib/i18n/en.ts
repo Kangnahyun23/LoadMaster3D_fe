@@ -112,6 +112,26 @@ export const en = {
     ORIENTATION_MISMATCH: 'Placed dimensions of {id} do not match orientation {orientation}.',
     ORIENTATION_NOT_ALLOWED: '{id} is placed in orientation {orientation}, which its package does not allow.',
   },
+  viewer: {
+    axles: {
+      title: 'Axle load',
+      comingLater: 'Coming later',
+      pending: 'Waiting for the backend to compute axle loads; no estimated figures are shown.',
+      axle: '{name} · {position} from the front wall · max {maxLoad}',
+    },
+    measurements: {
+      summary: '{rear} from the door · {left} from the left wall · Layer {layer}',
+    },
+    unplacedReasons: {
+      NO_SPACE: 'No free space fits the package',
+      OVER_PAYLOAD: 'Exceeds the vehicle max payload',
+      DOOR_TOO_SMALL: 'Does not fit through the door',
+      NO_ALLOWED_ORIENTATION: 'No allowed orientation fits the cargo space',
+      STACKING_VIOLATION: 'Breaks a stacking rule',
+      LIFO_VIOLATION: 'Breaks the delivery unloading order',
+      UNKNOWN: 'Not placed, reason unknown',
+    },
+  },
   fields: {
     innerLengthCm: 'Inner length',
     innerWidthCm: 'Inner width',

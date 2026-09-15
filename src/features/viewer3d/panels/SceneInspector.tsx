@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/Dialog'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import type { OperationsState } from '../operations/useOperations'
 import { OperationsPanel } from '../operations/OperationsPanel'
@@ -15,7 +15,7 @@ import type { InspectorTab } from './WorkspaceToolbar'
 
 export function SceneInspector({ state, operations, tripId, colorContext, onEdit, onFocus, onSelect, tab, onTab, onClose }: {
   state: LoadPlanViewerState; operations: OperationsState; tripId: string; colorContext: ColorContext
-  onEdit: () => void; onFocus: () => void; onSelect: (p: Placement) => void
+  onEdit: () => void; onFocus: () => void; onSelect: (p: ScenePlacement) => void
   tab: InspectorTab | null; onTab: (tab: InspectorTab) => void; onClose: () => void
 }) {
   return <Dialog open={tab !== null} onOpenChange={(open) => { if (!open) onClose() }}>
@@ -53,10 +53,10 @@ export function SceneInspector({ state, operations, tripId, colorContext, onEdit
           <SegmentedControl ariaLabel="Chế độ tô màu" options={COLOR_MODES} value={state.colorMode} onChange={state.setColorMode}
             className="flex-col [&_button]:min-h-14 [&_button]:text-body-lg xl:[&_button]:min-h-11 xl:[&_button]:text-body" floating={false} />
           <StopLegend stops={[...state.sceneModel.stops]} colorMode={state.colorMode} colorContext={colorContext} />
-          <SlicePanel sliceMm={state.sliceMm} maxMm={state.sceneModel.vehicle.innerLengthMm} onChange={state.setSliceMm} />
+          <SlicePanel sliceCm={state.sliceCm} maxCm={state.sceneModel.vehicle.innerLengthCm} onChange={state.setSliceCm} />
           <p>Space: phát/dừng · ←/→: từng bước · Esc: thoát tập trung. Kéo mô hình để xoay, chụm hai ngón để phóng to.</p>
         </div> : null}
-        {tab === 'packages' ? <PackageListPanel unplaced={[...state.sceneModel.unplaced]} pinned={state.placements.filter((p) => p.pinned)}
+        {tab === 'packages' ? <PackageListPanel unplaced={state.sceneModel.unplaced} pinned={state.placements.filter((p) => p.pinned)}
           placements={state.placements} vehicle={state.sceneModel.vehicle} open onToggle={onClose} tab={state.leftTab}
           onTabChange={state.setLeftTab} selectedId={state.selectedId} onSelect={(id) => { state.select(id); onTab('package') }} /> : null}
       </div>

@@ -1,10 +1,10 @@
-import type { PositionMm } from '@/types/load-plan'
+import type { PositionCm } from '@/features/viewer3d/scene-input'
 import type { GeometryResult } from './geometry'
 import type { SnapTarget } from './snapping'
 
 export type EditorPreview = {
   id: string
-  position: PositionMm
+  position: PositionCm
   result: GeometryResult
   sources: string[]
   targets?: SnapTarget[]

@@ -1,7 +1,9 @@
 import { useThree, type ThreeEvent } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { BackSide, BoxGeometry, InstancedBufferAttribute, type InstancedMesh } from 'three'
-import type { ColorMode, Placement } from '@/types/load-plan'
+import type { ColorMode } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+
 import type { ColorContext } from '../colors'
 import { createInstanceLayout } from './instance-layout'
 import { useCargoMatrices } from './useCargoMatrices'
@@ -13,14 +15,14 @@ import { CargoFeedback } from './CargoFeedback'
 import { animated, useSpring } from '@react-spring/three'
 
 type Props = {
-  placements: readonly Placement[]
+  placements: readonly ScenePlacement[]
   colorMode: ColorMode
   colorContext: ColorContext
-  sliceMm: number
+  sliceCm: number
   step: number
   selectedId: string | null
   onSelect: (id: string | null) => void
-  onFocus?: (p: Placement) => void
+  onFocus?: (p: ScenePlacement) => void
   outlines: boolean
   outlineColor: string
   reducedMotion: boolean
@@ -34,7 +36,7 @@ type Props = {
 
 /** Three cargo draws at most: solid, ghost, inverted hull. One selected outline. */
 export function CargoInstances({
-  placements, colorMode, colorContext, sliceMm, step, selectedId, onSelect, onFocus,
+  placements, colorMode, colorContext, sliceCm, step, selectedId, onSelect, onFocus,
   outlines, outlineColor, reducedMotion, animationQuality = 'full', hiddenId, semantics, xraySelection = false, surfaceDetail = false, warningSignal = 0,
 }: Props) {
   const opaque = useRef<InstancedMesh>(null)
@@ -62,10 +64,10 @@ export function CargoInstances({
   const current = layout.placementById.get(semantics?.currentId ?? '')
   const next = layout.placementById.get(semantics?.nextId ?? '')
   const hover = layout.placementById.get(hoverId ?? '')
-  const visible = (p: Placement | undefined) => p && p.id !== hiddenId && (!semantics || semantics.appearanceById.get(p.id)?.visibility !== 'hidden')
+  const visible = (p: ScenePlacement | undefined) => p && p.id !== hiddenId && (!semantics || semantics.appearanceById.get(p.id)?.visibility !== 'hidden')
   const showHull = outlines || Boolean(semantics?.blockers.length)
 
-  useCargoMatrices({ meshes, layout, placements, step, sliceMm, outlines, reducedMotion, animationQuality, hiddenId, semantics })
+  useCargoMatrices({ meshes, layout, placements, step, sliceCm, outlines, reducedMotion, animationQuality, hiddenId, semantics })
   useCargoColors(meshes, layout, colorMode, colorContext, outlineColor, showHull, semantics)
 
   useEffect(() => () => {

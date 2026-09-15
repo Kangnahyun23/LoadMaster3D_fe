@@ -50,21 +50,21 @@ export function sceneSnapshot(page: Page): Promise<SceneSnapshot> {
   }, R3F_DEPS)
 }
 
-/** Toạ độ màn hình của proxy editor, dịch thêm `deltaMm` theo trục nghiệp vụ X/Y/Z (mm). */
-export function proxyPoint(page: Page, deltaMm: Vector3Tuple = [0, 0, 0]): Promise<ScreenPoint> {
+/** Toạ độ màn hình của proxy editor, dịch thêm `deltaCm` theo trục nghiệp vụ X/Y/Z (cm; scene = cm × 0,01). */
+export function proxyPoint(page: Page, deltaCm: Vector3Tuple = [0, 0, 0]): Promise<ScreenPoint> {
   return page.evaluate(async ({ url, delta }) => {
     const { _roots } = (await import(url)) as R3FModule
     const canvas = document.querySelector('canvas')!
     const s = _roots.get(canvas)!.store.getState()
     const proxy = s.scene.getObjectByName('editor-proxy')!
     const position = proxy.getWorldPosition(proxy.position.clone())
-    position.x += delta[0] / 1000
-    position.y += delta[2] / 1000
-    position.z += delta[1] / 1000
+    position.x += delta[0] / 100
+    position.y += delta[2] / 100
+    position.z += delta[1] / 100
     position.project(s.camera)
     const r = canvas.getBoundingClientRect()
     return { x: r.x + (position.x + 1) * r.width / 2, y: r.y + (1 - position.y) * r.height / 2 }
-  }, { url: R3F_DEPS, delta: deltaMm })
+  }, { url: R3F_DEPS, delta: deltaCm })
 }
 
 export async function waitIdle(page: Page) {
@@ -238,6 +238,7 @@ export async function enterEdit(page: Page) {
  */
 export const SOURCE_MODULES = {
   benchmark: '/src/features/viewer3d/benchmark.mock.ts',
-  loadPlan: '/src/lib/load-plan.mock.ts',
+  /** `benchmarkScene` và `seedScene`: scene cm đúng như Planner dựng. */
+  scene: '/src/test/scene.ts',
   operations: '/src/features/viewer3d/operations/operations-model.ts',
 } as const
