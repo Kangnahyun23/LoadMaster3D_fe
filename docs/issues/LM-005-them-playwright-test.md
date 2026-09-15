@@ -98,13 +98,32 @@ Khi `prefers-reduced-motion: reduce`, chọn góc nhìn / tập trung / khôi ph
 
 ### Kiểm tra
 
-- `pnpm lint` ✅ · `pnpm build` ✅ (cảnh báo chunk > 500 kB có từ trước) · `pnpm test` 53/53 ✅.
-- `pnpm test:e2e` **23/23** ✅ (5,7 phút, không biến môi trường) · CI_RUN_PLACEHOLDER
+- Trong worktree của agent: `pnpm lint` ✅ · `pnpm build` ✅ (cảnh báo chunk > 500 kB có từ trước) · `pnpm test` 53/53 ✅ · `pnpm test:e2e` **23/23** ✅ (5,7 phút, không biến môi trường).
 - `handoff.md` mục 6 đổi lệnh chạy browser suite sang `pnpm test:e2e` và lệnh benchmark mới.
+
+### Hoàn tất và gộp — 15/09/2026 (người điều phối)
+
+Agent dừng giữa lượt chạy chế độ CI vì hết giới hạn phiên. Người điều phối commit phần việc trong worktree (bỏ file chẩn đoán tạm `e2e/zz-login-stress.spec.ts`), cherry-pick vào `feat/spec-mvp` (`6c4287a`) và chạy lại trên nhánh đã gộp (có thêm LM-010, LM-027, LM-055, LM-016, LM-012).
+
+**Lượt CI đầu trên nhánh gộp: 22/23, 1 test đỏ cả lần chạy lẫn lần thử lại** — `viewer-operations-ui` "loading, unloading advisories…": sau khi bấm "Về đầu" vẫn thấy 1.000 kiện đặc; lần thử lại, sau "Dỡ hàng" inspector vẫn ở chế độ xếp. Cả hai là **trạng thái lúc mới mở trang**.
+
+Chẩn đoán (skill diagnosing-bugs):
+
+1. Chạy riêng test: xanh 1/1, 8/8 (`--repeat-each`), chuỗi test đứng trước + test: xanh; xoá cache `node_modules/.vite`: xanh; đốt CPU 6 rồi 16/16 luồng: xanh → loại giả thuyết Vite tối ưu lại dependency và race do tải CPU.
+2. Đối chiếu thời gian: lúc test đỏ, người điều phối đang sửa `AGENTS.md`, `docs/issues/README.md`. Vòng phản hồi: chạy test và **sửa `AGENTS.md` sau 11 giây** → **đỏ 2/2** (`cargo-opaque` = 1000). Sửa `docs/issues/README.md` hoặc thêm `.md` mới trong `docs/issues`: xanh.
+3. Script Playwright nghe console + điều hướng: sửa `AGENTS.md` → trang **tải lại toàn phần sau ~40 ms** (cả lúc sửa lẫn lúc khôi phục). Cùng thao tác với cấu hình Vite **không có plugin Tailwind** → không tải lại.
+
+**Nguyên nhân:** `src/index.css` dùng `@import 'tailwindcss';` — Tailwind v4 tự dò nguồn class từ gốc repo, gồm `AGENTS.md`, `docs/`, `design/` và `.claude/worktrees/` (bản sao `src/` của các agent). Khi một file được quét nhưng không thuộc module graph thay đổi, `@tailwindcss/vite` bắt trình duyệt tải lại toàn trang → mất state đang test. Cũng giải thích file chẩn đoán đăng nhập ở `/kho` mà agent để lại: lúc đó các agent khác đang sửa file trong `.claude/worktrees/`.
+
+**Sửa:** `@import 'tailwindcss' source('.');` — chỉ quét `src/`. CSS build 50.583 → 48.144 byte; 10 class bị bỏ (`active:translate-y-px`, `antialiased`, `backdrop-filter`, `contents`, `disabled:opacity-50`, `ease-in-out`, `inline`, `static`, `tabular-nums`, `uppercase`) đều **không** được dùng trong `src/` (sinh ra từ chữ trong tài liệu). Thêm `.claude/worktrees/` vào `.gitignore`. Sau sửa: cùng vòng phản hồi sửa `AGENTS.md` → **xanh 2/2**.
+
+Không có seam test tự động đúng cho lỗi này (cần dev server đang chạy và sửa file trong repo giữa lúc test); bằng chứng nằm ở vòng phản hồi trên, quy tắc ghi vào AGENTS.md mục 4.
+
+- Kiểm tra trên nhánh gộp sau sửa: `pnpm lint` ✅ · `pnpm build` ✅ · Vitest 142/142 ✅ · `CI=1 pnpm test:e2e`: xem nhật ký `docs/progress.md` 15/09/2026.
 
 ## Lưu ý cho issue sau
 
-- LM-006: job e2e cần `pnpm exec playwright install --with-deps chromium`, upload `playwright-report/` khi lỗi; không chạy `tests/viewer-benchmark.mjs`.
+- LM-006: job e2e cần `pnpm exec playwright install --with-deps chromium`, upload `playwright-report/` khi lỗi; không chạy `tests/viewer-benchmark.mjs`. *(Đã làm.)*
 - LM-038: đổi mm → cm trong `e2e/*.spec.ts`; `proxyPoint` nhận độ dời theo mm.
-- LM-003: ghi `e2e/`, `@playwright/test`, `pnpm test:e2e` vào AGENTS.md/CLAUDE.md (mục 2, 3, 12).
-- Sửa lỗi `CameraRig` ở trên thì bỏ bước `invalidate()` trong `renderCameraChange`.
+- LM-003: ghi `e2e/`, `@playwright/test`, `pnpm test:e2e` vào AGENTS.md/CLAUDE.md (mục 2, 3, 12). *(Đã làm.)*
+- Sửa lỗi `CameraRig` → issue **LM-056**; khi đó bỏ bước `invalidate()` trong `renderCameraChange`.

@@ -15,23 +15,49 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | Phase | Nội dung | Xong / Tổng | Ước lượng | Trạng thái |
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
-| 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 4 / 7 | ~4,5 ngày | 🟦 Đang làm |
+| 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — còn LM-002 chờ backend; CI chờ push để chạy thật |
 | 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 6 / 19 | ~18,5 ngày | 🟦 Đang làm |
-| 2 | Engine 3D sang cm, 6 hướng, vật cản, editor | 0 / 9 | ~10 ngày | ⬜ |
+| 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **10 / 56 issue** | **~55,5 ngày công** | |
+| **Tổng** | | **12 / 57 issue** | **~56 ngày công** | |
 
-**Đang làm song song (15/09/2026):** LM-005 (Playwright), LM-013 (instance ID), LM-014 (mô hình lỗi) — agent trong worktree riêng.
+**Phase 0 đã xong, dừng để báo cáo (15/09/2026).** Phase 1 tiếp theo.
 
-**Làm được ngay:** LM-018 (cần LM-016 ✅), LM-021 (cần LM-012 ✅ + LM-015 ✅). Chờ: LM-006 (cần LM-005) · LM-017 (cần LM-013) · LM-028 (cần LM-014).
+**Phần việc dở của phase 1 còn giữ trong worktree** (agent dừng vì hết giới hạn phiên, chưa commit, chưa gộp): LM-013 `src/domain/cargo` gần xong kèm ghi chép issue; LM-014 `src/domain/constraints` làm được một phần. Làm được ngay: LM-018, LM-021; LM-017 chờ LM-013; LM-028 chờ LM-014.
 
-**Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 0–3.
+**Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3. LM-006 cần người dùng đồng ý push để CI chạy lần đầu.
 
 ---
 
 ## 2. Nhật ký
+
+### 15/09/2026 — Hoàn tất phase 0: LM-005, LM-006; sửa E2E đỏ ngẫu nhiên do Tailwind; mở LM-056
+
+**Đã làm**
+
+- Ba agent LM-005, LM-013, LM-014 bị dừng vì hết giới hạn phiên. Kiểm tra worktree: LM-005 gần xong (23/23 E2E trên nền cũ, thiếu lượt CI); LM-013 gần xong; LM-014 một phần. Giữ nguyên LM-013/014 cho phase 1.
+- LM-005: commit phần việc trong worktree (bỏ file chẩn đoán `e2e/zz-login-stress.spec.ts`), cherry-pick vào `feat/spec-mvp` → `6c4287a`. `@playwright/test` 1.61.1, 6 spec / 23 test (desktop 15, tablet 3, phone 5), fixture đăng nhập, `waitCameraSettled`, `tsconfig.e2e.json`, script `test:e2e`, xoá 7 file `.mjs`.
+- Lượt `CI=1 pnpm test:e2e` đầu trên nhánh gộp: **22/23**, `viewer-operations-ui` đỏ cả lần thử lại. Chẩn đoán theo skill diagnosing-bugs: không tái hiện khi chạy riêng (1/1, 8/8), chạy chuỗi, xoá cache Vite, đốt CPU 16/16 luồng; tái hiện **2/2** khi sửa `AGENTS.md` giữa lúc chạy; script nghe điều hướng cho thấy trang tải lại toàn phần ~40 ms sau khi sửa, và **không** tải lại khi tắt plugin Tailwind.
+- Nguyên nhân: `@import 'tailwindcss'` quét cả gốc repo (`AGENTS.md`, `docs/`, `design/`, `.claude/worktrees/`) và bắt trình duyệt tải lại khi file ngoài app đổi. Sửa: `@import 'tailwindcss' source('.')` (chỉ `src/`); CSS 50.583 → 48.144 byte, 10 class bị bỏ đều không được `src/` dùng. Thêm `.claude/worktrees/` vào `.gitignore`. Sau sửa: cùng vòng phản hồi xanh 2/2; quy tắc ghi vào AGENTS.md mục 4.
+- LM-006: `.github/workflows/ci.yml` — `lint`, `typecheck` (`tsc -b`), `unit`, `build` (upload `dist`), `e2e` (cài Chromium kèm deps, upload report khi lỗi). Chưa chạy thật: cần push.
+- Mở **LM-056** (phase 2): `CameraRig` không `invalidate` sau lệnh camera không transition khi bật giảm chuyển động → đổi góc nhìn có thể không hiện (agent LM-005 đo được).
+- AGENTS.md mục 9: cách chạy E2E, `E2E_PORT`, chờ camera vẽ xong, API bench Vitest 5.
+
+**Kiểm tra trên nhánh gộp (sau sửa Tailwind)**
+
+- `pnpm lint` ✅ · `pnpm build` ✅ · Vitest **142/142** ✅ · `CI=1 pnpm test:e2e` **23/23** ✅ (5,5 phút, không lần thử lại nào).
+
+**Vướng mắc / quyết định mới**
+
+- Không có seam test tự động đúng cho lỗi tải lại trang (cần dev server đang chạy và sửa file trong repo lúc test) — bằng chứng là vòng phản hồi, ghi trong issue LM-005.
+- Benchmark LM-016 vẫn chưa chạy (để máy rảnh ở phase 1).
+
+**Việc tiếp theo**
+
+- Người dùng: đồng ý push `feat/spec-mvp` để CI chạy lần đầu (LM-006).
+- Phase 1: gộp LM-013 (worktree), hoàn tất LM-014, rồi LM-017, LM-018, LM-019, LM-020, LM-021, LM-022, LM-023, LM-024, LM-025, LM-026, LM-028; chạy benchmark LM-016.
 
 ### 15/09/2026 — LM-016 xong (tự làm); gộp LM-012
 
@@ -224,8 +250,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-002](issues/LM-002-chot-contract-backend.md) | Chốt contract backend | 🟨 | 14/09/2026 | | Chờ nhóm backend, không chặn |
 | [LM-003](issues/LM-003-cap-nhat-agents-claude-md.md) | Cập nhật AGENTS.md, CLAUDE.md | ✅ | 15/09/2026 | 15/09/2026 | CLAUDE.md import `@AGENTS.md` |
 | [LM-004](issues/LM-004-them-vitest-rtl.md) | Vitest + RTL | ✅ | 14/09/2026 | 14/09/2026 | 39/39 test, Vitest 5.0.0 |
-| [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | 🟦 | 15/09/2026 | | Agent trong worktree |
-| [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ⬜ | | | |
+| [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | ✅ | 15/09/2026 | 15/09/2026 | `6c4287a`, 23/23 E2E (CI mode); sửa Tailwind `source('.')` |
+| [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ✅ | 15/09/2026 | 15/09/2026 | Workflow xong; CI chạy thật chờ push |
 | [LM-055](issues/LM-055-tailwind-merge-bo-mau-chu.md) | Bug `cn()` bỏ màu chữ nút | ✅ | 15/09/2026 | 15/09/2026 | TDD, 5 test; `/thanh-phan` chờ E2E |
 
 ### Phase 1 — Domain, service, dữ liệu, i18n nền
@@ -235,8 +261,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-010](issues/LM-010-domain-models-schema.md) | Domain models + zod | ✅ | 15/09/2026 | 15/09/2026 | `4901e6f`, 39 test, 34 mã lỗi |
 | [LM-011](issues/LM-011-numeric-roundcm-epsilon.md) | `roundCm` + EPSILON | ✅ | 14/09/2026 | 14/09/2026 | TDD 6 test; quy ước AGENTS chờ LM-003 |
 | [LM-012](issues/LM-012-orientation-6-huong.md) | 6 hướng đặt | ✅ | 15/09/2026 | 15/09/2026 | `32012e5`, 12 test; mã mismatch → LM-014/023 |
-| [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | 🟦 | 15/09/2026 | | Agent trong worktree (TDD) |
-| [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | 🟦 | 15/09/2026 | | Agent trong worktree (TDD), gồm bọc `EXCEEDS_BOUNDARY` |
+| [LM-013](issues/LM-013-mo-rong-quantity-instance-id.md) | Mở rộng quantity, ID | 🟨 | 15/09/2026 | | Agent dừng (giới hạn phiên); việc gần xong, chưa commit trong worktree |
+| [LM-014](issues/LM-014-mo-hinh-loi-ma-tham-so.md) | Mô hình lỗi | 🟨 | 15/09/2026 | | Agent dừng (giới hạn phiên); làm một phần trong worktree |
 | [LM-015](issues/LM-015-geometry-boundary-overlap-volume.md) | Biên, chồng lấn, thể tích | ✅ | 14/09/2026 | 14/09/2026 | TDD 8 test; phần diện tích giao → LM-018 |
 | [LM-016](issues/LM-016-luoi-khong-gian.md) | Lưới không gian | ✅ | 15/09/2026 | 15/09/2026 | `f26fb1b`, 9 test; số benchmark chờ chạy |
 | [LM-017](issues/LM-017-validation-dau-vao-xe-kien.md) | Validation đầu vào | ⬜ | | | |
@@ -265,6 +291,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-036](issues/LM-036-timeline-thu-tu-service-lifo.md) | Timeline, LIFO | ⬜ | | | |
 | [LM-037](issues/LM-037-tai-truc-se-co-sau.md) | Tải trục "Sẽ có sau" | ⬜ | | | |
 | [LM-038](issues/LM-038-e2e-3d-sang-cm-hieu-nang.md) | E2E 3D, hồi quy hiệu năng | ⬜ | | | |
+| [LM-056](issues/LM-056-camera-giam-chuyen-dong-khong-ve-lai.md) | Bug camera khi giảm chuyển động | ⬜ | | | Mở 15/09/2026, phát hiện ở LM-005 |
 
 ### Phase 3 — Màn luồng Spec
 
