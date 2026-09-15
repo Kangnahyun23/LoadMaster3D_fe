@@ -1,5 +1,13 @@
 import { describe, expect, test } from 'vitest'
-import { CONSTRAINT_CODES, type ConstraintCode, type ConstraintIssue } from '@/domain/constraints'
+import {
+  CONSTRAINT_CODES,
+  validatePackages,
+  validateVehicle,
+  type ConstraintCode,
+  type ConstraintIssue,
+} from '@/domain/constraints'
+import { SPEC_CARTON_A, SPEC_TRUCK_6M } from '@/domain/fixtures/spec-samples'
+import type { CargoPackage, VehicleConfig } from '@/domain/models'
 import { createFormatter } from '@/lib/format'
 import { createTranslator, formatIssue, LOCALES, type Locale } from '@/lib/i18n'
 import { SPEC_13_EXAMPLES, SPEC_13_PKG_004_TOO_TALL } from '@/test/spec-13'
@@ -142,6 +150,31 @@ describe.each(LOCALES)('every constraint code has a finished sentence in %s', (l
       { code: 'DOOR_EXCEEDS_INNER', severity: 'error', field: 'doorWidthCm', params: { axis: 'y', doorCm: 250, innerCm: 240 } },
     ]
     expect(variants.map((issue) => messageOf(issue, locale))).toMatchSnapshot()
+  })
+})
+
+describe('issues built by the real validators read as sentences in both languages', () => {
+  // Truck 6m breaking every vehicle rule that does not silence the others (a zero interior would skip obstacle checks)
+  const brokenVehicle: VehicleConfig = {
+    ...SPEC_TRUCK_6M,
+    maxPayloadKg: 0,
+    doorWidthCm: 250,
+    obstacles: [
+      { id: 'OBS-001', type: 'WHEEL_ARCH', xCm: 0, yCm: 0, zCm: 0, lengthCm: 0, widthCm: 30, heightCm: 45, loadBearing: false },
+      // z 220..260 under a 250 cm ceiling
+      { id: 'OBS-002', type: 'COOLING_UNIT', xCm: 0, yCm: 0, zCm: 220, lengthCm: 40, widthCm: 240, heightCm: 40, loadBearing: false },
+      // x 10..20, z 225..245: inside OBS-002
+      { id: 'OBS-003', type: 'PARTITION', xCm: 10, yCm: 0, zCm: 225, lengthCm: 10, widthCm: 240, heightCm: 20, loadBearing: false },
+    ],
+  }
+  const brokenPackages: CargoPackage[] = [{ ...SPEC_CARTON_A, heightCm: 0, allowedOrientations: [] }]
+
+  test.each(LOCALES)('%s', (locale) => {
+    const issues = [...validateVehicle(brokenVehicle), ...validatePackages(brokenPackages)]
+    expect(new Set(issues.map(({ code }) => code))).toStrictEqual(
+      new Set(['DIMENSION_NOT_POSITIVE', 'DOOR_EXCEEDS_INNER', 'EXCEEDS_BOUNDARY', 'OBSTACLE_OVERLAP', 'NO_ALLOWED_ORIENTATION']),
+    )
+    expect(issues.map((issue) => messageOf(issue, locale))).toMatchSnapshot()
   })
 })
 

@@ -84,6 +84,12 @@ export type ConstraintParams = {
   ORIENTATION_MISMATCH: { orientation: OrientationCode }
 }
 
+/**
+ * Chủ thể của issue, để `formatIssue` (LM-028) dựng câu và UI chỉ tới đúng chỗ:
+ * - `packageInstanceId`: kiện đã xếp mà issue nói tới; khi đó `relatedIds` là các kiện/đối tượng liên quan.
+ * - Issue không gắn kiện mà nói về một dòng vật cản của xe (validation LM-017) đặt vật cản đó ở `relatedIds[0]`.
+ * - `field`: đường dẫn trong form của chính đối tượng theo cú pháp react-hook-form (`innerLengthCm`, `obstacles.0.lengthCm`).
+ */
 export type ConstraintIssue<Code extends ConstraintCode = ConstraintCode> = {
   [C in Code]: {
     code: C

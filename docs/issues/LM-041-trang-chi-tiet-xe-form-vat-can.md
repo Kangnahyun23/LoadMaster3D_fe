@@ -21,7 +21,7 @@ spec: [9.2, 13]
 - [ ] Bảng vật cản (`useFieldArray`, số dòng nhỏ): loại (Select 4 loại), x/y/z, dài/rộng/cao (cm), chịu tải (Switch), tải tối đa (kg, chỉ bật khi chịu tải). Thêm, sửa, xoá.
 - [ ] Bảng trục xe tuỳ chọn: tên, vị trí X (cm), tải rỗng, tải tối đa (kg), nhãn "Chưa dùng trong tính toán".
 - [ ] Lỗi hiển thị tại field và trong validation summary đầu form (qua `formatIssue`), không dùng `alert`.
-- [ ] Bấm lỗi trong summary nhảy tới ô (dời từ `issueField` của LM-028): `issue.field` là tên trường của model, vật cản tìm dòng theo `params.obstacleId`.
+- [ ] Bấm lỗi trong summary nhảy tới ô (dời từ `issueField` của LM-028): `issue.field` của `validateVehicle` đã là đường dẫn react-hook-form (`innerLengthCm`, `obstacles.0.lengthCm`, lỗi cả dòng `obstacles.0`) → `setFocus` thẳng.
 - [ ] Rời trang khi form đang sửa: hỏi xác nhận (dialog của repo).
 - [ ] File ≤ 250 dòng: tách `VehicleSpecFields`, `ObstacleTable`, `AxleTable`, `VehicleValidationSummary`.
 

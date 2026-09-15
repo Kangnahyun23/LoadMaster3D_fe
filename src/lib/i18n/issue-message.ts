@@ -2,16 +2,18 @@ import type { ConstraintIssue } from '@/domain/constraints'
 import type { Formatter } from '@/lib/format'
 import type { MessageKey, TFunction } from './types'
 
-const FIELD_LABELS = {
-  innerLengthCm: 'fields.innerLengthCm',
-  innerWidthCm: 'fields.innerWidthCm',
-  innerHeightCm: 'fields.innerHeightCm',
-  doorWidthCm: 'fields.doorWidthCm',
-  doorHeightCm: 'fields.doorHeightCm',
-  lengthCm: 'fields.lengthCm',
-  widthCm: 'fields.widthCm',
-  heightCm: 'fields.heightCm',
-} as const satisfies Record<string, MessageKey>
+/** Trường số có thể bị báo `DIMENSION_NOT_POSITIVE`: nhãn và đơn vị của số 0 trong câu. */
+const POSITIVE_FIELDS = {
+  innerLengthCm: { label: 'fields.innerLengthCm', unit: 'cm' },
+  innerWidthCm: { label: 'fields.innerWidthCm', unit: 'cm' },
+  innerHeightCm: { label: 'fields.innerHeightCm', unit: 'cm' },
+  maxPayloadKg: { label: 'fields.maxPayloadKg', unit: 'kg' },
+  doorWidthCm: { label: 'fields.doorWidthCm', unit: 'cm' },
+  doorHeightCm: { label: 'fields.doorHeightCm', unit: 'cm' },
+  lengthCm: { label: 'fields.lengthCm', unit: 'cm' },
+  widthCm: { label: 'fields.widthCm', unit: 'cm' },
+  heightCm: { label: 'fields.heightCm', unit: 'cm' },
+} as const satisfies Record<string, { label: MessageKey; unit: 'cm' | 'kg' }>
 
 /**
  * Câu hiển thị cho một issue của `@/domain/constraints` (D-28): domain chỉ trả mã + số thô,
@@ -23,13 +25,14 @@ const FIELD_LABELS = {
 export function formatIssue(issue: ConstraintIssue, t: TFunction, format: Formatter): string {
   switch (issue.code) {
     case 'DIMENSION_NOT_POSITIVE': {
-      const field = fieldLabel(issue, t)
+      const { label, unit } = positiveFieldOf(issue)
+      const words = { field: t(label), zero: unit === 'kg' ? format.weight(0) : format.length(0) }
       const { params } = issue
-      if (params.entity === 'vehicle') return t('issues.DIMENSION_NOT_POSITIVE.vehicle', { field })
+      if (params.entity === 'vehicle') return t('issues.DIMENSION_NOT_POSITIVE.vehicle', words)
       if (params.entity === 'obstacle') {
-        return t('issues.DIMENSION_NOT_POSITIVE.obstacle', { field, obstacleId: params.obstacleId })
+        return t('issues.DIMENSION_NOT_POSITIVE.obstacle', { ...words, obstacleId: params.obstacleId })
       }
-      return t('issues.DIMENSION_NOT_POSITIVE.package', { field, packageId: params.packageId })
+      return t('issues.DIMENSION_NOT_POSITIVE.package', { ...words, packageId: params.packageId })
     }
     case 'DOOR_EXCEEDS_INNER':
       return t(`issues.DOOR_EXCEEDS_INNER.${issue.params.axis}`, {
@@ -49,18 +52,21 @@ export function formatIssue(issue: ConstraintIssue, t: TFunction, format: Format
         packageId: issue.params.packageId,
         door: format.widthByHeight(issue.params.doorWidthCm, issue.params.doorHeightCm),
       })
-    case 'EXCEEDS_BOUNDARY':
+    case 'EXCEEDS_BOUNDARY': {
+      const { kind, id } = placementOrObstacleOf(issue)
       return t(`issues.EXCEEDS_BOUNDARY.${issue.params.axis}.${issue.params.side}`, {
-        id: subjectOf(issue),
+        subject: t(`issues.subject.${kind}`, { id }),
         overCm: format.length(issue.params.overCm),
       })
+    }
     case 'OVERLAP':
     case 'NOT_STACKABLE':
     case 'LOADING_ORDER_INFEASIBLE':
       return t(`issues.${issue.code}`, { id: subjectOf(issue), related: relatedOf(issue, format) })
     case 'OBSTACLE_OVERLAP':
+      return t('issues.OBSTACLE_OVERLAP', { id: placementOrObstacleOf(issue).id, obstacleId: issue.params.obstacleId })
     case 'NON_BEARING_SUPPORT':
-      return t(`issues.${issue.code}`, { id: subjectOf(issue), obstacleId: issue.params.obstacleId })
+      return t('issues.NON_BEARING_SUPPORT', { id: subjectOf(issue), obstacleId: issue.params.obstacleId })
     case 'SUPPORT_BELOW_MIN':
       return t('issues.SUPPORT_BELOW_MIN', {
         id: subjectOf(issue),
@@ -123,11 +129,26 @@ function relatedOf(issue: ConstraintIssue, format: Formatter): string {
   return format.list(issue.relatedIds)
 }
 
-function hasLabel(field: string | undefined): field is keyof typeof FIELD_LABELS {
-  return field !== undefined && Object.hasOwn(FIELD_LABELS, field)
+/**
+ * Kiện đã xếp (`packageInstanceId`), hoặc dòng vật cản của form xe: validation xe (LM-017) không có kiện nên đặt
+ * vật cản của dòng ở `relatedIds[0]`.
+ */
+function placementOrObstacleOf(issue: ConstraintIssue): { kind: 'placement' | 'obstacle'; id: string } {
+  if (issue.packageInstanceId !== undefined) return { kind: 'placement', id: issue.packageInstanceId }
+  const obstacleId = issue.relatedIds?.[0]
+  if (obstacleId === undefined) throw new Error(`Issue ${issue.code} thiếu packageInstanceId hoặc relatedIds[0]`)
+  return { kind: 'obstacle', id: obstacleId }
 }
 
-function fieldLabel(issue: ConstraintIssue, t: TFunction): string {
-  if (!hasLabel(issue.field)) throw new Error(`Issue ${issue.code} có trường không có nhãn: ${String(issue.field)}`)
-  return t(FIELD_LABELS[issue.field])
+function isPositiveField(name: string): name is keyof typeof POSITIVE_FIELDS {
+  return Object.hasOwn(POSITIVE_FIELDS, name)
+}
+
+/** `field` là đường dẫn form (`innerLengthCm`, `obstacles.0.lengthCm`); nhãn lấy theo đoạn cuối. */
+function positiveFieldOf(issue: ConstraintIssue): (typeof POSITIVE_FIELDS)[keyof typeof POSITIVE_FIELDS] {
+  const name = issue.field?.split('.').at(-1)
+  if (name === undefined || !isPositiveField(name)) {
+    throw new Error(`Issue ${issue.code} có trường không có nhãn: ${String(issue.field)}`)
+  }
+  return POSITIVE_FIELDS[name]
 }

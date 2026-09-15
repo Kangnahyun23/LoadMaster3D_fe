@@ -81,3 +81,27 @@ exports[`every constraint code has a finished sentence in vi > the sentences rea
   "TOP_LOAD_EXCEEDED": "PKG-001-01 chịu 120,25 kg bên trên, vượt mức chịu tải 90 kg.",
 }
 `;
+
+exports[`issues built by the real validators read as sentences in both languages > en 1`] = `
+[
+  "Max payload must be greater than 0 kg.",
+  "Door width 250 cm cannot exceed vehicle inner width 240 cm.",
+  "Length of obstacle OBS-001 must be greater than 0 cm.",
+  "Obstacle OBS-002 exceeds vehicle height by 10 cm.",
+  "OBS-003 overlaps obstacle OBS-002.",
+  "Height of package PKG-001 must be greater than 0 cm.",
+  "Package PKG-001 has no allowed orientation.",
+]
+`;
+
+exports[`issues built by the real validators read as sentences in both languages > vi 1`] = `
+[
+  "Tải trọng tối đa phải lớn hơn 0 kg.",
+  "Chiều rộng cửa 250 cm không được lớn hơn chiều rộng lòng thùng 240 cm.",
+  "Chiều dài của vật cản OBS-001 phải lớn hơn 0 cm.",
+  "Vật cản OBS-002 vượt chiều cao thùng 10 cm.",
+  "OBS-003 chồng lấn vật cản OBS-002.",
+  "Chiều cao của kiện PKG-001 phải lớn hơn 0 cm.",
+  "Kiện PKG-001 chưa có hướng đặt nào được phép.",
+]
+`;

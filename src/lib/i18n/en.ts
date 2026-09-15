@@ -67,10 +67,11 @@ export const en = {
   },
   /** Giữ đúng từng chữ các câu mẫu của Spec mục 13. */
   issues: {
+    subject: { placement: 'Placement {id}', obstacle: 'Obstacle {id}' },
     DIMENSION_NOT_POSITIVE: {
-      vehicle: '{field} must be greater than 0 cm.',
-      obstacle: '{field} of obstacle {obstacleId} must be greater than 0 cm.',
-      package: '{field} of package {packageId} must be greater than 0 cm.',
+      vehicle: '{field} must be greater than {zero}.',
+      obstacle: '{field} of obstacle {obstacleId} must be greater than {zero}.',
+      package: '{field} of package {packageId} must be greater than {zero}.',
     },
     DOOR_EXCEEDS_INNER: {
       y: 'Door width {doorCm} cannot exceed vehicle inner width {innerCm}.',
@@ -82,16 +83,16 @@ export const en = {
     DOOR_TOO_SMALL: 'Package {packageId} cannot pass through the {door} door.',
     EXCEEDS_BOUNDARY: {
       x: {
-        beforeOrigin: 'Placement {id} extends {overCm} past the front wall.',
-        beyondInterior: 'Placement {id} exceeds vehicle length by {overCm}.',
+        beforeOrigin: '{subject} extends {overCm} past the front wall.',
+        beyondInterior: '{subject} exceeds vehicle length by {overCm}.',
       },
       y: {
-        beforeOrigin: 'Placement {id} extends {overCm} past the left wall.',
-        beyondInterior: 'Placement {id} exceeds vehicle width by {overCm}.',
+        beforeOrigin: '{subject} extends {overCm} past the left wall.',
+        beyondInterior: '{subject} exceeds vehicle width by {overCm}.',
       },
       z: {
-        beforeOrigin: 'Placement {id} is {overCm} below the floor.',
-        beyondInterior: 'Placement {id} exceeds vehicle height by {overCm}.',
+        beforeOrigin: '{subject} is {overCm} below the floor.',
+        beyondInterior: '{subject} exceeds vehicle height by {overCm}.',
       },
     },
     OVERLAP: '{id} overlaps {related}.',
@@ -114,6 +115,7 @@ export const en = {
     innerLengthCm: 'Inner length',
     innerWidthCm: 'Inner width',
     innerHeightCm: 'Inner height',
+    maxPayloadKg: 'Max payload',
     doorWidthCm: 'Door width',
     doorHeightCm: 'Door height',
     lengthCm: 'Length',

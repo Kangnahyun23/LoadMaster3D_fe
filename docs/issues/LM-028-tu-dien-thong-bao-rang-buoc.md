@@ -41,9 +41,12 @@ TDD 6 vòng: 59 test trong `issue-message.test.ts`, 2 test mới trong `format.t
   (phần `schemaTwin` giữ thành map có kiểu), không còn hai bản chép.
 - **Snapshot** (`__snapshots__/issue-message.test.ts.snap`): 22 mã + 9 biến thể × 2 ngôn ngữ, đã đọc duyệt từng câu.
   Chạy `CI=1` thì snapshot thiếu là đỏ, không tự ghi.
-- **`issueField` dời sang LM-041:** LM-017 đặt `issue.field` đúng tên trường của model và để mã kiện/vật cản trong `params`,
-  nên hàm này chỉ trả lại `issue.field`; việc đổi sang đường dẫn form (chỉ số dòng trong `useFieldArray`) cần dữ liệu form.
-- **Còn mở cho LM-019:** `TOP_LOAD_EXCEEDED` hiện cần `packageInstanceId`; nếu vật cản chịu tải cũng báo mã này thì LM-019 thêm
-  `obstacleId` vào params và một biến thể câu.
+- **`issueField` dời sang LM-041:** LM-017 đặt `issue.field` sẵn là đường dẫn react-hook-form trong form của đối tượng
+  (`innerLengthCm`, `obstacles.0.lengthCm`), nên hàm này chỉ trả lại `issue.field`; form tự `setFocus` theo đường dẫn đó.
+- **Sau khi gộp LM-017:** `DIMENSION_NOT_POSITIVE` lấy nhãn theo đoạn cuối của `field` và đơn vị của số 0 theo trường
+  (`maxPayloadKg` → "0 kg"); `EXCEEDS_BOUNDARY` / `OBSTACLE_OVERLAP` của dòng vật cản (không có `packageInstanceId`) lấy chủ ngữ
+  từ `relatedIds[0]` ("Vật cản OBS-002 vượt chiều cao thùng 10 cm."). Test mới chạy validator thật rồi dịch mọi issue (snapshot 7 câu × 2).
+- **Còn mở cho LM-019:** `TOP_LOAD_EXCEEDED` hiện cần `packageInstanceId`; vật cản chịu tải quá tải thì theo quy ước chủ thể
+  (vật cản ở `relatedIds[0]`) và thêm biến thể câu.
 - **Mã trần từ contract** (`warnings: string[]`, `constraintWarnings` của placement) không có params nên không đi qua `formatIssue`;
   màn Planner (LM-049) chạy lại constraint engine hoặc thêm nhãn ngắn theo mã khi cần.

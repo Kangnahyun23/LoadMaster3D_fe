@@ -1,7 +1,7 @@
 import { gt } from '@/domain/geometry'
 import type { VehicleConfig } from '@/domain/models'
 import type { ConstraintIssue } from './issues'
-import { obstacleIssues } from './vehicle-obstacles'
+import { vehicleObstacleIssues } from './vehicle-obstacles'
 
 /** Số của xe phải > 0 theo Spec 9.2, theo thứ tự form. */
 const POSITIVE_FIELDS = ['innerLengthCm', 'innerWidthCm', 'innerHeightCm', 'maxPayloadKg', 'doorWidthCm', 'doorHeightCm'] as const
@@ -17,7 +17,7 @@ const DOOR_SIDES = [
  * - `DIMENSION_NOT_POSITIVE` (`entity: 'vehicle'`) cho mỗi số không lớn hơn 0, kể cả `maxPayloadKg`: danh mục LM-014
  *   không có mã riêng cho tải trọng, `field` cho UI biết ô nào và đơn vị nào;
  * - `DOOR_EXCEEDS_INNER` khi cửa rộng hơn (trục y) hoặc cao hơn (trục z) lòng thùng;
- * - lỗi vật cản (`obstacleIssues`).
+ * - lỗi của từng dòng vật cản (`vehicleObstacleIssues`; khác `obstacleIssues` của LM-018 kiểm kiện với vật cản).
  *
  * `field` là đường dẫn trong form xe theo cú pháp react-hook-form (`innerLengthCm`, `obstacles.0.lengthCm`); lỗi của cả
  * dòng vật cản chỉ tới dòng (`obstacles.0`). Không kéo theo lỗi: quy tắc so hai giá trị bỏ qua giá trị đã bị báo không
@@ -38,5 +38,5 @@ export function validateVehicle(vehicle: VehicleConfig): ConstraintIssue[] {
       })
     }
   }
-  return [...issues, ...obstacleIssues(vehicle)]
+  return [...issues, ...vehicleObstacleIssues(vehicle)]
 }
