@@ -1,5 +1,6 @@
 export { vehicleBoundaryExcess, type AxisAmountCm, type BoundaryExcess, type VehicleInterior } from './boundary'
 export { overlaps, volumeCm3, type Box } from './box'
+export { overlapArea2D, overlapVolume } from './intersection'
 export { EPSILON, eq, gt, lt, roundCm, roundKg } from './numeric'
 export {
   effectiveOrientations,
