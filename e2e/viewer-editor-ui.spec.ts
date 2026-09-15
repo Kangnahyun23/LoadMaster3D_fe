@@ -81,9 +81,9 @@ test('nudge, history, pin, rotation, reset, focus and pointer drags on 1,000 pac
   expect((await position(page))[2]).toBe(initial[2]! + 1)
   await button(page, 'Làm lại').click()
 
-  // Bản `.mjs` chỉ `waitIdle` sau mỗi thao tác: với giảm chuyển động, góc "Trên" có khi chưa được vẽ
-  // lúc chụp (xem renderCameraChange) nên phép so hướng trượt 4/4 lần chạy lại bản gốc. Chờ tư thế
-  // mới được vẽ để vẫn kiểm tra đúng ý bước này: tập trung vào kiện giữ hướng nhìn và dời đích camera.
+  // Bản `.mjs` chỉ `waitIdle` sau mỗi thao tác, có thể đọc tư thế trước khi effect của CameraRig chạy.
+  // Chờ tư thế mới được vẽ (renderCameraChange) để kiểm tra đúng ý bước này: tập trung vào kiện giữ
+  // hướng nhìn và dời đích camera.
   await renderCameraChange(page, () => cameraPreset(page, 'Trên'))
   await waitIdle(page)
   const beforeFocus = await sceneSnapshot(page)

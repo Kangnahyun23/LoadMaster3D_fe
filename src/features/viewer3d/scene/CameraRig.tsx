@@ -11,6 +11,10 @@ import { boxCenter, containerCenter, SCENE_SCALE, type Vec3 } from './units'
  * Điều khiển camera bằng camera-controls (qua drei). Gốc thế giới là tâm
  * thùng nên mọi preset đều nhìn về (0,0,0). Chuyển góc 500ms giảm tốc
  * (mục 8); bật "giảm chuyển động" thì nhảy thẳng.
+ *
+ * Lệnh camera không transition không phát sự kiện nào của camera-controls, nên
+ * `frameloop="demand"` không tự vẽ lại: sau mỗi lệnh đổi camera phải gọi
+ * `invalidate()` (LM-056). Có transition thì lời gọi này gộp vào cùng frame.
  */
 
 const PRESET_POSITIONS: Record<CameraPreset, Vec3> = {
@@ -46,6 +50,7 @@ export function CameraRig({
   const applied = useRef<{ preset: CameraPreset; vehicle?: VehicleConfig } | null>(null)
   const size = useThree((state) => state.size)
   const camera = useThree((state) => state.camera)
+  const invalidate = useThree((state) => state.invalidate)
   const beforeFocus = useRef<{ position: Vector3; target: Vector3 } | null>(null)
 
   useEffect(() => {
@@ -82,7 +87,8 @@ export function CameraRig({
       x *= scale; y *= scale; z *= scale
     }
     void controls.setLookAt(x, y, z, 0, 0, 0, !reducedMotion)
-  }, [preset, reducedMotion, vehicle, fit, vehicleDecoration, size.width, size.height, camera])
+    invalidate()
+  }, [preset, reducedMotion, vehicle, fit, vehicleDecoration, size.width, size.height, camera, invalidate])
 
   useEffect(() => {
     const controls = controlsRef.current
@@ -90,7 +96,10 @@ export function CameraRig({
     if (!focus) {
       const saved = beforeFocus.current
       beforeFocus.current = null
-      if (saved) void controls.setLookAt(saved.position.x, saved.position.y, saved.position.z, saved.target.x, saved.target.y, saved.target.z, !reducedMotion)
+      if (saved) {
+        void controls.setLookAt(saved.position.x, saved.position.y, saved.position.z, saved.target.x, saved.target.y, saved.target.z, !reducedMotion)
+        invalidate()
+      }
       return
     }
     const center = containerCenter(vehicle)
@@ -100,7 +109,8 @@ export function CameraRig({
     void controls.moveTo(...target, !reducedMotion)
     const diagonal = Math.hypot(focus.placement.lengthCm, focus.placement.widthCm, focus.placement.heightCm) * SCENE_SCALE
     void controls.dollyTo(focus.follow ? Math.max(6, diagonal * 3) : Math.max(3, Math.min(6, diagonal * 3)), !reducedMotion)
-  }, [focus, vehicle, reducedMotion])
+    invalidate()
+  }, [focus, vehicle, reducedMotion, invalidate])
 
   useEffect(() => {
     function handleKey(event: KeyboardEvent) {
@@ -109,10 +119,11 @@ export function CameraRig({
       beforeFocus.current = null
       onUserControl?.()
       void controls.setLookAt(saved.position.x, saved.position.y, saved.position.z, saved.target.x, saved.target.y, saved.target.z, !reducedMotion)
+      invalidate()
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [onUserControl, reducedMotion])
+  }, [onUserControl, reducedMotion, invalidate])
 
   return (
     <CameraControls

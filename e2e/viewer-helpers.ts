@@ -110,12 +110,10 @@ function cameraGoal(page: Page): Promise<number[]> {
 }
 
 /**
- * Thực hiện thao tác đổi camera rồi chờ tư thế mới được vẽ. Khi giảm chuyển động, `CameraRig` gọi
- * `setLookAt`/`moveTo` không transition trong effect chạy sau commit của root R3F (sau cả frame
- * commit đó xin); camera-controls khi ấy không phát sự kiện nên không ai xin frame mới và tư thế
- * mới chỉ hiện khi có việc khác làm scene vẽ lại (lỗi app, ghi ở LM-005). Hàm chờ đích camera đổi
- * (effect đã chạy), xin một frame rồi chờ camera đứng yên. Bỏ bước xin frame khi `CameraRig` tự
- * `invalidate()` sau mỗi lần đổi camera.
+ * Thực hiện thao tác đổi camera rồi chờ tư thế mới được vẽ. `CameraRig` đổi camera trong effect
+ * chạy sau commit, nên ngay sau thao tác `waitCameraSettled` có thể thấy tư thế cũ đứng yên. Hàm
+ * chờ đích camera đổi (effect đã chạy) rồi mới chờ camera đứng yên. Không tự xin frame: từ LM-056
+ * `CameraRig` tự `invalidate()` sau mỗi lệnh camera, kể cả khi giảm chuyển động.
  */
 export async function renderCameraChange(page: Page, action: () => Promise<unknown>) {
   const previous = await cameraGoal(page)
@@ -128,7 +126,7 @@ export async function renderCameraChange(page: Page, action: () => Promise<unkno
       const tick = () => {
         const s = store.getState(), controls = s.controls as CameraControlsImpl
         const goal = [...controls.getPosition(s.camera.position.clone(), true).toArray(), ...controls.getTarget(s.camera.position.clone(), true).toArray()]
-        if (goal.some((value, i) => value !== previous[i])) { s.invalidate(); resolve() }
+        if (goal.some((value, i) => value !== previous[i])) resolve()
         else if (performance.now() - started > 30_000) reject(new Error('camera goal did not change within 30 s'))
         else requestAnimationFrame(tick)
       }
