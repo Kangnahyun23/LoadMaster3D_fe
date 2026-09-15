@@ -17,19 +17,43 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
 | 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 19 / 19 | ~18,5 ngày | ✅ Xong 15/09/2026 — 403 test, cổng benchmark đạt |
-| 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
+| 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 10 / 10 | ~10,5 ngày | ✅ Xong 15/09/2026 — 427 unit, 27 E2E, draw call không đổi |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **25 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **35 / 57 issue** | **~56 ngày công** | |
 
-**Phase 1 xong (15/09/2026).** LM-010 → LM-028 đủ 19 issue. Phase 2 (engine 3D sang cm, LM-030 → LM-038, LM-056) chờ người dùng xác nhận sau báo cáo phase.
+**Phase 2 xong (15/09/2026).** LM-030 → LM-038 và LM-056 đủ 10 issue. Phase 3 (màn luồng Spec) chờ người dùng xác nhận sau báo cáo phase.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 15/09/2026 — Xong phase 2: engine 3D sang cm (LM-030 → LM-038, LM-056)
+
+**Đã làm**
+- LM-030, LM-031, LM-037 (tự làm) — `f02a540`: Planner đọc revision đã duyệt qua `viewer-api` + Query → `adaptResult` (cm, bất biến, MOCK RESULT); toàn engine/editor/operations sang cm, `SCENE_SCALE = 0.01`; fixture benchmark theo contract Spec; tải trục "Sẽ có sau". Kho/tài xế giữ `LoadPlan` mm qua `adaptLoadPlan` tới LM-060.
+- LM-056 (agent) — review, cherry-pick sạch → `b12303b`: `CameraRig` `invalidate()` sau mỗi lệnh camera.
+- LM-032, LM-034, LM-035 (tự làm, TDD) — `de12ef7`: `editor-engine` bọc constraint engine của domain (`sync` theo placement hiệu lực, `check` = `evaluateMove`); lỗi chặn, cảnh báo vẫn commit; 6 hướng; snap 5/2 cm + mặt vật cản chịu tải. Test mới bắt được chồng lấn giả thật trong `overlaps` của editor (`100,4 + 120,7`) → so qua `lt`.
+- LM-033 (agent, worktree) — review, cherry-pick sạch → `5fbc6ba`: vật cản 2 draw call, hatch vùng dành riêng bằng attribute, bấm xem thông tin, legend + `sr-only`, `?debug&obstacles=0|1|20`.
+- LM-036 (agent, worktree) — review, cherry-pick có xung đột (`ViewerPage`, `benchmark.mock`, `SelectedPackagePanel`, từ điển vi/en: gộp cả hai phía; giữ `minSupportRatio 0,8` của LM-035 cùng hoán đổi điểm giao của LM-036) → `66dc2e4`: thứ tự dỡ theo `unloadingOrder`, blocker từ `lifoIssues`, fallback thứ tự suy ra cho `LoadPlan` cũ (tài xế).
+- LM-038: spec `viewer-benchmark-cm`, số đo `docs/benchmarks/viewer-cm-2026-09-15.json`, báo cáo `docs/viewer-cm-report.md`.
+
+**Kiểm tra**
+- pnpm lint: ✅ · pnpm build: ✅ · pnpm test: 427/427 · pnpm test:e2e: 26/26 + spec benchmark 1/1 · CI phase 1 (`e6a60cd`): ✅
+- Draw call 16/25/33 ở 132 → 1.000 kiện, trùng 14/09; vật cản +2; kiểm khi thả 1.000 kiện p95 ≈ 2 ms (trình duyệt).
+
+**Vướng mắc / quyết định mới**
+- `ScenePlacement` giữ `position {x,y,z}` + `lengthCm…` thay vì tên trường contract (`xCm`, `placedLengthCm`): editor duyệt theo trục; chỉ nằm trong `viewer3d`.
+- Chế độ màu "Theo đơn hàng" → "Theo kiện gốc" (contract không có đơn hàng); bỏ badge bao bì ở panel kiện.
+- Blocker hẹp hơn trước: chỉ kiện giao sau nằm hẳn sau mặt sau (D-26); hoạt ảnh dỡ vẫn mờ tại chỗ khi có hộp bất kỳ trên hành lang.
+- Còn nợ: ảnh so tỷ lệ `docs/screenshots/scene-first/` (LM-031); seed Planner chưa có vật cản và ca LIFO; đo React Profiler (LM-035).
+
+**Việc tiếp theo**
+- Báo cáo phase 2, chờ người dùng xác nhận trước phase 3.
+
 
 ### 15/09/2026 — Xong phase 1: LM-017 → LM-026, LM-028 (domain, engine + cổng benchmark, mock service, worker, mock repository)
 
@@ -339,16 +363,16 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 | ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
 |---|---|---|---|---|---|
-| [LM-030](issues/LM-030-view-model-scene-cm.md) | View model từ result | ⬜ | | | |
-| [LM-031](issues/LM-031-engine-doi-don-vi-cm.md) | Engine sang cm | ⬜ | | | Rủi ro cao |
-| [LM-032](issues/LM-032-engine-6-huong-dat.md) | 6 hướng trong engine | ⬜ | | | |
-| [LM-033](issues/LM-033-ve-vat-can-3d.md) | Vẽ vật cản | ⬜ | | | |
-| [LM-034](issues/LM-034-editor-do-chinh-xac-cm.md) | Editor theo cm | ⬜ | | | |
-| [LM-035](issues/LM-035-editor-dung-constraint-engine.md) | Editor dùng constraint engine | ⬜ | | | |
-| [LM-036](issues/LM-036-timeline-thu-tu-service-lifo.md) | Timeline, LIFO | ⬜ | | | |
-| [LM-037](issues/LM-037-tai-truc-se-co-sau.md) | Tải trục "Sẽ có sau" | ⬜ | | | |
-| [LM-038](issues/LM-038-e2e-3d-sang-cm-hieu-nang.md) | E2E 3D, hồi quy hiệu năng | ⬜ | | | |
-| [LM-056](issues/LM-056-camera-giam-chuyen-dong-khong-ve-lai.md) | Bug camera khi giảm chuyển động | ⬜ | | | Mở 15/09/2026, phát hiện ở LM-005 |
+| [LM-030](issues/LM-030-view-model-scene-cm.md) | View model từ result | ✅ | 15/09/2026 | 15/09/2026 | f02a540 |
+| [LM-031](issues/LM-031-engine-doi-don-vi-cm.md) | Engine sang cm | ✅ | 15/09/2026 | 15/09/2026 | f02a540 · còn nợ ảnh so tỷ lệ |
+| [LM-032](issues/LM-032-engine-6-huong-dat.md) | 6 hướng trong engine | ✅ | 15/09/2026 | 15/09/2026 | de12ef7 |
+| [LM-033](issues/LM-033-ve-vat-can-3d.md) | Vẽ vật cản | ✅ | 15/09/2026 | 15/09/2026 | 5fbc6ba (agent) |
+| [LM-034](issues/LM-034-editor-do-chinh-xac-cm.md) | Editor theo cm | ✅ | 15/09/2026 | 15/09/2026 | de12ef7 · sửa chồng lấn giả do số thực |
+| [LM-035](issues/LM-035-editor-dung-constraint-engine.md) | Editor dùng constraint engine | ✅ | 15/09/2026 | 15/09/2026 | de12ef7 · p95 kiểm khi thả ≈ 2 ms |
+| [LM-036](issues/LM-036-timeline-thu-tu-service-lifo.md) | Timeline, LIFO | ✅ | 15/09/2026 | 15/09/2026 | 66dc2e4 (agent) |
+| [LM-037](issues/LM-037-tai-truc-se-co-sau.md) | Tải trục "Sẽ có sau" | ✅ | 15/09/2026 | 15/09/2026 | f02a540 |
+| [LM-038](issues/LM-038-e2e-3d-sang-cm-hieu-nang.md) | E2E 3D, hồi quy hiệu năng | ✅ | 15/09/2026 | 15/09/2026 | báo cáo viewer-cm-report.md |
+| [LM-056](issues/LM-056-camera-giam-chuyen-dong-khong-ve-lai.md) | Bug camera khi giảm chuyển động | ✅ | 15/09/2026 | 15/09/2026 | b12303b (agent) |
 
 ### Phase 3 — Màn luồng Spec
 

@@ -26,7 +26,7 @@ Rủi ro lớn nhất của tích hợp: nhầm hệ số 10 âm thầm. Chỉ `
 ## Tiêu chí nghiệm thu
 
 - [ ] Ảnh chụp Planner mặc định, focus điểm giao, dỡ hàng khớp bộ ảnh `docs/screenshots/scene-first/` về tỷ lệ (sai lệch chỉ do dữ liệu seed khác).
-- [ ] `?debug&packages=1000&quality=low`: draw call vẫn 16, không tăng theo số kiện.
+- [x] `?debug&packages=1000&quality=low`: draw call vẫn 16, không tăng theo số kiện.
 - [x] Test đơn vị: thùng 600 × 240 × 250 cm → kích thước scene 6 × 2,5 × 2,4.
 
 ## Kết quả (15/09/2026)
