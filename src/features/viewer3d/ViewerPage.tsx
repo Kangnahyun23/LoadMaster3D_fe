@@ -1,12 +1,14 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { notifyPendingFeature } from '@/lib/pending-feature'
 import { WorkspaceToolbar, type InspectorTab } from './panels/WorkspaceToolbar'
 import { SceneHud } from './operations/SceneHud'
-import { DEFAULT_SELECTED_ID, LOAD_PLAN } from '@/lib/load-plan.mock'
+import { Button } from '@/components/ui/Button'
 import { PLANS } from '@/lib/plan-comparison.mock'
-import type { LoadPlan } from '@/types/load-plan'
-import { benchmarkCountFromSearch, createBenchmarkPlan } from './benchmark.mock'
+import { benchmarkCountFromSearch, createBenchmarkInput } from './benchmark.mock'
+import { adaptResult, type ViewerSceneModel } from './scene-input'
+import { usePlanSourceQuery } from './usePlanSourceQuery'
+import type { PlanSource } from './viewer-api'
 import { createPerfStore, DebugOverlay } from './DebugOverlay'
 import { debugQualityTier } from './viewer-options'
 import { ApprovePlanDialog } from './ApprovePlanDialog'
@@ -36,14 +38,45 @@ const LoadPlanViewer = lazy(() =>
  */
 export function ViewerPage() {
   const [searchParams] = useSearchParams()
-  const params = useParams()
   const count = benchmarkCountFromSearch(searchParams.toString())
-  const plan = useMemo(() => count ? createBenchmarkPlan(count) : LOAD_PLAN, [count])
-  // A new snapshot owns a new draft, selection, slice and playback session.
-  return <ViewerSession key={`${params.tripId}:${plan.tripId}`} plan={plan} />
+  return count ? <BenchmarkSession count={count} /> : <ResultSession />
 }
 
-function ViewerSession({ plan }: { plan: LoadPlan }) {
+/** `?debug&packages=N`: fixture renderer, không đọc kho. */
+function BenchmarkSession({ count }: { count: NonNullable<ReturnType<typeof benchmarkCountFromSearch>> }) {
+  const model = useMemo(() => {
+    const input = createBenchmarkInput(count)
+    return adaptResult({ trip: input.trip, revision: input })
+  }, [count])
+  return <ViewerSession key={model.tripId} model={model} />
+}
+
+/** Phương án đã lưu của chuyến (LM-030): revision đã duyệt mới nhất, hoặc `?revision=<jobId>`. */
+function ResultSession() {
+  const { tripId = '' } = useParams()
+  const [searchParams] = useSearchParams()
+  const query = usePlanSourceQuery(tripId, searchParams.get('revision') ?? undefined)
+  if (query.isPending) {
+    return <div className="relative h-dvh bg-canvas-1"><ViewerSkeleton packageCount={0} stopCount={0} /></div>
+  }
+  const revision = query.data?.revision
+  if (!query.data || !revision) {
+    return <div className="flex h-dvh flex-col items-start gap-3 bg-bg p-8">
+      <h1 className="text-h1 font-semibold">{query.isError ? 'Không tải được phương án' : 'Chuyến chưa có phương án'}</h1>
+      <p className="text-text-2">{query.isError ? `Không tìm thấy chuyến ${tripId}.` : 'Chạy tối ưu để có phương án xếp hàng 3D.'}</p>
+      <Button variant="secondary" asChild><Link to={`/chuyen/${tripId}`}>Về chi tiết chuyến</Link></Button>
+    </div>
+  }
+  // A new snapshot owns a new draft, selection, slice and playback session.
+  return <LoadedResult key={revision.id} source={{ trip: query.data.trip, revision }} />
+}
+
+function LoadedResult({ source }: { source: PlanSource }) {
+  const model = useMemo(() => adaptResult(source), [source])
+  return <ViewerSession model={model} />
+}
+
+function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
   const params = useParams()
   const [searchParams] = useSearchParams()
   const tripId = params.tripId ?? plan.tripId
@@ -51,7 +84,7 @@ function ViewerSession({ plan }: { plan: LoadPlan }) {
   const selectedPlan = PLANS.find((p) => p.key === searchParams.get('plan')) ?? PLANS[2]
 
   const flags = usePerformanceFlags(debugQualityTier(searchParams))
-  const state = useLoadPlanViewer(plan, { initialSelectedId: plan === LOAD_PLAN ? DEFAULT_SELECTED_ID : plan.placements[0]?.id })
+  const state = useLoadPlanViewer(plan, { initialSelectedId: plan.placements[0]?.id })
   const editor = useManualEditor(state)
   const operations = useOperations(state)
   const colorContext = useMemo(() => createColorContext(plan), [plan])
@@ -111,7 +144,8 @@ function ViewerSession({ plan }: { plan: LoadPlan }) {
         tripId={tripId}
         fillRate={plan.fillRate}
         totalWeightKg={totalWeightKg}
-        payloadKg={plan.vehicle.payloadKg}
+        payloadKg={plan.vehicle.maxPayloadKg}
+        isMockResult={plan.isMockResult}
         placedCount={plan.placements.length}
         totalCount={totalPackages}
         onApprove={() => setApproveOpen(true)}

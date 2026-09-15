@@ -5,14 +5,15 @@ import { animated, useSpring } from '@react-spring/three'
 import { useThree } from '@react-three/fiber'
 import { readToken } from '@/lib/tokens'
 import { stopColor } from '@/lib/stops'
-import type { Placement, VehicleSpec } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { VehicleConfig } from '@/domain/models'
 import { cargoCenterOfMass } from './operations-model'
 import { interiorStopMap } from './stop-map'
-import { MM } from '../scene/units'
+import { SCENE_SCALE } from '../scene/units'
 import { SceneCallout } from '../scene/SceneCallout'
 
-export function RearDoorCue({ vehicle }: { vehicle: VehicleSpec }) {
-  const x = vehicle.innerLengthMm * MM, z = vehicle.innerWidthMm * MM / 2
+export function RearDoorCue({ vehicle }: { vehicle: VehicleConfig }) {
+  const x = vehicle.innerLengthCm * SCENE_SCALE, z = vehicle.innerWidthCm * SCENE_SCALE / 2
   const points = useMemo(() => new Float32Array([
     x, 0.03, z, x + 0.9, 0.03, z,
     x + 0.9, 0.03, z, x + 0.65, 0.03, z - 0.15,
@@ -30,13 +31,13 @@ export function RearDoorCue({ vehicle }: { vehicle: VehicleSpec }) {
 }
 
 /** One colored mesh, even when stop placements are interleaved in every bin. */
-export function InteriorStopMap({ placements, vehicle, reducedMotion }: { placements: readonly Placement[]; vehicle: VehicleSpec; reducedMotion: boolean }) {
+export function InteriorStopMap({ placements, vehicle, reducedMotion }: { placements: readonly ScenePlacement[]; vehicle: VehicleConfig; reducedMotion: boolean }) {
   const invalidate = useThree((s) => s.invalidate)
   const spring = useSpring({ from: { opacity: 0 }, opacity: 0.65, config: { duration: reducedMotion ? 100 : 160 }, onChange: () => invalidate() })
   const buffers = useMemo(() => {
     const vertices: number[] = [], colors: number[] = [], color = new Color()
     for (const part of interiorStopMap(placements, vehicle)) {
-        vertices.push(...part.vertices.map((value) => value * MM))
+        vertices.push(...part.vertices.map((value) => value * SCENE_SCALE))
         color.set(stopColor(part.stop))
         for (let i = 0; i < 6; i++) colors.push(color.r, color.g, color.b)
     }
@@ -51,18 +52,18 @@ export function InteriorStopMap({ placements, vehicle, reducedMotion }: { placem
   </mesh>
 }
 
-export function CargoMassMarker({ placements, vehicle }: { placements: readonly Placement[]; vehicle: VehicleSpec }) {
+export function CargoMassMarker({ placements, vehicle }: { placements: readonly ScenePlacement[]; vehicle: VehicleConfig }) {
   const mass = useMemo(() => cargoCenterOfMass(placements), [placements])
   const points = useMemo(() => {
-    const x = (vehicle.innerLengthMm / 2 - (mass?.position.x ?? 0)) * MM
-    const z = (vehicle.innerWidthMm / 2 - (mass?.position.y ?? 0)) * MM
-    return new Float32Array([0, 0, 0, 0, (mass?.position.z ?? 0) * MM, 0,
+    const x = (vehicle.innerLengthCm / 2 - (mass?.position.x ?? 0)) * SCENE_SCALE
+    const z = (vehicle.innerWidthCm / 2 - (mass?.position.y ?? 0)) * SCENE_SCALE
+    return new Float32Array([0, 0, 0, 0, (mass?.position.z ?? 0) * SCENE_SCALE, 0,
       0, 0.01, 0, x, 0.01, z, x - 0.1, 0.01, z, x + 0.1, 0.01, z, x, 0.01, z - 0.1, x, 0.01, z + 0.1])
   }, [mass, vehicle])
   if (!mass) return null
   const color = readToken('--highlight')
-  return <group name="cargo-center-of-mass" position={[mass.position.x * MM, 0, mass.position.y * MM]}>
-    <mesh position={[0, mass.position.z * MM, 0]} raycast={() => null} renderOrder={10}>
+  return <group name="cargo-center-of-mass" position={[mass.position.x * SCENE_SCALE, 0, mass.position.y * SCENE_SCALE]}>
+    <mesh position={[0, mass.position.z * SCENE_SCALE, 0]} raycast={() => null} renderOrder={10}>
       <sphereGeometry args={[0.07, 12, 8]} /><meshBasicMaterial color={color} depthTest={false} depthWrite={false} />
     </mesh>
     <lineSegments raycast={() => null}>
@@ -72,7 +73,7 @@ export function CargoMassMarker({ placements, vehicle }: { placements: readonly 
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, 0]} raycast={() => null}>
       <ringGeometry args={[0.06, 0.09, 16]} /><meshBasicMaterial color={color} side={DoubleSide} />
     </mesh>
-    <SceneCallout position={[0, mass.position.z * MM, 0]} offset={[-140, 90]} width={180}>
+    <SceneCallout position={[0, mass.position.z * SCENE_SCALE, 0]} offset={[-140, 90]} width={180}>
       <span className="inline-block rounded-sm border border-highlight bg-panel-dark px-2 py-1 text-body text-bg">Tâm khối lượng hàng</span>
     </SceneCallout>
   </group>

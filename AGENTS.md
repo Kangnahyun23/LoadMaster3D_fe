@@ -310,9 +310,10 @@ trong state và payload (D-03), nên đích là:
   làm hai kiện chạm mặt bị báo chồng lấn giả.
 - Mọi ví dụ số thực đưa vào test phải được chạy thử bằng máy trước; ba giả định viết tay trong
   issue gốc đã sai (`45.1 + 45.1 + 45.1` thực ra bằng đúng `135.3`).
-- **Trạng thái chuyển đổi:** `src/domain` đã dùng cm. Engine 3D, editor, kho, tài xế và mock
-  `LoadPlan` **vẫn là mm** cho tới LM-031/LM-060/LM-061/LM-062. Code mới không được thêm giá trị
-  mm; code cũ đổi theo đúng issue, không đổi rải rác.
+- **Trạng thái chuyển đổi:** `src/domain`, engine 3D và editor đã dùng cm (LM-031). Màn kho, tài xế và mock
+  `LoadPlan` **vẫn là mm** cho tới LM-060/LM-061/LM-062; hai viewer của chúng đổi sang cm đúng một lần qua
+  `adaptLoadPlan` (`viewer3d/scene-input.ts`). Code mới không được thêm giá trị mm; code cũ đổi theo đúng issue,
+  không đổi rải rác.
 
 ### Định dạng số và ngày theo ngôn ngữ
 
@@ -385,11 +386,11 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
 
 ### Foundation engine *(bổ sung)*
 
-- `LoadPlan` là snapshot bất biến. Planner đi qua `adaptLoadPlan → ViewerSceneModel`, kết hợp `ViewerDraft` theo ID để sinh effective placements. Chỉ commit `{ position?, orientation?, pinned? }` vào draft; không sửa `plan.placements`. Tất cả vị trí trong draft dùng mm nghiệp vụ.
-- Kích thước domain **đã áp orientation**. Phải khôi phục kích thước nguyên bản từ hướng nguồn rồi áp hướng đích, kể cả nguồn ở hướng 1 hoặc 2. Xoay giữ nguyên góc vị trí của kiện. Helper nằm trong `viewer-scene-model.ts`.
+- *(đã điều chỉnh, LM-030)* Planner đọc revision của chuyến qua `viewer-api.ts` → `usePlanSourceQuery` → `adaptResult → ViewerSceneModel` (cm, snapshot bất biến): revision đã duyệt mới nhất, hoặc `?revision=<jobId>`. `ScenePlacement` ghép `PackagePlacement` với kiện gốc (`packageId`, tên, điểm giao, `fragilityLevel`); `step = loadingOrder`. Kho và tài xế còn `adaptLoadPlan` từ `LoadPlan` mm. Kết hợp `ViewerDraft` theo ID để sinh effective placements; chỉ commit `{ position?, orientation?, pinned? }`, vị trí draft là cm. Header hiện **MOCK RESULT** khi `isMockResult`. Chế độ màu thứ hai là **theo kiện gốc** (`packageId`) vì contract không có đơn hàng; `packaging` của kết quả là một kiểu trung tính.
+- Kích thước placement **đã áp orientation**. Xoay luôn áp mã đích lên kích thước danh nghĩa `baseDimensionsById` (lấy từ `CargoPackage`), không đảo ngược kích thước đã xoay (`orientedSize` trong `scene-input.ts`). Xoay giữ nguyên góc vị trí của kiện.
 - Cả ba vai trò dùng chung `SceneCanvas` với `frameloop="demand"`. CameraControls tự invalidate khi chuyển động; mọi thay đổi buffer imperative phải gọi invalidate. Spring chỉ ghi ma trận/proxy kiện đang chạy, không đưa state từng frame qua React.
 - `frustumCulled={false}` không loại bỏ nhu cầu bounds của **raycast**. Cargo dùng sphere bao toàn bộ effective geometry và quãng animation, cập nhật khi geometry đổi. Không tính lại `computeBoundingSphere()` trong animation/step/slice path; cập nhật màu không ghi lại ma trận.
-- Dữ liệu đo riêng trong `features/viewer3d/benchmark.mock.ts`: `?debug&packages=132|300|500|1000`, có thể thêm `&quality=high|balanced|low`. Không đổi mock nghiệp vụ và không kích hoạt benchmark khi thiếu `debug`. Đây là fixture renderer có khe hở, không phải phương án đã xác nhận ổn định chất xếp.
+- Dữ liệu đo riêng trong `features/viewer3d/benchmark.mock.ts` (`createBenchmarkInput`: request + result đúng contract Spec, cm; `createBenchmarkPlan` mm cũ chỉ cho kho/tài xế): `?debug&packages=132|300|500|1000`, có thể thêm `&quality=high|balanced|low`. Không đổi mock nghiệp vụ và không kích hoạt benchmark khi thiếu `debug`. Đây là fixture renderer có khe hở, không phải phương án đã xác nhận ổn định chất xếp.
 - Debug chỉ quan sát: FPS khi scene chuyển động, draw calls, tam giác, số kiện, DPR và tier. Khi nghỉ hiển thị trạng thái nghỉ; không tự invalidate để đo FPS. Chưa nâng mục tiêu FPS trên thiết bị thật chỉ dựa vào số đo Chromium phần mềm.
 - Low tier dùng DPR 0,5 và vật liệu cargo Lambert sau phép đo kéo camera 1.000 kiện trên SwiftShader; giữ nguyên picking và nhãn HTML. Balanced/high giữ Standard. Phần 3D mềm hơn là trade-off có chủ ý để ưu tiên tương tác. Không suy diễn kết quả này thành cam kết FPS trên mọi thiết bị hoặc mọi tier.
 
@@ -397,8 +398,8 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
 
 - Planner có chế độ Xem/Chỉnh sửa. Chỉ kiện đang chọn dùng một proxy mesh; instance tương ứng được ẩn theo ID. Lưới sàn và chỉ dẫn trục có số draw call cố định.
 - Kéo dùng pointer capture, ref và cập nhật Three imperative; chỉ commit một lệnh khi thả hợp lệ. Trong gesture tạm ngưng camera và raycast instances, khôi phục khi thả/hủy/unmount. Không đưa pointer position qua React mỗi frame.
-- Snapping/validation dùng mm nguyên trong `viewer3d/editor`. Nút nudge đi đúng bước mm; snapping dùng khi kéo hoặc bấm Căn vị trí. Không xoay quaternion tự do.
-- Chồng lấn và vượt biên chặn commit. Nâng đỡ dưới 80%, tiếp xúc kiện dễ vỡ và chỉnh thủ công chỉ là advisory. Coverage tính union diện tích tiếp xúc, tolerance 2 mm; không phải stability solver. Fixture có khe hở có thể nhận advisory.
+- Snapping/validation dùng cm trong `viewer3d/editor`: lưới 5 cm, ngưỡng hút 2 cm, vị trí commit qua `roundCm`. Nút nudge đi đúng 1/5/10 cm (mặc định 1); snapping dùng khi kéo hoặc bấm Căn vị trí. Xoay chỉ vòng qua `effectiveOrientations` của kiện (6 mã Spec), không xoay quaternion tự do.
+- Chồng lấn và vượt biên chặn commit. Nâng đỡ dưới 80%, tiếp xúc kiện dễ vỡ và chỉnh thủ công chỉ là advisory. Coverage tính union diện tích tiếp xúc, tolerance 0,2 cm; không phải stability solver. Fixture có khe hở có thể nhận advisory.
 - Lịch sử giữ patch trước/sau theo ID, tối đa 200 lệnh, không snapshot placements mỗi lần di chuột. Ghim khóa move/rotate cho đến khi bỏ ghim. Reset mọi chỉnh sửa cần dialog; reset riêng bị chặn nếu vị trí gốc đang bị kiện khác chiếm.
 - Không tạo placement từ UnplacedPackage, không lưu draft qua phiên/trang và không coi kiểm tra frontend là kết quả tối ưu authoritative.
 
@@ -406,7 +407,7 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
 
 - `operations/scene-semantics.ts` tách loaded/current/next/future/removed khỏi renderer. Planner, `PositionViewer` (kho) và `DriverCargoViewer` cùng dùng `SceneCanvas`; panel và workflow nằm ở wrapper. Không thêm engine cho từng vai trò.
 - Loading lấy `placement.step`; unloading lấy **thứ tự dỡ gợi ý**, ưu tiên stop tăng, cao trước, gần cửa trước. Stop-order consistency không chứng minh unload accessibility. Blocker chỉ là giao cắt hành lang thẳng về +X cửa sau, không tính người, xe nâng, clearance hay xoay lúc dỡ.
-- CoM là **tâm khối lượng hàng** đã xếp/còn lại, không phải toàn xe. Tải trục hiển thị số từ phương án gốc, chưa tính lại sau edit/dỡ. Cabin, bánh và khung gầm là mô hình minh họa, không phải axle geometry.
+- CoM là **tâm khối lượng hàng** đã xếp/còn lại, không phải toàn xe. *(đã điều chỉnh, LM-037)* Tải trục không hiện số nào: panel giữ chỗ với nhãn "Sẽ có sau" và chỉ liệt kê cấu hình `vehicle.axles` nếu có (Spec 7.10); Duyệt không kiểm tải trục. Cabin, bánh và khung gầm là mô hình minh họa, không phải axle geometry.
 - Chi tiết xe gộp geometry theo vật liệu; sáu bánh dùng một draw. Cargo dùng atlas trung tính chung cho carton/pallet/crate qua thuộc tính instance, không phải nhãn hướng đặt. Low tắt chi tiết phụ; không tắt cues nghiệp vụ. Khi gặp potential blocker, playback dỡ tạm dừng và giữ target. Chỉ khi người dùng chủ động bỏ qua bước mô phỏng, kiện bị cản mới mờ tại chỗ; không dịch chuyển xuyên kiện khác. Reduced motion không dịch chuyển lớn; hoàn tất phải trở lại idle.
 - Timeline dùng ô cao bằng nhau, 8–64 bins theo chiều rộng, slider giữ toàn bộ bước. Bản đồ điểm giao mặc định tắt; geometry nằm hoàn toàn trong mép sàn thùng (helper `operations/stop-map.ts`), depth test bình thường. Tính từ phân bố thể tích thực, giữ nhiều màu khi stop xen kẽ. Không đặt ribbon trên thân/gầm hoặc bên ngoài xe. Màu phải có số/tên điểm trong panel hoặc nhãn.
 - Planner mặc định ưu tiên scene với HUD gọn; thông tin kiện, tải trục, màu/slice và lớp phân tích nằm trong inspector mở theo nhu cầu. Double-click focus giữ góc nhìn; Esc hoặc “Xem toàn xe” thoát focus. Theo bước là tùy chọn, tạm dừng khi người dùng tự điều khiển camera. Chọn blocker không đổi target dỡ; có đường quay lại target.

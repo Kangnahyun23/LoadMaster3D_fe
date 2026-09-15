@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type {
-  CameraPreset,
-  ColorMode,
-  LoadPlan,
-  Orientation,
-  PlaybackSpeed,
-} from '@/types/load-plan'
-import { adaptLoadPlan } from './viewer-scene-model'
+import type { CameraPreset, ColorMode, PlaybackSpeed } from '@/types/load-plan'
+import type { OrientationCode } from '@/domain/geometry'
+import type { ViewerSceneModel } from '@/features/viewer3d/scene-input'
 import { resolveEffectiveScene, type PlacementPatch } from './viewer-draft'
 import { commitCommand, createDraftHistory, travelHistory, type CommandType } from './editor/draft-history'
 
@@ -21,17 +16,16 @@ export const STEP_DURATION_MS = 600
 export type LeftTab = 'unplaced' | 'pinned'
 
 export function useLoadPlanViewer(
-  plan: LoadPlan,
+  sceneModel: ViewerSceneModel,
   { initialSelectedId }: { initialSelectedId?: string } = {},
 ) {
   // ViewerPage keys each session by snapshot. No draft is carried to another plan.
-  const sceneModel = useMemo(() => adaptLoadPlan(plan), [plan])
   const totalSteps = Math.max(0, ...sceneModel.placements.map((p) => p.step))
   const initialSelected = initialSelectedId ? sceneModel.placementById.get(initialSelectedId) : undefined
 
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('goc-cheo')
   const [colorMode, setColorMode] = useState<ColorMode>('diem-giao')
-  const [sliceMm, setSliceMm] = useState(plan.vehicle.innerLengthMm)
+  const [sliceCm, setSliceCm] = useState(sceneModel.vehicle.innerLengthCm)
   // Mở màn là thấy trọn phương án; timeline chỉ tua khi người dùng chủ động.
   const [step, setStepState] = useState(totalSteps)
   const [playing, setPlaying] = useState(false)
@@ -95,7 +89,7 @@ export function useLoadPlanViewer(
     [commitDraft],
   )
   const setOrientation = useCallback(
-    (id: string, orientation: Orientation) => commitDraft('ROTATE', id, { orientation }),
+    (id: string, orientation: OrientationCode) => commitDraft('ROTATE', id, { orientation }),
     [commitDraft],
   )
 
@@ -123,8 +117,8 @@ export function useLoadPlanViewer(
     setCameraPreset,
     colorMode,
     setColorMode,
-    sliceMm,
-    setSliceMm,
+    sliceCm,
+    setSliceCm,
     step,
     setStep,
     stepForward,

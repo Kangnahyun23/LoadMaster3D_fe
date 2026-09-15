@@ -1,16 +1,16 @@
 import { Html } from '@react-three/drei'
 import { useMemo } from 'react'
 import { readToken } from '@/lib/tokens'
-import type { VehicleSpec } from '@/types/load-plan'
-import { MM, type Vec3 } from '../scene/units'
+import type { VehicleConfig } from '@/domain/models'
+import { SCENE_SCALE, type Vec3 } from '../scene/units'
 import { EDITOR_RULES } from './geometry'
 
 /** Major grid every ten snap cells: a single draw, readable at container scale. */
-export function EditorFloorGrid({ vehicle }: { vehicle: VehicleSpec }) {
+export function EditorFloorGrid({ vehicle }: { vehicle: VehicleConfig }) {
   const points = useMemo(() => {
     const vertices: number[] = []
-    const length = vehicle.innerLengthMm * MM, width = vehicle.innerWidthMm * MM
-    const spacing = EDITOR_RULES.gridMm * 10 * MM
+    const length = vehicle.innerLengthCm * SCENE_SCALE, width = vehicle.innerWidthCm * SCENE_SCALE
+    const spacing = EDITOR_RULES.gridCm * 10 * SCENE_SCALE
     for (let x = 0; x <= length; x += spacing) vertices.push(x, 0.003, 0, x, 0.003, width)
     for (let z = 0; z <= width; z += spacing) vertices.push(0, 0.003, z, length, 0.003, z)
     return new Float32Array(vertices)

@@ -4,6 +4,7 @@ import { createColorContext } from '@/features/viewer3d/colors'
 import { AxleLoadPanel } from '@/features/viewer3d/overlays/AxleLoadPanel'
 import { SlicePanel } from '@/features/viewer3d/overlays/SlicePanel'
 import { StopLegend } from '@/features/viewer3d/overlays/StopLegend'
+import { adaptLoadPlan } from '@/features/viewer3d/scene-input'
 import { Timeline } from '@/features/viewer3d/Timeline'
 import { LOAD_PLAN } from '@/lib/load-plan.mock'
 import type { CameraPreset, ColorMode, PlaybackSpeed } from '@/types/load-plan'
@@ -18,16 +19,16 @@ const CAMERAS: ReadonlyArray<{ value: CameraPreset; label: string }> = [
 ]
 const MODES: ReadonlyArray<{ value: ColorMode; label: string }> = [
   { value: 'diem-giao', label: 'Theo điểm giao' },
-  { value: 'don-hang', label: 'Theo đơn hàng' },
+  { value: 'kien-goc', label: 'Theo kiện gốc' },
   { value: 'khoi-luong', label: 'Theo khối lượng' },
 ]
 
 export function Viewport3DSection() {
-  const plan = LOAD_PLAN
+  const plan = useMemo(() => adaptLoadPlan(LOAD_PLAN), [])
   const colorContext = useMemo(() => createColorContext(plan), [plan])
   const [camera, setCamera] = useState<CameraPreset>('goc-cheo')
   const [mode, setMode] = useState<ColorMode>('diem-giao')
-  const [slice, setSlice] = useState(plan.vehicle.innerLengthMm)
+  const [slice, setSlice] = useState(plan.vehicle.innerLengthCm)
   const [step, setStep] = useState(47)
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState<PlaybackSpeed>(2)
@@ -35,7 +36,7 @@ export function Viewport3DSection() {
 
   return (
     <SheetSection id="viewport" number="06" title="Thành phần 3D" description="Thẻ trắng nổi trên nền tối cho mọi điều khiển vùng 3D — nơi duy nhất được dùng bóng --e2 ngoài dropdown/modal/toast.">
-      <SheetRow name="FloatingPanel · CameraBar · ColorModeBar · Legend" note="CameraBar 5 góc. ColorMode 3 chế độ; chú thích đổi theo chế độ (điểm giao / đơn hàng / dải khối lượng)." className="items-stretch">
+      <SheetRow name="FloatingPanel · CameraBar · ColorModeBar · Legend" note="CameraBar 5 góc. ColorMode 3 chế độ; chú thích đổi theo chế độ (điểm giao / kiện gốc / dải khối lượng)." className="items-stretch">
         <DarkStage className="flex min-h-56 items-start justify-between">
           <SegmentedControl ariaLabel="Góc nhìn" options={CAMERAS} value={camera} onChange={setCamera} />
           <div className="flex flex-col items-end gap-2">
@@ -45,14 +46,14 @@ export function Viewport3DSection() {
         </DarkStage>
       </SheetRow>
 
-      <SheetRow name="AxleLoadGauge · SliceSlider · CalloutLabel" note="Gauge 2 thanh; thanh ≥ 90% chuyển warning, số cùng màu. Slider 0–7.200 mm bước 50, nhãn “Toàn bộ” khi tối đa. CalloutLabel gắn trên kiện đang chọn." className="items-stretch">
+      <SheetRow name="AxleLoadGauge · SliceSlider · CalloutLabel" note="Tải trục chỉ nhãn “Sẽ có sau” và cấu hình trục, không số tải (Spec 7.10). Slider 0–720 cm bước 5, nhãn “Toàn bộ” khi tối đa. CalloutLabel gắn trên kiện đang chọn." className="items-stretch">
         <DarkStage className="flex min-h-56 items-end justify-between">
-          <AxleLoadPanel front={plan.vehicle.frontAxle} rear={plan.vehicle.rearAxle} />
+          <AxleLoadPanel compact axles={[{ id: 'AXLE-01', name: 'Trục trước', positionXCm: -120, emptyLoadKg: 2100, maxLoadKg: 4000 }, { id: 'AXLE-02', name: 'Trục sau', positionXCm: 430, emptyLoadKg: 2900, maxLoadKg: 5500 }]} />
           <div className="mb-10 flex flex-col items-center">
             <span className="rounded-sm bg-bg px-2 py-1 font-mono text-[11px] leading-3.5 font-semibold text-text">PKG-00147</span>
             <span aria-hidden className="h-[34px] w-px bg-bg" />
           </div>
-          <SlicePanel sliceMm={slice} maxMm={plan.vehicle.innerLengthMm} onChange={setSlice} />
+          <SlicePanel sliceCm={slice} maxCm={plan.vehicle.innerLengthCm} onChange={setSlice} />
         </DarkStage>
       </SheetRow>
 

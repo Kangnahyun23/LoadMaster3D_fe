@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { attachJson, attachScreenshot, expect, PLANNER_ROUTE, test } from './fixtures'
-import { cameraPreset, closeInspector, metrics, openInspector, waitIdle, type ViewerMetrics } from './viewer-helpers'
+import { cameraPreset, closeInspector, metrics, openInspector, SOURCE_MODULES, waitIdle, type ViewerMetrics } from './viewer-helpers'
 
 const selectedPanel = (page: Page) => page.getByRole('complementary', { name: 'Kiện đang chọn' })
 
@@ -20,7 +20,12 @@ test('planner idles under debug and keeps presets, edit toggles, colour modes, s
   expect((await metrics(page)).renderedFrames, 'debug overlay must not keep rendering').toBe(normal.renderedFrames)
   const selected = selectedPanel(page)
   await openInspector(page, 'package')
-  expect(await selected.innerText()).toMatch(/PKG-00147/)
+  const seed = await page.evaluate(async (url) => {
+    const { seedScene } = (await import(url)) as typeof import('@/test/scene')
+    const model = await seedScene()
+    return { firstId: model.placements[0]!.id, innerLengthCm: model.vehicle.innerLengthCm }
+  }, SOURCE_MODULES.scene)
+  expect(await selected.innerText()).toContain(seed.firstId)
   await attachScreenshot(page, testInfo, 'normal')
   await closeInspector(page)
 
@@ -37,7 +42,7 @@ test('planner idles under debug and keeps presets, edit toggles, colour modes, s
   await page.getByRole('button', { name: 'Bỏ ghim', exact: true }).click()
   await page.getByRole('button', { name: 'Xem', exact: true }).click()
   await openInspector(page, 'display')
-  for (const name of ['Theo đơn hàng', 'Theo khối lượng', 'Theo điểm giao']) {
+  for (const name of ['Theo kiện gốc', 'Theo khối lượng', 'Theo điểm giao']) {
     await page.getByRole('button', { name, exact: true }).click()
   }
   const slice = page.getByRole('slider', { name: 'Cắt lớp theo chiều dài', exact: true })
@@ -45,7 +50,7 @@ test('planner idles under debug and keeps presets, edit toggles, colour modes, s
   await slice.press('Home')
   expect(await slice.inputValue()).toBe('0')
   await slice.press('End')
-  expect(await slice.inputValue()).toBe('7200')
+  expect(await slice.inputValue()).toBe(String(seed.innerLengthCm))
   await closeInspector(page)
 
   const timeline = page.getByRole('slider', { name: 'Bước xếp', exact: true })

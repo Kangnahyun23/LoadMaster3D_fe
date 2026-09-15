@@ -122,6 +122,27 @@ export const vi = {
     ORIENTATION_MISMATCH: 'Kích thước đã xếp của {id} không khớp hướng {orientation}.',
     ORIENTATION_NOT_ALLOWED: '{id} được đặt theo hướng {orientation}, không thuộc các hướng được phép của kiện.',
   },
+  viewer: {
+    axles: {
+      title: 'Tải trục',
+      comingLater: 'Sẽ có sau',
+      pending: 'Chờ backend tính tải trục; không hiển thị số ước lượng.',
+      axle: '{name} · cách vách trước {position} · tối đa {maxLoad}',
+    },
+    measurements: {
+      summary: 'Cách cửa {rear} · vách trái {left} · Lớp {layer}',
+    },
+    /** Mã `UnplacedPackage.reasonCode` của Spec. */
+    unplacedReasons: {
+      NO_SPACE: 'Không còn chỗ trống vừa kiện',
+      OVER_PAYLOAD: 'Vượt tải trọng tối đa của xe',
+      DOOR_TOO_SMALL: 'Không lọt cửa thùng',
+      NO_ALLOWED_ORIENTATION: 'Không có hướng đặt được phép vừa thùng',
+      STACKING_VIOLATION: 'Vi phạm luật xếp chồng',
+      LIFO_VIOLATION: 'Vi phạm thứ tự dỡ theo điểm giao',
+      UNKNOWN: 'Chưa xếp được, không rõ lý do',
+    },
+  },
   /** Tên trường dữ liệu, không kèm đơn vị; dùng trong câu lỗi và nhãn form. */
   fields: {
     innerLengthCm: 'Chiều dài lòng thùng',

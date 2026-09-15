@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { ExtrudeGeometry, InstancedMesh, Object3D, Shape } from 'three'
-import type { VehicleSpec } from '@/types/load-plan'
+import type { VehicleConfig } from '@/domain/models'
 import type { SceneMaterials } from './materials'
 import { containerSize } from './units'
 import { truckDetails, truckWheel } from './truck-geometry'
@@ -9,7 +9,7 @@ const cabX = -1
 
 /** Cosmetic vehicle representation. Wheel locations are not authoritative axle data. */
 export function TruckCab({ vehicle, materials, shadows }: {
-  vehicle: VehicleSpec; materials: SceneMaterials; shadows: boolean
+  vehicle: VehicleConfig; materials: SceneMaterials; shadows: boolean
 }) {
   const { length: L, width: W } = containerSize(vehicle)
   const wheels = useRef<InstancedMesh>(null)

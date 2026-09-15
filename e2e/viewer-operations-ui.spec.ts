@@ -41,7 +41,7 @@ test('loading, unloading advisories, blockers and approval wording on 1,000 pack
   await waitCameraSettled(page)
   const point = await instancePoint(page, 999)
   await page.mouse.click(point.x, point.y)
-  expect(await selectedPlacementId(page)).toBe('BENCH-01000')
+  expect(await selectedPlacementId(page)).toBe('BENCH-01000-01')
   await openInspector(page, 'display')
   await button(page, 'Hiện tâm khối lượng hàng').click(); await settle(page)
   await closeInspector(page)
@@ -57,10 +57,10 @@ test('loading, unloading advisories, blockers and approval wording on 1,000 pack
   await page.getByRole('combobox', { name: 'Tập trung điểm giao', exact: true }).selectOption('2'); await settle(page)
   cargo = await visibleCargo(page)
   expect(cargo['cargo-opaque'] + cargo['cargo-dim'], 'prior stop is removed from the simulation').toBe(750)
-  const blockedIndex = await page.evaluate(async ({ benchmark, operations }) => {
-    const { createBenchmarkPlan } = (await import(benchmark)) as typeof import('@/features/viewer3d/benchmark.mock')
+  const blockedIndex = await page.evaluate(async ({ scene, operations }) => {
+    const { benchmarkScene } = (await import(scene)) as typeof import('@/test/scene')
     const { suggestedUnloadOrder, potentialBlockers } = (await import(operations)) as typeof import('@/features/viewer3d/operations/operations-model')
-    const plan = createBenchmarkPlan(1000), order = suggestedUnloadOrder(plan.placements)
+    const plan = benchmarkScene(1000), order = suggestedUnloadOrder(plan.placements)
     return order.findIndex((p, i) => p.stop === 2 && potentialBlockers(p, order.slice(i), plan.vehicle).length)
   }, SOURCE_MODULES)
   expect(blockedIndex).toBeGreaterThanOrEqual(0)
@@ -81,7 +81,8 @@ test('loading, unloading advisories, blockers and approval wording on 1,000 pack
   await button(page, 'Duyệt phương án').click()
   const approval = page.getByRole('dialog')
   expect(await approval.innerText()).toMatch(/Thứ tự xếp phù hợp thứ tự điểm giao/)
-  expect(await approval.innerText()).toMatch(/giới hạn phương án gốc/)
+  // LM-037: Duyệt không kiểm tải trục khi chưa có số liệu tin cậy (Spec 7.10).
+  expect(await approval.innerText()).not.toMatch(/Trục trước|Trục sau|tải trục/)
   expect(await approval.innerText()).not.toMatch(/LIFO hoàn toàn hợp lệ|Tuân thủ thứ tự dỡ/)
   await button(page, 'Huỷ').click()
   await attachScreenshot(page, testInfo, 'planner-unloading')

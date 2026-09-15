@@ -1,5 +1,6 @@
 import { LOAD_PLAN } from '@/lib/load-plan.mock'
 import { suggestedUnloadOrder } from '@/features/viewer3d/operations/operations-model'
+import { adaptLoadPlan } from '@/features/viewer3d/scene-input'
 
 /**
  * Điểm giao 2/4 của TRIP-2026-0914 nhìn từ phía tài xế.
@@ -49,20 +50,21 @@ const GOODS_BY_ORDER: Record<string, string[]> = {
   ],
 }
 
-function whereText(x: number, z: number, lengthMm: number): string {
-  const area = x + lengthMm > 5500 ? 'Gần cửa' : x < 1500 ? 'Sát vách trước' : 'Giữa xe'
-  const layer = z === 0 ? 'sàn' : z < 900 ? 'lớp dưới' : 'lớp trên'
+function whereText(xCm: number, zCm: number, lengthCm: number): string {
+  const area = xCm + lengthCm > 550 ? 'Gần cửa' : xCm < 150 ? 'Sát vách trước' : 'Giữa xe'
+  const layer = zCm === 0 ? 'sàn' : zCm < 90 ? 'lớp dưới' : 'lớp trên'
   return `${area}, ${layer}`
 }
 
-const items: DeliveryItem[] = suggestedUnloadOrder(LOAD_PLAN.placements.filter((p) => p.stop === STOP_NUMBER))
+const items: DeliveryItem[] = suggestedUnloadOrder(adaptLoadPlan(LOAD_PLAN).placements.filter((p) => p.stop === STOP_NUMBER))
   .map((p, index) => {
-    const goods = GOODS_BY_ORDER[p.orderId] ?? ['Hàng tổng hợp']
+    const goods = GOODS_BY_ORDER[p.packageId] ?? ['Hàng tổng hợp']
     return {
       id: p.id,
-      orderId: p.orderId,
+      // adaptLoadPlan giữ mã đơn cũ ở packageId.
+      orderId: p.packageId,
       description: goods[index % goods.length] ?? 'Hàng tổng hợp',
-      where: whereText(p.position.x, p.position.z, p.lengthMm),
+      where: whereText(p.position.x, p.position.z, p.lengthCm),
     }
   })
 

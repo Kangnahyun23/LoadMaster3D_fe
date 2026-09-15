@@ -1,9 +1,10 @@
-import type { Orientation, Placement, PositionMm } from '@/types/load-plan'
-import { orientDimensions, type ViewerSceneModel } from './viewer-scene-model'
+import type { OrientationCode } from '@/domain/geometry'
+import type { ScenePlacement, PositionCm } from '@/features/viewer3d/scene-input'
+import { orientedSize, type ViewerSceneModel } from '@/features/viewer3d/scene-input'
 
 export type PlacementPatch = {
-  readonly position?: PositionMm
-  readonly orientation?: Orientation
+  readonly position?: PositionCm
+  readonly orientation?: OrientationCode
   readonly pinned?: boolean
 }
 
@@ -14,15 +15,15 @@ export type ViewerDraft = {
 
 export type EffectiveViewerScene = {
   /** Array mới để giữ tương thích API panel/renderer; không sửa các phần tử. */
-  readonly placements: Placement[]
-  readonly placementById: ReadonlyMap<string, Placement>
+  readonly placements: ScenePlacement[]
+  readonly placementById: ReadonlyMap<string, ScenePlacement>
 }
 
 export function createViewerDraft(): ViewerDraft {
   return Object.freeze({ patches: new Map<string, PlacementPatch>() })
 }
 
-function samePosition(a: PositionMm | undefined, b: PositionMm | undefined): boolean {
+function samePosition(a: PositionCm | undefined, b: PositionCm | undefined): boolean {
   return a === b || Boolean(a && b && a.x === b.x && a.y === b.y && a.z === b.z)
 }
 
@@ -60,7 +61,7 @@ export function patchPlacement(
 
 /** Immutable snapshot + draft keyed by id = effective dimensions/positions. */
 export function resolveEffectiveScene(model: ViewerSceneModel, draft: ViewerDraft): EffectiveViewerScene {
-  const placementById = new Map<string, Placement>()
+  const placementById = new Map<string, ScenePlacement>()
   const placements = model.placements.map((source) => {
     const patch = draft.patches.get(source.id)
     const baseDimensions = model.baseDimensionsById.get(source.id)
@@ -71,7 +72,7 @@ export function resolveEffectiveScene(model: ViewerSceneModel, draft: ViewerDraf
     const orientation = patch.orientation ?? source.orientation
     const placement = Object.freeze({
       ...source,
-      ...orientDimensions(baseDimensions, orientation),
+      ...orientedSize(baseDimensions, orientation),
       orientation,
       position: patch.position ?? source.position,
       pinned: patch.pinned ?? source.pinned,

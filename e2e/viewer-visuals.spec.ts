@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 import type { InstancedMesh, Material, Mesh } from 'three'
 import { attachJson, attachScreenshot, expect, PLANNER_ROUTE, test } from './fixtures'
-import { cameraPreset, metrics, R3F_DEPS, sceneSnapshot, settle as settleFor, type R3FModule, type ViewerMetrics } from './viewer-helpers'
+import { cameraPreset, metrics, R3F_DEPS, sceneSnapshot, settle as settleFor, SOURCE_MODULES, type R3FModule, type ViewerMetrics } from './viewer-helpers'
 
 type AnimationSample = { y?: number; x?: number; visible?: boolean; opacity?: number }
 
@@ -18,8 +18,12 @@ test.beforeEach(async ({ context }) => {
 
 /** Bấm "Tiến một bước" qua DOM rồi ghi transform thật đã vẽ ở từng animation frame trong 850 ms. */
 function animationFrames(page: Page, kind: 'loading' | 'unloading'): Promise<AnimationSample[]> {
-  return page.evaluate(async ({ url, kind }) => {
+  return page.evaluate(async ({ url, scene, kind }) => {
     const { _roots } = (await import(url)) as R3FModule
+    // GPU slot = vị trí mã kiện trong danh sách mã đã sắp (instance-layout); kiện vào ở bước 2 của seed.
+    const { seedScene } = (await import(scene)) as typeof import('@/test/scene')
+    const placements = (await seedScene()).placements
+    const slot = placements.map((p) => p.id).sort().indexOf(placements.find((p) => p.step === 2)!.id)
     const state = _roots.get(document.querySelector('canvas')!)!.store.getState()
     const samples: AnimationSample[] = [], matrix = state.camera.matrixWorld.clone()
     document.querySelector<HTMLButtonElement>('button[aria-label="Tiến một bước"]')!.click()
@@ -27,7 +31,7 @@ function animationFrames(page: Page, kind: 'loading' | 'unloading'): Promise<Ani
     await new Promise<void>((resolve) => {
       const sample = () => {
         if (kind === 'loading') {
-          (state.scene.getObjectByName('cargo-opaque') as InstancedMesh).getMatrixAt(1, matrix)
+          (state.scene.getObjectByName('cargo-opaque') as InstancedMesh).getMatrixAt(slot, matrix)
           samples.push({ y: matrix.elements[13] })
         } else {
           const mesh = state.scene.getObjectByName('unloading-motion') as Mesh
@@ -38,7 +42,7 @@ function animationFrames(page: Page, kind: 'loading' | 'unloading'): Promise<Ani
       requestAnimationFrame(sample)
     })
     return samples
-  }, { url: R3F_DEPS, kind })
+  }, { url: R3F_DEPS, scene: SOURCE_MODULES.scene, kind })
 }
 
 const range = (values: number[]) => Math.max(...values) - Math.min(...values)

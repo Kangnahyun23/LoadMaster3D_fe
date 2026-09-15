@@ -1,10 +1,12 @@
 import { ChevronLeft, Pin } from 'lucide-react'
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
-import { formatDecimal, formatDimensions, formatInteger } from '@/lib/format'
+import { formatInteger } from '@/lib/format'
+import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
-import { describeWhere } from '@/lib/placement'
-import type { Placement, UnplacedPackage, VehicleSpec } from '@/types/load-plan'
+import { describeWhere } from './placement-relations'
+import type { ScenePlacement, SceneUnplaced } from '@/features/viewer3d/scene-input'
+import type { VehicleConfig } from '@/domain/models'
 import type { LeftTab } from '../useLoadPlanViewer'
 
 /**
@@ -24,10 +26,10 @@ export function PackageListPanel({
   selectedId,
   onSelect,
 }: {
-  unplaced: UnplacedPackage[]
-  pinned: Placement[]
-  placements: Placement[]
-  vehicle: VehicleSpec
+  unplaced: readonly SceneUnplaced[]
+  pinned: ScenePlacement[]
+  placements: ScenePlacement[]
+  vehicle: VehicleConfig
   open: boolean
   onToggle: () => void
   tab: LeftTab
@@ -35,6 +37,8 @@ export function PackageListPanel({
   selectedId: string | null
   onSelect: (id: string) => void
 }) {
+  const t = useT()
+  const format = useFormat()
   return (
     <aside
       aria-label="Danh sách kiện"
@@ -91,10 +95,9 @@ export function PackageListPanel({
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="font-mono text-body font-medium">{item.id}</span>
                   <span className="truncate font-mono text-caption text-text-3">
-                    {formatDimensions(item.lengthMm, item.widthMm, item.heightMm).replace(' mm', '')} ·{' '}
-                    {formatDecimal(item.weightKg)} kg
+                    {format.dimensions(item.lengthCm, item.widthCm, item.heightCm)} · {format.weight(item.weightKg)}
                   </span>
-                  <span className="text-caption text-badge-warning-fg">{item.reason}</span>
+                  <span className="text-caption text-badge-warning-fg">{item.reasonText ?? t(`viewer.unplacedReasons.${item.reasonCode ?? 'UNKNOWN'}`)}</span>
                 </div>
               </div>
             ))}
@@ -125,8 +128,7 @@ export function PackageListPanel({
                       <Pin className="size-3.5 fill-warning text-warning" strokeWidth={1.5} aria-label="Đã ghim" />
                     </span>
                     <span className="font-mono text-caption text-text-3">
-                      {formatDimensions(item.lengthMm, item.widthMm, item.heightMm).replace(' mm', '')} ·{' '}
-                      {formatDecimal(item.weightKg)} kg
+                      {format.dimensions(item.lengthCm, item.widthCm, item.heightCm)} · {format.weight(item.weightKg)}
                     </span>
                     <span className="text-caption text-text-2">
                       {describeWhere(item, placements, vehicle)}

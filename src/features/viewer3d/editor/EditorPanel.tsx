@@ -2,7 +2,7 @@ import { useState, useSyncExternalStore } from 'react'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/Dialog'
-import { formatInteger } from '@/lib/format'
+import { useFormat } from '@/lib/i18n'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import { EditorControls } from './EditorControls'
 import type { ManualEditor } from './useManualEditor'
@@ -10,6 +10,7 @@ import type { ManualEditor } from './useManualEditor'
 export function EditorPanel({ state, editor }: { state: LoadPlanViewerState; editor: ManualEditor }) {
   const preview = useSyncExternalStore(editor.preview.subscribe, editor.preview.getSnapshot, editor.preview.getSnapshot)
   const [resetOpen, setResetOpen] = useState(false)
+  const format = useFormat()
   const p = state.selected
   const active = preview?.id === p?.id ? preview : null
   const result = active?.result ?? editor.validation
@@ -33,7 +34,7 @@ export function EditorPanel({ state, editor }: { state: LoadPlanViewerState; edi
         </div>
         {active?.message ? <p className="mt-1">{active.message}</p> : null}
         {[...result.errors, ...result.advisories].map((reason) => <p key={reason} className="mt-1">{reason}</p>)}
-        {position ? <p className="mt-2 font-mono">X {formatInteger(position.x)} · Y {formatInteger(position.y)} · Z {formatInteger(position.z)} mm</p> : null}
+        {position ? <p className="mt-2 font-mono">X {format.length(position.x)} · Y {format.length(position.y)} · Z {format.length(position.z)}</p> : null}
         {active?.sources.length ? <p className="mt-1">{active.sources.join(' · ')}</p> : null}
       </div>
     </> : <p className="mb-4">Chọn kiện trong scene hoặc danh sách “Chọn kiện” để chỉnh sửa.</p>}

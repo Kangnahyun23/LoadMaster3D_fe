@@ -2,7 +2,7 @@ import { easings, useSpring } from '@react-spring/three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useLayoutEffect, useRef, type RefObject } from 'react'
 import { DynamicDrawUsage, type InstancedMesh } from 'three'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import type { AnimationQuality } from '../usePerformanceFlags'
 import { cargoBounds, DROP_HEIGHT, HULL_PADDING, writeCargoMatrix } from './cargo-buffers'
 import { cargoVisibility, sameGeometry, type InstanceLayout } from './instance-layout'
@@ -13,19 +13,19 @@ export type CargoMeshes = {
   dim: RefObject<InstancedMesh | null>
   hull: RefObject<InstancedMesh | null>
 }
-type CachedSlot = { placement: Placement; visibility: ReturnType<typeof cargoVisibility>; hullVisible: boolean }
+type CachedSlot = { placement: ScenePlacement; visibility: ReturnType<typeof cargoVisibility>; hullVisible: boolean }
 const DROP_DURATION_MS = 500
 const REDUCED_DROP_HEIGHT = 0.16
 
 /** Keep high frequency spring writes outside React. Only changed GPU slots upload. */
 export function useCargoMatrices({
-  meshes, layout, placements, step, sliceMm, outlines, reducedMotion, animationQuality, hiddenId, semantics,
+  meshes, layout, placements, step, sliceCm, outlines, reducedMotion, animationQuality, hiddenId, semantics,
 }: {
   meshes: CargoMeshes
   layout: InstanceLayout
-  placements: readonly Placement[]
+  placements: readonly ScenePlacement[]
   step: number
-  sliceMm: number
+  sliceCm: number
   outlines: boolean
   reducedMotion: boolean
   animationQuality: AnimationQuality
@@ -55,9 +55,9 @@ export function useCargoMatrices({
     const nextCache = layout.instanceToPlacementId.map((id, index): CachedSlot => {
       const placement = layout.placementById.get(id)!
       const semantic = semantics?.appearanceById.get(id)
-      let visibility = semantic?.visibility ?? cargoVisibility(placement, step, sliceMm)
+      let visibility = semantic?.visibility ?? cargoVisibility(placement, step, sliceCm)
       if (id === hiddenId) visibility = 'hidden'
-      else if (visibility === 'opaque' && placement.position.x + placement.lengthMm > sliceMm) visibility = 'dim'
+      else if (visibility === 'opaque' && placement.position.x + placement.lengthCm > sliceCm) visibility = 'dim'
       const hullVisible = visibility === 'opaque' && (outlines || semantic?.tone === 'blocker')
       const before = cache.current[index]
       const geometryDiffers = before?.placement.id !== id || !sameGeometry(before?.placement, placement)
@@ -88,7 +88,7 @@ export function useCargoMatrices({
         const height = animationQuality === 'full' ? DROP_HEIGHT : REDUCED_DROP_HEIGHT
         animation.current = { id: placement.id, height }
         const index = layout.placementIdToInstance.get(placement.id)!
-        const beyond = cargoVisibility(placement, step, sliceMm) === 'dim'
+        const beyond = cargoVisibility(placement, step, sliceCm) === 'dim'
         writeCargoMatrix(beyond ? dim : opaque, index, placement, true, height)
         if (hull && !beyond && outlines) writeCargoMatrix(hull, index, placement, true, height, HULL_PADDING)
         invalidate()
@@ -100,7 +100,7 @@ export function useCargoMatrices({
     }
     previousStep.current = step
     invalidate()
-  }, [meshes, layout, placements, step, sliceMm, outlines, reducedMotion, animationQuality, hiddenId, semantics, api, invalidate])
+  }, [meshes, layout, placements, step, sliceCm, outlines, reducedMotion, animationQuality, hiddenId, semantics, api, invalidate])
 
   useFrame(() => {
     const active = animation.current
@@ -115,7 +115,7 @@ export function useCargoMatrices({
     }
     const t = spring.t.get()
     const offset = (1 - t) * active.height
-    const beyond = cargoVisibility(placement, step, sliceMm) === 'dim'
+    const beyond = cargoVisibility(placement, step, sliceCm) === 'dim'
     writeCargoMatrix(beyond ? dim : opaque, index, placement, true, offset)
     if (meshes.hull.current && !beyond && outlines) {
       writeCargoMatrix(meshes.hull.current, index, placement, true, offset, HULL_PADDING)

@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { Placement, PlaybackSpeed, VehicleSpec } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { PlaybackSpeed } from '@/types/load-plan'
+import type { VehicleConfig } from '@/domain/models'
 import { suggestedUnloadOrder, potentialBlockers } from './operations-model'
 
-export function useUnloadPlayback(placements: readonly Placement[], speed: PlaybackSpeed = 2, vehicle?: VehicleSpec, context: readonly Placement[] = placements) {
+export function useUnloadPlayback(placements: readonly ScenePlacement[], speed: PlaybackSpeed = 2, vehicle?: VehicleConfig, context: readonly ScenePlacement[] = placements) {
   const ordered = useMemo(() => suggestedUnloadOrder(placements), [placements])
   const [session, setSession] = useState({ source: placements, cursor: 0, playing: false, warning: 0 })
   // Geometry/order changes start a fresh simulation; history stays in ViewerDraft.

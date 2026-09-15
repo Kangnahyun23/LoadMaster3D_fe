@@ -2,19 +2,20 @@ import { Line } from '@react-three/drei'
 import { animated, useSpring } from '@react-spring/three'
 import { useThree } from '@react-three/fiber'
 import { useMemo } from 'react'
-import type { Placement, VehicleSpec } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { VehicleConfig } from '@/domain/models'
 import { readToken } from '@/lib/tokens'
-import { boxCenter, MM, type Vec3 } from '../scene/units'
+import { boxCenter, SCENE_SCALE, type Vec3 } from '../scene/units'
 import { SceneCallout } from '../scene/SceneCallout'
 
 /** Straight extraction is an advisory corridor, not a physically proven route. */
 export function ExtractionCorridor({ target, vehicle, blockers, reducedMotion }: {
-  target: Placement; vehicle: VehicleSpec; blockers: readonly Placement[]; reducedMotion: boolean
+  target: ScenePlacement; vehicle: VehicleConfig; blockers: readonly ScenePlacement[]; reducedMotion: boolean
 }) {
   const invalidate = useThree((s) => s.invalidate)
   const spring = useSpring({ from: { opacity: 0.05 }, opacity: 0.22, config: { duration: reducedMotion ? 100 : 180 }, onChange: () => invalidate() })
-  const start = (target.position.x + target.lengthMm) * MM, end = vehicle.innerLengthMm * MM + 0.6
-  const y = target.position.z * MM + 0.008, z = (target.position.y + target.widthMm / 2) * MM
+  const start = (target.position.x + target.lengthCm) * SCENE_SCALE, end = vehicle.innerLengthCm * SCENE_SCALE + 0.6
+  const y = target.position.z * SCENE_SCALE + 0.008, z = (target.position.y + target.widthCm / 2) * SCENE_SCALE
   const color = readToken(blockers.length ? '--warning' : '--success')
   const points = useMemo(() => {
     const points: Vec3[] = [[start, y, z], [end, y, z]]
@@ -26,15 +27,15 @@ export function ExtractionCorridor({ target, vehicle, blockers, reducedMotion }:
     // Two relationship lines at most; all blocker IDs remain available in the panel.
     for (const blocker of blockers.slice(0, 2)) {
       const from = boxCenter(target), to = boxCenter(blocker)
-      from[1] += target.heightMm * MM / 2 + 0.02
-      to[1] += blocker.heightMm * MM / 2 + 0.02
+      from[1] += target.heightCm * SCENE_SCALE / 2 + 0.02
+      to[1] += blocker.heightCm * SCENE_SCALE / 2 + 0.02
       points.push(from, to)
     }
     return points
   }, [start, end, y, z, target, blockers])
   return <group name="extraction-corridor">
     <mesh position={[(start + end) / 2, y, z]} rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
-      <planeGeometry args={[Math.max(0.001, end - start), target.widthMm * MM]} />
+      <planeGeometry args={[Math.max(0.001, end - start), target.widthCm * SCENE_SCALE]} />
       <animated.meshBasicMaterial color={color} transparent opacity={spring.opacity} depthWrite={false} />
     </mesh>
     <Line points={points} segments color={color} lineWidth={2} raycast={() => null} />

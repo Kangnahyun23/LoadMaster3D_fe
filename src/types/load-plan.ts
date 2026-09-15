@@ -58,11 +58,6 @@ export type UnplacedPackage = {
   reason: string
 }
 
-export type AxleLoad = {
-  loadKg: number
-  capacityKg: number
-}
-
 export type VehicleSpec = {
   name: string
   plate: string
@@ -70,8 +65,6 @@ export type VehicleSpec = {
   innerWidthMm: number
   innerHeightMm: number
   payloadKg: number
-  frontAxle: AxleLoad
-  rearAxle: AxleLoad
 }
 
 export type PlanStop = {
@@ -92,6 +85,6 @@ export type LoadPlan = {
 
 export type CameraPreset = 'truoc' | 'cua-sau' | 'ben-hong' | 'tren' | 'goc-cheo'
 
-export type ColorMode = 'diem-giao' | 'don-hang' | 'khoi-luong'
+export type ColorMode = 'diem-giao' | 'kien-goc' | 'khoi-luong'
 
 export type PlaybackSpeed = 1 | 2 | 4

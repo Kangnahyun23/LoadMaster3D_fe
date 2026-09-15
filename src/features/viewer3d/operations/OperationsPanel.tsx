@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Button } from '@/components/ui/Button'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import { AxleLoadPanel } from '../overlays/AxleLoadPanel'
 import { stopOrderConsistent } from './operations-model'
@@ -8,7 +8,7 @@ import { BlockerPanel } from './BlockerPanel'
 import type { OperationsState } from './useOperations'
 
 export function OperationsPanel({ state, operations, onSelect }: {
-  state: LoadPlanViewerState; operations: OperationsState; onSelect: (p: Placement) => void
+  state: LoadPlanViewerState; operations: OperationsState; onSelect: (p: ScenePlacement) => void
 }) {
   const { current, next, focusStop, semantics } = operations
   const stop = state.sceneModel.stops.find((p) => p.number === focusStop)
@@ -39,6 +39,6 @@ export function OperationsPanel({ state, operations, onSelect }: {
       className="h-14 text-body-lg xl:h-11 xl:text-body">{operations.inspectBlockers ? 'Ẩn' : 'Xem'} kiện có thể cản đường</Button>
     {operations.inspectBlockers ? <BlockerPanel target={target} blockers={semantics.blockers} onSelect={onSelect} /> : null}
     {operations.kind === 'unloading' ? <p className="text-text-2">Mũi tên về cửa biểu diễn hành lang dỡ thẳng. Cảnh báo chỉ mang tính hỗ trợ; mô phỏng tạm dừng để xem kiện có khả năng cản đường.</p> : null}
-    <AxleLoadPanel front={state.sceneModel.vehicle.frontAxle} rear={state.sceneModel.vehicle.rearAxle} />
+    <AxleLoadPanel axles={state.sceneModel.vehicle.axles} />
   </div>
 }

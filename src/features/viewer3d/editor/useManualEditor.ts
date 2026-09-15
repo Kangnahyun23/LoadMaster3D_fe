@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { Orientation, Placement, PositionMm } from '@/types/load-plan'
+import { nextOrientation, type OrientationCode } from '@/domain/geometry'
+import type { ScenePlacement, PositionCm } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
-import { orientDimensions } from '../viewer-scene-model'
-import { integerPosition, validatePlacement, type Axis } from './geometry'
+import { orientedSize } from '@/features/viewer3d/scene-input'
+import { roundPosition, validatePlacement, type Axis } from './geometry'
 import { createPreviewStore } from './preview-store'
 import { snapPosition } from './snapping'
 
@@ -12,9 +13,9 @@ export const PLANE_AXES: Record<DragPlane, readonly Axis[]> = { xy: ['x', 'y'], 
 export function useManualEditor(state: LoadPlanViewerState) {
   const [mode, setModeState] = useState<'view' | 'edit'>('view')
   const [plane, setPlane] = useState<DragPlane>('xy')
-  const [nudgeMm, setNudgeMm] = useState(10)
+  const [nudgeCm, setNudgeCm] = useState(1)
   const [snapping, setSnapping] = useState(true)
-  const [focus, setFocus] = useState<{ placement: Placement; request: number; follow?: boolean } | null>(null)
+  const [focus, setFocus] = useState<{ placement: ScenePlacement; request: number; follow?: boolean } | null>(null)
   const preview = useMemo(() => createPreviewStore(), [])
   const { selected, placements, sceneModel, draft } = state
   const patch = selected ? draft.patches.get(selected.id) : undefined
@@ -28,26 +29,26 @@ export function useManualEditor(state: LoadPlanViewerState) {
     preview.publish(null, true)
     setModeState(next)
   }
-  const inspect = useCallback((p: Placement) => {
+  const inspect = useCallback((p: ScenePlacement) => {
     const source = sceneModel.placementById.get(p.id)!
     const changed = p.orientation !== source.orientation ||
       p.position.x !== source.position.x || p.position.y !== source.position.y || p.position.z !== source.position.z
     return validatePlacement(p, placements, sceneModel.vehicle, changed)
   }, [placements, sceneModel])
 
-  const commitMove = (id: string, position: PositionMm) => {
+  const commitMove = (id: string, position: PositionCm) => {
     const p = placements.find((item) => item.id === id)
     if (!p || p.pinned || mode !== 'edit') return false
-    const candidate = { ...p, position: integerPosition(position) }
+    const candidate = { ...p, position: roundPosition(position) }
     const result = inspect(candidate)
     preview.publish({ id, position: candidate.position, result, sources: [], dragging: false,
       message: result.valid ? 'Đã đặt kiện' : 'Không thể đặt — đã giữ vị trí trước đó' }, true)
     if (result.valid) state.commitDraft('MOVE', id, { position: candidate.position })
     return result.valid
   }
-  const rotate = (orientation: Orientation) => {
+  const rotate = (orientation: OrientationCode) => {
     if (!selected || selected.pinned || preview.getLatest()?.dragging) return
-    const candidate = { ...selected, ...orientDimensions(sceneModel.baseDimensionsById.get(selected.id)!, orientation), orientation }
+    const candidate = { ...selected, ...orientedSize(sceneModel.baseDimensionsById.get(selected.id)!, orientation), orientation }
     const result = inspect(candidate)
     preview.publish({ id: selected.id, position: selected.position, result, sources: [], dragging: false,
       message: result.valid ? 'Đã đổi hướng đặt' : 'Không thể xoay — đã giữ hướng trước đó' }, true)
@@ -55,7 +56,7 @@ export function useManualEditor(state: LoadPlanViewerState) {
   }
   const nudge = (axis: Axis, direction: number) => {
     if (!selected || preview.getLatest()?.dragging) return
-    commitMove(selected.id, { ...selected.position, [axis]: selected.position[axis] + direction * nudgeMm })
+    commitMove(selected.id, { ...selected.position, [axis]: selected.position[axis] + direction * nudgeCm })
   }
   const snap = () => {
     if (!selected || preview.getLatest()?.dragging) return
@@ -64,10 +65,10 @@ export function useManualEditor(state: LoadPlanViewerState) {
   const focusSelected = () => {
     if (selected && !preview.getLatest()?.dragging) setFocus((current) => ({ placement: selected, request: (current?.request ?? 0) + 1 }))
   }
-  const focusPlacement = useCallback((placement: Placement) => {
+  const focusPlacement = useCallback((placement: ScenePlacement) => {
     if (!preview.getLatest()?.dragging) setFocus((current) => ({ placement, request: (current?.request ?? 0) + 1 }))
   }, [preview])
-  const followPlacement = useCallback((placement: Placement) => {
+  const followPlacement = useCallback((placement: ScenePlacement) => {
     if (!preview.getLatest()?.dragging) setFocus((current) => ({ placement, request: (current?.request ?? 0) + 1, follow: true }))
   }, [preview])
   const undo = () => { if (!preview.getLatest()?.dragging) { preview.publish(null, true); state.undo() } }
@@ -103,7 +104,7 @@ export function useManualEditor(state: LoadPlanViewerState) {
         const move = movement[event.key]
         if (move) { event.preventDefault(); nudge(...move) }
         if (event.key.toLowerCase() === 'r' && selected) {
-          event.preventDefault(); rotate(((selected.orientation + 1) % 3) as Orientation)
+          event.preventDefault(); rotate(nextOrientation({ ...sceneModel.baseDimensionsById.get(selected.id)!, ...sceneModel.orientationRulesById.get(selected.id)! }, selected.orientation))
         }
       }
     }
@@ -112,7 +113,7 @@ export function useManualEditor(state: LoadPlanViewerState) {
   })
 
   return {
-    mode, setMode, plane, setPlane, nudgeMm, setNudgeMm, snapping, setSnapping, preview,
+    mode, setMode, plane, setPlane, nudgeCm, setNudgeCm, snapping, setSnapping, preview,
     focus, resetFocus: () => setFocus(null), focusSelected, focusPlacement, followPlacement, inspect, commitMove, rotate, nudge, snap, undo, redo, resetPlacement, resetDraft,
     togglePin, validation, manual,
   }

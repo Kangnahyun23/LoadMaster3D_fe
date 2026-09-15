@@ -3,9 +3,10 @@ import { useThree, type ThreeEvent } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useRef, type ComponentRef } from 'react'
 import { Plane, Raycaster, Vector2, Vector3, type Group, type MeshStandardMaterial } from 'three'
 import { readToken } from '@/lib/tokens'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
-import { boxCenter, boxSize, MM } from '../scene/units'
+import { roundCm } from '@/domain/geometry'
+import { boxCenter, boxSize, fromScene, toScene } from '../scene/units'
 import { snapPosition } from './snapping'
 import { PLANE_AXES, type ManualEditor } from './useManualEditor'
 import type { GeometryResult } from './geometry'
@@ -14,7 +15,7 @@ import { EditorSpatialFeedback } from './EditorSpatialFeedback'
 
 /** Exactly one proxy. Native captured gestures bypass instance raycasts after picking. */
 export function EditorProxy({ placement, state, editor }: {
-  placement: Placement; state: LoadPlanViewerState; editor: ManualEditor
+  placement: ScenePlacement; state: LoadPlanViewerState; editor: ManualEditor
 }) {
   const group = useRef<Group>(null)
   const material = useRef<MeshStandardMaterial>(null)
@@ -72,9 +73,9 @@ export function EditorProxy({ placement, state, editor }: {
       raycaster.setFromCamera(pointer, camera)
       if (!raycaster.ray.intersectPlane(plane, hit)) return
       const requested = {
-        x: Math.round(placement.position.x + (hit.x - initialHit.x) / MM),
-        y: Math.round(placement.position.y + (hit.z - initialHit.z) / MM),
-        z: Math.round(placement.position.z + (hit.y - initialHit.y) / MM),
+        x: roundCm(placement.position.x + fromScene(hit.x - initialHit.x)),
+        y: roundCm(placement.position.y + fromScene(hit.z - initialHit.z)),
+        z: roundCm(placement.position.z + fromScene(hit.y - initialHit.y)),
       }
       const snapped = editor.snapping ? snapPosition(placement, requested, state.placements, state.sceneModel.vehicle, PLANE_AXES[editor.plane])
         : { position: requested, sources: [], targets: [] }
@@ -139,7 +140,7 @@ export function EditorProxy({ placement, state, editor }: {
         <meshStandardMaterial ref={material} transparent opacity={0.85} roughness={0.8} />
         <Edges color={readToken('--bg')} raycast={() => null} />
       </mesh>
-      <Html position={[0, placement.heightMm * MM / 2, 0]} zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
+      <Html position={[0, toScene(placement.heightCm) / 2, 0]} zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
         <span className="block -translate-x-1/2 -translate-y-full rounded-sm bg-bg px-2 py-1 font-mono text-body whitespace-nowrap text-text">
           {placement.id} · Điểm {placement.stop}
         </span>

@@ -2,8 +2,10 @@ import { CameraControls } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import { PerspectiveCamera, Vector3 } from 'three'
 import { useEffect, useRef, type ComponentRef } from 'react'
-import type { CameraPreset, Placement, VehicleSpec } from '@/types/load-plan'
-import { boxCenter, containerCenter, type Vec3 } from './units'
+import type { CameraPreset } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { VehicleConfig } from '@/domain/models'
+import { boxCenter, containerCenter, SCENE_SCALE, type Vec3 } from './units'
 
 /**
  * Điều khiển camera bằng camera-controls (qua drei). Gốc thế giới là tâm
@@ -34,14 +36,14 @@ export function CameraRig({
 }: {
   preset: CameraPreset
   reducedMotion: boolean
-  focus?: { placement: Placement; request: number; follow?: boolean } | null
-  vehicle?: VehicleSpec
+  focus?: { placement: ScenePlacement; request: number; follow?: boolean } | null
+  vehicle?: VehicleConfig
   fit?: boolean
   vehicleDecoration?: boolean
   onUserControl?: () => void
 }) {
   const controlsRef = useRef<ComponentRef<typeof CameraControls>>(null)
-  const applied = useRef<{ preset: CameraPreset; vehicle?: VehicleSpec } | null>(null)
+  const applied = useRef<{ preset: CameraPreset; vehicle?: VehicleConfig } | null>(null)
   const size = useThree((state) => state.size)
   const camera = useThree((state) => state.camera)
   const beforeFocus = useRef<{ position: Vector3; target: Vector3 } | null>(null)
@@ -96,7 +98,7 @@ export function CameraRig({
     if (!beforeFocus.current) beforeFocus.current = { position: controls.getPosition(new Vector3()), target: controls.getTarget(new Vector3()) }
     // Keep orientation, with a contextual dolly rather than fitToBox's automatic rotation.
     void controls.moveTo(...target, !reducedMotion)
-    const diagonal = Math.hypot(focus.placement.lengthMm, focus.placement.widthMm, focus.placement.heightMm) / 1000
+    const diagonal = Math.hypot(focus.placement.lengthCm, focus.placement.widthCm, focus.placement.heightCm) * SCENE_SCALE
     void controls.dollyTo(focus.follow ? Math.max(6, diagonal * 3) : Math.max(3, Math.min(6, diagonal * 3)), !reducedMotion)
   }, [focus, vehicle, reducedMotion])
 

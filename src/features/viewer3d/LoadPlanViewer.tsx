@@ -17,7 +17,7 @@ export function LoadPlanViewer({ state, flags, editor, operations, onPerfSample 
     preset={state.cameraPreset} focus={editor.focus} selectedId={state.selectedId} onSelect={state.select}
     onUserControl={operations.pauseFollow} onFocus={(p) => { operations.pauseFollow(); editor.focusPlacement(p) }}
     warningSignal={operations.unload.warning}
-    colorMode={state.colorMode} sliceMm={editing ? state.sceneModel.vehicle.innerLengthMm : state.sliceMm}
+    colorMode={state.colorMode} sliceCm={editing ? state.sceneModel.vehicle.innerLengthCm : state.sliceCm}
     step={editing ? state.totalSteps : state.step} semantics={editing ? undefined : operations.semantics}
     hiddenId={editing ? state.selectedId : null} animateLoading={!editing && operations.kind === 'loading' && operations.focusStop === null}
     showMass={operations.showMass} showDistribution={operations.showDistribution} onPerfSample={onPerfSample}

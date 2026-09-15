@@ -2,20 +2,22 @@ import { useMemo } from 'react'
 import { Focus, Pencil, Settings2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { formatInteger } from '@/lib/format'
+import { useFormat } from '@/lib/i18n'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import type { OperationsState } from './useOperations'
 import { cargoCenterOfMass } from './operations-model'
 import type { InspectorTab } from '../panels/WorkspaceToolbar'
-import type { Placement } from '@/types/load-plan'
+import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 
 /** Context at screen edges; spatial facts stay on the selected/current objects. */
 export function SceneHud({ state, operations, onInspect, onFocus, onEdit, onResetFocus }: {
   state: LoadPlanViewerState; operations: OperationsState; onInspect: (tab: InspectorTab) => void
-  onFocus: (p?: Placement) => void; onEdit: () => void; onResetFocus?: () => void
+  onFocus: (p?: ScenePlacement) => void; onEdit: () => void; onResetFocus?: () => void
 }) {
   const p = operations.current, stopNumber = operations.focusStop ?? p?.stop
   const stop = state.sceneModel.stops.find((s) => s.number === stopNumber)
   const count = state.placements.filter((p) => p.stop === stopNumber).length
+  const format = useFormat()
   const mass = useMemo(() => operations.showMass ? cargoCenterOfMass(operations.semantics.massPlacements) : null, [operations.showMass, operations.semantics.massPlacements])
   return <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-3 xl:p-5">
     <div className="flex items-start justify-between gap-3">
@@ -38,8 +40,8 @@ export function SceneHud({ state, operations, onInspect, onFocus, onEdit, onRese
       </div>
       {mass ? <div className="max-w-60 rounded-md border border-border-dark bg-panel-dark p-3 text-body text-bg" data-mass-hud>
         <p className="font-medium">Tâm khối lượng hàng</p>
-        <p className="font-mono">X {formatInteger(mass.position.x)} · Y {formatInteger(mass.position.y)} · Z {formatInteger(mass.position.z)} mm</p>
-        <p>Lệch ngang {formatInteger(Math.abs(mass.position.y - state.sceneModel.vehicle.innerWidthMm / 2))} mm</p>
+        <p className="font-mono">X {format.length(mass.position.x)} · Y {format.length(mass.position.y)} · Z {format.length(mass.position.z)}</p>
+        <p>Lệch ngang {format.length(Math.abs(mass.position.y - state.sceneModel.vehicle.innerWidthCm / 2))}</p>
       </div> : null}
     </div>
     <div className="flex items-end justify-between gap-2">

@@ -1,9 +1,9 @@
 import { Focus, Pin, PinOff, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { ORIENTATION_LABELS } from '@/types/load-plan'
+import { effectiveOrientations } from '@/domain/geometry'
 import { formatInteger } from '@/lib/format'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
-import { AXES } from './geometry'
+import { AXES, EDITOR_NUDGE_STEPS_CM } from './geometry'
 import type { DragPlane, ManualEditor } from './useManualEditor'
 
 const controlClass = 'h-14 px-2 text-body-lg xl:h-11 xl:text-body'
@@ -22,9 +22,9 @@ export function EditorControls({ state, editor }: { state: LoadPlanViewerState; 
       <div>
         <span className="mb-2 block">Dịch chuyển theo trục</span>
         <div className="grid grid-cols-3 gap-2" role="group" aria-label="Bước dịch chuyển">
-          {[10, 50, 100].map((mm) => <Button key={mm} variant="secondary" className={controlClass}
-            aria-pressed={editor.nudgeMm === mm} onClick={() => editor.setNudgeMm(mm)}
-            style={editor.nudgeMm === mm ? { borderColor: 'var(--primary)', background: 'var(--primary-bg)' } : undefined}>{formatInteger(mm)} mm</Button>)}
+          {EDITOR_NUDGE_STEPS_CM.map((cm) => <Button key={cm} variant="secondary" className={controlClass}
+            aria-pressed={editor.nudgeCm === cm} onClick={() => editor.setNudgeCm(cm)}
+            style={editor.nudgeCm === cm ? { borderColor: 'var(--primary)', background: 'var(--primary-bg)' } : undefined}>{formatInteger(cm)} cm</Button>)}
         </div>
         <div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label="Dịch chuyển kiện">
           {AXES.map((axis) => <div key={axis} className="flex flex-col gap-2">
@@ -32,12 +32,12 @@ export function EditorControls({ state, editor }: { state: LoadPlanViewerState; 
             <Button variant="secondary" className={controlClass} onClick={() => editor.nudge(axis, 1)} aria-label={`Tăng ${axis.toUpperCase()}`}>{axis.toUpperCase()} +</Button>
           </div>)}
         </div>
-        <p className="mt-2 text-text-2">X: dọc thùng · Y: ngang thùng · Z: chiều cao. Nút dịch chuyển đi đúng bước mm, không tự hút.</p>
+        <p className="mt-2 text-text-2">X: dọc thùng · Y: ngang thùng · Z: chiều cao. Nút dịch chuyển đi đúng bước cm, không tự hút.</p>
       </div>
       <div role="group" aria-label="Hướng xoay" className="grid grid-cols-3 gap-2">
-        {([0, 1, 2] as const).map((orientation) => <Button key={orientation} variant="secondary" className={controlClass}
+        {effectiveOrientations(state.sceneModel.orientationRulesById.get(p.id) ?? { allowedOrientations: [p.orientation], keepUpright: false }).map((orientation) => <Button key={orientation} variant="secondary" className={controlClass}
           aria-pressed={p.orientation === orientation} onClick={() => editor.rotate(orientation)}
-          style={p.orientation === orientation ? { borderColor: 'var(--primary)', background: 'var(--primary-bg)' } : undefined}>{ORIENTATION_LABELS[orientation]}</Button>)}
+          style={p.orientation === orientation ? { borderColor: 'var(--primary)', background: 'var(--primary-bg)' } : undefined}><span className="font-mono">{orientation}</span></Button>)}
       </div>
       <label className="flex flex-col gap-2">Mặt phẳng kéo
         <select value={editor.plane} onChange={(e) => editor.setPlane(e.target.value as DragPlane)}

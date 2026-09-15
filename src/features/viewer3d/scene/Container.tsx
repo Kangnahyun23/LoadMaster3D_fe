@@ -1,6 +1,6 @@
 import { Line } from '@react-three/drei'
 import { DoubleSide } from 'three'
-import type { VehicleSpec } from '@/types/load-plan'
+import type { VehicleConfig } from '@/domain/models'
 import type { SceneMaterials } from './materials'
 import { containerSize, type Vec3 } from './units'
 import { ContainerDoor, FloorScale } from './ContainerDetails'
@@ -20,7 +20,7 @@ export function Container({
   detail = true,
   reducedMotion = false,
 }: {
-  vehicle: VehicleSpec
+  vehicle: VehicleConfig
   materials: SceneMaterials
   detail?: boolean
   reducedMotion?: boolean
