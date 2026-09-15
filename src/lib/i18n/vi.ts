@@ -76,10 +76,12 @@ export const vi = {
    * số có đơn vị đã được format theo ngôn ngữ trước khi điền vào.
    */
   issues: {
+    /** Chủ thể đứng đầu câu: kiện đã xếp, hoặc dòng vật cản trong form xe. */
+    subject: { placement: 'Kiện {id}', obstacle: 'Vật cản {id}' },
     DIMENSION_NOT_POSITIVE: {
-      vehicle: '{field} phải lớn hơn 0 cm.',
-      obstacle: '{field} của vật cản {obstacleId} phải lớn hơn 0 cm.',
-      package: '{field} của kiện {packageId} phải lớn hơn 0 cm.',
+      vehicle: '{field} phải lớn hơn {zero}.',
+      obstacle: '{field} của vật cản {obstacleId} phải lớn hơn {zero}.',
+      package: '{field} của kiện {packageId} phải lớn hơn {zero}.',
     },
     DOOR_EXCEEDS_INNER: {
       y: 'Chiều rộng cửa {doorCm} không được lớn hơn chiều rộng lòng thùng {innerCm}.',
@@ -91,16 +93,16 @@ export const vi = {
     DOOR_TOO_SMALL: 'Kiện {packageId} không lọt qua cửa {door}.',
     EXCEEDS_BOUNDARY: {
       x: {
-        beforeOrigin: 'Kiện {id} lấn qua vách đầu thùng {overCm}.',
-        beyondInterior: 'Kiện {id} vượt chiều dài thùng {overCm}.',
+        beforeOrigin: '{subject} lấn qua vách đầu thùng {overCm}.',
+        beyondInterior: '{subject} vượt chiều dài thùng {overCm}.',
       },
       y: {
-        beforeOrigin: 'Kiện {id} lấn qua vách trái {overCm}.',
-        beyondInterior: 'Kiện {id} vượt chiều rộng thùng {overCm}.',
+        beforeOrigin: '{subject} lấn qua vách trái {overCm}.',
+        beyondInterior: '{subject} vượt chiều rộng thùng {overCm}.',
       },
       z: {
-        beforeOrigin: 'Kiện {id} thấp hơn sàn thùng {overCm}.',
-        beyondInterior: 'Kiện {id} vượt chiều cao thùng {overCm}.',
+        beforeOrigin: '{subject} thấp hơn sàn thùng {overCm}.',
+        beyondInterior: '{subject} vượt chiều cao thùng {overCm}.',
       },
     },
     OVERLAP: '{id} chồng lấn {related}.',
@@ -124,6 +126,7 @@ export const vi = {
     innerLengthCm: 'Chiều dài lòng thùng',
     innerWidthCm: 'Chiều rộng lòng thùng',
     innerHeightCm: 'Chiều cao lòng thùng',
+    maxPayloadKg: 'Tải trọng tối đa',
     doorWidthCm: 'Chiều rộng cửa',
     doorHeightCm: 'Chiều cao cửa',
     lengthCm: 'Chiều dài',

@@ -77,6 +77,12 @@ Validation summary ở Thiết lập tối ưu (Spec 9.4) gom lỗi của xe và
 
 **Kiểm tra:** `pnpm lint` ✅ (0 chẩn đoán, 259 file) · `pnpm test` ✅ 200/200 (167 cũ + 33 mới) · `pnpm build` ✅.
 
+**Gộp vào `feat/spec-mvp` (15/09/2026):** cherry-pick → `dfe2d5f`, xung đột duy nhất ở barrel `constraints/index.ts` (gộp export với LM-018).
+Đổi tên hàm nội bộ `obstacleIssues(vehicle)` của `vehicle-obstacles.ts` thành `vehicleObstacleIssues` vì trùng tên hàm công khai
+`obstacleIssues(placement, vehicle)` của LM-018. Mục LM-028 bên dưới đã làm ngay khi gộp: `formatIssue` lấy nhãn và đơn vị theo đoạn cuối
+của `field`, chủ ngữ dòng vật cản từ `relatedIds[0]`; test mới chạy `validateVehicle` + `validatePackages` thật rồi dịch mọi issue ở cả hai
+ngôn ngữ, nên dạng issue và câu không lệch nhau được. Quy ước chủ thể ghi vào JSDoc của `ConstraintIssue`.
+
 **Để lại cho issue sau**
 
 - **LM-028:** câu vi/en cho các mã trên; `DIMENSION_NOT_POSITIVE` lấy nhãn và đơn vị theo `field` (kể cả `maxPayloadKg` → kg); issue dòng vật cản không có `packageInstanceId` thì chủ ngữ là `relatedIds[0]`; `issueField` đọc `field` dạng react-hook-form.

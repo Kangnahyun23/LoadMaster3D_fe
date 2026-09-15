@@ -70,7 +70,7 @@ function hasSize(obstacle: VehicleObstacle): boolean {
  * - `OBSTACLE_OVERLAP` tại dòng sau của cặp; `relatedIds` = [vật cản của dòng], `params.obstacleId` = vật cản dòng trước
  *   bị chồng lấn — cùng nghĩa với kiện chồng vật cản (LM-018): `obstacleId` luôn là vật cản bị chồng lấn.
  */
-export function obstacleIssues(vehicle: VehicleConfig): ConstraintIssue[] {
+export function vehicleObstacleIssues(vehicle: VehicleConfig): ConstraintIssue[] {
   // Lòng thùng có cạnh ≤ 0 đã báo DIMENSION_NOT_POSITIVE; không đo vật cản với nó
   const interiorValid = gt(vehicle.innerLengthCm, 0) && gt(vehicle.innerWidthCm, 0) && gt(vehicle.innerHeightCm, 0)
   return vehicle.obstacles.flatMap((obstacle, row) => [
