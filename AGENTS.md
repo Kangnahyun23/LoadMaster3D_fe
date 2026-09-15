@@ -342,6 +342,9 @@ format nhận locale đang chọn.
 - `src/domain` **không chứa câu chữ hiển thị**: validation và constraint trả **mã lỗi + tham số**
   (`{ code, severity, params }`, D-28); zod schema dùng mã làm message. UI dịch mã và format số
   theo locale. Test so mã, không so câu.
+- Câu cho mã ràng buộc nằm ở nhánh `issues` của từ điển, key trùng tên mã, và chỉ gọi qua
+  `formatIssue(issue, t, format)` của `@/lib/i18n` (LM-028). Thêm mã vào `CONSTRAINT_CODES` mà
+  chưa có câu thì `tsc -b` báo lỗi. Bản en giữ đúng từng chữ câu mẫu Spec mục 13 (`src/test/spec-13.ts`).
 
 ### Không để từ vựng kỹ thuật rò ra màn vận hành *(bổ sung)*
 

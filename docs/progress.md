@@ -16,14 +16,14 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|
 | — | Chuẩn bị: đọc repo, chốt quyết định, PRD, gói issue | 4 / 4 | — | ✅ Xong 14/09/2026 |
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
-| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 9 / 19 | ~18,5 ngày | 🟦 Đang làm |
+| 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 10 / 19 | ~18,5 ngày | 🟦 Đang làm |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 0 / 10 | ~10,5 ngày | ⬜ |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **15 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **16 / 57 issue** | **~56 ngày công** | |
 
-**Phase 1 đang làm (15/09/2026).** Đã có LM-010, 011, 012, 013, 014, 015, 016, 021, 027. Đang làm: LM-017, LM-018 (agent), LM-028. Sau đó LM-019, LM-020 → LM-022 → LM-023 → LM-024 → LM-025, LM-026.
+**Phase 1 đang làm (15/09/2026).** Đã có LM-010, 011, 012, 013, 014, 015, 016, 021, 027, 028. Đang làm: LM-017, LM-018 (agent). Sau đó LM-019, LM-020 → LM-022 → LM-023 → LM-024 → LM-025, LM-026.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
@@ -31,21 +31,23 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
-### 15/09/2026 — Phase 1: benchmark LM-016, LM-021 metrics và trọng tâm
+### 15/09/2026 — Phase 1: benchmark LM-016, LM-021 metrics và trọng tâm, LM-028 câu thông báo vi/en
 
 **Đã làm**
 
 - LM-016: chạy benchmark khi máy rảnh (`1b0a8af`) — một lần thả editor **0,47 ms** (p99 0,81); xếp kín 1.000 kiện, 2.000 truy vấn **35,1 ms** (quét cặp 129,9 ms). Chưa đạt ước lượng < 5 ms của issue; ngân sách thật đo ở LM-023, tối ưu đầu tiên nếu cần là thêm trục Z vào khoá ô.
 - LM-021 theo TDD (seam `@/domain/metrics`, 9 vòng, 15 test): `computeMetrics` (thể tích không trừ vật cản, phần trăm nhân trước rồi chia, thiếu khối lượng là `throw`), trọng tâm có trọng số (không kiện → vắng trường), `COG_THRESHOLDS` + `checkCenterOfGravity` → `COG_LATERAL` / `COG_HIGH` với `params` qua `roundCm`. Mọi số thực trong test đã kiểm bằng Node.
 - LM-017 và LM-018 giao 2 agent chạy song song trong worktree riêng từ `1b0a8af`.
+- LM-028 theo TDD (seam `@/lib/i18n`, `@/lib/format`; 6 vòng): `formatIssue` cho đủ 22 mã × vi/en, `switch` vét cạn bằng `never`; 8 câu Spec §13 tái tạo đúng từng chữ; snapshot 31 câu × 2 ngôn ngữ đã đọc duyệt; `Formatter` thêm `widthByHeight`, `list`. Bảng Spec §13 gom về `src/test/spec-13.ts`. `issueField` dời sang LM-041. Thêm luật câu thông báo vào AGENTS.md mục 6.
 
 **Kiểm tra**
 
-- `pnpm lint` ✅ · `pnpm build` ✅ · Vitest **182/182** ✅.
+- Sau LM-021: `pnpm lint` ✅ · `pnpm build` ✅ · Vitest **182/182** ✅.
+- Sau LM-028: `pnpm lint` ✅ · `pnpm build` ✅ · `CI=1` Vitest **244/244** ✅.
 
 **Việc tiếp theo**
 
-- Review và gộp LM-017, LM-018; LM-028; rồi LM-019, LM-020 → LM-022 → LM-023.
+- Review và gộp LM-017, LM-018; rồi LM-019, LM-020 → LM-022 → LM-023.
 
 ### 15/09/2026 — Xong nốt phase 0 (CI thật); phase 1: gộp LM-013, hoàn tất LM-014
 
@@ -309,7 +311,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-025](issues/LM-025-worker-tien-trinh-huy-loi.md) | Web Worker | ⬜ | | | |
 | [LM-026](issues/LM-026-mock-repository-revision.md) | Mock repository, revision | ⬜ | | | |
 | [LM-027](issues/LM-027-ha-tang-i18n.md) | Hạ tầng i18n | ✅ | 15/09/2026 | 15/09/2026 | `e00b097`, `53a205e`, 24 test |
-| [LM-028](issues/LM-028-tu-dien-thong-bao-rang-buoc.md) | Thông báo ràng buộc vi/en | ⬜ | | | |
+| [LM-028](issues/LM-028-tu-dien-thong-bao-rang-buoc.md) | Thông báo ràng buộc vi/en | ✅ | 15/09/2026 | 15/09/2026 | TDD 59 test, 22 mã × vi/en; `issueField` → LM-041 |
 
 ### Phase 2 — Engine 3D sang cm
 

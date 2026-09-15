@@ -65,4 +65,59 @@ export const en = {
   common: {
     packageCount: { one: '{count} package', other: '{count} packages' },
   },
+  /** Giữ đúng từng chữ các câu mẫu của Spec mục 13. */
+  issues: {
+    DIMENSION_NOT_POSITIVE: {
+      vehicle: '{field} must be greater than 0 cm.',
+      obstacle: '{field} of obstacle {obstacleId} must be greater than 0 cm.',
+      package: '{field} of package {packageId} must be greater than 0 cm.',
+    },
+    DOOR_EXCEEDS_INNER: {
+      y: 'Door width {doorCm} cannot exceed vehicle inner width {innerCm}.',
+      z: 'Door height {doorCm} cannot exceed vehicle inner height {innerCm}.',
+    },
+    NO_ALLOWED_ORIENTATION: 'Package {packageId} has no allowed orientation.',
+    PAYLOAD_EXCEEDED: 'Total cargo weight {totalKg} exceeds vehicle payload {maxPayloadKg}.',
+    MUST_LOAD_PAYLOAD_EXCEEDED: 'Must-load packages alone weigh {totalKg}, exceeding vehicle payload {maxPayloadKg}.',
+    DOOR_TOO_SMALL: 'Package {packageId} cannot pass through the {door} door.',
+    EXCEEDS_BOUNDARY: {
+      x: {
+        beforeOrigin: 'Placement {id} extends {overCm} past the front wall.',
+        beyondInterior: 'Placement {id} exceeds vehicle length by {overCm}.',
+      },
+      y: {
+        beforeOrigin: 'Placement {id} extends {overCm} past the left wall.',
+        beyondInterior: 'Placement {id} exceeds vehicle width by {overCm}.',
+      },
+      z: {
+        beforeOrigin: 'Placement {id} is {overCm} below the floor.',
+        beyondInterior: 'Placement {id} exceeds vehicle height by {overCm}.',
+      },
+    },
+    OVERLAP: '{id} overlaps {related}.',
+    OBSTACLE_OVERLAP: '{id} overlaps obstacle {obstacleId}.',
+    NON_BEARING_SUPPORT: '{id} rests on obstacle {obstacleId}, which cannot bear load.',
+    SUPPORT_BELOW_MIN: '{id} support ratio {ratio} is below the required {required}.',
+    TOP_LOAD_EXCEEDED: '{id} carries {loadKg} on top, above its limit of {maxKg}.',
+    NOT_STACKABLE: '{id} is not stackable but supports {related}.',
+    STACK_COUNT_EXCEEDED: '{id} is in a stack of {layers} layers, above the limit of {maxStackCount}.',
+    LIFO_BLOCKED: '{id} is fully blocked by packages delivered later.',
+    LIFO_PARTIAL: '{id} is {coverage} blocked by packages delivered later.',
+    COG_LATERAL: 'Cargo center of gravity is {offsetCm} off the centerline, beyond the {limitCm} limit.',
+    COG_HIGH: 'Cargo center of gravity is {heightCm} above the floor, beyond the {limitCm} limit.',
+    MUST_LOAD_UNPLACED: 'Must-load package {packageId} was not placed.',
+    LOADING_ORDER_INFEASIBLE: '{id} is loaded before the packages supporting it: {related}.',
+    DUPLICATE_INSTANCE_ID: 'ID {id} is used by {occurrences} package lines: {related}.',
+    ORIENTATION_MISMATCH: 'Placed dimensions of {id} do not match orientation {orientation}.',
+  },
+  fields: {
+    innerLengthCm: 'Inner length',
+    innerWidthCm: 'Inner width',
+    innerHeightCm: 'Inner height',
+    doorWidthCm: 'Door width',
+    doorHeightCm: 'Door height',
+    lengthCm: 'Length',
+    widthCm: 'Width',
+    heightCm: 'Height',
+  },
 } satisfies Dictionary<typeof vi>

@@ -71,4 +71,63 @@ export const vi = {
     /** Mẫu số nhiều, dùng lại ở bảng kiện và kết quả tối ưu (LM-044, LM-049). */
     packageCount: { one: '{count} kiện', other: '{count} kiện' },
   },
+  /**
+   * Câu cho mã ràng buộc của `@/domain/constraints` (LM-028), key trùng tên mã. Chỉ gọi qua `formatIssue`:
+   * số có đơn vị đã được format theo ngôn ngữ trước khi điền vào.
+   */
+  issues: {
+    DIMENSION_NOT_POSITIVE: {
+      vehicle: '{field} phải lớn hơn 0 cm.',
+      obstacle: '{field} của vật cản {obstacleId} phải lớn hơn 0 cm.',
+      package: '{field} của kiện {packageId} phải lớn hơn 0 cm.',
+    },
+    DOOR_EXCEEDS_INNER: {
+      y: 'Chiều rộng cửa {doorCm} không được lớn hơn chiều rộng lòng thùng {innerCm}.',
+      z: 'Chiều cao cửa {doorCm} không được lớn hơn chiều cao lòng thùng {innerCm}.',
+    },
+    NO_ALLOWED_ORIENTATION: 'Kiện {packageId} chưa có hướng đặt nào được phép.',
+    PAYLOAD_EXCEEDED: 'Tổng khối lượng hàng {totalKg} vượt tải trọng xe {maxPayloadKg}.',
+    MUST_LOAD_PAYLOAD_EXCEEDED: 'Riêng các kiện bắt buộc đã nặng {totalKg}, vượt tải trọng xe {maxPayloadKg}.',
+    DOOR_TOO_SMALL: 'Kiện {packageId} không lọt qua cửa {door}.',
+    EXCEEDS_BOUNDARY: {
+      x: {
+        beforeOrigin: 'Kiện {id} lấn qua vách đầu thùng {overCm}.',
+        beyondInterior: 'Kiện {id} vượt chiều dài thùng {overCm}.',
+      },
+      y: {
+        beforeOrigin: 'Kiện {id} lấn qua vách trái {overCm}.',
+        beyondInterior: 'Kiện {id} vượt chiều rộng thùng {overCm}.',
+      },
+      z: {
+        beforeOrigin: 'Kiện {id} thấp hơn sàn thùng {overCm}.',
+        beyondInterior: 'Kiện {id} vượt chiều cao thùng {overCm}.',
+      },
+    },
+    OVERLAP: '{id} chồng lấn {related}.',
+    OBSTACLE_OVERLAP: '{id} chồng lấn vật cản {obstacleId}.',
+    NON_BEARING_SUPPORT: '{id} đặt lên vật cản {obstacleId} không chịu tải.',
+    SUPPORT_BELOW_MIN: '{id} có tỷ lệ đỡ đáy {ratio}, thấp hơn mức yêu cầu {required}.',
+    TOP_LOAD_EXCEEDED: '{id} chịu {loadKg} bên trên, vượt mức chịu tải {maxKg}.',
+    NOT_STACKABLE: '{id} không được xếp chồng nhưng đang đỡ {related}.',
+    STACK_COUNT_EXCEEDED: '{id} nằm trong chồng {layers} tầng, vượt giới hạn {maxStackCount} tầng.',
+    LIFO_BLOCKED: '{id} bị kiện giao sau che kín lối dỡ.',
+    LIFO_PARTIAL: '{id} bị kiện giao sau che {coverage} lối dỡ.',
+    COG_LATERAL: 'Trọng tâm hàng lệch {offsetCm} khỏi đường giữa thùng, vượt ngưỡng {limitCm}.',
+    COG_HIGH: 'Trọng tâm hàng cao {heightCm} so với sàn, vượt ngưỡng {limitCm}.',
+    MUST_LOAD_UNPLACED: 'Kiện bắt buộc {packageId} chưa được xếp lên xe.',
+    LOADING_ORDER_INFEASIBLE: '{id} được xếp trước kiện đỡ nó: {related}.',
+    DUPLICATE_INSTANCE_ID: 'Mã {id} bị trùng ở {occurrences} dòng kiện: {related}.',
+    ORIENTATION_MISMATCH: 'Kích thước đã xếp của {id} không khớp hướng {orientation}.',
+  },
+  /** Tên trường dữ liệu, không kèm đơn vị; dùng trong câu lỗi và nhãn form. */
+  fields: {
+    innerLengthCm: 'Chiều dài lòng thùng',
+    innerWidthCm: 'Chiều rộng lòng thùng',
+    innerHeightCm: 'Chiều cao lòng thùng',
+    doorWidthCm: 'Chiều rộng cửa',
+    doorHeightCm: 'Chiều cao cửa',
+    lengthCm: 'Chiều dài',
+    widthCm: 'Chiều rộng',
+    heightCm: 'Chiều cao',
+  },
 } as const

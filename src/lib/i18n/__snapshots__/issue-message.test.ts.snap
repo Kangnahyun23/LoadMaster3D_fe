@@ -1,0 +1,83 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`every constraint code has a finished sentence in en > codes whose sentence depends on axis, side or entity read as reviewed 1`] = `
+[
+  "Placement PKG-004 extends 3.5 cm past the front wall.",
+  "Placement PKG-004 exceeds vehicle length by 3.5 cm.",
+  "Placement PKG-004 extends 3.5 cm past the left wall.",
+  "Placement PKG-004 exceeds vehicle width by 3.5 cm.",
+  "Placement PKG-004 is 3.5 cm below the floor.",
+  "Placement PKG-004 exceeds vehicle height by 3.5 cm.",
+  "Inner width must be greater than 0 cm.",
+  "Length of obstacle OBS-001 must be greater than 0 cm.",
+  "Door width 250 cm cannot exceed vehicle inner width 240 cm.",
+]
+`;
+
+exports[`every constraint code has a finished sentence in en > the sentences read as reviewed 1`] = `
+{
+  "COG_HIGH": "Cargo center of gravity is 137.5 cm above the floor, beyond the 125 cm limit.",
+  "COG_LATERAL": "Cargo center of gravity is 26.4 cm off the centerline, beyond the 24 cm limit.",
+  "DIMENSION_NOT_POSITIVE": "Height of package PKG-002 must be greater than 0 cm.",
+  "DOOR_EXCEEDS_INNER": "Door height 255.5 cm cannot exceed vehicle inner height 250 cm.",
+  "DOOR_TOO_SMALL": "Package PKG-003 cannot pass through the 220 × 230 cm door.",
+  "DUPLICATE_INSTANCE_ID": "ID PKG-001-01 is used by 2 package lines: PKG-001 and PKG-001-01.",
+  "EXCEEDS_BOUNDARY": "Placement PKG-004 exceeds vehicle height by 12.5 cm.",
+  "LIFO_BLOCKED": "PKG-001-01 is fully blocked by packages delivered later.",
+  "LIFO_PARTIAL": "PKG-001-02 is 40.0% blocked by packages delivered later.",
+  "LOADING_ORDER_INFEASIBLE": "PKG-001-02 is loaded before the packages supporting it: PKG-001-01.",
+  "MUST_LOAD_PAYLOAD_EXCEEDED": "Must-load packages alone weigh 5,150.5 kg, exceeding vehicle payload 5,000 kg.",
+  "MUST_LOAD_UNPLACED": "Must-load package PKG-003 was not placed.",
+  "NON_BEARING_SUPPORT": "PKG-001-03 rests on obstacle OBS-001, which cannot bear load.",
+  "NOT_STACKABLE": "PKG-002-01 is not stackable but supports PKG-001-01.",
+  "NO_ALLOWED_ORIENTATION": "Package PKG-001 has no allowed orientation.",
+  "OBSTACLE_OVERLAP": "PKG-001-02 overlaps obstacle OBS-001.",
+  "ORIENTATION_MISMATCH": "Placed dimensions of PKG-001-01 do not match orientation WLH.",
+  "OVERLAP": "PKG-006 overlaps PKG-007 and PKG-009.",
+  "PAYLOAD_EXCEEDED": "Total cargo weight 5,320 kg exceeds vehicle payload 5,000 kg.",
+  "STACK_COUNT_EXCEEDED": "PKG-001-04 is in a stack of 4 layers, above the limit of 3.",
+  "SUPPORT_BELOW_MIN": "PKG-008 support ratio 0.62 is below the required 0.80.",
+  "TOP_LOAD_EXCEEDED": "PKG-001-01 carries 120.25 kg on top, above its limit of 90 kg.",
+}
+`;
+
+exports[`every constraint code has a finished sentence in vi > codes whose sentence depends on axis, side or entity read as reviewed 1`] = `
+[
+  "Kiện PKG-004 lấn qua vách đầu thùng 3,5 cm.",
+  "Kiện PKG-004 vượt chiều dài thùng 3,5 cm.",
+  "Kiện PKG-004 lấn qua vách trái 3,5 cm.",
+  "Kiện PKG-004 vượt chiều rộng thùng 3,5 cm.",
+  "Kiện PKG-004 thấp hơn sàn thùng 3,5 cm.",
+  "Kiện PKG-004 vượt chiều cao thùng 3,5 cm.",
+  "Chiều rộng lòng thùng phải lớn hơn 0 cm.",
+  "Chiều dài của vật cản OBS-001 phải lớn hơn 0 cm.",
+  "Chiều rộng cửa 250 cm không được lớn hơn chiều rộng lòng thùng 240 cm.",
+]
+`;
+
+exports[`every constraint code has a finished sentence in vi > the sentences read as reviewed 1`] = `
+{
+  "COG_HIGH": "Trọng tâm hàng cao 137,5 cm so với sàn, vượt ngưỡng 125 cm.",
+  "COG_LATERAL": "Trọng tâm hàng lệch 26,4 cm khỏi đường giữa thùng, vượt ngưỡng 24 cm.",
+  "DIMENSION_NOT_POSITIVE": "Chiều cao của kiện PKG-002 phải lớn hơn 0 cm.",
+  "DOOR_EXCEEDS_INNER": "Chiều cao cửa 255,5 cm không được lớn hơn chiều cao lòng thùng 250 cm.",
+  "DOOR_TOO_SMALL": "Kiện PKG-003 không lọt qua cửa 220 × 230 cm.",
+  "DUPLICATE_INSTANCE_ID": "Mã PKG-001-01 bị trùng ở 2 dòng kiện: PKG-001 và PKG-001-01.",
+  "EXCEEDS_BOUNDARY": "Kiện PKG-004 vượt chiều cao thùng 12,5 cm.",
+  "LIFO_BLOCKED": "PKG-001-01 bị kiện giao sau che kín lối dỡ.",
+  "LIFO_PARTIAL": "PKG-001-02 bị kiện giao sau che 40,0% lối dỡ.",
+  "LOADING_ORDER_INFEASIBLE": "PKG-001-02 được xếp trước kiện đỡ nó: PKG-001-01.",
+  "MUST_LOAD_PAYLOAD_EXCEEDED": "Riêng các kiện bắt buộc đã nặng 5.150,5 kg, vượt tải trọng xe 5.000 kg.",
+  "MUST_LOAD_UNPLACED": "Kiện bắt buộc PKG-003 chưa được xếp lên xe.",
+  "NON_BEARING_SUPPORT": "PKG-001-03 đặt lên vật cản OBS-001 không chịu tải.",
+  "NOT_STACKABLE": "PKG-002-01 không được xếp chồng nhưng đang đỡ PKG-001-01.",
+  "NO_ALLOWED_ORIENTATION": "Kiện PKG-001 chưa có hướng đặt nào được phép.",
+  "OBSTACLE_OVERLAP": "PKG-001-02 chồng lấn vật cản OBS-001.",
+  "ORIENTATION_MISMATCH": "Kích thước đã xếp của PKG-001-01 không khớp hướng WLH.",
+  "OVERLAP": "PKG-006 chồng lấn PKG-007 và PKG-009.",
+  "PAYLOAD_EXCEEDED": "Tổng khối lượng hàng 5.320 kg vượt tải trọng xe 5.000 kg.",
+  "STACK_COUNT_EXCEEDED": "PKG-001-04 nằm trong chồng 4 tầng, vượt giới hạn 3 tầng.",
+  "SUPPORT_BELOW_MIN": "PKG-008 có tỷ lệ đỡ đáy 0,62, thấp hơn mức yêu cầu 0,80.",
+  "TOP_LOAD_EXCEEDED": "PKG-001-01 chịu 120,25 kg bên trên, vượt mức chịu tải 90 kg.",
+}
+`;
