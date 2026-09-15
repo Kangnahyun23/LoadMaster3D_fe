@@ -37,7 +37,7 @@ exports[`every constraint code has a finished sentence in en > the sentences rea
   "PAYLOAD_EXCEEDED": "Total cargo weight 5,320 kg exceeds vehicle payload 5,000 kg.",
   "STACK_COUNT_EXCEEDED": "PKG-001-04 is in a stack of 4 layers, above the limit of 3.",
   "SUPPORT_BELOW_MIN": "PKG-008 support ratio 0.62 is below the required 0.80.",
-  "TOP_LOAD_EXCEEDED": "PKG-001-01 carries 120.25 kg on top, above its limit of 90 kg.",
+  "TOP_LOAD_EXCEEDED": "Placement PKG-001-01 carries 120.25 kg on top, above its limit of 90 kg.",
 }
 `;
 
@@ -78,7 +78,7 @@ exports[`every constraint code has a finished sentence in vi > the sentences rea
   "PAYLOAD_EXCEEDED": "Tổng khối lượng hàng 5.320 kg vượt tải trọng xe 5.000 kg.",
   "STACK_COUNT_EXCEEDED": "PKG-001-04 nằm trong chồng 4 tầng, vượt giới hạn 3 tầng.",
   "SUPPORT_BELOW_MIN": "PKG-008 có tỷ lệ đỡ đáy 0,62, thấp hơn mức yêu cầu 0,80.",
-  "TOP_LOAD_EXCEEDED": "PKG-001-01 chịu 120,25 kg bên trên, vượt mức chịu tải 90 kg.",
+  "TOP_LOAD_EXCEEDED": "Kiện PKG-001-01 chịu 120,25 kg bên trên, vượt mức chịu tải 90 kg.",
 }
 `;
 
@@ -91,6 +91,28 @@ exports[`issues built by the real validators read as sentences in both languages
   "OBS-003 overlaps obstacle OBS-002.",
   "Height of package PKG-001 must be greater than 0 cm.",
   "Package PKG-001 has no allowed orientation.",
+]
+`;
+
+exports[`issues built by the real validators read as sentences in both languages > stack checks in en 1`] = `
+[
+  "Placement C1 carries 60 kg on top, above its limit of 40 kg.",
+  "C1 is in a stack of 3 layers, above the limit of 2.",
+  "C2 is in a stack of 3 layers, above the limit of 2.",
+  "C3 is in a stack of 3 layers, above the limit of 2.",
+  "DRUM is not stackable but supports BOX.",
+  "Obstacle OBS-001 carries 30 kg on top, above its limit of 20 kg.",
+]
+`;
+
+exports[`issues built by the real validators read as sentences in both languages > stack checks in vi 1`] = `
+[
+  "Kiện C1 chịu 60 kg bên trên, vượt mức chịu tải 40 kg.",
+  "C1 nằm trong chồng 3 tầng, vượt giới hạn 2 tầng.",
+  "C2 nằm trong chồng 3 tầng, vượt giới hạn 2 tầng.",
+  "C3 nằm trong chồng 3 tầng, vượt giới hạn 2 tầng.",
+  "DRUM không được xếp chồng nhưng đang đỡ BOX.",
+  "Vật cản OBS-001 chịu 30 kg bên trên, vượt mức chịu tải 20 kg.",
 ]
 `;
 

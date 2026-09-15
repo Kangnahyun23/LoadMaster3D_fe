@@ -52,13 +52,11 @@ export function formatIssue(issue: ConstraintIssue, t: TFunction, format: Format
         packageId: issue.params.packageId,
         door: format.widthByHeight(issue.params.doorWidthCm, issue.params.doorHeightCm),
       })
-    case 'EXCEEDS_BOUNDARY': {
-      const { kind, id } = placementOrObstacleOf(issue)
+    case 'EXCEEDS_BOUNDARY':
       return t(`issues.EXCEEDS_BOUNDARY.${issue.params.axis}.${issue.params.side}`, {
-        subject: t(`issues.subject.${kind}`, { id }),
+        subject: subjectPhrase(issue, t),
         overCm: format.length(issue.params.overCm),
       })
-    }
     case 'OVERLAP':
     case 'NOT_STACKABLE':
     case 'LOADING_ORDER_INFEASIBLE':
@@ -75,7 +73,7 @@ export function formatIssue(issue: ConstraintIssue, t: TFunction, format: Format
       })
     case 'TOP_LOAD_EXCEEDED':
       return t('issues.TOP_LOAD_EXCEEDED', {
-        id: subjectOf(issue),
+        subject: subjectPhrase(issue, t),
         loadKg: format.weight(issue.params.loadKg),
         maxKg: format.weight(issue.params.maxKg),
       })
@@ -129,9 +127,15 @@ function relatedOf(issue: ConstraintIssue, format: Formatter): string {
   return format.list(issue.relatedIds)
 }
 
+/** "Kiện PKG-004" · "Vật cản OBS-001" — chủ ngữ đứng đầu câu. */
+function subjectPhrase(issue: ConstraintIssue, t: TFunction): string {
+  const { kind, id } = placementOrObstacleOf(issue)
+  return t(`issues.subject.${kind}`, { id })
+}
+
 /**
- * Kiện đã xếp (`packageInstanceId`), hoặc dòng vật cản của form xe: validation xe (LM-017) không có kiện nên đặt
- * vật cản của dòng ở `relatedIds[0]`.
+ * Kiện đã xếp (`packageInstanceId`), hoặc vật cản ở `relatedIds[0]` khi issue không gắn kiện (dòng vật cản của form xe
+ * ở LM-017, vật cản chịu tải quá tải ở LM-019) — quy ước chủ thể của `ConstraintIssue`.
  */
 function placementOrObstacleOf(issue: ConstraintIssue): { kind: 'placement' | 'obstacle'; id: string } {
   if (issue.packageInstanceId !== undefined) return { kind: 'placement', id: issue.packageInstanceId }

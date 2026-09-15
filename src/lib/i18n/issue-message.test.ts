@@ -1,13 +1,15 @@
 import { describe, expect, test } from 'vitest'
 import {
   CONSTRAINT_CODES,
+  stackIssues,
   validatePackages,
   validateVehicle,
   type ConstraintCode,
   type ConstraintIssue,
 } from '@/domain/constraints'
 import { SPEC_CARTON_A, SPEC_TRUCK_6M } from '@/domain/fixtures/spec-samples'
-import type { CargoPackage, VehicleConfig } from '@/domain/models'
+import type { CargoPackage, VehicleConfig, VehicleObstacle } from '@/domain/models'
+import { placed, stackGraphOf, stackingProfile } from '@/test/placements'
 import { createFormatter } from '@/lib/format'
 import { createTranslator, formatIssue, LOCALES, type Locale } from '@/lib/i18n'
 import { SPEC_13_EXAMPLES, SPEC_13_PKG_004_TOO_TALL } from '@/test/spec-13'
@@ -174,6 +176,25 @@ describe('issues built by the real validators read as sentences in both language
     expect(new Set(issues.map(({ code }) => code))).toStrictEqual(
       new Set(['DIMENSION_NOT_POSITIVE', 'DOOR_EXCEEDS_INNER', 'EXCEEDS_BOUNDARY', 'OBSTACLE_OVERLAP', 'NO_ALLOWED_ORIENTATION']),
     )
+    expect(issues.map((issue) => messageOf(issue, locale))).toMatchSnapshot()
+  })
+
+  test.each(LOCALES)('stack checks in %s', (locale) => {
+    const [wheelArch] = SPEC_TRUCK_6M.obstacles as [VehicleObstacle]
+    const truck = { ...SPEC_TRUCK_6M, obstacles: [{ ...wheelArch, loadBearing: true, maxTopLoadKg: 20 }] }
+    const column = ['C1', 'C2', 'C3'].map((id, level) => placed(id, [300, 0, 45 * level], [120, 60, 45]))
+    const placements = [...column, placed('ON-ARCH', [0, 0, 45], [120, 30, 30]), placed('DRUM', [450, 0, 0], [60, 60, 90]), placed('BOX', [450, 0, 90], [40, 40, 20])]
+    const carton = stackingProfile(30, { maxTopLoadKg: 40, maxStackCount: 2 })
+    const graph = stackGraphOf(placements, {
+      C1: carton,
+      C2: carton,
+      C3: carton,
+      'ON-ARCH': stackingProfile(30),
+      DRUM: stackingProfile(80, { stackable: false, maxTopLoadKg: 0 }),
+      BOX: stackingProfile(4),
+    }, truck)
+    const issues = stackIssues(graph)
+    expect(new Set(issues.map(({ code }) => code))).toStrictEqual(new Set(['TOP_LOAD_EXCEEDED', 'STACK_COUNT_EXCEEDED', 'NOT_STACKABLE']))
     expect(issues.map((issue) => messageOf(issue, locale))).toMatchSnapshot()
   })
 })

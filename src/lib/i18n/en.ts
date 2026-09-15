@@ -99,7 +99,7 @@ export const en = {
     OBSTACLE_OVERLAP: '{id} overlaps obstacle {obstacleId}.',
     NON_BEARING_SUPPORT: '{id} rests on obstacle {obstacleId}, which cannot bear load.',
     SUPPORT_BELOW_MIN: '{id} support ratio {ratio} is below the required {required}.',
-    TOP_LOAD_EXCEEDED: '{id} carries {loadKg} on top, above its limit of {maxKg}.',
+    TOP_LOAD_EXCEEDED: '{subject} carries {loadKg} on top, above its limit of {maxKg}.',
     NOT_STACKABLE: '{id} is not stackable but supports {related}.',
     STACK_COUNT_EXCEEDED: '{id} is in a stack of {layers} layers, above the limit of {maxStackCount}.',
     LIFO_BLOCKED: '{id} is fully blocked by packages delivered later.',

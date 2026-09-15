@@ -125,7 +125,7 @@ src/
     cargo/              mở rộng quantity thành instance, trùng ID, mã kiện mới (LM-013)
   services/
     optimization/       interface OptimizationService, MockOptimizationService, worker (LM-024 →)
-  test/                 setup dùng chung cho Vitest (setup-dom.ts)
+  test/                 setup và dữ liệu test dùng chung (setup-dom.ts, spec-13.ts, placements.ts)
 tests/                  unit test cũ của viewer3d (Vitest)
 e2e/                    Playwright (LM-005)
 ```

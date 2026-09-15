@@ -8,9 +8,18 @@ export {
   type ConstraintParams,
   type ConstraintSeverity,
 } from './issues'
-export { createPlacementLayout, type PlacementLayout } from './layout'
+export { createPlacementLayout, movePlacement, type PlacementLayout } from './layout'
 export { obstacleIssues } from './obstacles'
 export { checkPayload } from './payload'
+export { stackIssues } from './stack-issues'
+export {
+  createStackGraph,
+  obstacleTopLoadKg,
+  recomputeColumn,
+  topLoadKg,
+  type StackGraph,
+  type StackingProfile,
+} from './stack-load'
 export { supportIssues, supportRatio } from './support'
 export { validatePackages } from './validate-packages'
 export { validateRequest } from './validate-request'
