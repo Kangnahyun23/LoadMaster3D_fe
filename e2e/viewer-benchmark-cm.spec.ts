@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import type { Page } from '@playwright/test'
 import { attachJson, expect, PLANNER_ROUTE, test } from './fixtures'
-import { metrics, SOURCE_MODULES, waitIdle, type ViewerMetrics } from './viewer-helpers'
+import { metrics, SOURCE_MODULES, waitCameraSettled, waitIdle, type ViewerMetrics } from './viewer-helpers'
 
 /**
  * Hồi quy hiệu năng sau khi engine sang cm (LM-038). Số đo SwiftShader chỉ để so trước/sau, không phải cam kết FPS.
@@ -40,6 +40,10 @@ test('draw calls stay flat from 132 to 1,000 cm packages in every tier, idle ren
     const perTier = samples.filter((sample) => sample.tier === tier).map((sample) => sample.rest.drawCalls)
     expect(new Set(perTier).size, `${tier}: draw calls must not grow with package count (${perTier.join(', ')})`).toBe(1)
   }
+  // Đổi tier (DPR, bóng) vẫn có thể vẽ vài frame sau khi overlay báo nghỉ: chờ camera đứng yên thật rồi mới đo nghỉ.
+  await waitCameraSettled(page)
+  await waitIdle(page)
+  await page.waitForTimeout(600)
   const settled = (await metrics(page)).renderedFrames
   await page.waitForTimeout(1200)
   expect((await metrics(page)).renderedFrames, 'idle adds no frame').toBe(settled)
