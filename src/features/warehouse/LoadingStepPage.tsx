@@ -3,58 +3,73 @@ import { lazy, Suspense, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
-import { LOAD_PLAN } from '@/lib/load-plan.mock'
+import { adaptResult } from '@/features/viewer3d/scene-input'
+import { useT } from '@/lib/i18n'
 import { ConfirmedOverlay } from './ConfirmedOverlay'
 import { PackageInstructionCard } from './PackageInstructionCard'
+import { PlanNotices } from './PlanNotices'
 import { StepHeader } from './StepHeader'
 import { useLoadingSession } from './useLoadingSession'
-import { benchmarkCountFromSearch, createBenchmarkPlan } from '@/features/viewer3d/benchmark.mock'
-import type { LoadPlan } from '@/types/load-plan'
+import { useWarehousePlanQuery } from './useWarehousePlanQuery'
+import type { WarehousePlan } from './warehouse-api'
+import { WarehouseEmpty } from './WarehouseEmpty'
 
 /** Three.js nặng — chỉ tải khi màn kho thực sự hiển thị ô vị trí 3D. */
 const PositionViewer = lazy(() =>
   import('@/features/viewer3d/PositionViewer').then((m) => ({ default: m.PositionViewer })),
 )
 
-/** Bước mở màn, khớp bản design (PKG-00147). */
-const INITIAL_STEP = 47
-
 /**
  * Máy tính bảng kho — một thao tác mỗi màn: xác nhận đã xếp kiện hiện tại.
  * Toàn màn, không nav rail. Vùng chạm ≥56px, chữ ≥16px (mục 10).
+ *
+ * Dữ liệu (LM-060): revision **đã duyệt** mới nhất của chuyến `?chuyen=<mã>`, không có tham số thì chuyến đầu tiên có bản duyệt.
+ * Bước đi theo `loadingOrder` của kết quả, bắt đầu từ 1.
  *
  * Lệch có chủ ý khỏi design: nút xác nhận trong design màu xanh lá và viết
  * hoa toàn bộ; mục 5 chỉ định nghĩa nút chính nền `--primary` và cấm viết hoa,
  * nên ở đây là nút primary "Xác nhận đã xếp".
  */
 export function LoadingStepPage() {
+  const t = useT()
   const [search] = useSearchParams()
-  const count = benchmarkCountFromSearch(search.toString())
-  const plan = useMemo(() => count ? createBenchmarkPlan(count) : LOAD_PLAN, [count])
-  return <LoadingSessionPage key={plan.tripId} plan={plan} />
+  const tripId = search.get('chuyen') ?? undefined
+  const query = useWarehousePlanQuery(tripId)
+
+  if (query.isPending) {
+    return (
+      <div role="status" aria-label={t('warehouse.loading')} className="grid h-dvh place-items-center bg-bg">
+        <Spinner />
+      </div>
+    )
+  }
+  if (query.isError || !query.data) return <WarehouseEmpty tripId={tripId} failed={query.isError} />
+  return <LoadingSessionPage key={query.data.revision.id} plan={query.data} />
 }
 
-function LoadingSessionPage({ plan }: { plan: LoadPlan }) {
-  const session = useLoadingSession(plan, INITIAL_STEP)
-  const exitTo = `/chuyen/${plan.tripId}`
+function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
+  const model = useMemo(() => adaptResult(plan), [plan])
+  const session = useLoadingSession(model.placements)
+  const exitTo = `/chuyen/${plan.trip.id}`
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-bg text-body-lg">
       <StepHeader
         step={session.step}
         totalSteps={session.totalSteps}
-        tripId={plan.tripId}
+        tripId={plan.trip.id}
         exitTo={exitTo}
       />
+      <PlanNotices model={model} stale={plan.stale} />
 
       <div className="relative grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto p-3 lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)]">
         {session.current ? (
           <>
             <PackageInstructionCard
               placement={session.current}
-              placements={plan.placements}
-              vehicle={plan.vehicle}
-              stops={plan.stops}
+              placements={model.placements}
+              vehicle={model.vehicle}
+              stops={model.stops}
             />
             <Suspense
               fallback={
@@ -67,7 +82,7 @@ function LoadingSessionPage({ plan }: { plan: LoadPlan }) {
                 </div>
               }
             >
-              <div className="order-first min-h-96 lg:order-last lg:min-h-0"><PositionViewer plan={plan} current={session.current} /></div>
+              <div className="order-first min-h-96 lg:order-last lg:min-h-0"><PositionViewer model={model} current={session.current} /></div>
             </Suspense>
           </>
         ) : (

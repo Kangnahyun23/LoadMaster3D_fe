@@ -122,17 +122,22 @@ test('camera orbit keeps draw calls and cargo instances bounded; balanced/high a
 })
 
 test('warehouse isolates the current package and advances after confirmation', async ({ page, login, browserErrors }, testInfo) => {
-  await login('/kho?debug&packages=1000&quality=low'); await settle(page)
+  // Kho đọc revision đã duyệt của chuyến seed (LM-060), bắt đầu ở bước 1: kiện hiện tại đậm, kiện kế tiếp mờ.
+  await login('/kho?debug&quality=low'); await settle(page)
   expect(await page.locator('[data-experience="warehouse"]').count()).toBe(1)
-  expect((await visibleCargo(page))['cargo-opaque']).toBe(47)
-  expect((await visibleCargo(page))['cargo-dim']).toBe(1)
+  expect(await visibleCargo(page)).toStrictEqual({ 'cargo-opaque': 1, 'cargo-dim': 1 })
   await page.getByRole('combobox', { name: 'Góc nhìn thùng xe', exact: true }).selectOption('cua-sau')
   await button(page, 'Chỉ kiện này').click(); await settle(page)
   expect(await visibleCargo(page)).toStrictEqual({ 'cargo-opaque': 1, 'cargo-dim': 0 })
   await button(page, 'Hiện xung quanh').click()
-  await button(page, 'Xác nhận đã xếp').click(); await page.waitForTimeout(1400)
-  expect(await page.locator('body').innerText()).toMatch(/BENCH-00048/)
+  const second = await page.evaluate(async (url) => {
+    const { seedScene } = (await import(url)) as typeof import('@/test/scene')
+    return (await seedScene()).placements.find((placement) => placement.step === 2)!.id
+  }, SOURCE_MODULES.scene)
+  await button(page, 'Xác nhận đã xếp').click()
+  await expect(page.getByRole('heading', { level: 1, name: second, exact: true })).toBeVisible()
   await settle(page)
+  expect(await visibleCargo(page)).toStrictEqual({ 'cargo-opaque': 2, 'cargo-dim': 1 })
   await attachJson(testInfo, 'report', { scene: await sceneSnapshot(page), metrics: await metrics(page) })
   await attachScreenshot(page, testInfo, 'warehouse')
   expect(browserErrors).toStrictEqual([])

@@ -582,6 +582,59 @@ export const vi = {
       openOnly: 'Mở phương án đã có',
     },
   },
+  /** Màn kho `/kho` (LM-060): đọc revision đã duyệt, số cm theo locale. Phần vỏ màn còn lại dịch ở LM-071. */
+  warehouse: {
+    loading: 'Đang tải phương án đã duyệt',
+    emptyTitle: 'Chưa có phương án đã duyệt',
+    emptyDescription: 'Kho chỉ xếp theo phương án đã duyệt. Mở chuyến trong Planner và bấm Duyệt phương án trước.',
+    emptyTripDescription: 'Chuyến {tripId} chưa có phương án đã duyệt. Mở chuyến trong Planner và bấm Duyệt phương án trước.',
+    toTrips: 'Tới danh sách chuyến',
+    exit: 'Thoát màn kho',
+    loadErrorTitle: 'Không tải được phương án',
+    loadErrorDescription: 'Kho dữ liệu không phản hồi. Thử mở lại màn kho.',
+    stale: 'Phương án đã duyệt này lỗi thời: xe hoặc kiện đã đổi sau lần tối ưu. Hỏi điều phối viên trước khi xếp.',
+    ordersRecomputed: 'Thứ tự tính lại ở FE',
+    tiles: {
+      position: 'Vị trí',
+      orientation: 'Hướng đặt',
+      weight: 'Khối lượng',
+    },
+    layer: 'Lớp {layer} · Cách cửa {rear}',
+    distances: {
+      front: 'Cách vách trước',
+      left: 'Cách vách trái',
+      right: 'Cách vách phải',
+      rear: 'Cách cửa sau',
+      floor: 'Cách sàn',
+      below: 'Phía dưới gần nhất',
+      noneBelow: 'Không có kiện',
+      obstacle: 'Vật cản gần nhất',
+      obstacleValue: '{type} {id} · khe {gap}',
+    },
+    /** Mã hướng đặt Spec đọc theo trục X, Y, Z của thùng; "mặt trên gốc" là mặt trên khi kiện đứng thẳng. */
+    orientations: {
+      LWH: 'Đứng thẳng · cạnh dài dọc thùng',
+      WLH: 'Đứng thẳng · cạnh dài ngang thùng',
+      LHW: 'Nằm nghiêng · mặt trên gốc quay sang vách bên',
+      WHL: 'Dựng đứng cạnh dài · mặt trên gốc quay sang vách bên',
+      HLW: 'Nằm nghiêng · mặt trên gốc quay theo chiều dọc thùng',
+      HWL: 'Dựng đứng cạnh dài · mặt trên gốc quay theo chiều dọc thùng',
+    },
+    notes: {
+      fragile: 'Dễ vỡ — không đặt vật nặng lên trên',
+      fragileBelow: 'Phía dưới có kiện dễ vỡ — kiểm tra cách nâng đỡ',
+      heavy: 'Nặng — hai người khiêng hoặc dùng xe nâng tay',
+      notUpright: 'Đặt nằm đúng như hình — mặt trên gốc không hướng lên',
+      default: 'Mặt trên gốc hướng lên, đặt khít kiện bên cạnh',
+    },
+    figure: {
+      label: 'Minh hoạ hướng đặt {code}: mũi tên đen chỉ ra cửa sau, mũi tên xanh chỉ mặt trên gốc của kiện',
+      front: 'Vách trước',
+      door: 'Cửa sau',
+      doorArrow: 'Mũi tên đen: hướng ra cửa sau',
+      topArrow: 'Mũi tên xanh: mặt trên gốc của kiện',
+    },
+  },
   viewer: {
     /** Planner: chỉ số, Duyệt, lọc kiện (LM-049, LM-050). */
     plan: {

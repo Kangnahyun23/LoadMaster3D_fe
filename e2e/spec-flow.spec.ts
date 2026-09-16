@@ -146,11 +146,18 @@ for (const device of ['desktop', 'tablet'] as const) {
     await confirm.click()
     await expect(page.getByText('Đã duyệt phương án.')).toBeVisible()
 
-    // Mở màn kho phía client. Màn kho còn đọc phương án mẫu mm riêng tới LM-060, nên chỉ khẳng định bước xếp hiện ra,
-    // chưa khẳng định đó là kiện của chuyến vừa duyệt.
-    await navigateInApp(page, '/kho')
-    await expect(page.getByText(/Bước \d+ \/ \d+/)).toBeVisible()
-    await expect(page.getByRole('heading', { level: 1, name: /^PKG-/ })).toBeVisible()
+    // Mở màn kho phía client (LM-060): bước 1 là kiện `loadingOrder = 1` của revision vừa duyệt, đọc thẳng từ kho của trang.
+    await page.waitForURL(/\/phuong-an\?revision=REV-/)
+    const approved = await page.evaluate(async ({ db, tripId }) => {
+      const { getMockDb } = (await import(db)) as typeof import('@/lib/mock-db')
+      const revision = (await getMockDb().listRevisions(tripId)).findLast((item) => item.approvedAt !== undefined)
+      return { id: revision?.id, first: revision?.result.placements.find((placement) => placement.loadingOrder === 1)?.packageInstanceId, total: revision?.result.placements.length }
+    }, { db: MOCK_DB, tripId: 'TRIP-001' })
+    expect(page.url()).toContain(`revision=${approved.id}`)
+    await navigateInApp(page, '/kho?chuyen=TRIP-001')
+    await expect(page.getByText(`Bước 1 / ${approved.total}`)).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: approved.first, exact: true })).toBeVisible()
+    await expect(page.getByText('MOCK RESULT', { exact: true })).toBeVisible()
     const confirmLoaded = page.getByRole('button', { name: 'Xác nhận đã xếp', exact: true })
     await expect(confirmLoaded).toBeVisible()
     if (tablet) {
