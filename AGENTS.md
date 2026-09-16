@@ -52,7 +52,8 @@ tailwindcss v4           — cấu hình bằng @theme trong CSS, không có tai
 @tanstack/react-table v9 — mọi bảng dữ liệu
 react-hook-form + zod v4 — mọi form
 react-router v7          — routing
-recharts                 — biểu đồ dashboard
+recharts                 — biểu đồ dashboard (LM-052: dashboard hiện KHÔNG có biểu đồ nào,
+                           xem mục 6 "Không bịa số"; giữ thư viện cho biểu đồ có nguồn thật sau)
 dnd-kit                  — kéo thả thứ tự điểm giao, ghim kiện
 lucide-react             — icon, KHÔNG dùng bộ khác
 sonner                   — toast
@@ -374,6 +375,20 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
   **"Sẽ có sau" / "Coming later"** dạng chữ, không bấm được.
 - Code hiện còn `notifyPendingFeature()` ở một số màn cũ — gỡ ở LM-053, không thêm lời gọi mới.
 
+### Không bịa số *(bổ sung 16/09/2026, LM-052, D-20)*
+
+Cùng lý do với nút giả: số bịa còn nguy hơn nút bịa vì người đọc tin ngay. Mọi con số, thanh
+tiến độ và biểu đồ trên màn vận hành phải truy được về dữ liệu kho (`src/lib/mock-db`) hoặc về
+kết quả tối ưu; không có nguồn thì **bỏ hẳn phần đó**, không giữ lại bản mẫu cho đẹp.
+
+- Bảng điều khiển của quản lý (LM-052) vì vậy không còn `FillRateChart`, `AlgorithmChart`,
+  `PlanVsActualTable` và `dashboard.mock.ts`: kho không có chuỗi theo tuần, không có so sánh
+  thuật toán và không có số **thực tế** để đặt cạnh kế hoạch. Không dựng lại chúng bằng dữ liệu mẫu.
+- "So với kỳ trước" cũng là số bịa khi chưa có kỳ trước: `KpiTile` chỉ còn nhãn, số và một dòng
+  ghi chú nói số đến từ đâu.
+- Trang tài liệu `/thanh-phan` được dùng số mẫu để trình bày component, nhưng lấy từ dữ liệu seed
+  thật (132 kiện của chuyến mẫu), không phải số nghĩ ra.
+
 ## 7. Quy tắc riêng cho 3D
 
 ### Three.js
@@ -535,8 +550,8 @@ Màn nào còn giữ dữ liệu ở `useState` (Đội xe, Người dùng) thì
 
 ### Chia chunk theo route
 
-Mọi màn trong `app/App.tsx` đều `lazy()`. Nhờ đó Three.js chỉ tải khi mở màn 3D,
-recharts chỉ tải khi mở dashboard, và máy tính bảng ở kho không gánh code của dispatcher.
+Mọi màn trong `app/App.tsx` đều `lazy()`. Nhờ đó Three.js chỉ tải khi mở màn 3D, thư viện biểu đồ
+chỉ tải khi mở màn cần nó, và máy tính bảng ở kho không gánh code của dispatcher.
 Thêm màn mới thì thêm theo đúng lối này.
 
 ## 10. Khả năng truy cập
