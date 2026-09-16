@@ -140,8 +140,8 @@ component. Mọi hàm tính toán ở đây là pure function có unit test. Fea
 domain, không bao giờ ngược lại. Three.js không quyết định tính hợp lệ của placement.
 
 **Đặt mock ở đâu** *(bổ sung)*: mock chỉ một feature dùng thì để trong feature đó
-(`features/trips/trip-list.mock.ts`). Mock nhiều feature dùng chung thì lên `lib/`
-(`lib/load-plan.mock.ts` — viewer3d, warehouse và driver cùng đọc).
+(`features/viewer3d/benchmark.mock.ts`). Dữ liệu nghiệp vụ nhiều feature dùng chung nằm ở kho `lib/mock-db`, không
+thêm mock riêng lên `lib/` (LM-062 đã gỡ `lib/load-plan.mock.ts` mm).
 
 ## 4. Design tokens
 
@@ -318,7 +318,7 @@ trong state và payload (D-03), nên đích là:
 - Mọi ví dụ số thực đưa vào test phải được chạy thử bằng máy trước; ba giả định viết tay trong
   issue gốc đã sai (`45.1 + 45.1 + 45.1` thực ra bằng đúng `135.3`).
 - **Trạng thái chuyển đổi:** `src/domain`, engine 3D và editor đã dùng cm (LM-031). Màn kho (LM-060) và tài xế (LM-061)
-  đọc revision đã duyệt bằng cm qua `adaptResult`. Mock `LoadPlan` mm chỉ còn cho tới LM-062. Code mới không được thêm giá trị mm; code cũ đổi theo đúng issue,
+  đọc revision đã duyệt bằng cm qua `adaptResult`. Mock `LoadPlan` mm, `types/load-plan` và `adaptLoadPlan` đã gỡ (LM-062); kiểu điều khiển viewer nằm ở `viewer3d/viewer-types.ts`. Code mới không được thêm giá trị mm; code cũ đổi theo đúng issue,
   không đổi rải rác.
 
 ### Định dạng số và ngày theo ngôn ngữ
@@ -416,7 +416,7 @@ kết quả tối ưu; không có nguồn thì **bỏ hẳn phần đó**, khôn
 - Kích thước placement **đã áp orientation**. Xoay luôn áp mã đích lên kích thước danh nghĩa `baseDimensionsById` (lấy từ `CargoPackage`), không đảo ngược kích thước đã xoay (`orientedSize` trong `scene-input.ts`). Xoay giữ nguyên góc vị trí của kiện.
 - Cả ba vai trò dùng chung `SceneCanvas` với `frameloop="demand"`. CameraControls tự invalidate khi chuyển động; mọi thay đổi buffer imperative phải gọi invalidate. Spring chỉ ghi ma trận/proxy kiện đang chạy, không đưa state từng frame qua React.
 - `frustumCulled={false}` không loại bỏ nhu cầu bounds của **raycast**. Cargo dùng sphere bao toàn bộ effective geometry và quãng animation, cập nhật khi geometry đổi. Không tính lại `computeBoundingSphere()` trong animation/step/slice path; cập nhật màu không ghi lại ma trận.
-- Dữ liệu đo riêng trong `features/viewer3d/benchmark.mock.ts` (`createBenchmarkInput`: request + result đúng contract Spec, cm; tài xế dùng `createBenchmarkInput`; `createBenchmarkPlan` mm cũ không còn màn nào dùng, gỡ ở LM-062): `?debug&packages=132|300|500|1000`, có thể thêm `&quality=high|balanced|low`. Không đổi mock nghiệp vụ và không kích hoạt benchmark khi thiếu `debug`. Đây là fixture renderer có khe hở, không phải phương án đã xác nhận ổn định chất xếp.
+- Dữ liệu đo riêng trong `features/viewer3d/benchmark.mock.ts` (`createBenchmarkInput`: request + result đúng contract Spec, cm; tài xế dùng `createBenchmarkInput`): `?debug&packages=132|300|500|1000`, có thể thêm `&quality=high|balanced|low`. Không đổi mock nghiệp vụ và không kích hoạt benchmark khi thiếu `debug`. Đây là fixture renderer có khe hở, không phải phương án đã xác nhận ổn định chất xếp.
 - Debug chỉ quan sát: FPS khi scene chuyển động, draw calls, tam giác, số kiện, DPR và tier. Khi nghỉ hiển thị trạng thái nghỉ; không tự invalidate để đo FPS. Chưa nâng mục tiêu FPS trên thiết bị thật chỉ dựa vào số đo Chromium phần mềm.
 - Low tier dùng DPR 0,5 và vật liệu cargo Lambert sau phép đo kéo camera 1.000 kiện trên SwiftShader; giữ nguyên picking và nhãn HTML. Balanced/high giữ Standard. Phần 3D mềm hơn là trade-off có chủ ý để ưu tiên tương tác. Không suy diễn kết quả này thành cam kết FPS trên mọi thiết bị hoặc mọi tier.
 
@@ -432,7 +432,7 @@ kết quả tối ưu; không có nguồn thì **bỏ hẳn phần đó**, khôn
 ### Operations và scene dùng chung *(bổ sung)*
 
 - `operations/scene-semantics.ts` tách loaded/current/next/future/removed khỏi renderer. Planner, `PositionViewer` (kho) và `DriverCargoViewer` cùng dùng `SceneCanvas`; panel và workflow nằm ở wrapper. Không thêm engine cho từng vai trò.
-- *(đã điều chỉnh, LM-036)* Loading lấy `placement.step` (= `loadingOrder`); unloading lấy `unloadingOrder` của kết quả qua `unloadSequence` (`operations/unloading.ts`), nhãn "Thứ tự dỡ" không kèm "gợi ý"; revision `ordersRecomputed` hiện thêm câu "tính lại ở FE". Màn tài xế (LM-061) dùng `unloadingOrder` của revision đã duyệt cho cả danh sách kiện của điểm giao lẫn mô phỏng, không có chữ "gợi ý". Nhánh thứ tự suy ra (stop tăng, cao trước, gần cửa trước, nhãn "gợi ý") chỉ còn cho `LoadPlan` mm cũ không có `unloadingOrder`. Stop-order consistency không chứng minh unload accessibility.
+- *(đã điều chỉnh, LM-036)* Loading lấy `placement.step` (= `loadingOrder`); unloading lấy `unloadingOrder` của kết quả qua `unloadSequence` (`operations/unloading.ts`), nhãn "Thứ tự dỡ" không kèm "gợi ý"; revision `ordersRecomputed` hiện thêm câu "tính lại ở FE". Màn tài xế (LM-061) dùng `unloadingOrder` của revision đã duyệt cho cả danh sách kiện của điểm giao lẫn mô phỏng, không có chữ "gợi ý". Nhánh thứ tự suy ra (stop tăng, cao trước, gần cửa trước, nhãn "gợi ý") chỉ còn làm dự phòng khi kết quả thiếu `unloadingOrder`; hiện không màn nào dùng tới. Stop-order consistency không chứng minh unload accessibility.
 - Blocker là `lifoIssues` của domain qua `createLifoIndex`: chỉ kiện giao **muộn hơn** nằm hẳn sau mặt sau; kiện đã dỡ/đang ẩn gỡ khỏi lưới (`grid.remove`), tua lùi thì thêm lại; kiện chắn sắp theo x trước khi callout. `LIFO_BLOCKED` dừng mô phỏng và giữ target; `LIFO_PARTIAL` chỉ đánh dấu. Duyệt đếm hai mã này, không khẳng định dỡ được thực tế. Không tính người, xe nâng, clearance hay xoay lúc dỡ. Riêng hình ảnh dỡ (`UnloadMotion`) dùng `corridor` — mọi kiện còn lại trên hành lang thẳng, bất kể điểm giao — để không trượt xuyên kiện. Fixture benchmark có đúng một cặp kiện đổi điểm giao tạo ca `LIFO_BLOCKED` cho browser suite; seed đã duyệt không có ca LIFO.
 - CoM là **tâm khối lượng hàng** đã xếp/còn lại, không phải toàn xe. *(đã điều chỉnh, LM-037)* Tải trục không hiện số nào: panel giữ chỗ với nhãn "Sẽ có sau" và chỉ liệt kê cấu hình `vehicle.axles` nếu có (Spec 7.10); Duyệt không kiểm tải trục. Cabin, bánh và khung gầm là mô hình minh họa, không phải axle geometry.
 - Chi tiết xe gộp geometry theo vật liệu; sáu bánh dùng một draw. Cargo dùng atlas trung tính chung cho carton/pallet/crate qua thuộc tính instance, không phải nhãn hướng đặt. Low tắt chi tiết phụ; không tắt cues nghiệp vụ. Khi gặp `LIFO_BLOCKED`, playback dỡ tạm dừng và giữ target. Kiện còn vật trên hành lang thẳng (người dùng bỏ qua bước, hoặc bị che một phần) mờ tại chỗ; không dịch chuyển xuyên kiện khác. Reduced motion không dịch chuyển lớn; hoàn tất phải trở lại idle.

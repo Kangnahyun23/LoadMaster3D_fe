@@ -105,9 +105,9 @@ function toDate(value: Date | string): Date {
 }
 
 /* ---------------------------------------------------------------------------
-   Lớp cũ cho các màn chưa dịch: cố định vi-VN và giữ đơn vị cũ (mm của LoadPlan).
+   Lớp cũ cho các màn chưa dịch: cố định vi-VN.
    Chỉ còn những hàm đang có nơi gọi; code mới dùng `useFormat()` / `createFormatter`.
-   LM-031 (mm → cm), LM-070 và LM-071 chuyển dần các nơi gọi rồi xoá phần này.
+   LM-070 và LM-071 chuyển dần các nơi gọi rồi xoá phần này. Đơn vị mm cũ đã gỡ ở LM-062.
    --------------------------------------------------------------------------- */
 
 const VI = createFormatter('vi-VN')
@@ -125,11 +125,6 @@ export function formatDecimal(value: number): string {
 /** 0.874 → "87,4%" — dùng khi nguồn dữ liệu là tỉ lệ 0–1 */
 export function formatRatioAsPercent(ratio: number): string {
   return VI.percent(ratio * 100)
-}
-
-/** (7200, 2350, 2400) → "7.200 × 2.350 × 2.400 mm" — dữ liệu mm cũ, bỏ ở LM-031 */
-export function formatDimensions(lengthMm: number, widthMm: number, heightMm: number): string {
-  return `${[lengthMm, widthMm, heightMm].map((mm) => VI.integer(mm)).join(' × ')} mm`
 }
 
 /** Date → "14:30 14/09/2026" */

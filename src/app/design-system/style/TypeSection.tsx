@@ -13,7 +13,7 @@ const ROWS: Array<{ style: string; size: string; className: string; sample: stri
 const MONO_SAMPLES = [
   { label: 'Mã chuyến', value: 'TRIP-2026-0914' },
   { label: 'Khối lượng', value: '8.240 kg' },
-  { label: 'Kích thước', value: '7.200 × 2.350 × 2.400 mm' },
+  { label: 'Kích thước', value: '720 × 235 × 240 cm' },
   { label: 'Phần trăm', value: '87,4%' },
 ]
 

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import type { ManualEditor } from './useManualEditor'
 import { CAMERA_PRESETS } from '../viewer-options'
-import type { CameraPreset } from '@/types/load-plan'
+import type { CameraPreset } from '@/features/viewer3d/viewer-types'
 
 export function EditorToolbar({ state, editor, onModeChange = editor.setMode }: {
   state: LoadPlanViewerState; editor: ManualEditor; onModeChange?: ManualEditor['setMode']

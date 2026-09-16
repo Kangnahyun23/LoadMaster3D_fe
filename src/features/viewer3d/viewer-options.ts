@@ -1,4 +1,4 @@
-import type { CameraPreset, ColorMode } from '@/types/load-plan'
+import type { CameraPreset, ColorMode } from '@/features/viewer3d/viewer-types'
 import type { QualityTier } from './usePerformanceFlags'
 
 export const CAMERA_PRESETS: ReadonlyArray<{ value: CameraPreset; label: string }> = [

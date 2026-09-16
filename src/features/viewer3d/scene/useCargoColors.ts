@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import { Color, DynamicDrawUsage, type InstancedMesh } from 'three'
-import type { ColorMode } from '@/types/load-plan'
+import type { ColorMode } from '@/features/viewer3d/viewer-types'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import { dimColor, placementColor, type ColorContext } from '../colors'
 import type { InstanceLayout } from './instance-layout'

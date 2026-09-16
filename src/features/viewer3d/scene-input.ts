@@ -2,14 +2,13 @@ import { expandPackages } from '@/domain/cargo'
 import type { ConstraintEngineInput } from '@/domain/constraints'
 import {
   orientDimensions,
-  roundCm,
   type OrientationCode,
   type OrientationRules,
   type PackageDimensions,
 } from '@/domain/geometry'
 import type { FragilityLevel, OptimizationResult, UnplacedPackage, VehicleConfig } from '@/domain/models'
 import { isStale, type DeliveryStop, type Revision } from '@/lib/mock-db'
-import type { LoadPlan, Orientation, Packaging } from '@/types/load-plan'
+import type { Packaging } from './viewer-types'
 
 /**
  * Dữ liệu vào của engine 3D (LM-030, LM-031): **cm** theo hệ toạ độ Spec (x dọc thùng từ vách trong ra cửa, y ngang từ vách
@@ -42,7 +41,7 @@ export type ScenePlacement = {
   readonly fragile: boolean
   readonly stackable: boolean
   readonly pinned: boolean
-  /** Tỷ lệ đỡ đáy và mã cảnh báo do engine tính trên kết quả (Spec 7.6, LM-049); phương án mm cũ: 1 và rỗng. */
+  /** Tỷ lệ đỡ đáy và mã cảnh báo do engine tính trên kết quả (Spec 7.6, LM-049); fixture không qua engine: 1 và rỗng. */
   readonly supportRatio: number
   readonly constraintWarnings: readonly string[]
 }
@@ -60,8 +59,6 @@ export type SceneUnplaced = {
   readonly reasonCode?: UnplacedPackage['reasonCode']
   /** `message` của contract — mock ghi lại mã lý do; service thật có thể ghi câu riêng. */
   readonly message?: string
-  /** Phương án mm cũ: lý do đã là câu tiếng Việt */
-  readonly reasonText?: string
 }
 
 export type SceneStop = { readonly number: number; readonly name: string; readonly packageCount: number }
@@ -82,11 +79,11 @@ export type ViewerSceneModel = {
   readonly isMockResult: boolean
   /** Thứ tự xếp/dỡ được tính lại ở FE khi Duyệt (D-32) */
   readonly ordersRecomputed: boolean
-  /** Đầu vào constraint engine cho editor (LM-035); `null` với `LoadPlan` mm cũ — kho/tài xế không chỉnh sửa. */
+  /** Đầu vào constraint engine cho editor (LM-035); `null` khi không chỉnh sửa được. */
   readonly engineInput: ConstraintEngineInput | null
-  /** `result.metrics` của kết quả (LM-049); `null` với phương án mm cũ. */
+  /** `result.metrics` của kết quả (LM-049); `null` khi nguồn không có metrics. */
   readonly metrics: OptimizationResult['metrics'] | null
-  /** Revision nguồn (LM-049, LM-050); `null` với phương án mm cũ và fixture benchmark. */
+  /** Revision nguồn (LM-049, LM-050); `null` với fixture benchmark. */
   readonly revision: {
     readonly id: string
     readonly jobId: string
@@ -205,71 +202,4 @@ export function adaptResult({ trip, revision }: ResultSceneSource): ViewerSceneM
   })
 }
 
-/** Ba hướng của phương án mm cũ theo mã Spec: 0 D×R×C = LWH, 1 R×D×C = WLH, 2 C×R×D = HWL. */
-const LEGACY_ORIENTATION: Record<Orientation, OrientationCode> = { 0: 'LWH', 1: 'WLH', 2: 'HWL' }
-const LEGACY_RULES: OrientationRules = Object.freeze({ allowedOrientations: Object.freeze(Object.values(LEGACY_ORIENTATION)), keepUpright: false })
-const cm = (mm: number) => roundCm(mm / 10)
-
-/**
- * `LoadPlan` mm cũ (kho, tài xế, fixture benchmark) → scene cm, cho tới khi các màn đó đọc revision (LM-060 → LM-062).
- * Đổi đơn vị đúng một lần ở đây. Ba hướng cũ đều là phép hoán vị tự nghịch đảo, nên kích thước gốc = áp lại chính hướng đó.
- */
-export function adaptLoadPlan(plan: LoadPlan): ViewerSceneModel {
-  const placements = plan.placements.map((p): ScenePlacement => {
-    const [lengthCm, widthCm, heightCm] = [cm(p.lengthMm), cm(p.widthMm), cm(p.heightMm)]
-    return Object.freeze({
-      id: p.id,
-      packageId: p.orderId,
-      name: p.orderId,
-      stop: p.stop,
-      lengthCm,
-      widthCm,
-      heightCm,
-      weightKg: p.weightKg,
-      position: Object.freeze({ x: cm(p.position.x), y: cm(p.position.y), z: cm(p.position.z) }),
-      step: p.step,
-      unloadingOrder: 0,
-      orientation: LEGACY_ORIENTATION[p.orientation],
-      packaging: p.packaging,
-      fragilityLevel: p.fragile ? 'HIGH' : 'NONE',
-      fragile: p.fragile,
-      stackable: true,
-      pinned: p.pinned,
-      supportRatio: 1,
-      constraintWarnings: [],
-    })
-  })
-  const { vehicle } = plan
-  return Object.freeze({
-    tripId: plan.tripId,
-    vehicle: Object.freeze({
-      id: plan.tripId,
-      name: `${vehicle.name} · ${vehicle.plate}`,
-      innerLengthCm: cm(vehicle.innerLengthMm),
-      innerWidthCm: cm(vehicle.innerWidthMm),
-      innerHeightCm: cm(vehicle.innerHeightMm),
-      maxPayloadKg: vehicle.payloadKg,
-      doorWidthCm: cm(vehicle.innerWidthMm),
-      doorHeightCm: cm(vehicle.innerHeightMm),
-      doorPosition: 'REAR' as const,
-      clearanceCm: 0,
-      obstacles: [],
-    }),
-    fillRate: plan.fillRate,
-    stops: Object.freeze(plan.stops.map((stop) => Object.freeze({ ...stop }))),
-    placements: Object.freeze(placements),
-    unplaced: Object.freeze(plan.unplaced.map((u): SceneUnplaced => Object.freeze({
-      id: u.id, packageId: u.orderId, name: u.orderId, stop: u.stop,
-      lengthCm: cm(u.lengthMm), widthCm: cm(u.widthMm), heightCm: cm(u.heightMm), weightKg: u.weightKg, reasonText: u.reason,
-    }))),
-    placementById: indexById(placements),
-    baseDimensionsById: new Map(placements.map((p) => [p.id, Object.freeze(orientedSize(p, p.orientation))])),
-    orientationRulesById: new Map(placements.map((p) => [p.id, LEGACY_RULES])),
-    isMockResult: false,
-    ordersRecomputed: false,
-    engineInput: null,
-    revision: null,
-    metrics: null,
-  })
-}
 

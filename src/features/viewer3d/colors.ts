@@ -1,7 +1,7 @@
 import { Color } from 'three'
 import { stopColor } from '@/lib/stops'
 import { readToken } from '@/lib/tokens'
-import type { ColorMode } from '@/types/load-plan'
+import type { ColorMode } from '@/features/viewer3d/viewer-types'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 
 /**

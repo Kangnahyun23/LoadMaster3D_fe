@@ -121,7 +121,7 @@ export function PackageListPanel({
                   <span className="truncate font-mono text-caption text-text-3">
                     {format.dimensions(item.lengthCm, item.widthCm, item.heightCm)} · {format.weight(item.weightKg)}
                   </span>
-                  <span className="text-caption text-badge-warning-fg">{item.reasonText ?? t(`viewer.unplacedReasons.${item.reasonCode ?? 'UNKNOWN'}`)}</span>
+                  <span className="text-caption text-badge-warning-fg">{t(`viewer.unplacedReasons.${item.reasonCode ?? 'UNKNOWN'}`)}</span>
                   {/* `message` của service thật có thể khác mã lý do; mock ghi lại đúng mã nên không lặp */}
                   {item.message && item.message !== item.reasonCode ? <span className="text-caption text-text-2">{item.message}</span> : null}
                 </div>

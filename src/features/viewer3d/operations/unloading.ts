@@ -4,13 +4,13 @@ import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 
 export type UnloadSequence = {
   readonly ordered: ScenePlacement[]
-  /** `true`: thứ tự dỡ của kết quả (service hoặc FE tính lại khi Duyệt). `false`: phương án mm cũ không có thứ tự, đang dùng thứ tự suy ra. */
+  /** `true`: thứ tự dỡ của kết quả (service hoặc FE tính lại khi Duyệt). `false`: kết quả thiếu thứ tự dỡ (`unloadingOrder = 0`), đang dùng thứ tự suy ra. */
   readonly fromResult: boolean
 }
 
 /**
- * Thứ tự phát dỡ (LM-036): theo `unloadingOrder` của kết quả. Phương án mm cũ của tài xế (`adaptLoadPlan`) không có thứ tự dỡ
- * (`unloadingOrder = 0`) nên suy ra tạm: điểm giao tăng, kiện cao trước, gần cửa trước — chỉ là gợi ý, UI ghi rõ như vậy.
+ * Thứ tự phát dỡ (LM-036): theo `unloadingOrder` của kết quả. Kết quả thiếu thứ tự dỡ
+ * (`unloadingOrder = 0`, mọi màn hiện đọc revision nên không còn nguồn nào như vậy) thì suy ra tạm: điểm giao tăng, kiện cao trước, gần cửa trước — chỉ là gợi ý, UI ghi rõ như vậy.
  */
 export function unloadSequence(placements: readonly ScenePlacement[]): UnloadSequence {
   const fromResult = placements.every((p) => p.unloadingOrder > 0)

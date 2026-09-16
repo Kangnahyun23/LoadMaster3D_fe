@@ -3,7 +3,6 @@ import {
   createFormatter,
   formatDateTime,
   formatDecimal,
-  formatDimensions,
   formatInteger,
   formatRatioAsPercent,
 } from '@/lib/format'
@@ -91,10 +90,9 @@ test('times use the 24-hour clock in both languages', () => {
   expect(en.time(new Date(2026, 8, 14, 0, 5))).toBe('00:05')
 })
 
-test('screens not yet translated keep their Vietnamese output and old units', () => {
+test('screens not yet translated keep their Vietnamese output', () => {
   expect(formatInteger(8240)).toBe('8.240')
   expect(formatDecimal(18.44)).toBe('18,4')
   expect(formatRatioAsPercent(0.874)).toBe('87,4%')
-  expect(formatDimensions(7200, 2350, 2400)).toBe('7.200 × 2.350 × 2.400 mm')
   expect(formatDateTime(new Date(2026, 8, 14, 14, 30))).toBe('14:30 14/09/2026')
 })

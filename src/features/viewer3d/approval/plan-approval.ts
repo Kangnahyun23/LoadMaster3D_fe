@@ -19,7 +19,7 @@ export type PlanApproval = {
 /**
  * Kiểm Duyệt cho Planner (LM-050): dựng constraint engine trên request + result của revision, áp tư thế draft, rồi
  * `approvalBlockers` của domain — còn `error`/`blockApproval`, kiện `mustLoad` chưa xếp, hoặc revision lỗi thời (D-24, D-31).
- * Phương án không có đầu vào engine (mm cũ, benchmark) thì không Duyệt được: trả `null`.
+ * Phương án không có đầu vào engine (fixture benchmark) thì không Duyệt được: trả `null`.
  */
 export function planApproval(
   model: ViewerSceneModel,
