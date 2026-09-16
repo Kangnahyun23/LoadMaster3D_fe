@@ -443,6 +443,21 @@ export const vi = {
       deleteTitle: 'Xoá kiện {id}?',
       deleteDescription: 'Kiện bị xoá khỏi chuyến. Phương án đã tối ưu sẽ thành lỗi thời.',
       cancel: 'Huỷ',
+      // Câu cho mã lỗi của `cargoPackageSchema` hiện dưới từng ô của form kiện (LM-054)
+      errors: {
+        numberInvalid: 'Nhập số.',
+        dimensionPositive: 'Kích thước phải lớn hơn 0 cm.',
+        weightNonNegative: 'Khối lượng không được nhỏ hơn 0 kg.',
+        quantityInteger: 'Số lượng phải là số nguyên.',
+        quantityMin: 'Số lượng tối thiểu là 1.',
+        orientationsEmpty: 'Chọn ít nhất một hướng đặt.',
+        maxTopLoadNonNegative: 'Tải phía trên không được nhỏ hơn 0 kg.',
+        maxTopLoadNotStackable: 'Kiện không cho xếp chồng thì tải phía trên phải bằng 0 kg.',
+        maxStackCountInteger: 'Số tầng phải là số nguyên.',
+        maxStackCountMin: 'Số tầng tối thiểu là 1.',
+        minSupportRatioRange: 'Tỷ lệ đỡ đáy phải trong khoảng 0 đến 1.',
+        invalid: 'Giá trị không hợp lệ.',
+      },
     },
     packages: {
       title: 'Kiện hàng',

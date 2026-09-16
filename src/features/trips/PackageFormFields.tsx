@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/Textarea'
 import { ORIENTATION_CODES, isUpright } from '@/domain/geometry'
 import type { CargoPackage } from '@/domain/models'
 import { useT } from '@/lib/i18n'
+import { packageFieldError } from './package-form-errors'
 import type { StopRow } from './trip-summary'
 
 const FRAGILITY = ['NONE', 'LOW', 'MEDIUM', 'HIGH'] as const
@@ -34,7 +35,7 @@ export function PackageFormFields({ form, stops, onKeepUprightChange, onStackabl
       suffix={suffix}
       type="number"
       step={step}
-      error={errors[field]?.message}
+      error={packageFieldError(errors[field]?.message, t)}
       disabled={disabled}
       {...register(field, { valueAsNumber: true })}
     />
@@ -42,7 +43,7 @@ export function PackageFormFields({ form, stops, onKeepUprightChange, onStackabl
 
   return (
     <div className="flex flex-col gap-4">
-      <Input label={t('trips.form.name')} error={errors.name?.message} {...register('name')} />
+      <Input label={t('trips.form.name')} error={packageFieldError(errors.name?.message, t)} {...register('name')} />
 
       <div className="grid grid-cols-3 gap-3">
         {numeric('lengthCm', t('trips.form.length'), 'cm', '0.1')}
@@ -72,7 +73,7 @@ export function PackageFormFields({ form, stops, onKeepUprightChange, onStackabl
             />
           ))}
         </div>
-        {errors.allowedOrientations ? <p className="text-caption text-badge-danger-fg">{errors.allowedOrientations.message}</p> : null}
+        {errors.allowedOrientations?.message ? <p className="text-caption text-badge-danger-fg">{packageFieldError(errors.allowedOrientations.message, t)}</p> : null}
       </fieldset>
 
       <Switch

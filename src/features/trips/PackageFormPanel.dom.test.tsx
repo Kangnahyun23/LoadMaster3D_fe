@@ -65,3 +65,17 @@ test('saving a valid package hands the edited values back', async () => {
   await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1))
   expect(onSave.mock.calls[0]?.[0]).toMatchObject({ id: 'PKG-001', name: 'Thùng carton B' })
 })
+
+test('an invalid package is not saved and field errors read as sentences, not schema codes (LM-054)', async () => {
+  const { onSave, user } = renderPanel()
+  await user.click(screen.getByRole('checkbox', { name: 'LWH' }))
+  await user.click(screen.getByRole('checkbox', { name: 'HLW' }))
+  await user.clear(screen.getByLabelText(/Số lượng/))
+  await user.type(screen.getByLabelText(/Số lượng/), '0')
+  await user.click(screen.getByRole('button', { name: 'Lưu kiện' }))
+
+  expect(await screen.findByText('Chọn ít nhất một hướng đặt.')).toBeInTheDocument()
+  expect(screen.getByText('Số lượng tối thiểu là 1.')).toBeInTheDocument()
+  expect(screen.queryByText(/^package\./)).not.toBeInTheDocument()
+  expect(onSave).not.toHaveBeenCalled()
+})
