@@ -13,7 +13,6 @@ export const en = {
     driver: 'Driver screen',
     fleet: 'Fleet',
     users: 'Users',
-    settings: 'Settings',
     account: 'Account {name}',
     signOut: 'Sign out',
   },

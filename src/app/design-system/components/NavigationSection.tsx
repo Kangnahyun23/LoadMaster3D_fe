@@ -5,7 +5,6 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/Button'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { TabCount, Tabs, TabsList, TabsTrigger } from '@/components/ui/Tabs'
-import { DriverTabBar } from '@/features/driver/DriverTabBar'
 import { Sample, SheetRow, SheetSection } from '../SheetLayout'
 
 const CAMERAS = [
@@ -49,7 +48,7 @@ export function NavigationSection() {
         </Sample>
       </SheetRow>
 
-      <SheetRow name="Tabs · SegmentedControl · BottomTabBar" note="Tabs có đếm · Segmented cho bộ chọn nhỏ (camera, chế độ màu, tốc độ) · Tab bar 4 mục trên điện thoại." className="flex-col items-stretch">
+      <SheetRow name="Tabs · SegmentedControl" note="Tabs có đếm · Segmented cho bộ chọn nhỏ (camera, chế độ màu, tốc độ)." className="flex-col items-stretch">
         <Sample label="Tabs có đếm">
           <Tabs defaultValue="unplaced" className="w-70 rounded-md border border-border">
             <TabsList>
@@ -66,11 +65,6 @@ export function NavigationSection() {
             <SegmentedControl ariaLabel="Tốc độ" size="sm" mono floating={false} options={[{ value: 1, label: '1×' }, { value: 2, label: '2×' }, { value: 4, label: '4×' }]} value={speed} onChange={setSpeed} />
           </Sample>
         </div>
-        <Sample label="bottom tab bar · 390px">
-          <div className="w-[390px] overflow-hidden rounded-md border border-border">
-            <DriverTabBar />
-          </div>
-        </Sample>
       </SheetRow>
 
       <SheetRow name="SidePanel" note="Trái 280px (thu gọn 48px) · phải 360px. Tiêu đề 44px, viền 1px.">

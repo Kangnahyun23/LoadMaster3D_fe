@@ -2,7 +2,6 @@ import {
   Box,
   LayoutDashboard,
   LogOut,
-  Settings,
   Tablet,
   Truck,
   Users,
@@ -93,19 +92,6 @@ export function NavRail() {
       <div className="flex-1" />
 
       <LanguageSwitch orientation="vertical" className="mb-2" />
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-label={t('nav.settings')}
-            className={cn(RAIL_BUTTON, 'text-text-2 hover:bg-primary-bg')}
-          >
-            <Settings className="size-5" strokeWidth={1.5} aria-hidden />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="right">{t('nav.settings')}</TooltipContent>
-      </Tooltip>
 
       {user ? (
         <DropdownMenu>

@@ -35,9 +35,8 @@ export function useDeliveryStop(stop: DeliveryStop) {
       })
       return
     }
-    toast.success(`Đã hoàn tất điểm giao ${stop.number}`, {
-      description: 'Sẽ đồng bộ khi có mạng. Chuyển sang điểm kế tiếp.',
-    })
+    // Chưa có đồng bộ hay điểm kế tiếp (D-20): chỉ xác nhận điều màn này kiểm được.
+    toast.success(`Đã dỡ đủ kiện tại điểm giao ${stop.number}`)
   }, [remaining, stop.number])
 
   return { done, rejected, toggle, total, doneCount, remaining, percent, complete }

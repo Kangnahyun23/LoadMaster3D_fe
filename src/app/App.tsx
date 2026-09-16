@@ -80,7 +80,7 @@ const router = createBrowserRouter([
               { path: '/kho', element: <LoadingStepPage /> },
               { path: '/tai-xe', element: <Navigate to="/tai-xe/diem-giao" replace /> },
               { path: '/tai-xe/diem-giao', element: <DriverStopPage /> },
-              { path: '/tai-xe/:tab', element: <DriverStopPage /> },
+              { path: '/tai-xe/*', element: <Navigate to="/tai-xe/diem-giao" replace /> },
             ],
           },
         ],
