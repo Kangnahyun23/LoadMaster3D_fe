@@ -5,9 +5,6 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { Badge } from '@/components/ui/Badge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { DeliveryItemRow } from '@/features/driver/DeliveryItemRow'
-import { AlgorithmChart } from '@/features/manager/AlgorithmChart'
-import { KPIS } from '@/features/manager/dashboard.mock'
-import { FillRateChart } from '@/features/manager/FillRateChart'
 import { KpiTile } from '@/features/manager/KpiTile'
 import { GenerationSparkline } from '@/features/optimization/GenerationSparkline'
 import { StopCard } from '@/features/trips/StopCard'
@@ -19,7 +16,6 @@ import { Sample, SheetRow, SheetSection } from '../SheetLayout'
 const DRIVER_ITEM = { id: 'PKG-00194', orderId: 'DH-51031', description: 'Thùng sữa tươi 12 hộp', where: 'Gần cửa, lớp trên' }
 
 export function DataSection() {
-  const kpi = KPIS[0]
   const stop: StopRow = {
     id: 'STOP-1', number: 1, name: 'Công ty TNHH Thực phẩm Sài Gòn',
     address: '12 Nguyễn Văn Linh, Q.7, TP. Hồ Chí Minh', packageCount: 38, weightKg: 2400,
@@ -40,8 +36,8 @@ export function DataSection() {
         <span className="inline-flex h-[22px] items-center gap-1 rounded-full border border-badge-success-border bg-badge-success-bg px-2 font-mono text-caption font-medium text-badge-success-fg"><ArrowUp className="size-3" strokeWidth={2.5} />+3,1%</span>
       </SheetRow>
 
-      <SheetRow name="Card · KPITile · StatTile · InfoTile" note="Card thường · KPI (số lớn + delta) · Stat nhỏ trong card · InfoTile nền surface (tablet, vị trí X/Y/Z)." className="items-stretch">
-        {kpi ? <div className="w-80"><KpiTile kpi={kpi} /></div> : null}
+      <SheetRow name="Card · KPITile · StatTile · InfoTile" note="Card thường · KPI (số lớn + ghi chú nguồn số) · Stat nhỏ trong card · InfoTile nền surface (tablet, vị trí X/Y/Z)." className="items-stretch">
+        <div className="w-80"><KpiTile label="Tổng số kiện" value={formatInteger(132)} unit="kiện" note="Đã tách theo số lượng của 1 chuyến" /></div>
         <div className="flex flex-col gap-0.5"><span className="text-caption text-text-3">Thể tích</span><span className="font-mono text-h2 font-semibold">18,4 <span className="font-sans text-caption font-normal text-text-3">m³</span></span></div>
         <div className="flex flex-col gap-0.5 rounded-md border border-border bg-surface px-2.5 py-2"><span className="text-[11px] leading-3.5 text-text-3">X</span><span className="font-mono text-body font-medium">4.360</span></div>
       </SheetRow>
@@ -63,13 +59,9 @@ export function DataSection() {
         </div>
       </SheetRow>
 
-      <SheetRow name="UtilizationBar · ProgressBar · StepProgress · Sparkline · Chart" note="Thanh 8px pill; >90% chuyển warning. StepProgress 10px cho tablet. Sparkline hội tụ. Biểu đồ dashboard dùng recharts." className="flex-col items-stretch gap-6">
+      <SheetRow name="UtilizationBar · ProgressBar · StepProgress · Sparkline" note="Thanh 8px pill; >90% chuyển warning. StepProgress 10px cho tablet. Sparkline hội tụ. Bảng điều khiển chưa có biểu đồ: chưa có nguồn số thật (LM-052)." className="flex-col items-stretch gap-6">
         <div className="flex w-80 flex-col gap-3"><ProgressBar label="Thể tích sử dụng" value={78} /><ProgressBar label="Trục sau" value={93} tone="warning" /><ProgressBar label="Quá tải" value={100} tone="danger" /></div>
         <Sample label="sparkline · 200 vòng → 89,2%"><div className="w-146"><GenerationSparkline generations={200} target={89.2} done /></div></Sample>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-md border border-border p-4"><span className="text-body font-medium">Tỷ lệ lấp đầy theo tuần</span><FillRateChart /></div>
-          <div className="rounded-md border border-border p-4"><span className="text-body font-medium">So sánh thuật toán</span><AlgorithmChart /></div>
-        </div>
         <span className="font-mono text-caption text-text-3">{formatInteger(132)} kiện · trục 0–100%</span>
       </SheetRow>
     </SheetSection>
