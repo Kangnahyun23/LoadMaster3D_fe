@@ -48,7 +48,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - pnpm lint: ✅ · pnpm build: ✅ · pnpm test: 492/492 · pnpm test:e2e: 45/45 (desktop, tablet, phone)
 
 **Vướng mắc / quyết định mới**
-- Nút primary các màn dispatcher (Tạo chuyến, Tối ưu, xác nhận Duyệt) vẫn 40 px trên tablet; AGENTS mục 5/10 đòi 56 px. Chưa sửa — cần quyết định: `Button` tự đổi cỡ theo breakpoint, hay coi màn dispatcher là desktop-only.
+- Nút primary các màn dispatcher vẫn 40 px trên tablet → người dùng chốt 16/09/2026: màn điều phối tạm thời chỉ desktop (AGENTS mục 5).
 - Màn kho và tài xế vẫn đọc mock mm, chưa đọc revision đã duyệt (phase 4: LM-060 → LM-062).
 
 **Việc tiếp theo**

@@ -247,6 +247,8 @@ trong `src/`; muốn dùng class từ nơi khác thì thêm `@source` tường m
 ### Nút
 
 - Nút chính: cao 40px desktop, **56px tablet và điện thoại**. Padding ngang 16px. Bo góc 8px. Nền đặc `--primary`. Chữ trắng 14px weight 600. Không viền, không bóng lúc nghỉ.
+- *(quyết định 16/09/2026)* Màn **điều phối** (danh sách/chi tiết/form chuyến, kiện, thiết lập tối ưu, so sánh, đội xe, dashboard) tạm thời
+  **chỉ hỗ trợ desktop**: nút giữ 40px, không bắt buộc 56px. Luật 56px áp cho màn cảm ứng: kho, tài xế, Planner 3D.
 - Hover chỉ đổi nền sang `--primary-hover`. **Không** phóng to, **không** nhấc lên.
 - Focus: vòng 2px `--primary` cách 2px.
 - Loading: giữ nguyên chiều rộng, thêm spinner 16px bên trái chữ.
