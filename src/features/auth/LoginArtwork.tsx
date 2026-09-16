@@ -11,7 +11,7 @@ import {
   shellColors,
   sortByDepth,
 } from '@/lib/isometric'
-import { THUMBNAIL_CONTAINER, thumbnailBoxes } from '@/lib/plan-comparison.mock'
+import { ARTWORK_CONTAINER, artworkBoxes } from './login-artwork-boxes'
 
 const SCALE = 64
 /** Lề trong khung nhìn, chừa chỗ cho bóng đổ mềm khỏi bị cắt thành cạnh thẳng. */
@@ -35,16 +35,16 @@ export function LoginArtwork() {
 
   const { frame, project, shell, roof, shadow, boxes } = useMemo(() => {
     // Khung nhìn tính từ kích thước thùng, không đặt tay — xem `fitViewBox`.
-    const frame = fitViewBox(THUMBNAIL_CONTAINER, SCALE, PAD)
+    const frame = fitViewBox(ARTWORK_CONTAINER, SCALE, PAD)
     const projector = createProjector(SCALE, frame.offsetX, frame.offsetY)
     return {
       frame,
       project: projector,
-      shell: containerShell(THUMBNAIL_CONTAINER, projector, shellColors()),
-      roof: roofOutline(THUMBNAIL_CONTAINER, projector),
-      shadow: groundShadow(THUMBNAIL_CONTAINER, projector),
+      shell: containerShell(ARTWORK_CONTAINER, projector, shellColors()),
+      roof: roofOutline(ARTWORK_CONTAINER, projector),
+      shadow: groundShadow(ARTWORK_CONTAINER, projector),
       // Thứ tự xếp: vách trước → cửa sau, lớp dưới → lớp trên.
-      boxes: [...thumbnailBoxes('lifo')].sort(
+      boxes: artworkBoxes().sort(
         (a, b) => a.x - b.x || a.z - b.z || a.y - b.y,
       ),
     }

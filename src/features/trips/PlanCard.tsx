@@ -1,144 +1,133 @@
-import { Check, CircleCheck, X } from 'lucide-react'
+import { Check, CircleCheck } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { formatDecimal, formatInteger } from '@/lib/format'
+import { useFormat, useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { PlanThumbnail } from './PlanThumbnail'
-import {
-  PAYLOAD_KG,
-  type PlanSummary,
-  type bestValues,
-} from '@/lib/plan-comparison.mock'
+import type { ComparedMetric, RevisionCardModel, bestValues } from './revision-comparison'
 
 type Best = ReturnType<typeof bestValues>
 
-/** Chiều cao từng khối trong thẻ — cột nhãn bên trái dùng đúng các số này. */
-export const CARD_HEIGHTS = {
-  thumbnail: 190,
-  title: 84,
-  metric: 48,
-  footer: 72,
-} as const
-
-export const METRIC_LABELS = [
-  'Tỷ lệ lấp đầy',
-  'Tải trọng đã dùng',
-  'Số kiện chưa xếp',
-  'Thời gian chạy',
-  'Tuân thủ thứ tự dỡ',
-] as const
-
 /**
- * Một cột phương án. Thẻ đang chọn nổi bằng viền primary + vòng 1px,
- * không dùng bóng (mục 5). Giá trị tốt nhất mỗi hàng nền primary-bg + dấu tích.
+ * Một cột revision. Thẻ đang chọn nổi bằng viền primary + vòng 1px, không bóng (mục 5); nút chọn luôn là nút phụ vì
+ * màn chỉ có một nút primary ở chân trang (LM-051). Giá trị tốt nhất của hàng nền primary-bg + dấu tích.
  */
 export function PlanCard({
-  plan,
+  card,
   best,
   selected,
   onSelect,
 }: {
-  plan: PlanSummary
+  card: RevisionCardModel
   best: Best
   selected: boolean
-  onSelect: (key: PlanSummary['key']) => void
+  onSelect: (id: string) => void
 }) {
+  const t = useT()
+  const format = useFormat()
+  const isBest = (metric: ComparedMetric) => best[metric] === card[metric]
+  const { revision } = card
+  const note = card.sourceRevisionId
+    ? t('trips.compare.approvedFrom', { id: card.sourceRevisionId })
+    : card.approvedAs.length > 0
+      ? t('trips.compare.approvedAs', { ids: card.approvedAs.join(', ') })
+      : t('trips.compare.createdAt', { time: format.time(card.createdAt), date: format.date(card.createdAt) })
+
   return (
     <article
-      aria-label={plan.name}
+      aria-label={card.id}
       className={cn(
-        'relative flex flex-col overflow-hidden rounded-md border bg-bg',
+        'flex min-w-0 flex-col overflow-hidden rounded-md border bg-bg',
         selected ? 'border-primary ring-1 ring-primary' : 'border-border',
       )}
     >
-      {selected ? (
-        <span className="absolute top-3 left-3 z-1 inline-flex h-[22px] items-center gap-1.5 rounded-full bg-primary px-2.5 text-caption font-medium leading-none text-white">
-          <Check className="size-3" strokeWidth={2.5} aria-hidden />
-          Đang chọn
-        </span>
-      ) : null}
+      <PlanThumbnail
+        revisionId={card.id}
+        request={revision.request}
+        placements={revision.result.placements}
+        totalCount={card.placedCount + card.unplacedCount}
+      />
 
-      <PlanThumbnail style={plan.style} placedCount={plan.placedCount} totalCount={plan.totalCount} />
-
-      <div className="flex flex-col gap-0.5 px-5 pt-4" style={{ height: CARD_HEIGHTS.title }}>
-        <span className="text-body-lg font-semibold">{plan.name}</span>
-        <span className="text-body text-text-3">{plan.algorithm}</span>
+      <div className="flex h-27 flex-col gap-1.5 px-5 pt-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="font-mono text-h3 font-semibold">{card.id}</span>
+          <span className="truncate font-mono text-caption text-text-3">{t('trips.compare.jobId', { jobId: card.jobId })}</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {card.isMockResult ? <Badge tone="warning">MOCK RESULT</Badge> : null}
+          {card.latest ? <Badge tone="info">{t('trips.compare.status.latest')}</Badge> : null}
+          {card.approved ? <Badge tone="success">{t('trips.compare.status.approved')}</Badge> : null}
+          {card.stale ? <Badge tone="danger">{t('trips.compare.status.stale')}</Badge> : null}
+        </div>
+        <span className="truncate text-caption text-text-3">{note}</span>
       </div>
 
-      <Metric label={METRIC_LABELS[0]} best={plan.fillRate === best.fillRate}>
-        <span className={cn(plan.fillRate === best.fillRate ? 'text-primary-hover' : 'text-text')}>
-          {formatDecimal(plan.fillRate)}
-        </span>{' '}
-        <Unit>%</Unit>
-      </Metric>
-      <Metric label={METRIC_LABELS[1]} best={plan.weightKg === best.weightKg}>
-        {formatInteger(plan.weightKg)} <Unit>/ {formatInteger(PAYLOAD_KG)} kg</Unit>
-      </Metric>
-      <Metric label={METRIC_LABELS[2]} best={plan.unplacedCount === best.unplacedCount}>
-        <span className={cn(plan.unplacedCount > 0 ? 'text-badge-warning-fg' : 'text-text')}>
-          {formatInteger(plan.unplacedCount)}
-        </span>{' '}
-        <Unit>kiện</Unit>
-      </Metric>
-      <Metric label={METRIC_LABELS[3]} best={plan.runtimeSeconds === best.runtimeSeconds}>
-        {formatInteger(plan.runtimeSeconds)} <Unit>giây</Unit>
-      </Metric>
-      <Metric label={METRIC_LABELS[4]} best={plan.lifoCompliant} mono={false}>
-        {plan.lifoCompliant ? (
-          <span className="text-badge-success-fg">Có</span>
-        ) : (
-          <span className="inline-flex items-center gap-2 text-text-3">
-            <X className="size-3.5 text-text-disabled" strokeWidth={2} aria-hidden />
-            Không
-          </span>
-        )}
-      </Metric>
+      <Heading>{t('trips.compare.settings')}</Heading>
+      <Row label={t('trips.compare.method')} mono={false}>{t(`optimization.methods.${card.method}`)}</Row>
+      <Row label={t('trips.compare.randomSeed')}>
+        {card.randomSeed === undefined ? t('trips.compare.noSeed') : String(card.randomSeed)}
+      </Row>
+      <Row label={t('trips.compare.enforceLifo')} mono={false}>
+        {t(card.enforceLifo ? 'trips.compare.on' : 'trips.compare.off')}
+      </Row>
+      <Row label={t('trips.compare.lowCenterOfGravity')} mono={false}>
+        {t(card.prioritizeLowCenterOfGravity ? 'trips.compare.on' : 'trips.compare.off')}
+      </Row>
+      <Row label={t('trips.compare.timeLimit')}>
+        {t('trips.compare.seconds', { value: format.integer(card.timeLimitSeconds) })}
+      </Row>
 
-      <div className="border-t border-border px-5 py-4" style={{ height: CARD_HEIGHTS.footer }}>
-        <Button
-          variant={selected ? 'primary' : 'secondary'}
-          block
-          aria-pressed={selected}
-          onClick={() => onSelect(plan.key)}
-        >
+      <Heading>{t('trips.compare.results')}</Heading>
+      <Row label={t('trips.compare.volume')} best={isBest('volumeUtilizationPercent')}>
+        {format.percent(card.volumeUtilizationPercent)}
+      </Row>
+      <Row label={t('trips.compare.payload')}>{format.percent(card.payloadUtilizationPercent)}</Row>
+      <Row label={t('trips.compare.placed')} best={isBest('placedCount')}>
+        {t('trips.compare.packages', { value: format.integer(card.placedCount) })}
+      </Row>
+      <Row label={t('trips.compare.unplaced')} best={isBest('unplacedCount')}>
+        <span className={cn(card.unplacedCount > 0 && 'text-badge-warning-fg')}>
+          {t('trips.compare.packages', { value: format.integer(card.unplacedCount) })}
+        </span>
+      </Row>
+      <Row label={t('trips.compare.runtime')} best={isBest('runtimeMs')}>
+        {t('trips.compare.milliseconds', { value: format.integer(card.runtimeMs) })}
+      </Row>
+
+      <div className="mt-auto border-t border-border px-5 py-4">
+        <Button variant="secondary" block aria-pressed={selected} onClick={() => onSelect(card.id)}>
           {selected ? <Check strokeWidth={2} /> : null}
-          {selected ? 'Phương án đang chọn' : 'Chọn phương án này'}
+          {selected ? t('trips.compare.selected') : t('trips.compare.select')}
         </Button>
       </div>
     </article>
   )
 }
 
-function Metric({
+function Heading({ children }: { children: ReactNode }) {
+  return <div className="border-t border-border bg-surface px-5 py-1.5 text-caption font-medium text-text-2">{children}</div>
+}
+
+function Row({
   label,
-  best,
+  best = false,
   mono = true,
   children,
 }: {
   label: string
-  best: boolean
+  best?: boolean
   mono?: boolean
   children: ReactNode
 }) {
+  const t = useT()
   return (
-    <div
-      className={cn(
-        'flex items-center justify-between gap-3 border-t border-border px-5',
-        best && 'bg-primary-bg',
-      )}
-      style={{ height: CARD_HEIGHTS.metric }}
-    >
+    <div className={cn('flex h-11 items-center justify-between gap-3 border-t border-border px-5', best && 'bg-primary-bg')}>
       <span className="text-caption text-text-3">{label}</span>
-      <span className={cn('inline-flex items-center gap-2 font-medium', mono ? 'font-mono text-body-lg' : 'text-body')}>
-        {best ? (
-          <CircleCheck className="size-3.5 text-primary" strokeWidth={2} aria-label="Tốt nhất" />
-        ) : null}
-        <span>{children}</span>
+      <span className={cn('inline-flex min-w-0 items-center gap-2 text-body font-medium', mono && 'font-mono')}>
+        {best ? <CircleCheck className="size-3.5 flex-none text-primary" strokeWidth={1.5} aria-label={t('trips.compare.best')} /> : null}
+        <span className="truncate">{children}</span>
       </span>
     </div>
   )
-}
-
-function Unit({ children }: { children: ReactNode }) {
-  return <span className="font-normal text-text-3">{children}</span>
 }

@@ -6,6 +6,7 @@ import {
   duplicateTripPackage,
   fetchPackages,
   fetchTripDetail,
+  fetchTripRevisions,
   fetchTrips,
   removeTripStop,
   savePackage,
@@ -21,6 +22,11 @@ export function useTripsQuery({ empty = false }: { empty?: boolean } = {}) {
 
 export function useTripDetailQuery(tripId: string) {
   return useQuery({ queryKey: ['trips', tripId, 'detail'], queryFn: () => fetchTripDetail(tripId), enabled: tripId !== '' })
+}
+
+/** Khoá nằm dưới `['trips', tripId]` nên mọi mutation của chuyến và lần tối ưu mới đều làm mới danh sách này. */
+export function useTripRevisionsQuery(tripId: string) {
+  return useQuery({ queryKey: ['trips', tripId, 'revisions'], queryFn: () => fetchTripRevisions(tripId), enabled: tripId !== '' })
 }
 
 export function usePackagesQuery(tripId: string) {

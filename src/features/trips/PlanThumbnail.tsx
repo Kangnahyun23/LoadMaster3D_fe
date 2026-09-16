@@ -1,86 +1,85 @@
 import { useMemo } from 'react'
+import type { OptimizationRequest, PackagePlacement } from '@/domain/models'
+import { useFormat, useT } from '@/lib/i18n'
 import {
   boxFaces,
   containerShell,
   createProjector,
-  groundShadow,
+  fitViewBox,
   roofOutline,
   shellColors,
   sortByDepth,
 } from '@/lib/isometric'
-import { formatInteger } from '@/lib/format'
-import {
-  THUMBNAIL_CONTAINER,
-  thumbnailBoxes,
-  type PackingStyle,
-} from '@/lib/plan-comparison.mock'
+import { revisionThumbnail } from './revision-thumbnail'
 
 const SCALE = 21
-const VIEW_WIDTH = 360
-const VIEW_HEIGHT = 190
+const PAD = 12
 
-/** Ảnh thu nhỏ 190px nền tối của một phương án, kèm số kiện đã xếp. */
+/**
+ * Ảnh thu nhỏ SVG đẳng cự nền tối của một revision, dựng từ placement thật (LM-051). Không dùng Three.js: ảnh tĩnh,
+ * không xoay (AGENTS.md mục 7). Khung nhìn tính từ lòng thùng của chính revision nên xe nào cũng vừa khung.
+ */
 export function PlanThumbnail({
-  style,
-  placedCount,
+  revisionId,
+  request,
+  placements,
   totalCount,
 }: {
-  style: PackingStyle
-  placedCount: number
+  revisionId: string
+  request: Pick<OptimizationRequest, 'vehicle' | 'packages'>
+  placements: readonly PackagePlacement[]
   totalCount: number
 }) {
-  const { faces, roof, shadow } = useMemo(() => {
-    const project = createProjector(SCALE)
-    const colors = shellColors()
-    const shell = containerShell(THUMBNAIL_CONTAINER, project, colors)
-    const cargo = thumbnailBoxes(style).flatMap((box) =>
-      boxFaces(box, project, { strokeWidth: 0.5, topTint: 0.08 }),
-    )
+  const t = useT()
+  const format = useFormat()
+
+  const { frame, faces, roof, drawnCount, placedCount } = useMemo(() => {
+    const thumbnail = revisionThumbnail(request, placements)
+    const frame = fitViewBox(thumbnail.container, SCALE, PAD)
+    const project = createProjector(SCALE, frame.offsetX, frame.offsetY)
+    const cargo = thumbnail.boxes.flatMap((box) => boxFaces(box, project, { strokeWidth: 0.5, topTint: 0.08 }))
     return {
-      faces: sortByDepth([...shell, ...cargo]),
-      roof: roofOutline(THUMBNAIL_CONTAINER, project),
-      shadow: groundShadow(THUMBNAIL_CONTAINER, project),
+      frame,
+      faces: sortByDepth([...containerShell(thumbnail.container, project, shellColors()), ...cargo]),
+      roof: roofOutline(thumbnail.container, project),
+      drawnCount: thumbnail.boxes.length,
+      placedCount: thumbnail.placedCount,
     }
-  }, [style])
+  }, [request, placements])
 
   return (
-    <div className="relative h-[190px] flex-none bg-[linear-gradient(180deg,var(--canvas-1)_0%,var(--canvas-2)_100%)]">
+    <div className="relative h-[190px] flex-none bg-canvas-1">
       <svg
-        viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+        viewBox={frame.viewBox}
         preserveAspectRatio="xMidYMid meet"
         className="block h-full w-full"
         role="img"
-        aria-label={`Sơ đồ xếp hàng, ${formatInteger(placedCount)} trên ${formatInteger(totalCount)} kiện`}
+        aria-label={t('trips.compare.thumbnail', {
+          id: revisionId,
+          placed: format.integer(placedCount),
+          total: format.integer(totalCount),
+        })}
       >
-        <defs>
-          <filter id="lm-thumb-blur" x="-30%" y="-60%" width="160%" height="240%">
-            <feGaussianBlur stdDeviation="7" />
-          </filter>
-        </defs>
-        <g transform="translate(132,92)">
-          <polygon points={shadow} fill="#000" opacity={0.55} filter="url(#lm-thumb-blur)" />
-          {faces.map((face, index) => (
-            <polygon
-              key={index}
-              points={face.points}
-              fill={face.fill}
-              stroke={face.stroke}
-              strokeWidth={face.strokeWidth}
-              strokeLinejoin="round"
-            />
-          ))}
-          <polyline
-            points={roof}
-            fill="none"
-            stroke="rgba(255,255,255,.28)"
-            strokeWidth={0.8}
-            strokeDasharray="2 2"
+        {faces.map((face, index) => (
+          <polygon
+            key={index}
+            points={face.points}
+            fill={face.fill}
+            stroke={face.stroke}
+            strokeWidth={face.strokeWidth}
+            strokeLinejoin="round"
           />
-        </g>
+        ))}
+        <polyline points={roof} fill="none" stroke="rgba(255,255,255,.28)" strokeWidth={0.8} strokeDasharray="2 2" />
       </svg>
-      <span className="absolute top-2.5 right-3 rounded-[4px] bg-black/35 px-1.5 py-0.5 font-mono text-[11px] leading-3.5 text-white/65">
-        {formatInteger(placedCount)} / {formatInteger(totalCount)} kiện
+      <span className="absolute top-2.5 right-3 rounded-sm bg-black/35 px-1.5 py-0.5 font-mono text-[11px] leading-3.5 text-white/80">
+        {format.integer(placedCount)} / {format.integer(totalCount)}
       </span>
+      {drawnCount < placedCount ? (
+        <span className="absolute bottom-2.5 left-3 text-[11px] leading-3.5 text-white/65">
+          {t('trips.compare.thumbnailCapped', { drawn: format.integer(drawnCount), placed: format.integer(placedCount) })}
+        </span>
+      ) : null}
     </div>
   )
 }
