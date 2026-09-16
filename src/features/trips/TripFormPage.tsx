@@ -8,7 +8,6 @@ import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { SelectField, type SelectOption } from '@/components/ui/SelectField'
 import { Textarea } from '@/components/ui/Textarea'
-import { VEHICLES } from '@/features/fleet/vehicles.mock'
 import { formatDimensions, formatInteger } from '@/lib/format'
 import {
   displayDateToIso,
@@ -16,8 +15,9 @@ import {
   type TripFormValues,
 } from './trip-form.schema'
 import { TRIPS } from './trip-list.mock'
+import { TRIP_VEHICLES } from './trip-vehicles.mock'
 
-const VEHICLE_OPTIONS: SelectOption[] = VEHICLES.filter(
+const VEHICLE_OPTIONS: SelectOption[] = TRIP_VEHICLES.filter(
   (vehicle) => vehicle.status !== 'ngung',
 ).map((vehicle) => ({
   value: vehicle.id,
@@ -46,18 +46,18 @@ export function TripFormPage() {
       ? {
           date: displayDateToIso(existing.date),
           depot: existing.route.split('→')[0]?.trim() ?? DEPOTS[0] ?? '',
-          vehicleId: VEHICLES.find((v) => v.plate === existing.plate)?.id ?? '',
+          vehicleId: TRIP_VEHICLES.find((v) => v.plate === existing.plate)?.id ?? '',
           note: '',
         }
       : { date: todayIso(), depot: DEPOTS[0] ?? '', vehicleId: '', note: '' },
   })
 
   const vehicleId = useWatch({ control: form.control, name: 'vehicleId' })
-  const selectedVehicle = VEHICLES.find((v) => v.id === vehicleId)
+  const selectedVehicle = TRIP_VEHICLES.find((v) => v.id === vehicleId)
   const errors = form.formState.errors
 
   function onSubmit(values: TripFormValues) {
-    const vehicle = VEHICLES.find((v) => v.id === values.vehicleId)
+    const vehicle = TRIP_VEHICLES.find((v) => v.id === values.vehicleId)
 
     if (isEdit && existing) {
       toast.success(`Đã lưu chuyến ${existing.id}`)

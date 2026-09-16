@@ -505,8 +505,9 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
 2. Bọc bằng hook Query trong cùng feature (`useTripsQuery`).
 3. Component chỉ gọi hook, không bao giờ gọi `-api.ts` trực tiếp.
 
-Màn nào còn giữ dữ liệu ở `useState` (Đội xe, Người dùng) thì phải chuyển sang đường
-đi này khi nối backend — đừng thêm màn mới theo lối cũ.
+Màn nào còn giữ dữ liệu ở `useState` (Người dùng) thì phải chuyển sang đường
+đi này khi nối backend — đừng thêm màn mới theo lối cũ. *(đã điều chỉnh 16/09/2026)* Đội xe đã chuyển xong
+ở LM-040: `vehicles-api.ts` → `useVehiclesQuery` và các mutation, dữ liệu nằm ở kho mock dùng chung.
 
 ### Dữ liệu dùng chung và tối ưu *(bổ sung 15/09/2026, D-06, D-30, D-31)*
 
@@ -570,6 +571,9 @@ Thêm màn mới thì thêm theo đúng lối này.
 3. Nếu mockup vi phạm luật ở mục 5, **làm theo luật ở mục 5** và nói rõ chỗ đã lệch khỏi mockup.
 4. Dữ liệu để mock đặt trong file riêng `*.mock.ts` (xem mục 3 để biết đặt ở đâu), không nhúng vào component.
 5. Không viết một file dài quá 250 dòng. Tách sớm — thường tách được ngay ở phần header hoặc từng panel.
+   *(bổ sung 16/09/2026, LM-041)* Giới hạn này tính cho file **có logic**: component, hook, module. File chỉ
+   chứa dữ liệu phẳng — từ điển `src/lib/i18n/{vi,en}.ts`, `*.mock.ts`, fixture — được dài hơn, vì cắt chúng
+   ra chỉ thêm chỗ để hai bản dịch lệch nhau. Mỗi nhánh của từ điển vẫn phải có chú thích nói nó phục vụ màn nào.
 
 ### Những chỗ đã lệch khỏi bản design gốc, có chủ ý
 
