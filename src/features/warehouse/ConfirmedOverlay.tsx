@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { formatInteger } from '@/lib/format'
+import { useFormat, useT } from '@/lib/i18n'
 
 /**
  * Lớp phủ xác nhận sau khi bấm "Xác nhận đã xếp": vòng tròn xanh lớn,
@@ -13,6 +13,8 @@ export function ConfirmedOverlay({
   confirmedId: string
   nextStep: number
 }) {
+  const t = useT()
+  const format = useFormat()
   return (
     <div
       role="status"
@@ -23,10 +25,10 @@ export function ConfirmedOverlay({
         <Check className="size-22 text-white" strokeWidth={3} aria-hidden />
       </span>
       <span className="text-[28px] leading-9 font-semibold text-text">
-        Đã xếp <span className="font-mono">{confirmedId}</span>
+        {t('warehouse.confirmed', { id: confirmedId })}
       </span>
       <span className="text-[18px] leading-6 text-text-2">
-        Chuyển sang bước {formatInteger(nextStep)}…
+        {t('warehouse.nextStep', { step: format.integer(nextStep) })}
       </span>
     </div>
   )

@@ -1,9 +1,11 @@
 import { createColumnHelper } from '@tanstack/react-table'
+import { useMemo } from 'react'
 import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card'
-import { createFormatter, formatInteger } from '@/lib/format'
+import type { Formatter } from '@/lib/format'
+import { useFormat, useT, type TFunction } from '@/lib/i18n'
 import { STOP_COLORS, stopColor, stopForeground, stopLabel } from '@/lib/stops'
 import { SheetSection } from '../SheetLayout'
 
@@ -17,28 +19,36 @@ const ROWS: Row[] = [
 ]
 
 const helper = createColumnHelper<BaseTableFeatures, Row>()
-const columns = helper.columns([
-  helper.accessor('code', { header: 'Mã kiện', meta: { width: '36%' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption">{i.getValue()}</span> }),
-  helper.accessor('stop', {
-    header: 'Điểm',
-    cell: (i) => (
-      <span className="inline-flex items-center gap-2">
-        <span aria-hidden className="size-2 rounded-xs" style={{ background: stopColor(i.getValue()) }} />
-        {stopLabel(i.getValue())}
-      </span>
-    ),
-  }),
-  helper.accessor('weightKg', { header: 'Khối lượng', meta: { align: 'right' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption">{formatInteger(i.getValue())} kg</span> }),
-  helper.accessor('dims', { header: 'Kích thước', meta: { align: 'right' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption text-text-2">{createFormatter('vi-VN').dimensions(...i.getValue())}</span> }),
-])
+
+/** Tiêu đề và số theo ngôn ngữ đang chọn, nên dựng trong component. */
+function createColumns(t: TFunction, format: Formatter) {
+  return helper.columns([
+    helper.accessor('code', { header: t('designSystem.style.card.code'), meta: { width: '36%' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption">{i.getValue()}</span> }),
+    helper.accessor('stop', {
+      header: t('designSystem.style.card.stop'),
+      cell: (i) => (
+        <span className="inline-flex items-center gap-2">
+          <span aria-hidden className="size-2 rounded-xs" style={{ background: stopColor(i.getValue()) }} />
+          {stopLabel(i.getValue())}
+        </span>
+      ),
+    }),
+    helper.accessor('weightKg', { header: t('designSystem.style.card.weight'), meta: { align: 'right' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption">{format.weight(i.getValue())}</span> }),
+    helper.accessor('dims', { header: t('designSystem.style.card.dimensions'), meta: { align: 'right' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption text-text-2">{format.dimensions(...i.getValue())}</span> }),
+  ])
+}
 
 export function CardTableSection() {
+  const t = useT()
+  const format = useFormat()
+  const columns = useMemo(() => createColumns(t, format), [t, format])
+
   return (
     <SheetSection
       id="card"
       number="06"
-      title="Card & hàng bảng"
-      description="Card: viền 1px, radius 8px, padding 20px, không bóng. Bảng: tiêu đề 12px/500 xám trên nền surface, số canh phải bằng mono, không kẻ sọc."
+      title={t('designSystem.style.card.title')}
+      description={t('designSystem.style.card.description')}
     >
       <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
         <Card>
@@ -47,29 +57,29 @@ export function CardTableSection() {
               <CardTitle>Hyundai HD210</CardTitle>
               <span className="font-mono text-caption text-text-3">60C-446.32</span>
             </div>
-            <Badge tone="info">Đã tối ưu</Badge>
+            <Badge tone="info">{t('designSystem.style.card.optimized')}</Badge>
           </CardHeader>
           <CardBody className="flex flex-col gap-3">
-            <div className="flex justify-between text-body"><span className="text-text-2">Lấp đầy</span><span className="font-mono font-medium">87,4%</span></div>
-            <div className="flex justify-between text-body"><span className="text-text-2">Tải trọng</span><span className="font-mono font-medium">8.240 / 9.500 kg</span></div>
-            <Button variant="secondary" block>Xem phương án</Button>
+            <div className="flex justify-between text-body"><span className="text-text-2">{t('designSystem.style.card.fill')}</span><span className="font-mono font-medium">{format.percent(87.4)}</span></div>
+            <div className="flex justify-between text-body"><span className="text-text-2">{t('designSystem.style.card.payload')}</span><span className="font-mono font-medium">{format.integer(8240)} / {format.weight(9500)}</span></div>
+            <Button variant="secondary" block>{t('designSystem.style.card.viewPlan')}</Button>
           </CardBody>
         </Card>
 
         <div className="flex flex-col gap-2.5">
-          <div className="flex items-baseline gap-2"><span className="text-body font-medium">Chế độ thoáng</span><span className="font-mono text-caption text-text-3">hàng 48px</span></div>
+          <div className="flex items-baseline gap-2"><span className="text-body font-medium">{t('designSystem.style.card.comfortable')}</span><span className="font-mono text-caption text-text-3">{t('designSystem.style.card.comfortableRows')}</span></div>
           <div className="overflow-hidden rounded-md border border-border">
             <DataTable data={ROWS.slice(0, 3)} columns={columns} density="comfortable" isRowSelected={(r) => r.stop === 3} />
           </div>
-          <span className="text-caption text-text-3">Hàng cuối: trạng thái đã chọn (nền primary-bg)</span>
+          <span className="text-caption text-text-3">{t('designSystem.style.card.comfortableNote')}</span>
         </div>
 
         <div className="flex flex-col gap-2.5">
-          <div className="flex items-baseline gap-2"><span className="text-body font-medium">Chế độ gọn</span><span className="font-mono text-caption text-text-3">hàng 36px</span></div>
+          <div className="flex items-baseline gap-2"><span className="text-body font-medium">{t('designSystem.style.card.compact')}</span><span className="font-mono text-caption text-text-3">{t('designSystem.style.card.compactRows')}</span></div>
           <div className="overflow-hidden rounded-md border border-border">
             <DataTable data={ROWS} columns={columns} density="compact" isRowSelected={(r) => r.stop === 5} />
           </div>
-          <span className="text-caption text-text-3">Dùng cho danh sách dài (kiện hàng, lịch sử)</span>
+          <span className="text-caption text-text-3">{t('designSystem.style.card.compactNote')}</span>
         </div>
       </div>
     </SheetSection>
@@ -77,17 +87,18 @@ export function CardTableSection() {
 }
 
 export function LegendSection() {
+  const t = useT()
   const stops = STOP_COLORS.map((color, index) => ({ number: index + 1, color }))
   return (
     <SheetSection
       id="legend"
       number="07"
-      title="Chú thích màu điểm giao"
-      description="Bảng 8 màu Okabe–Ito, an toàn cho người mù màu. Chỉ dùng để định danh điểm giao. Chữ trên nền màu 1, 2, 4 là tối; còn lại là trắng."
+      title={t('designSystem.style.legend.title')}
+      description={t('designSystem.style.legend.description')}
     >
       <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-5">
         <div className="flex flex-col gap-4 rounded-md border border-border p-5">
-          <span className="text-caption font-medium text-text-3">Trên nền sáng · dạng dot</span>
+          <span className="text-caption font-medium text-text-3">{t('designSystem.style.legend.light')}</span>
           <div className="grid grid-cols-2 gap-x-6 gap-y-3">
             {stops.map((s) => (
               <div key={s.number} className="flex items-center gap-2.5">
@@ -99,7 +110,7 @@ export function LegendSection() {
           </div>
         </div>
         <div className="flex flex-col gap-4 rounded-md bg-[linear-gradient(180deg,var(--canvas-1)_0%,var(--canvas-2)_100%)] p-5">
-          <span className="text-caption font-medium text-white/60">Trong vùng 3D · dạng tag</span>
+          <span className="text-caption font-medium text-white/60">{t('designSystem.style.legend.dark')}</span>
           <div className="flex flex-wrap gap-2">
             {stops.map((s) => (
               <span key={s.number} className="inline-flex h-[22px] items-center rounded-[4px] px-2 text-caption font-semibold leading-none" style={{ background: s.color, color: stopForeground(s.number) }}>

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
-import { expect, test } from './fixtures'
-import { MOCK_DB, navigateInApp, SEED_TRIP } from './spec-flow-helpers'
+import { attachScreenshot, expect, test } from './fixtures'
+import { heightOf, MOCK_DB, navigateInApp, overflowingText, SEED_TRIP } from './spec-flow-helpers'
 
 /**
  * Màn tài xế đọc revision đã duyệt (LM-061). Thứ tự kỳ vọng đọc thẳng từ kho in-memory của trang qua đúng module app dùng;
@@ -48,6 +48,41 @@ test('phone: unload order equals the approved revision; Three.js loads only on "
   await expect(dialog).toContainText('Thứ tự dỡ · Mô phỏng không đánh dấu giao hàng')
   await expect(dialog).not.toContainText('gợi ý')
   await expect(dialog).toContainText(`Hiện tại ${expected.ids[0]}`)
+  expect(browserErrors).toStrictEqual([])
+})
+
+/**
+ * LM-071: màn tài xế chạy bằng `?lang=en` ở 390×844, nút chuyển ngôn ngữ trên header đạt 56px, chữ tiếng Anh không tràn,
+ * đổi ngôn ngữ giữa phiên giữ điểm giao hiện tại và kiện đã đánh dấu. Không ghi kho nên được tải trang để đặt `?lang`.
+ */
+test('phone: the driver screen runs in English and switching language mid-session keeps the stop', { tag: '@phone' }, async ({ page, login, browserErrors }, testInfo) => {
+  await login('/chuyen')
+  await page.goto(`${DRIVER}?lang=en`)
+  await expect(page.getByRole('heading', { name: 'Stop 1 / 4', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'View cargo positions', exact: true })).toBeVisible()
+  const english = page.getByRole('button', { name: 'EN English', exact: true })
+  const vietnamese = page.getByRole('button', { name: 'VI Tiếng Việt', exact: true })
+  await expect(english).toHaveAttribute('aria-pressed', 'true')
+  expect(await heightOf(english)).toBeGreaterThanOrEqual(56)
+  expect(await heightOf(vietnamese)).toBeGreaterThanOrEqual(56)
+  expect(await overflowingText(page)).toStrictEqual([])
+  await attachScreenshot(page, testInfo, 'driver-en-phone')
+
+  const first = await approvedUnloadOrder(page, 1)
+  for (const id of first.ids) await page.getByRole('button', { name: `Mark ${id} as unloaded`, exact: true }).tap()
+  await page.getByRole('button', { name: 'Complete stop', exact: true }).tap()
+  await expect(page.getByRole('heading', { name: 'Stop 2 / 4', exact: true })).toBeVisible()
+
+  const second = await approvedUnloadOrder(page, 2)
+  await page.getByRole('button', { name: `Mark ${second.ids[0]} as unloaded`, exact: true }).tap()
+  expect(await overflowingText(page)).toStrictEqual([])
+  await attachScreenshot(page, testInfo, 'driver-en-phone-stop-2')
+
+  await vietnamese.tap()
+  await expect(page.getByRole('heading', { name: 'Điểm 2 / 4', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: `Bỏ đánh dấu đã dỡ ${second.ids[0]}`, exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await english.tap()
+  await expect(page.getByRole('heading', { name: 'Stop 2 / 4', exact: true })).toBeVisible()
   expect(browserErrors).toStrictEqual([])
 })
 

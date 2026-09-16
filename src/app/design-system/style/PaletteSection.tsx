@@ -1,74 +1,74 @@
-import { SheetSection } from '../SheetLayout'
+import { useT } from '@/lib/i18n'
 import { STOP_COLORS } from '@/lib/stops'
 import { readToken } from '@/lib/tokens'
+import { SheetSection } from '../SheetLayout'
 
-type Swatch = { name: string; token: `--${string}` }
+type SwatchKey = 'bg' | 'surface' | 'border' | 'disabled' | 'text' | 'text2' | 'text3' | 'primary' | 'primaryHover' | 'primaryBg' | 'success' | 'warning' | 'danger' | 'info'
 
-const GROUPS: Array<{ name: string; note: string; items: Swatch[] }> = [
+type Swatch = { key: SwatchKey; token: `--${string}` }
+
+const GROUPS: ReadonlyArray<{ key: 'base' | 'text' | 'primary' | 'semantic'; items: Swatch[] }> = [
   {
-    name: 'Nền & viền',
-    note: 'Trang trắng, surface cho vùng phụ và tiêu đề bảng.',
+    key: 'base',
     items: [
-      { name: 'Nền', token: '--bg' },
-      { name: 'Surface', token: '--surface' },
-      { name: 'Viền', token: '--border' },
-      { name: 'Disabled', token: '--text-disabled' },
+      { key: 'bg', token: '--bg' },
+      { key: 'surface', token: '--surface' },
+      { key: 'border', token: '--border' },
+      { key: 'disabled', token: '--text-disabled' },
     ],
   },
   {
-    name: 'Chữ',
-    note: 'Ba mức: chính, phụ, mờ. Không dùng độ trong suốt cho chữ.',
+    key: 'text',
     items: [
-      { name: 'Text chính', token: '--text' },
-      { name: 'Text phụ', token: '--text-2' },
-      { name: 'Text mờ', token: '--text-3' },
+      { key: 'text', token: '--text' },
+      { key: 'text2', token: '--text-2' },
+      { key: 'text3', token: '--text-3' },
     ],
   },
   {
-    name: 'Primary',
-    note: 'Một màu nhấn duy nhất. Nền nhạt cho trạng thái chọn và tag thông tin.',
+    key: 'primary',
     items: [
-      { name: 'Primary', token: '--primary' },
-      { name: 'Hover', token: '--primary-hover' },
-      { name: 'Nền nhạt', token: '--primary-bg' },
+      { key: 'primary', token: '--primary' },
+      { key: 'primaryHover', token: '--primary-hover' },
+      { key: 'primaryBg', token: '--primary-bg' },
     ],
   },
   {
-    name: 'Ngữ nghĩa',
-    note: 'Chỉ dùng cho trạng thái và phản hồi, không dùng làm màu trang trí.',
+    key: 'semantic',
     items: [
-      { name: 'Success', token: '--success' },
-      { name: 'Warning', token: '--warning' },
-      { name: 'Danger', token: '--danger' },
-      { name: 'Info', token: '--info' },
+      { key: 'success', token: '--success' },
+      { key: 'warning', token: '--warning' },
+      { key: 'danger', token: '--danger' },
+      { key: 'info', token: '--info' },
     ],
   },
 ]
 
 export function PaletteSection() {
+  const t = useT()
   return (
-    <SheetSection id="mau" number="01" title="Bảng màu">
+    <SheetSection id="mau" number="01" title={t('designSystem.style.palette.title')}>
       {GROUPS.map((group) => (
-        <PaletteGroup key={group.name} name={group.name} note={group.note}>
+        <PaletteGroup key={group.key} name={t(`designSystem.style.palette.${group.key}.name`)} note={t(`designSystem.style.palette.${group.key}.note`)}>
           {group.items.map((item) => (
-            <SwatchCard key={item.token} name={item.name} token={item.token} />
+            <SwatchCard key={item.token} name={t(`designSystem.style.palette.swatches.${item.key}`)} token={item.token} />
           ))}
         </PaletteGroup>
       ))}
 
-      <PaletteGroup name="Điểm giao" note="8 màu định danh, an toàn cho người mù màu (Okabe–Ito). Chỉ để định danh điểm giao.">
+      <PaletteGroup name={t('designSystem.style.palette.stops.name')} note={t('designSystem.style.palette.stops.note')}>
         {STOP_COLORS.map((color, index) => (
           <div key={color} className="flex flex-col gap-2">
             <div className="h-14 rounded-md border border-text/8" style={{ background: color }} />
             <div className="flex flex-col gap-0.5">
-              <span className="text-caption font-medium">Điểm {index + 1}</span>
+              <span className="text-caption font-medium">{t('designSystem.style.palette.stop', { number: index + 1 })}</span>
               <span className="font-mono text-caption text-text-3">--stop-{index + 1}</span>
             </div>
           </div>
         ))}
       </PaletteGroup>
 
-      <PaletteGroup name="Vùng 3D" note="Luôn nền tối, kể cả khi toàn app sáng. Gradient dọc 180° từ --canvas-1 tới --canvas-2.">
+      <PaletteGroup name={t('designSystem.style.palette.canvas.name')} note={t('designSystem.style.palette.canvas.note')}>
         <div className="col-span-full flex h-30 items-end justify-between rounded-md bg-[linear-gradient(180deg,var(--canvas-1)_0%,var(--canvas-2)_100%)] px-5 py-4">
           <div className="flex flex-col gap-0.5">
             <span className="text-caption font-medium text-white">Viewport 3D</span>
@@ -76,7 +76,7 @@ export function PaletteSection() {
               {readToken('--canvas-1')} → {readToken('--canvas-2')}
             </span>
           </div>
-          <span className="font-mono text-caption text-white/60">--panel-dark · --border-dark cho panel và viền</span>
+          <span className="font-mono text-caption text-white/60">{t('designSystem.style.palette.panels')}</span>
         </div>
       </PaletteGroup>
     </SheetSection>

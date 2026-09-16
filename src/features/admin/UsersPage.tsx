@@ -1,75 +1,82 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { formatDateTime, formatInteger } from '@/lib/format'
-import { ROLE_LABELS, USER_STATUS_LABELS, initialsOf, type User } from '@/types/user'
+import type { Formatter } from '@/lib/format'
+import { useFormat, useT, type TFunction } from '@/lib/i18n'
+import { initialsOf, type User } from '@/types/user'
 import type { UserFormValues } from './user-form.schema'
 import { UserFormDialog } from './UserFormDialog'
 import { USERS } from './users.mock'
 
 const helper = createColumnHelper<BaseTableFeatures, User>()
 
-const columns = helper.columns([
-  helper.accessor('fullName', {
-    header: 'Người dùng',
-    cell: (info) => (
-      <span className="flex items-center gap-2.5">
-        <span className="grid size-8 flex-none place-items-center rounded-full bg-primary-bg text-caption font-semibold leading-none text-primary-hover">
-          {initialsOf(info.getValue())}
-        </span>
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate">{info.getValue()}</span>
-          <span className="truncate font-mono text-caption text-text-3">
-            {info.row.original.email}
+/** Cột phụ thuộc ngôn ngữ đang chọn (tiêu đề, nhãn, ngày giờ), nên dựng trong component chứ không ở module. */
+function createColumns(t: TFunction, format: Formatter) {
+  return helper.columns([
+    helper.accessor('fullName', {
+      header: t('admin.users.columns.user'),
+      cell: (info) => (
+        <span className="flex items-center gap-2.5">
+          <span className="grid size-8 flex-none place-items-center rounded-full bg-primary-bg text-caption font-semibold leading-none text-primary-hover">
+            {initialsOf(info.getValue())}
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate">{info.getValue()}</span>
+            <span className="truncate font-mono text-caption text-text-3">
+              {info.row.original.email}
+            </span>
           </span>
         </span>
-      </span>
-    ),
-  }),
-  helper.accessor('phone', {
-    header: 'Điện thoại',
-    meta: { width: '140px' } satisfies ColumnMeta,
-    cell: (info) => <span className="font-mono text-caption">{info.getValue()}</span>,
-  }),
-  helper.accessor('role', {
-    header: 'Vai trò',
-    meta: { width: '170px' } satisfies ColumnMeta,
-    cell: (info) => ROLE_LABELS[info.getValue()],
-  }),
-  helper.accessor('depot', {
-    header: 'Kho / chi nhánh',
-    meta: { width: '200px' } satisfies ColumnMeta,
-    cell: (info) => <span className="block truncate">{info.getValue()}</span>,
-  }),
-  helper.accessor('lastActiveAt', {
-    header: 'Hoạt động gần nhất',
-    meta: { align: 'right', width: '180px' } satisfies ColumnMeta,
-    cell: (info) => {
-      const value = info.getValue()
-      return value ? (
-        <span className="font-mono text-caption">{formatDateTime(value)}</span>
-      ) : (
-        <span className="text-caption text-text-3">Chưa đăng nhập</span>
-      )
-    },
-  }),
-  helper.accessor('status', {
-    header: 'Trạng thái',
-    meta: { width: '150px' } satisfies ColumnMeta,
-    cell: (info) => (
-      <Badge tone={info.getValue() === 'active' ? 'success' : 'danger'}>
-        {USER_STATUS_LABELS[info.getValue()]}
-      </Badge>
-    ),
-  }),
-])
+      ),
+    }),
+    helper.accessor('phone', {
+      header: t('admin.users.columns.phone'),
+      meta: { width: '140px' } satisfies ColumnMeta,
+      cell: (info) => <span className="font-mono text-caption">{info.getValue()}</span>,
+    }),
+    helper.accessor('role', {
+      header: t('admin.users.columns.role'),
+      meta: { width: '170px' } satisfies ColumnMeta,
+      cell: (info) => t(`roles.${info.getValue()}`),
+    }),
+    helper.accessor('depot', {
+      header: t('admin.users.columns.depot'),
+      meta: { width: '200px' } satisfies ColumnMeta,
+      cell: (info) => <span className="block truncate">{info.getValue()}</span>,
+    }),
+    helper.accessor('lastActiveAt', {
+      header: t('admin.users.columns.lastActive'),
+      meta: { align: 'right', width: '180px' } satisfies ColumnMeta,
+      cell: (info) => {
+        const value = info.getValue()
+        return value ? (
+          <span className="font-mono text-caption">{`${format.time(value)} ${format.date(value)}`}</span>
+        ) : (
+          <span className="text-caption text-text-3">{t('admin.users.neverSignedIn')}</span>
+        )
+      },
+    }),
+    helper.accessor('status', {
+      header: t('admin.users.columns.status'),
+      meta: { width: '150px' } satisfies ColumnMeta,
+      cell: (info) => (
+        <Badge tone={info.getValue() === 'active' ? 'success' : 'danger'}>
+          {t(`admin.users.status.${info.getValue()}`)}
+        </Badge>
+      ),
+    }),
+  ])
+}
 
 /** Quản trị người dùng — danh sách, thêm và sửa bằng hộp thoại form. */
 export function UsersPage() {
+  const t = useT()
+  const format = useFormat()
+  const columns = useMemo(() => createColumns(t, format), [t, format])
   const [users, setUsers] = useState<User[]>(USERS)
   const [editing, setEditing] = useState<User | undefined>(undefined)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -89,7 +96,7 @@ export function UsersPage() {
       setUsers((current) =>
         current.map((u) => (u.id === editing.id ? { ...u, ...values } : u)),
       )
-      toast.success(`Đã cập nhật ${values.fullName}`)
+      toast.success(t('admin.users.updated', { name: values.fullName }))
       return
     }
 
@@ -99,8 +106,8 @@ export function UsersPage() {
       lastActiveAt: null,
     }
     setUsers((current) => [created, ...current])
-    toast.success(`Đã thêm ${values.fullName}`, {
-      description: 'Email đặt mật khẩu đã được gửi.',
+    toast.success(t('admin.users.created', { name: values.fullName }), {
+      description: t('admin.users.createdDescription'),
     })
   }
 
@@ -108,14 +115,14 @@ export function UsersPage() {
     <div className="flex min-w-0 flex-1 flex-col">
       <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-bg px-6">
         <div className="flex items-baseline gap-2">
-          <h1 className="text-h2 font-semibold">Người dùng</h1>
+          <h1 className="text-h2 font-semibold">{t('admin.users.title')}</h1>
           <span className="font-mono text-caption text-text-3">
-            {formatInteger(users.length)} tài khoản
+            {t('admin.users.count', { count: users.length })}
           </span>
         </div>
         <Button variant="primary" className="h-9 px-3.5" onClick={openCreate}>
           <Plus strokeWidth={1.5} />
-          Thêm người dùng
+          {t('admin.users.form.createTitle')}
         </Button>
       </header>
 
@@ -123,7 +130,7 @@ export function UsersPage() {
         <div className="overflow-hidden rounded-md border border-border bg-bg">
           <DataTable data={users} columns={columns} density="comfortable" onRowClick={openEdit} />
         </div>
-        <p className="mt-3 text-caption text-text-3">Bấm vào một dòng để sửa tài khoản.</p>
+        <p className="mt-3 text-caption text-text-3">{t('admin.users.rowHint')}</p>
       </div>
 
       <UserFormDialog
