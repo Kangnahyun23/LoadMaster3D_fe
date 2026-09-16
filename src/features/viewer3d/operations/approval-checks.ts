@@ -7,13 +7,13 @@ import { countLifoIssues } from './unloading'
 export function operationApprovalChecks(placements: readonly ScenePlacement[], edited: boolean, t: TFunction): ApprovalCheck[] {
   const consistent = stopOrderConsistent(placements)
   const checks: ApprovalCheck[] = [{ tone: consistent ? 'success' : 'warning', text: consistent
-    ? 'Thứ tự xếp phù hợp thứ tự điểm giao' : 'Thứ tự xếp chưa phù hợp thứ tự điểm giao' }]
+    ? t('viewer.operations.orderConsistent') : t('viewer.operations.orderInconsistent') }]
   // Kiểm LIFO của domain (Spec 7.11, D-26): chỉ nói kiện giao sau có che lối dỡ hay không, không khẳng định dỡ được thực tế.
   const { blocked, partial } = countLifoIssues(placements)
   if (blocked) checks.push({ tone: 'warning', text: t('viewer.operations.approval.lifoBlocked', { count: blocked }) })
   if (partial) checks.push({ tone: 'warning', text: t('viewer.operations.approval.lifoPartial', { count: partial }) })
   if (!blocked && !partial) checks.push({ tone: 'warning', text: t('viewer.operations.approval.lifoClear') })
   // Spec 7.10: không có số tải trục khi backend chưa tính (LM-037), nên Duyệt không kiểm tải trục.
-  if (edited) checks.push({ tone: 'warning', text: 'Có chỉnh sửa thủ công' })
+  if (edited) checks.push({ tone: 'warning', text: t('viewer.operations.manualEdits') })
   return checks
 }

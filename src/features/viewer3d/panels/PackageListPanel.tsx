@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import type { ConstraintIssue } from '@/domain/constraints'
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
-import { formatInteger } from '@/lib/format'
 import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
@@ -55,7 +54,7 @@ export function PackageListPanel({
   const shownUnplaced = reason === '' ? unplaced : unplaced.filter((item) => item.reasonCode === reason)
   return (
     <aside
-      aria-label="Danh sách kiện"
+      aria-label={t('viewer.packageList.label')}
       className={cn(
         'flex flex-none flex-col overflow-hidden border-r border-border bg-bg',
         'transition-[width] duration-(--dur-md) ease-standard',
@@ -64,11 +63,11 @@ export function PackageListPanel({
     >
       <div className="flex h-11 flex-none items-center justify-between border-b border-border pr-2 pl-4">
         {open ? (
-          <span className="text-body font-medium whitespace-nowrap">Danh sách kiện</span>
+          <span className="text-body font-medium whitespace-nowrap">{t('viewer.packageList.label')}</span>
         ) : null}
         <button
           type="button"
-          aria-label={open ? 'Thu gọn danh sách kiện' : 'Mở danh sách kiện'}
+          aria-label={t(open ? 'viewer.packageList.collapse' : 'viewer.packageList.expand')}
           aria-expanded={open}
           onClick={onToggle}
           className="grid size-8 place-items-center rounded-md text-text-3 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -89,10 +88,10 @@ export function PackageListPanel({
         >
           <TabsList>
             <TabsTrigger value="unplaced">
-              Kiện chưa xếp <TabCount tone="danger">{unplaced.length}</TabCount>
+              {t('viewer.packageList.unplacedTab')} <TabCount tone="danger">{unplaced.length}</TabCount>
             </TabsTrigger>
             <TabsTrigger value="pinned">
-              Kiện đã ghim <TabCount>{pinned.length}</TabCount>
+              {t('viewer.packageList.pinnedTab')} <TabCount>{pinned.length}</TabCount>
             </TabsTrigger>
             <TabsTrigger value="placed">
               {t('viewer.plan.filters.placedTab')} <TabCount>{placements.length}</TabCount>
@@ -101,7 +100,7 @@ export function PackageListPanel({
 
           <TabsContent value="unplaced" className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-3">
             <p className="px-1 pb-1 text-caption text-text-3">
-              Không vừa chỗ trống còn lại.
+              {t('viewer.packageList.unplacedHint')}
             </p>
             {reasons.length > 1 ? (
               <select aria-label={t('viewer.plan.filters.reason')} value={reason} onChange={(event) => setReason(event.target.value)}
@@ -131,7 +130,7 @@ export function PackageListPanel({
 
           <TabsContent value="pinned" className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-3">
             <p className="px-1 pb-1 text-caption text-text-3">
-              Kiện đã ghim giữ nguyên vị trí khi chạy tối ưu lại.
+              {t('viewer.packageList.pinnedHint')}
             </p>
             {pinned.map((item) => {
               const selected = item.id === selectedId
@@ -151,13 +150,13 @@ export function PackageListPanel({
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="flex items-center gap-1.5 font-mono text-body font-medium">
                       {item.id}
-                      <Pin className="size-3.5 fill-warning text-warning" strokeWidth={1.5} aria-label="Đã ghim" />
+                      <Pin className="size-3.5 fill-warning text-warning" strokeWidth={1.5} aria-label={t('viewer.packageList.pinned')} />
                     </span>
                     <span className="font-mono text-caption text-text-3">
                       {format.dimensions(item.lengthCm, item.widthCm, item.heightCm)} · {format.weight(item.weightKg)}
                     </span>
                     <span className="text-caption text-text-2">
-                      {describeWhere(item, placements, vehicle)}
+                      <PinnedWhere where={describeWhere(item, placements, vehicle)} />
                     </span>
                   </div>
                 </button>
@@ -175,13 +174,21 @@ export function PackageListPanel({
 }
 
 function StopSquare({ stop }: { stop: number }) {
+  const t = useT()
+  const format = useFormat()
   return (
     <span
       className="grid size-9 flex-none place-items-center rounded-sm font-mono text-caption font-semibold leading-none"
       style={{ background: stopColor(stop), color: stopForeground(stop) }}
     >
-      <span className="sr-only">Điểm giao </span>
-      {formatInteger(stop)}
+      <span className="sr-only">{t('viewer.selected.stop')} </span>
+      {format.integer(stop)}
     </span>
   )
+}
+
+function PinnedWhere({ where }: { where: ReturnType<typeof describeWhere> }) {
+  const t = useT()
+  const layer = where.layer === 1 ? t('viewer.packageList.floor') : t('viewer.packageList.layer', { layer: where.layer })
+  return <>{t('viewer.packageList.where', { layer, side: t(`viewer.packageList.sides.${where.side}`) })}</>
 }

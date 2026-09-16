@@ -1,3 +1,4 @@
+import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
@@ -11,10 +12,11 @@ export function Spinner({
   tone?: 'light' | 'dark'
   className?: string
 }) {
+  const t = useT()
   return (
     <span
       role="status"
-      aria-label="Đang xử lý"
+      aria-label={t('common.processing')}
       className={cn(
         'inline-block size-4 flex-none rounded-full border-2 border-t-transparent opacity-90',
         'animate-[lm-spin_0.7s_linear_infinite]',

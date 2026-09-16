@@ -1,8 +1,20 @@
 import type { ScenePlacement, PositionCm } from '@/features/viewer3d/scene-input'
 import type { VehicleConfig } from '@/domain/models'
 import { gt, lt, roundCm } from '@/domain/geometry'
+import type { TFunction } from '@/lib/i18n'
 import { AXES, EDITOR_RULES, extent, limit, obstacleBox, roundPosition, type Axis, type EditorBox } from './geometry'
-export type SnapTarget = { axis: Axis; coordinateCm: number; source: string; placementId?: string }
+
+/** Mặt hút, không kèm câu chữ: UI dịch qua `formatSnapSource` (LM-070). */
+export type SnapSourceKind = 'floor' | 'wall' | 'ceiling' | 'package' | 'obstacle' | 'grid'
+export type SnapSource = { axis: Axis; kind: SnapSourceKind; id?: string }
+export type SnapTarget = SnapSource & { coordinateCm: number; placementId?: string }
+
+export function formatSnapSource({ axis, kind, id = '' }: SnapSource, t: TFunction): string {
+  const source = kind === 'package' ? t('viewer.editor.snapSources.package', { id })
+    : kind === 'obstacle' ? t('viewer.editor.snapSources.obstacle', { id })
+      : t(`viewer.editor.snapSources.${kind}`)
+  return t('viewer.editor.snapSources.axis', { axis: axis.toUpperCase(), source })
+}
 
 /**
  * All thresholds and face distances are cm. Fixed axes stay fixed during a gesture. Magnetic faces: floor, walls, grid, other
@@ -11,15 +23,15 @@ export type SnapTarget = { axis: Axis; coordinateCm: number; source: string; pla
 export function snapPosition(
   p: ScenePlacement, requested: PositionCm, placements: readonly ScenePlacement[], vehicle: VehicleConfig,
   axes: readonly Axis[] = AXES,
-): { position: PositionCm; sources: string[]; targets: SnapTarget[] } {
+): { position: PositionCm; sources: SnapSource[]; targets: SnapTarget[] } {
   const position = roundPosition(requested)
-  const sources: string[] = []
+  const sources: SnapSource[] = []
   const targets: SnapTarget[] = []
   for (const axis of axes) {
     const size = extent(p, axis)
-    const candidates: { value: number; coordinateCm: number; source: string; placementId?: string }[] = [
-      { value: 0, coordinateCm: 0, source: axis === 'z' ? 'Sàn' : 'Vách thùng' },
-      { value: limit(vehicle, axis) - size, coordinateCm: limit(vehicle, axis), source: axis === 'z' ? 'Trần thùng' : 'Vách thùng' },
+    const candidates: { value: number; coordinateCm: number; kind: SnapSourceKind; id?: string; placementId?: string }[] = [
+      { value: 0, coordinateCm: 0, kind: axis === 'z' ? 'floor' : 'wall' },
+      { value: limit(vehicle, axis) - size, coordinateCm: limit(vehicle, axis), kind: axis === 'z' ? 'ceiling' : 'wall' },
     ]
     const faces: (EditorBox & { id: string; kind: 'package' | 'obstacle' })[] = [
       ...placements.filter((q) => q.id !== p.id).map((q) => ({ ...q, kind: 'package' as const })),
@@ -32,12 +44,12 @@ export function snapPosition(
         position[a] + extent(p, a) >= q.position[a] - EDITOR_RULES.snapThresholdCm)) continue
       for (const value of [q.position[axis] - size, q.position[axis] + extent(q, axis)]) {
         candidates.push({ value, coordinateCm: value === q.position[axis] - size ? q.position[axis] : value,
-          source: q.kind === 'package' ? `Mặt kiện ${q.id}` : `Mặt vật cản ${q.id}`, placementId: q.kind === 'package' ? q.id : undefined })
+          kind: q.kind, id: q.id, placementId: q.kind === 'package' ? q.id : undefined })
       }
     }
     // Physical faces win ties with the grid.
     const grid = Math.round(position[axis] / EDITOR_RULES.gridCm) * EDITOR_RULES.gridCm
-    candidates.push({ value: grid, coordinateCm: grid, source: 'Lưới' })
+    candidates.push({ value: grid, coordinateCm: grid, kind: 'grid' })
     let best: typeof candidates[number] | undefined
     let distance = EDITOR_RULES.snapThresholdCm + 1
     for (const candidate of candidates) {
@@ -49,8 +61,8 @@ export function snapPosition(
     }
     if (best && !gt(distance, EDITOR_RULES.snapThresholdCm)) {
       position[axis] = roundCm(best.value)
-      sources.push(`${axis.toUpperCase()}: ${best.source}`)
-      targets.push({ axis, coordinateCm: best.coordinateCm, source: best.source, placementId: best.placementId })
+      sources.push({ axis, kind: best.kind, id: best.id })
+      targets.push({ axis, kind: best.kind, id: best.id, coordinateCm: best.coordinateCm, placementId: best.placementId })
     }
   }
   return { position, sources, targets }

@@ -15,11 +15,11 @@ prd: [D-08]
 - [x] Dịch `features/warehouse`, `features/driver`, `features/admin`, `features/auth` (phần còn lại), `app/design-system` (`/kieu-dang`, `/thanh-phan`).
 - [x] Nút chuyển ngôn ngữ có trên header màn kho và tài xế, đạt vùng chạm 56px.
 - [x] Kiểm tra tràn chữ trên tablet kho và điện thoại tài xế.
-- [ ] Bật test phát hiện chuỗi cứng (LM-070) cho toàn `src/`. *(Phần LM-071 đã gỡ khỏi `PENDING`; phần còn lại là khối LM-070 — xong khi gộp với LM-070.)*
+- [x] Bật test phát hiện chuỗi cứng (LM-070) cho toàn `src/`. *(Người điều phối gộp LM-070: `PENDING` rỗng.)*
 
 ## Tiêu chí nghiệm thu
 
-- [ ] Không còn chuỗi tiếng Việt cứng trong JSX của `src/` (test xanh). *(Xanh cho phạm vi LM-071; toàn `src/` hoàn tất sau khi gộp LM-070.)*
+- [x] Không còn chuỗi tiếng Việt cứng trong JSX của `src/` (test xanh). *(Toàn `src/` sau khi gộp LM-070.)*
 - [x] E2E kho và tài xế chạy được với `?lang=en`.
 
 ## Kết quả (16/09/2026)

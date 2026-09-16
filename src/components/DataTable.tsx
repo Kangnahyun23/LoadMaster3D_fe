@@ -4,6 +4,7 @@ import {
   type RowData,
   type TableOptions,
 } from '@tanstack/react-table'
+import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
@@ -73,8 +74,9 @@ export function DataTable<TData extends RowData>({
   touch = false,
   onRowClick,
   isRowSelected,
-  emptyMessage = 'Chưa có dữ liệu',
+  emptyMessage,
 }: DataTableProps<TData>) {
+  const t = useT()
   const table = useTable({ features: baseTableFeatures, columns, data })
   const rowHeight = touch ? TOUCH_ROW_HEIGHT : ROW_HEIGHT[density]
   const padX = CELL_PADDING[cellPadding]
@@ -82,7 +84,7 @@ export function DataTable<TData extends RowData>({
   if (data.length === 0) {
     return (
       <div className="flex h-24 items-center justify-center text-body text-text-3">
-        {emptyMessage}
+        {emptyMessage ?? t('common.noData')}
       </div>
     )
   }

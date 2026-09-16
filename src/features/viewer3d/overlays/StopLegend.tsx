@@ -1,4 +1,4 @@
-import { formatDecimal, formatInteger } from '@/lib/format'
+import { useFormat, useT } from '@/lib/i18n'
 import { stopColor } from '@/lib/stops'
 import { weightColor, type ColorContext } from '../colors'
 import type { ColorMode } from '@/features/viewer3d/viewer-types'
@@ -18,19 +18,21 @@ export function StopLegend({
   colorMode: ColorMode
   colorContext: ColorContext
 }) {
+  const t = useT()
+  const format = useFormat()
   if (colorMode === 'khoi-luong') {
     const ramp = [0, 0.25, 0.5, 0.75, 1].map(weightColor).join(', ')
     return (
       <div className="flex min-w-50 flex-col gap-2 rounded-md border border-border bg-bg px-3 py-2.5">
-        <span className="text-body-lg xl:text-caption text-text-2">Khối lượng mỗi kiện</span>
+        <span className="text-body-lg xl:text-caption text-text-2">{t('viewer.legend.weight')}</span>
         <div
           aria-hidden
           className="h-2.5 rounded-xs"
           style={{ background: `linear-gradient(90deg, ${ramp})` }}
         />
         <div className="flex justify-between font-mono text-body-lg xl:text-caption text-text-3">
-          <span>{formatDecimal(colorContext.minWeightKg)} kg</span>
-          <span>{formatDecimal(colorContext.maxWeightKg)} kg</span>
+          <span>{format.decimal(colorContext.minWeightKg)} kg</span>
+          <span>{format.decimal(colorContext.maxWeightKg)} kg</span>
         </div>
       </div>
     )
@@ -40,7 +42,7 @@ export function StopLegend({
     <div className="flex min-w-50 flex-col gap-1.5 rounded-md border border-border bg-bg px-3 py-2.5">
       {colorMode === 'kien-goc' ? (
         <span className="pb-0.5 text-body-lg xl:text-caption text-text-3">
-          Cùng điểm giao, kiện gốc sau tối hơn một nấc
+          {t('viewer.legend.sourcePackage')}
         </span>
       ) : null}
       {stops.map((stop) => (
@@ -51,10 +53,10 @@ export function StopLegend({
             style={{ background: stopColor(stop.number) }}
           />
           <span className="flex-1">
-            Điểm {stop.number} · {stop.name}
+            {t('common.stopWithName', { number: stop.number, name: stop.name })}
           </span>
           <span className="font-mono text-text-3">
-            {formatInteger(stop.packageCount)}
+            {format.integer(stop.packageCount)}
           </span>
         </span>
       ))}

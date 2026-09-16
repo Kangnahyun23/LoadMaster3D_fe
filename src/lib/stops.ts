@@ -30,8 +30,3 @@ export function stopColor(stopNumber: number): string {
 export function stopForeground(stopNumber: number): string {
   return DARK_TEXT_ON.has(stopColor(stopNumber)) ? '#111827' : '#FFFFFF'
 }
-
-/** Nhãn mặc định cho điểm giao. */
-export function stopLabel(stopNumber: number): string {
-  return `Điểm ${stopNumber}`
-}

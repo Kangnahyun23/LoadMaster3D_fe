@@ -3,6 +3,7 @@ import { nextOrientation, type OrientationCode } from '@/domain/geometry'
 import type { ScenePlacement, PositionCm } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import { orientedSize } from '@/features/viewer3d/scene-input'
+import { useT } from '@/lib/i18n'
 import { roundPosition, type Axis } from './geometry'
 import { useEditorValidation } from './useEditorValidation'
 import { createPreviewStore } from './preview-store'
@@ -12,6 +13,7 @@ export type DragPlane = 'xy' | 'xz' | 'yz'
 export const PLANE_AXES: Record<DragPlane, readonly Axis[]> = { xy: ['x', 'y'], xz: ['x', 'z'], yz: ['y', 'z'] }
 
 export function useManualEditor(state: LoadPlanViewerState) {
+  const t = useT()
   const [mode, setModeState] = useState<'view' | 'edit'>('view')
   const [plane, setPlane] = useState<DragPlane>('xy')
   const [nudgeCm, setNudgeCm] = useState(1)
@@ -35,7 +37,7 @@ export function useManualEditor(state: LoadPlanViewerState) {
     const candidate = { ...p, position: roundPosition(position) }
     const result = inspect(candidate)
     preview.publish({ id, position: candidate.position, result, sources: [], dragging: false,
-      message: result.valid ? 'Đã đặt kiện' : 'Không thể đặt — đã giữ vị trí trước đó' }, true)
+      message: t(result.valid ? 'viewer.editor.placed' : 'viewer.editor.placeRejected') }, true)
     if (result.valid) state.commitDraft('MOVE', id, { position: candidate.position })
     return result.valid
   }
@@ -44,7 +46,7 @@ export function useManualEditor(state: LoadPlanViewerState) {
     const candidate = { ...selected, ...orientedSize(sceneModel.baseDimensionsById.get(selected.id)!, orientation), orientation }
     const result = inspect(candidate)
     preview.publish({ id: selected.id, position: selected.position, result, sources: [], dragging: false,
-      message: result.valid ? 'Đã đổi hướng đặt' : 'Không thể xoay — đã giữ hướng trước đó' }, true)
+      message: t(result.valid ? 'viewer.editor.rotated' : 'viewer.editor.rotateRejected') }, true)
     if (result.valid) state.setOrientation(selected.id, orientation)
   }
   const nudge = (axis: Axis, direction: number) => {
@@ -72,7 +74,7 @@ export function useManualEditor(state: LoadPlanViewerState) {
     const result = inspect(source)
     // Other edits can occupy the original slot. Reset all remains an exact snapshot restore.
     preview.publish({ id: source.id, position: source.position, result, sources: [], dragging: false,
-      message: result.valid ? 'Đã khôi phục kiện' : 'Không thể khôi phục riêng kiện này; vị trí gốc đang bị chiếm' }, true)
+      message: t(result.valid ? 'viewer.editor.restored' : 'viewer.editor.restoreRejected') }, true)
     if (result.valid) state.commitDraft('RESET_PLACEMENT', selected.id)
   }
   const resetDraft = () => { preview.publish(null, true); state.commitDraft('RESET_DRAFT') }

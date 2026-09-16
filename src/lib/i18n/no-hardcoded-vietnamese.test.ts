@@ -26,15 +26,8 @@ const ALLOWED: Readonly<Record<string, string>> = {
 /** Thư mục đã dịch xong và được cổng giữ. LM-070 thêm luồng Spec, LM-071 mở rộng ra toàn `src/`. */
 const ENFORCED = ['/src/']
 
-/** Chưa dịch: gỡ dần khỏi danh sách này. Rỗng là đích của LM-071. */
-const PENDING: readonly string[] = [
-  // LM-070
-  '/src/features/viewer3d/',
-  '/src/features/trips/',
-  '/src/components/',
-  '/src/app/App.tsx',
-  '/src/lib/stops.ts',
-]
+/** Chưa dịch: rỗng từ LM-071 — toàn `src/` đi qua từ điển. Không thêm lại thư mục vào đây. */
+const PENDING: readonly string[] = []
 
 test('no hard-coded Vietnamese UI text outside the dictionaries', () => {
   const offenders = Object.entries(SOURCES)
