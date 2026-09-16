@@ -1,20 +1,15 @@
 import { ArrowRight, ArrowUp, Package, TriangleAlert } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
-import { formatDecimal, formatInteger } from '@/lib/format'
+import type { VehicleConfig } from '@/domain/models'
+import type { ScenePlacement, SceneStop } from '@/features/viewer3d/scene-input'
+import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
-import type { Placement, PlanStop, VehicleSpec } from '@/types/load-plan'
-import {
-  describeDimensions,
-  describeOrientation,
-  describePosition,
-  stepNote,
-} from './describe-step'
-import { findBelow } from '@/lib/placement'
+import { measureStep, nearestObstacle, stepNote } from './describe-step'
 import { OrientationFigure } from './OrientationFigure'
 
 /**
- * Thẻ hướng dẫn xếp một kiện: mã kiện cỡ lớn, điểm giao, ba ô thông tin,
+ * Thẻ hướng dẫn xếp một kiện: mã kiện cỡ lớn, điểm giao, ba ô thông tin, khoảng cách cm theo locale, vật cản gần nhất,
  * ghi chú và hình minh hoạ hướng đặt. Chữ tối thiểu 16px trên tablet (mục 10).
  * Lệch có chủ ý: nhãn "Kiện cần xếp" trong design viết hoa — mục 5 cấm.
  */
@@ -24,20 +19,24 @@ export function PackageInstructionCard({
   vehicle,
   stops,
 }: {
-  placement: Placement
-  placements: Placement[]
-  vehicle: VehicleSpec
-  stops: PlanStop[]
+  placement: ScenePlacement
+  placements: readonly ScenePlacement[]
+  vehicle: VehicleConfig
+  stops: readonly SceneStop[]
 }) {
+  const t = useT()
+  const format = useFormat()
   const stopName = stops.find((s) => s.number === placement.stop)?.name ?? ''
   const note = stepNote(placement, placements)
-  // Kho vẫn đọc LoadPlan mm tới LM-060; khoảng cách tới vách tính tại chỗ, không đi qua scene cm.
-  const { position: at } = placement
-  const measurements = {
-    frontMm: at.x, rearMm: vehicle.innerLengthMm - at.x - placement.lengthMm,
-    leftMm: at.y, rightMm: vehicle.innerWidthMm - at.y - placement.widthMm, floorMm: at.z,
-    belowId: findBelow(placement, placements)?.id,
-  }
+  const measured = measureStep(placement, placements, vehicle)
+  const obstacle = nearestObstacle(placement, vehicle.obstacles)
+  const distances = [
+    [t('warehouse.distances.front'), measured.frontCm],
+    [t('warehouse.distances.left'), measured.leftCm],
+    [t('warehouse.distances.right'), measured.rightCm],
+    [t('warehouse.distances.rear'), measured.rearCm],
+    [t('warehouse.distances.floor'), measured.floorCm],
+  ] as const
 
   return (
     <Card className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto p-4">
@@ -45,6 +44,7 @@ export function PackageInstructionCard({
         <div className="flex flex-col gap-1">
           <span className="text-body-lg font-medium text-text-3">Kiện cần xếp</span>
           <h1 className="font-mono text-[40px] leading-12 font-semibold tracking-[-0.02em]">{placement.id}</h1>
+          <span className="text-body-lg text-text-2">{placement.name}</span>
         </div>
         <span
           className="inline-flex min-h-9 items-center gap-2 rounded-md px-3 text-body-lg font-semibold"
@@ -55,20 +55,31 @@ export function PackageInstructionCard({
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-        <Tile label="Vị trí">{describePosition(placement, placements, vehicle)}</Tile>
-        <Tile label="Hướng đặt">{describeOrientation(placement)}</Tile>
-        <Tile label="Khối lượng">
-          <span className="font-mono text-[28px] leading-8 tracking-[-0.01em]">
-            {formatDecimal(placement.weightKg)}
-          </span>{' '}
-          <span className="text-body-lg font-normal text-text-3">kg</span>
+        <Tile label={t('warehouse.tiles.position')}>
+          {t('warehouse.layer', { layer: format.integer(measured.layer), rear: format.length(measured.rearCm) })}
+        </Tile>
+        <Tile label={t('warehouse.tiles.orientation')}>
+          <span className="font-mono">{placement.orientation}</span> · {t(`warehouse.orientations.${placement.orientation}`)}
+        </Tile>
+        <Tile label={t('warehouse.tiles.weight')}>
+          <span className="font-mono text-[28px] leading-8 tracking-[-0.01em]">{format.weight(placement.weightKg)}</span>
         </Tile>
       </div>
       <dl className="grid grid-cols-2 gap-2 text-body-lg">
-        {([['Vách trước', measurements.frontMm], ['Vách trái', measurements.leftMm], ['Vách phải', measurements.rightMm],
-          ['Cửa sau', measurements.rearMm], ['Sàn', measurements.floorMm]] as const).map(([label, value]) =>
-          <div key={label}><dt className="text-text-2">Cách {label.toLowerCase()}</dt><dd className="font-mono">{formatInteger(value)} mm</dd></div>)}
-        <div><dt className="text-text-2">Phía dưới gần nhất</dt><dd className="font-mono">{measurements.belowId ?? 'Không có kiện'}</dd></div>
+        {distances.map(([label, value]) => (
+          <div key={label}><dt className="text-text-2">{label}</dt><dd className="font-mono">{format.length(value)}</dd></div>
+        ))}
+        <div><dt className="text-text-2">{t('warehouse.distances.below')}</dt><dd className="font-mono">{measured.belowId ?? t('warehouse.distances.noneBelow')}</dd></div>
+        {obstacle ? (
+          <div className="col-span-2">
+            <dt className="text-text-2">{t('warehouse.distances.obstacle')}</dt>
+            <dd>{t('warehouse.distances.obstacleValue', {
+              type: t(`viewer.obstacles.types.${obstacle.obstacle.type}`),
+              id: obstacle.obstacle.id,
+              gap: format.length(obstacle.gapCm),
+            })}</dd>
+          </div>
+        ) : null}
       </dl>
 
       <div
@@ -85,7 +96,7 @@ export function PackageInstructionCard({
         ) : (
           <Package className="size-6 flex-none" strokeWidth={2} aria-hidden />
         )}
-        <span className="text-[18px] leading-6 font-semibold">{note.text}</span>
+        <span className="text-[18px] leading-6 font-semibold">{t(`warehouse.notes.${note.code}`)}</span>
       </div>
 
       <div className="flex flex-wrap items-center gap-4 pt-1">
@@ -93,15 +104,15 @@ export function PackageInstructionCard({
         <ul className="flex min-w-0 flex-col gap-2 text-body-lg text-text-2">
           <li className="flex items-center gap-2.5">
             <span aria-hidden className="size-3 flex-none rounded-[3px]" style={{ background: stopColor(placement.stop) }} />
-            {describeDimensions(placement)}
+            <span className="font-mono">{format.dimensions(placement.lengthCm, placement.widthCm, placement.heightCm)}</span>
           </li>
           <li className="flex items-center gap-2.5">
             <ArrowRight className="size-4 flex-none" strokeWidth={2} aria-hidden />
-            Mũi tên: mặt hướng ra cửa
+            {t('warehouse.figure.doorArrow')}
           </li>
-          <li className="flex items-center gap-2.5 text-text-3">
-            <ArrowUp className="size-4 flex-none" strokeWidth={2} aria-hidden />
-            Mặt có nhãn hướng lên
+          <li className="flex items-center gap-2.5">
+            <ArrowUp className="size-4 flex-none text-primary" strokeWidth={2} aria-hidden />
+            {t('warehouse.figure.topArrow')}
           </li>
         </ul>
       </div>

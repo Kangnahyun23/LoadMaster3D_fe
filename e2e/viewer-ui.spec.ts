@@ -121,9 +121,13 @@ test('benchmark fixture requires debug; warehouse camera, next step and driver 2
   await page.getByRole('combobox', { name: 'Góc nhìn thùng xe', exact: true }).selectOption('cua-sau')
   await page.waitForTimeout(1000)
   await attachScreenshot(page, testInfo, 'warehouse')
+  // Kho đọc revision đã duyệt của chuyến seed (LM-060): sau xác nhận là kiện `loadingOrder = 2`
+  const second = await page.evaluate(async (url) => {
+    const { seedScene } = (await import(url)) as typeof import('@/test/scene')
+    return (await seedScene()).placements.find((placement) => placement.step === 2)!.id
+  }, SOURCE_MODULES.scene)
   await page.getByRole('button', { name: 'Xác nhận đã xếp', exact: true }).click()
-  await page.waitForTimeout(1400)
-  expect(await page.locator('body').innerText()).toMatch(/PKG-00148/)
+  await expect(page.getByRole('heading', { level: 1, name: second, exact: true })).toBeVisible()
 
   await page.goto('/tai-xe/diem-giao')
   await page.getByRole('button', { name: 'Hoàn tất điểm giao', exact: true }).waitFor()
