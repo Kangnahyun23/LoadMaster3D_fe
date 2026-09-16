@@ -358,7 +358,7 @@ format nhận locale đang chọn.
 Màn vận hành viết bằng ngôn ngữ của người dùng, không phải của thuật toán hay của
 backend. Ví dụ đã sửa: hộp thoại tối ưu từng ghi "Thế hệ 128" — đúng thuật ngữ giải
 thuật di truyền nhưng vô nghĩa với điều phối viên, và sẽ **sai hẳn** nếu sau này đổi
-thuật toán. Nay ghi "Vòng tối ưu 128".
+thuật toán. *(LM-048)* Nay hộp thoại chỉ hiện số service báo thật: "Đã xét 80 / 132 kiện".
 
 Tên trường dữ liệu trong code vẫn giữ đúng hợp đồng với backend (`generation`);
 giao diện làm lớp dịch. Ngoại lệ: màn **So sánh phương án** được dùng từ vựng thuật
