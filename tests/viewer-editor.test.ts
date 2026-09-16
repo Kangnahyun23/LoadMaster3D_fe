@@ -21,7 +21,7 @@ test('snapping attracts only load-bearing obstacle faces; a non-bearing obstacle
   // 47,6 cm: mặt trên vật cản 46 cách 1,6 cm (≤ 2), mốc lưới gần nhất 50 cách 2,4 cm (> 2).
   const bearing = snapPosition(p, { x: 100, y: 0, z: 47.6 }, [], { ...vehicle, obstacles: [{ ...obstacle, loadBearing: true }] }, ['z'])
   const plain = snapPosition(p, { x: 100, y: 0, z: 47.6 }, [], { ...vehicle, obstacles: [{ ...obstacle, loadBearing: false }] }, ['z'])
-  expect([bearing.position.z, bearing.sources]).toStrictEqual([46, ['Z: Mặt vật cản O']])
+  expect([bearing.position.z, bearing.sources]).toStrictEqual([46, [{ axis: 'z', kind: 'obstacle', id: 'O' }]])
   expect([plain.position.z, plain.sources]).toStrictEqual([47.6, []])
 })
 
@@ -32,7 +32,7 @@ test('snapping chooses floor/walls/5 cm grid/cargo faces within 2 cm, with fixed
   const neighbor = box('b', 26.7, 0, 0)
   const snapped = snapPosition(p, { x: 17.2, y: 0, z: 0 }, [neighbor], vehicle)
   expect(snapped.position.x).toBe(16.7)
-  expect(snapped.sources.some((s) => s.includes('Mặt kiện b'))).toBeTruthy()
+  expect(snapped.sources.some((s) => s.kind === 'package' && s.id === 'b')).toBeTruthy()
   expect(overlaps({ ...p, position: snapped.position }, neighbor)).toBe(false)
   expect(snapPosition(p, { x: 17.2, y: 70, z: 0 }, [neighbor], vehicle).position.x, 'remote face does not attract').toBe(17.2)
   expect(snapPosition(p, { x: 0.8, y: 0.8, z: 1.2 }, [], vehicle, ['x', 'y']).position.z).toBe(1.2)

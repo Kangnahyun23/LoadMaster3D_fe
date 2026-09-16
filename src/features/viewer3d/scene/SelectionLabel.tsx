@@ -1,3 +1,4 @@
+import { useT } from '@/lib/i18n'
 import { SceneCallout } from './SceneCallout'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import { boxCenter, boxSize } from './units'
@@ -7,6 +8,7 @@ import { boxCenter, boxSize } from './units'
  * cho phép dùng `<Html>` của drei, vì nhãn phải bám theo vật thể 3D.
  */
 export function SelectionLabel({ placement, role = 'selected' }: { placement: ScenePlacement; role?: 'selected' | 'current' | 'next' }) {
+  const t = useT()
   const [cx, cy, cz] = boxCenter(placement)
   const [, height] = boxSize(placement)
 
@@ -17,7 +19,7 @@ export function SelectionLabel({ placement, role = 'selected' }: { placement: Sc
       width={role === 'next' ? 180 : 168}
     >
         <span className={`inline-block rounded-sm border px-2 py-1 text-body-lg font-medium whitespace-nowrap xl:text-caption ${role === 'next' ? 'border-info bg-panel-dark text-bg' : 'border-border bg-bg text-text'}`}>
-          <span className="block">{role === 'current' ? 'Hiện tại' : role === 'next' ? 'Tiếp theo' : 'Đã chọn'} · Điểm {placement.stop}</span>
+          <span className="block">{t(`viewer.selectionLabel.${role}`, { stop: placement.stop })}</span>
           {role !== 'next' ? <span className="font-mono">{placement.id}</span> : null}
         </span>
     </SceneCallout>

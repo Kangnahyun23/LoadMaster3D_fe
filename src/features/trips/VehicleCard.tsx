@@ -36,21 +36,21 @@ export function VehicleCard({ vehicle, tripId }: { vehicle: VehicleConfig; tripI
 
       <dl className="border-t border-border">
         <div className="flex flex-col gap-0.5 border-b border-border py-2.5">
-          <dt className="text-body text-text-2">Lòng thùng (D × R × C)</dt>
+          <dt className="text-body text-text-2">{t('trips.vehicleCard.cargoSpace')}</dt>
           <dd className="font-mono text-body font-medium whitespace-nowrap">
             {format.dimensions(vehicle.innerLengthCm, vehicle.innerWidthCm, vehicle.innerHeightCm)}
           </dd>
         </div>
 
         <div className="flex items-baseline justify-between gap-3 border-b border-border py-2.5">
-          <dt className="text-body text-text-2">Cửa (R × C)</dt>
+          <dt className="text-body text-text-2">{t('trips.vehicleCard.door')}</dt>
           <dd className="font-mono text-body font-medium whitespace-nowrap">
             {format.widthByHeight(vehicle.doorWidthCm, vehicle.doorHeightCm)}
           </dd>
         </div>
 
         <div className="flex items-baseline justify-between gap-3 py-2.5">
-          <dt className="text-body text-text-2">Vật cản</dt>
+          <dt className="text-body text-text-2">{t('trips.vehicleCard.obstacles')}</dt>
           <dd className="font-mono text-body font-medium">{format.integer(vehicle.obstacles.length)}</dd>
         </div>
       </dl>

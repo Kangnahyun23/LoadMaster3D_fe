@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card'
 import type { Formatter } from '@/lib/format'
 import { useFormat, useT, type TFunction } from '@/lib/i18n'
-import { STOP_COLORS, stopColor, stopForeground, stopLabel } from '@/lib/stops'
+import { StopLabel } from '@/components/StopLabel'
+import { STOP_COLORS, stopColor, stopForeground } from '@/lib/stops'
 import { SheetSection } from '../SheetLayout'
 
 type Row = { code: string; stop: number; weightKg: number; dims: [number, number, number] }
@@ -29,7 +30,7 @@ function createColumns(t: TFunction, format: Formatter) {
       cell: (i) => (
         <span className="inline-flex items-center gap-2">
           <span aria-hidden className="size-2 rounded-xs" style={{ background: stopColor(i.getValue()) }} />
-          {stopLabel(i.getValue())}
+          <StopLabel number={i.getValue()} />
         </span>
       ),
     }),
@@ -103,7 +104,7 @@ export function LegendSection() {
             {stops.map((s) => (
               <div key={s.number} className="flex items-center gap-2.5">
                 <span aria-hidden className="size-3 flex-none rounded-[3px]" style={{ background: s.color }} />
-                <span className="flex-1 text-body">{stopLabel(s.number)}</span>
+                <span className="flex-1 text-body"><StopLabel number={s.number} /></span>
                 <span className="font-mono text-caption text-text-3">{s.color}</span>
               </div>
             ))}
@@ -114,7 +115,7 @@ export function LegendSection() {
           <div className="flex flex-wrap gap-2">
             {stops.map((s) => (
               <span key={s.number} className="inline-flex h-[22px] items-center rounded-[4px] px-2 text-caption font-semibold leading-none" style={{ background: s.color, color: stopForeground(s.number) }}>
-                {stopLabel(s.number)}
+                <StopLabel number={s.number} />
               </span>
             ))}
           </div>

@@ -1,19 +1,10 @@
 import type { CameraPreset, ColorMode } from '@/features/viewer3d/viewer-types'
 import type { QualityTier } from './usePerformanceFlags'
 
-export const CAMERA_PRESETS: ReadonlyArray<{ value: CameraPreset; label: string }> = [
-  { value: 'truoc', label: 'Trước' },
-  { value: 'cua-sau', label: 'Cửa sau' },
-  { value: 'ben-hong', label: 'Bên hông' },
-  { value: 'tren', label: 'Trên' },
-  { value: 'goc-cheo', label: 'Góc chéo' },
-]
+/** Nhãn nằm ở `viewer.camera.<preset>` và `viewer.colorModes.<mode>` của từ điển (LM-070). */
+export const CAMERA_PRESETS: readonly CameraPreset[] = ['truoc', 'cua-sau', 'ben-hong', 'tren', 'goc-cheo']
 
-export const COLOR_MODES: ReadonlyArray<{ value: ColorMode; label: string }> = [
-  { value: 'diem-giao', label: 'Theo điểm giao' },
-  { value: 'kien-goc', label: 'Theo kiện gốc' },
-  { value: 'khoi-luong', label: 'Theo khối lượng' },
-]
+export const COLOR_MODES: readonly ColorMode[] = ['diem-giao', 'kien-goc', 'khoi-luong']
 
 export function debugQualityTier(params: URLSearchParams): QualityTier | undefined {
   if (!params.has('debug')) return undefined

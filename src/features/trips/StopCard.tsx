@@ -45,7 +45,7 @@ export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => vo
       <button
         ref={setActivatorNodeRef}
         type="button"
-        aria-label={`Kéo để đổi thứ tự ${stop.name}`}
+        aria-label={t('trips.stops.dragHandle', { name: stop.name })}
         className={cn(
           'grid size-5 flex-none place-items-center text-text-disabled',
           'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
@@ -70,7 +70,7 @@ export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => vo
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-body font-medium">
-          <span className="sr-only">Điểm {stopNumber}: </span>
+          <span className="sr-only">{t('trips.stops.numberLabel', { number: stopNumber })} </span>
           {stop.name}
         </span>
         <span className="inline-flex items-center gap-1.5 truncate text-caption text-text-3">
@@ -83,7 +83,7 @@ export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => vo
         <span className="font-mono text-body font-medium">
           {format.integer(stop.packageCount)}{' '}
           <span className="font-sans text-caption font-normal text-text-3">
-            {t('trips.instances').toLowerCase()}
+            {t('trips.stops.packagesUnit')}
           </span>
         </span>
         <span className="font-mono text-caption text-text-3">

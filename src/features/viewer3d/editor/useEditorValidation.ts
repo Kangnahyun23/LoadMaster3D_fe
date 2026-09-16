@@ -17,7 +17,7 @@ export function useEditorValidation(model: ViewerSceneModel, placements: readonl
     const source = model.placementById.get(p.id)
     const changed = !source || p.orientation !== source.orientation ||
       p.position.x !== source.position.x || p.position.y !== source.position.y || p.position.z !== source.position.z
-    const manualNote = changed ? ['Vị trí hoặc hướng đặt đã chỉnh thủ công'] : []
+    const manualNote = changed ? [t('viewer.editor.manualNote')] : []
     if (!engine) return { valid: true, errors: [], advisories: manualNote, supportRatio: 1, overlapIds: [] }
     engine.sync(placements)
     const check = engine.check(p)

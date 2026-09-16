@@ -1,12 +1,12 @@
 import type { PositionCm } from '@/features/viewer3d/scene-input'
 import type { GeometryResult } from './geometry'
-import type { SnapTarget } from './snapping'
+import type { SnapSource, SnapTarget } from './snapping'
 
 export type EditorPreview = {
   id: string
   position: PositionCm
   result: GeometryResult
-  sources: string[]
+  sources: SnapSource[]
   targets?: SnapTarget[]
   dragging: boolean
   message?: string

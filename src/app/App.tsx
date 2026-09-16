@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router'
 import { Spinner } from '@/components/ui/Spinner'
+import { useT } from '@/lib/i18n'
 import { RequireAuth } from '@/features/auth/RequireAuth'
 import { AppShell } from './AppShell'
 import { NotFoundPage } from './NotFoundPage'
@@ -27,10 +28,11 @@ const StyleSheetPage = lazy(() => import('./design-system/StyleSheetPage').then(
 const ComponentSheetPage = lazy(() => import('./design-system/ComponentSheetPage').then((m) => ({ default: m.ComponentSheetPage })))
 
 function SuspenseOutlet() {
+  const t = useT()
   return (
     <Suspense
       fallback={
-        <div className="flex flex-1 items-center justify-center p-8" role="status" aria-label="Đang tải màn hình">
+        <div className="flex flex-1 items-center justify-center p-8" role="status" aria-label={t('common.loadingScreen')}>
           <Spinner />
         </div>
       }

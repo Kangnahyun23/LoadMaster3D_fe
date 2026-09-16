@@ -2,6 +2,7 @@ import { Edges, Html, type CameraControls } from '@react-three/drei'
 import { useThree, type ThreeEvent } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useRef, type ComponentRef } from 'react'
 import { Plane, Raycaster, Vector2, Vector3, type Group, type MeshStandardMaterial } from 'three'
+import { useT } from '@/lib/i18n'
 import { readToken } from '@/lib/tokens'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
@@ -17,6 +18,7 @@ import { EditorSpatialFeedback } from './EditorSpatialFeedback'
 export function EditorProxy({ placement, state, editor }: {
   placement: ScenePlacement; state: LoadPlanViewerState; editor: ManualEditor
 }) {
+  const t = useT()
   const group = useRef<Group>(null)
   const material = useRef<MeshStandardMaterial>(null)
   const cancel = useRef<(() => void) | null>(null)
@@ -48,7 +50,7 @@ export function EditorProxy({ placement, state, editor }: {
       : editor.plane === 'xz' ? new Vector3(0, 0, 1) : new Vector3(1, 0, 0)
     if (Math.abs(event.ray.direction.dot(normal)) < 0.08) {
       editor.preview.publish({ id: placement.id, position: placement.position, result: editor.inspect(placement), sources: [], dragging: false,
-        message: 'Đổi góc nhìn để kéo trên mặt phẳng này: Trên cho X–Y, Bên hông cho X–Z, Cửa sau cho Y–Z.' }, true)
+        message: t('viewer.editor.wrongView') }, true)
       return
     }
     // Plane passes through the picked surface to avoid a jump at gesture start.
@@ -142,7 +144,7 @@ export function EditorProxy({ placement, state, editor }: {
       </mesh>
       <Html position={[0, toScene(placement.heightCm) / 2, 0]} zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
         <span className="block -translate-x-1/2 -translate-y-full rounded-sm bg-bg px-2 py-1 font-mono text-body whitespace-nowrap text-text">
-          {placement.id} · Điểm {placement.stop}
+          {t('common.packageAtStop', { id: placement.id, stop: placement.stop })}
         </span>
       </Html>
     </group>

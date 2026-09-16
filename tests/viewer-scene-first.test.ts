@@ -57,6 +57,6 @@ test('distance guides use the closest walls and highest actual supporting footpr
   const top = box('top', 710, 225, 30), below = box('below', 710, 225, 10)
   const unrelated = box('remote', 600, 0, 19)
   const guides = editorMeasurements(top, [top, below, unrelated], vehicle)
-  expect(guides.map((g) => [g.label, g.cm])).toStrictEqual([['Cửa', 0], ['Vách phải', 0], ['Mặt đỡ', 10]])
+  expect(guides.map((g) => [g.label, g.cm])).toStrictEqual([['door', 0], ['rightWall', 0], ['support', 10]])
   expect(editorMeasurements(box('floor'), [], vehicle)[2]!.cm).toBe(0)
 })

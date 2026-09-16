@@ -19,7 +19,7 @@ export function BlockerPanel({ target, lifo, onSelect }: {
       <p>{summary}</p>
       <ul className="max-h-56 overflow-auto">
         {blockers.map((p) => <li key={p.id}><Button variant="ghost" className="h-14 w-full justify-start px-2 font-mono text-body-lg xl:h-11 xl:text-body" onClick={() => onSelect(p)}>
-          {p.id} · Điểm {p.stop}
+          {t('common.packageAtStop', { id: p.id, stop: p.stop })}
         </Button></li>)}
       </ul>
     </> : null}

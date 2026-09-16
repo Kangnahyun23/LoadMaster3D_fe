@@ -79,7 +79,7 @@ export function TripDetailPage() {
       <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg px-8">
         <Link
           to="/chuyen"
-          aria-label="Quay lại danh sách chuyến"
+          aria-label={t('trips.detail.back')}
           className="grid size-9 place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
@@ -95,17 +95,17 @@ export function TripDetailPage() {
         <Button variant="primary" asChild>
           <Link to={`/chuyen/${tripId}/toi-uu${searchParams.get('mo-phong') === 'loi' ? '?mo-phong=loi' : ''}`}>
             <Play strokeWidth={1.5} />
-            Chạy tối ưu
+            {t('trips.detail.runOptimization')}
           </Link>
         </Button>
       </header>
 
       {query.isPending ? (
-        <div role="status" aria-label="Đang tải chuyến" className="grid flex-1 place-items-center"><Spinner /></div>
+        <div role="status" aria-label={t('trips.detail.loading')} className="grid flex-1 place-items-center"><Spinner /></div>
       ) : !trip || !vehicle || !summary ? (
         <div className="flex flex-1 flex-col items-start gap-3 p-8">
-          <h2 className="text-h2 font-semibold">Không tìm thấy chuyến {tripId}</h2>
-          <Button variant="secondary" asChild><Link to="/chuyen">Về danh sách chuyến</Link></Button>
+          <h2 className="text-h2 font-semibold">{t('trips.detail.notFound', { id: tripId })}</h2>
+          <Button variant="secondary" asChild><Link to="/chuyen">{t('common.backToTrips')}</Link></Button>
         </div>
       ) : (
         <div className="flex min-h-0 flex-1 flex-wrap items-start gap-6 overflow-auto px-8 pt-6 pb-8">
@@ -124,7 +124,7 @@ export function TripDetailPage() {
             <div className="flex items-baseline gap-2 px-1">
               <h2 className="text-h3 font-semibold">{t('trips.packages.title')}</h2>
               <span className="font-mono text-caption text-text-3">
-                {t('trips.stops.count', { count: summary.lines })}
+                {t('trips.packages.lineCount', { count: summary.lines })}
               </span>
             </div>
             <PackagesTable

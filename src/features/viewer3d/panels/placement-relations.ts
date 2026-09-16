@@ -54,16 +54,17 @@ export function layerOf(p: ScenePlacement, all: readonly ScenePlacement[]): numb
   return layer
 }
 
-/** "Sàn · sát vách trước", "Lớp 2 · bên trái"… cho danh sách kiện ghim. */
-export function describeWhere(p: ScenePlacement, all: readonly ScenePlacement[], vehicle: VehicleConfig): string {
+export type PlacementSide = 'front' | 'rear' | 'left' | 'right' | 'middle'
+
+/** Tầng và phía trong thùng cho danh sách kiện ghim; UI dịch `side` qua `viewer.packageList.sides` (LM-070). */
+export function describeWhere(p: ScenePlacement, all: readonly ScenePlacement[], vehicle: VehicleConfig): { layer: number; side: PlacementSide } {
   const layer = layerOf(p, all)
-  const layerLabel = layer === 1 ? 'Sàn' : `Lớp ${layer}`
   const centerY = p.position.y + p.widthCm / 2
-  let side: string
-  if (p.position.x < END_ZONE_CM) side = 'sát vách trước'
-  else if (p.position.x + p.lengthCm > vehicle.innerLengthCm - END_ZONE_CM) side = 'gần cửa sau'
-  else if (centerY < vehicle.innerWidthCm / 3) side = 'bên trái'
-  else if (centerY > (vehicle.innerWidthCm * 2) / 3) side = 'bên phải'
-  else side = 'giữa thùng'
-  return `${layerLabel} · ${side}`
+  let side: PlacementSide
+  if (p.position.x < END_ZONE_CM) side = 'front'
+  else if (p.position.x + p.lengthCm > vehicle.innerLengthCm - END_ZONE_CM) side = 'rear'
+  else if (centerY < vehicle.innerWidthCm / 3) side = 'left'
+  else if (centerY > (vehicle.innerWidthCm * 2) / 3) side = 'right'
+  else side = 'middle'
+  return { layer, side }
 }

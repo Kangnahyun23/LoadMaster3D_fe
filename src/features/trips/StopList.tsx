@@ -48,8 +48,8 @@ export function StopList({ stops, onReorder, onRemove }: {
 
   return (
     <div className="flex min-w-0 flex-col gap-3">
-      <div className="flex items-center justify-between gap-3 px-1">
-        <div className="flex items-baseline gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-1">
+        <div className="flex items-baseline gap-2 whitespace-nowrap">
           <h2 className="text-h3 font-semibold">{t('trips.stops.title')}</h2>
           <span className="font-mono text-caption text-text-3">
             {t('trips.stops.count', { count: stops.length })}

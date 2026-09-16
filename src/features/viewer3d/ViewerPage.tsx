@@ -48,7 +48,7 @@ function ResultSession() {
           title={query.isError ? t('viewer.plan.loadErrorTitle') : t('viewer.plan.emptyTitle')}
           description={query.isError ? t('viewer.plan.loadErrorDescription', { tripId }) : t('viewer.plan.emptyDescription')}
           action={<Button variant={query.isError ? 'secondary' : 'primary'} asChild>
-            <Link to={query.isError ? '/chuyen' : `/chuyen/${tripId}/toi-uu`}>{query.isError ? 'Về danh sách chuyến' : t('viewer.plan.toSetup')}</Link>
+            <Link to={query.isError ? '/chuyen' : `/chuyen/${tripId}/toi-uu`}>{query.isError ? t('common.backToTrips') : t('viewer.plan.toSetup')}</Link>
           </Button>}
         />
       </div>

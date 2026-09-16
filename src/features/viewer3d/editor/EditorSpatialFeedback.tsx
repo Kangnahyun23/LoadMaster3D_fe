@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, type ComponentRef } from 'react'
 import { BoxGeometry, EdgesGeometry, Object3D, type Group, type InstancedMesh, type Mesh, type MeshBasicMaterial } from 'three'
 import { readToken } from '@/lib/tokens'
-import { useFormat } from '@/lib/i18n'
+import { useFormat, useT } from '@/lib/i18n'
 import type { ScenePlacement, PositionCm } from '@/features/viewer3d/scene-input'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import { boxCenter, boxSize, SCENE_SCALE, type Vec3 } from '../scene/units'
@@ -25,12 +25,13 @@ export function EditorSpatialFeedback({ placement, state, editor }: {
   const previous = useRef<unknown>(undefined)
   const invalidate = useThree((s) => s.invalidate)
   const format = useFormat()
+  const t = useT()
   const showMeasurements = useThree((s) => s.size.width >= 600)
   const source = state.sceneModel.placementById.get(placement.id)!
   const edges = useMemo(() => { const box = new BoxGeometry(); const e = new EdgesGeometry(box); box.dispose(); return e }, [])
   const dummy = useMemo(() => new Object3D(), [])
   useEffect(() => () => edges.dispose(), [edges])
-  useEffect(() => { previous.current = undefined; invalidate() }, [placement, editor.plane, showMeasurements, invalidate])
+  useEffect(() => { previous.current = undefined; invalidate() }, [placement, editor.plane, showMeasurements, invalidate, t])
 
   useFrame(() => {
     const preview = editor.preview.getLatest()
@@ -48,7 +49,7 @@ export function EditorSpatialFeedback({ placement, state, editor }: {
     lines.current?.geometry.setPositions(points)
     guides.forEach((g, i) => {
       labels.current[i]?.position.set(...point({ x: (g.from.x + g.to.x) / 2, y: (g.from.y + g.to.y) / 2, z: (g.from.z + g.to.z) / 2 }))
-      if (texts.current[i]) texts.current[i]!.textContent = `${g.label} ${format.length(g.cm)}`
+      if (texts.current[i]) texts.current[i]!.textContent = `${t(`viewer.editor.guides.${g.label}`)} ${format.length(g.cm)}`
     })
     const color = readToken(!result.valid ? '--danger' : result.advisories.length ? '--warning' : '--success')
     snapMaterial.current?.color.set(color)
@@ -79,7 +80,7 @@ export function EditorSpatialFeedback({ placement, state, editor }: {
       <lineSegments geometry={edges} position={boxCenter(source)} scale={boxSize(source)} raycast={() => null}>
         <lineBasicMaterial color={readToken('--bg')} transparent opacity={0.3} />
       </lineSegments>
-      {showMeasurements ? <SceneCallout position={boxCenter(source)} offset={[-140, 112]} width={160}><span className="rounded-sm bg-panel-dark px-2 py-1 text-caption text-bg">Vị trí gốc</span></SceneCallout> : null}
+      {showMeasurements ? <SceneCallout position={boxCenter(source)} offset={[-140, 112]} width={160}><span className="rounded-sm bg-panel-dark px-2 py-1 text-caption text-bg">{t('viewer.editor.originalPosition')}</span></SceneCallout> : null}
     </group>
     <mesh ref={plane} name="movement-plane" raycast={() => null}>
       <boxGeometry /><meshBasicMaterial color={readToken('--info')} transparent opacity={0.1} depthWrite={false} />

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { formatInteger } from '@/lib/format'
+import { useFormat, useT } from '@/lib/i18n'
 import { createProjector, roofOutline, groundShadow, type IsoSize } from '@/lib/isometric'
 
 const SCALE = 30
@@ -22,6 +22,8 @@ export function ViewerSkeleton({
   packageCount: number
   stopCount: number
 }) {
+  const t = useT()
+  const format = useFormat()
   const scene = useMemo(() => {
     const project = createProjector(SCALE)
     const { length: l, width: w, height: h } = CONTAINER
@@ -48,7 +50,7 @@ export function ViewerSkeleton({
   }, [])
 
   return (
-    <div role="status" aria-label="Đang dựng mô hình 3D" className="absolute inset-0">
+    <div role="status" aria-label={t('viewer.skeleton.label')} className="absolute inset-0">
       <div className="absolute top-4 left-4 flex gap-0.5 rounded-md bg-white/6 p-1">
         <Skeleton dark className="h-7 w-13 rounded-sm" />
         <Skeleton dark className="h-7 w-16 rounded-sm" style={{ animationDelay: '.15s' }} />
@@ -81,9 +83,9 @@ export function ViewerSkeleton({
       </svg>
 
       <div className="absolute right-0 bottom-5 left-0 flex flex-col items-center gap-2">
-        <span className="text-body font-medium text-white/75">Đang dựng mô hình 3D…</span>
+        <span className="text-body font-medium text-white/75">{t('viewer.skeleton.text')}</span>
         <span className="font-mono text-caption text-white/45">
-          {formatInteger(packageCount)} kiện · {formatInteger(stopCount)} điểm giao
+          {t('viewer.skeleton.counts', { packages: format.integer(packageCount), stops: format.integer(stopCount) })}
         </span>
       </div>
     </div>

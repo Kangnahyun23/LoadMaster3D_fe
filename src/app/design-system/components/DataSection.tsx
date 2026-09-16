@@ -2,13 +2,14 @@ import { DndContext } from '@dnd-kit/core'
 import { SortableContext } from '@dnd-kit/sortable'
 import { ArrowUp } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
+import { StopLabel } from '@/components/StopLabel'
 import { Badge } from '@/components/ui/Badge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { DeliveryItemRow } from '@/features/driver/DeliveryItemRow'
 import { KpiTile } from '@/features/manager/KpiTile'
 import { StopCard } from '@/features/trips/StopCard'
 import { useFormat, useT } from '@/lib/i18n'
-import { stopColor, stopForeground, stopLabel } from '@/lib/stops'
+import { stopColor, stopForeground } from '@/lib/stops'
 import { SAMPLE_DRIVER_ITEM, SAMPLE_STOP, SAMPLE_STOP_NAME } from '../design-system.mock'
 import { SheetRow, SheetSection } from '../SheetLayout'
 
@@ -26,8 +27,8 @@ export function DataSection() {
         <Badge tone="success">{t('designSystem.components.data.completed')}</Badge>
         <Badge tone="warning">{t('designSystem.components.data.needsReview')}</Badge>
         <Badge tone="danger">{t('designSystem.components.data.cancelled')}</Badge>
-        <span className="inline-flex h-[22px] items-center rounded-[4px] px-2 text-caption font-semibold leading-none" style={{ background: stopColor(2), color: stopForeground(2) }}>{stopLabel(2)}</span>
-        <span className="inline-flex items-center gap-2 text-body"><span aria-hidden className="size-2.5 rounded-[3px]" style={{ background: stopColor(3) }} />{stopLabel(3)} · {SAMPLE_STOP_NAME}</span>
+        <span className="inline-flex h-[22px] items-center rounded-[4px] px-2 text-caption font-semibold leading-none" style={{ background: stopColor(2), color: stopForeground(2) }}><StopLabel number={2} /></span>
+        <span className="inline-flex items-center gap-2 text-body"><span aria-hidden className="size-2.5 rounded-[3px]" style={{ background: stopColor(3) }} /><StopLabel number={3} /> · {SAMPLE_STOP_NAME}</span>
         <span className="grid size-8 place-items-center rounded-full font-mono text-body font-semibold" style={{ background: stopColor(4), color: stopForeground(4) }}>4</span>
         <span className="inline-flex h-[22px] items-center gap-1 rounded-full border border-badge-success-border bg-badge-success-bg px-2 font-mono text-caption font-medium text-badge-success-fg"><ArrowUp className="size-3" strokeWidth={2.5} />+{format.percent(3.1)}</span>
       </SheetRow>

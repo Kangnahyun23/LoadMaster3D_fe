@@ -30,7 +30,7 @@ export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockR
     <header className="flex h-14 flex-none items-center gap-2 border-b border-border bg-bg px-2 xl:gap-4 xl:px-5">
       <Link
         to={`/chuyen/${tripId}`}
-        aria-label="Quay lại chuyến"
+        aria-label={t('viewer.header.back')}
         className="grid size-14 shrink-0 place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary xl:size-11"
       >
         <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />

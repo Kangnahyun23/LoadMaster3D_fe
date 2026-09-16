@@ -4,7 +4,9 @@ import { AXES, extent, overlapsAxis } from './geometry'
 import type { SnapTarget } from './snapping'
 
 export type FeedbackBox = { position: PositionCm; lengthCm: number; widthCm: number; heightCm: number }
-export type MeasurementGuide = { from: PositionCm; to: PositionCm; label: string; cm: number }
+/** Mã nhãn đường đo, dịch ở `viewer.editor.guides` (LM-070). */
+export type MeasurementLabel = 'door' | 'frontWall' | 'rightWall' | 'leftWall' | 'support' | 'floor'
+export type MeasurementGuide = { from: PositionCm; to: PositionCm; label: MeasurementLabel; cm: number }
 export function editorMeasurements(p: ScenePlacement, placements: readonly ScenePlacement[], v: VehicleConfig): MeasurementGuide[] {
   const center = { x: p.position.x + p.lengthCm / 2, y: p.position.y + p.widthCm / 2, z: p.position.z }
   const rear = v.innerLengthCm - p.position.x - p.lengthCm < p.position.x
@@ -13,9 +15,9 @@ export function editorMeasurements(p: ScenePlacement, placements: readonly Scene
     overlapsAxis(p, q, 'x') && overlapsAxis(p, q, 'y')).sort((a, b) => b.position.z + b.heightCm - a.position.z - a.heightCm)[0]
   const level = below ? below.position.z + below.heightCm : 0
   return [
-    { from: { ...center, x: rear ? p.position.x + p.lengthCm : p.position.x }, to: { ...center, x: rear ? v.innerLengthCm : 0 }, label: rear ? 'Cửa' : 'Vách trước', cm: rear ? v.innerLengthCm - p.position.x - p.lengthCm : p.position.x },
-    { from: { ...center, y: right ? p.position.y + p.widthCm : p.position.y }, to: { ...center, y: right ? v.innerWidthCm : 0 }, label: right ? 'Vách phải' : 'Vách trái', cm: right ? v.innerWidthCm - p.position.y - p.widthCm : p.position.y },
-    { from: center, to: { ...center, z: level }, label: below ? 'Mặt đỡ' : 'Sàn', cm: p.position.z - level },
+    { from: { ...center, x: rear ? p.position.x + p.lengthCm : p.position.x }, to: { ...center, x: rear ? v.innerLengthCm : 0 }, label: rear ? 'door' : 'frontWall', cm: rear ? v.innerLengthCm - p.position.x - p.lengthCm : p.position.x },
+    { from: { ...center, y: right ? p.position.y + p.widthCm : p.position.y }, to: { ...center, y: right ? v.innerWidthCm : 0 }, label: right ? 'rightWall' : 'leftWall', cm: right ? v.innerWidthCm - p.position.y - p.widthCm : p.position.y },
+    { from: center, to: { ...center, z: level }, label: below ? 'support' : 'floor', cm: p.position.z - level },
   ]
 }
 

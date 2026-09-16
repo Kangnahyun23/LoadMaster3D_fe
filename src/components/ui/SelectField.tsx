@@ -6,6 +6,7 @@ import {
   type FieldValues,
 } from 'react-hook-form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './Select'
+import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 export type SelectOption = { value: string; label: string }
@@ -19,7 +20,7 @@ export function SelectField<TValues extends FieldValues>({
   name,
   label,
   options,
-  placeholder = 'Chọn…',
+  placeholder,
   hint,
   className,
 }: {
@@ -32,6 +33,7 @@ export function SelectField<TValues extends FieldValues>({
   className?: string
 }) {
   const id = useId()
+  const t = useT()
 
   return (
     <Controller
@@ -52,7 +54,7 @@ export function SelectField<TValues extends FieldValues>({
                 aria-invalid={message ? true : undefined}
                 className={message ? 'border-danger' : undefined}
               >
-                <SelectValue placeholder={placeholder} />
+                <SelectValue placeholder={placeholder ?? t('common.selectPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {options.map((option) => (

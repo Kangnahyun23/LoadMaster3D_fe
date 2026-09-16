@@ -3,6 +3,7 @@ import { Color, DoubleSide } from 'three'
 import { useMemo } from 'react'
 import { animated, useSpring } from '@react-spring/three'
 import { useThree } from '@react-three/fiber'
+import { useT } from '@/lib/i18n'
 import { readToken } from '@/lib/tokens'
 import { stopColor } from '@/lib/stops'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
@@ -13,6 +14,7 @@ import { SCENE_SCALE } from '../scene/units'
 import { SceneCallout } from '../scene/SceneCallout'
 
 export function RearDoorCue({ vehicle }: { vehicle: VehicleConfig }) {
+  const t = useT()
   const x = vehicle.innerLengthCm * SCENE_SCALE, z = vehicle.innerWidthCm * SCENE_SCALE / 2
   const points = useMemo(() => new Float32Array([
     x, 0.03, z, x + 0.9, 0.03, z,
@@ -25,7 +27,7 @@ export function RearDoorCue({ vehicle }: { vehicle: VehicleConfig }) {
       <lineBasicMaterial color={readToken('--bg')} />
     </lineSegments>
     <Html position={[x + 0.7, 0.05, z]} zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
-      <span className="block -translate-x-1/2 rounded-sm bg-panel-dark px-2 py-1 text-body whitespace-nowrap text-bg">Cửa sau · Hướng dỡ</span>
+      <span className="block w-max max-w-44 -translate-x-1/2 rounded-sm bg-panel-dark px-2 py-1 text-center text-body text-bg sm:max-w-none sm:whitespace-nowrap">{t('viewer.cues.rearDoor')}</span>
     </Html>
   </group>
 }
@@ -53,6 +55,7 @@ export function InteriorStopMap({ placements, vehicle, reducedMotion }: { placem
 }
 
 export function CargoMassMarker({ placements, vehicle }: { placements: readonly ScenePlacement[]; vehicle: VehicleConfig }) {
+  const t = useT()
   const mass = useMemo(() => cargoCenterOfMass(placements), [placements])
   const points = useMemo(() => {
     const x = (vehicle.innerLengthCm / 2 - (mass?.position.x ?? 0)) * SCENE_SCALE
@@ -74,7 +77,7 @@ export function CargoMassMarker({ placements, vehicle }: { placements: readonly 
       <ringGeometry args={[0.06, 0.09, 16]} /><meshBasicMaterial color={color} side={DoubleSide} />
     </mesh>
     <SceneCallout position={[0, mass.position.z * SCENE_SCALE, 0]} offset={[-140, 90]} width={180}>
-      <span className="inline-block rounded-sm border border-highlight bg-panel-dark px-2 py-1 text-body text-bg">Tâm khối lượng hàng</span>
+      <span className="inline-block rounded-sm border border-highlight bg-panel-dark px-2 py-1 text-body text-bg">{t('viewer.cues.centerOfMass')}</span>
     </SceneCallout>
   </group>
 }
