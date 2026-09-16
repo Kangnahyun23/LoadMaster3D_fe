@@ -14,6 +14,7 @@ import { ObstacleTable } from './ObstacleTable'
 import { useDeleteVehicleMutation, useSaveVehicleMutation } from './useVehiclesQuery'
 import { createVehicleFormSchema, toFormValues, toVehicleConfig, type VehicleFormValues } from './vehicle-form'
 import { createVehicleResolver, flattenFormErrors } from './vehicle-form-resolver'
+import { VehiclePreview } from './VehiclePreview'
 import { VehicleSpecFields } from './VehicleSpecFields'
 import { VehicleValidationSummary } from './VehicleValidationSummary'
 
@@ -35,6 +36,8 @@ export function VehicleForm({ vehicle }: { vehicle?: VehicleConfig }) {
   const save = useSaveVehicleMutation()
   const remove = useDeleteVehicleMutation()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // Vật cản đang làm nổi, chung cho bảng và xem trước 3D (LM-042)
+  const [highlightedObstacle, setHighlightedObstacle] = useState<string | null>(null)
   // Lưu hoặc xoá xong: rời trang trong effect ở lần render sau, để hộp hỏi "rời trang?" không chặn chính mình
   const [done, setDone] = useState(false)
 
@@ -108,22 +111,40 @@ export function VehicleForm({ vehicle }: { vehicle?: VehicleConfig }) {
       </header>
 
       <div className="min-h-0 flex-1 overflow-auto p-6">
-        <div className="flex max-w-300 flex-col gap-5">
-          <VehicleValidationSummary issues={issues} onFocus={(path) => form.setFocus(focusTarget(path))} />
+        {/* Màn rộng: xem trước 3D là cột phải dính khi cuộn; màn hẹp: nằm cuối form (LM-042) */}
+        <div className="grid max-w-400 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
+          <div className="flex min-w-0 flex-col gap-5">
+            <VehicleValidationSummary issues={issues} onFocus={(path) => form.setFocus(focusTarget(path))} />
 
-          <Card className="flex flex-col gap-4 p-5">
-            <h2 className="text-h3 font-semibold">{t('fleet.detail.specTitle')}</h2>
-            <VehicleSpecFields control={form.control} register={form.register} />
-          </Card>
+            <Card className="flex flex-col gap-4 p-5">
+              <h2 className="text-h3 font-semibold">{t('fleet.detail.specTitle')}</h2>
+              <VehicleSpecFields control={form.control} register={form.register} />
+            </Card>
 
-          <Card className="flex flex-col gap-4 p-5">
-            <h2 className="text-h3 font-semibold">{t('fleet.detail.obstaclesTitle')}</h2>
-            <ObstacleTable control={form.control} register={form.register} setValue={form.setValue} />
-          </Card>
+            <Card className="flex flex-col gap-4 p-5">
+              <h2 className="text-h3 font-semibold">{t('fleet.detail.obstaclesTitle')}</h2>
+              <ObstacleTable
+                control={form.control}
+                register={form.register}
+                setValue={form.setValue}
+                highlightedId={highlightedObstacle}
+                onHighlight={setHighlightedObstacle}
+              />
+            </Card>
 
-          <Card className="flex flex-col gap-4 p-5">
-            <h2 className="text-h3 font-semibold">{t('fleet.detail.axlesTitle')}</h2>
-            <AxleTable control={form.control} register={form.register} />
+            <Card className="flex flex-col gap-4 p-5">
+              <h2 className="text-h3 font-semibold">{t('fleet.detail.axlesTitle')}</h2>
+              <AxleTable control={form.control} register={form.register} />
+            </Card>
+          </div>
+
+          <Card className="flex min-w-0 flex-col gap-4 p-5 xl:sticky xl:top-0">
+            <h2 className="text-h3 font-semibold">{t('fleet.preview.title')}</h2>
+            <VehiclePreview
+              control={form.control}
+              highlightedObstacleId={highlightedObstacle}
+              onHighlightObstacle={setHighlightedObstacle}
+            />
           </Card>
         </div>
       </div>

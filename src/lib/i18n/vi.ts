@@ -165,6 +165,14 @@ export const vi = {
       obstaclesTitle: 'Vật cản trong thùng',
       axlesTitle: 'Trục xe',
     },
+    preview: {
+      title: 'Xem trước 3D',
+      label: 'Xem trước 3D thùng xe và vật cản',
+      pending: 'Đang chờ giá trị hợp lệ',
+      loading: 'Đang dựng mô hình 3D',
+      unsupported: 'Trình duyệt này không dựng được 3D; hình phác chỉ thể hiện tỉ lệ thùng.',
+      hint: 'Bấm vật cản trong hình hoặc một dòng trong bảng vật cản để làm nổi.',
+    },
     form: {
       name: 'Tên xe',
       namePlaceholder: 'Hyundai HD210 · 60C-446.32',
