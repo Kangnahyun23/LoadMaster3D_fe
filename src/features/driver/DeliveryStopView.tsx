@@ -1,6 +1,7 @@
 import { ArrowRight, ChevronLeft, Navigation } from 'lucide-react'
 import { lazy, Suspense, useState } from 'react'
 import { Link } from 'react-router'
+import { LanguageSwitch } from '@/components/LanguageSwitch'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/Dialog'
 import { Spinner } from '@/components/ui/Spinner'
@@ -48,7 +49,8 @@ export function DeliveryStopView({ model, stops }: { model: ViewerSceneModel; st
           >
             {stop.number}
           </span>
-          <h1 className="text-h2 font-semibold">{t('driver.stopTitle', { number: stop.number, total: stops.length })}</h1>
+          <h1 className="min-w-0 flex-1 text-h2 font-semibold">{t('driver.stopTitle', { number: stop.number, total: stops.length })}</h1>
+          <LanguageSwitch size="touch" className="flex-none [&>svg]:hidden min-[400px]:[&>svg]:block" />
         </div>
         <div className="flex gap-1" aria-hidden>
           {stops.map(({ number }) => (

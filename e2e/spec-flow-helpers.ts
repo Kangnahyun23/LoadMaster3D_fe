@@ -48,6 +48,35 @@ export async function optimizeAndOpenPlanner(page: Page) {
   await page.locator('canvas').waitFor()
 }
 
+/**
+ * Chữ bị tràn khỏi khung (LM-071): phần tử có chữ trực tiếp mà `scrollWidth` vượt `clientWidth` hoặc nằm ngoài viewport,
+ * hoặc rộng hơn nút chứa nó, cộng tràn ngang của trang. Bỏ qua chữ cố ý cắt bằng dấu ba chấm (`truncate`), `sr-only` và nhãn trong khung 3D.
+ */
+export async function overflowingText(page: Page) {
+  return page.evaluate(() => {
+    const found: string[] = []
+    const root = document.documentElement
+    if (root.scrollWidth > root.clientWidth + 1) found.push(`page ${root.scrollWidth} > ${root.clientWidth}`)
+    for (const el of document.querySelectorAll<HTMLElement>('body *')) {
+      // Nhãn neo trong khung 3D được SceneCallout giữ trong khung canvas, không thuộc bố cục màn: bỏ qua.
+      if (el.closest('.sr-only, svg, div:has(> canvas), div:has(> div > canvas)')) continue
+      const style = getComputedStyle(el)
+      if (style.textOverflow === 'ellipsis') continue
+      const hasText = [...el.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim())
+      if (!hasText) continue
+      const label = `${el.tagName} "${el.textContent?.trim().slice(0, 40)}"`
+      if (el.clientWidth > 0 && el.scrollWidth > el.clientWidth + 1) found.push(`${label} ${el.scrollWidth} > ${el.clientWidth}`)
+      const rect = el.getBoundingClientRect()
+      if (rect.width > 0 && (rect.right > root.clientWidth + 1 || rect.left < -1)) found.push(`${label} outside viewport`)
+      // Chữ trong nút tròn/ô cố định có thể tràn ra ngoài mà nút vẫn không cuộn: so khung chữ với khung nút chứa nó.
+      const control = el.parentElement?.closest('button, a')
+      const box = control?.getBoundingClientRect()
+      if (box && rect.width > 0 && (rect.left < box.left - 1 || rect.right > box.right + 1)) found.push(`${label} wider than its control`)
+    }
+    return found
+  })
+}
+
 /** Chiều cao hiển thị của một phần tử, px. */
 export async function heightOf(locator: Locator) {
   const box = await locator.boundingBox()

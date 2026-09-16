@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import { useT } from '@/lib/i18n'
 
 /** Thời gian hiện lớp phủ "Đã xếp" trước khi chuyển bước kế tiếp. */
 const CONFIRMED_OVERLAY_MS = 1200
@@ -10,6 +11,7 @@ const CONFIRMED_OVERLAY_MS = 1200
  * Xác nhận xong hiện lớp phủ xanh rồi tự chuyển sang kiện kế tiếp.
  */
 export function useLoadingSession(placements: readonly ScenePlacement[], initialStep = 1) {
+  const t = useT()
   const totalSteps = placements.length
   const [step, setStep] = useState(initialStep)
   const [confirmedId, setConfirmedId] = useState<string | null>(null)
@@ -41,9 +43,9 @@ export function useLoadingSession(placements: readonly ScenePlacement[], initial
   const reportMissing = useCallback(() => {
     if (!current) return
     // Chưa có nơi lưu báo cáo thiếu kiện (D-20): toast chỉ nói việc thật sự xảy ra — bỏ qua bước này.
-    toast.warning(`Đã bỏ qua ${current.id}`, { description: 'Chuyển sang bước kế tiếp.' })
+    toast.warning(t('warehouse.skipped', { id: current.id }), { description: t('warehouse.skippedDescription') })
     setStep((s) => s + 1)
-  }, [current])
+  }, [current, t])
 
   useEffect(() => clearTimer, [clearTimer])
 

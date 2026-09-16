@@ -1,5 +1,5 @@
-import { expect, PLANNER_ROUTE, test } from './fixtures'
-import { heightOf, MOCK_DB, navigateInApp, SEED_TRIP } from './spec-flow-helpers'
+import { attachScreenshot, expect, PLANNER_ROUTE, test } from './fixtures'
+import { heightOf, MOCK_DB, navigateInApp, overflowingText, SEED_TRIP } from './spec-flow-helpers'
 
 /**
  * Màn kho đọc revision đã duyệt (LM-060). Kho dữ liệu nằm trong bộ nhớ trang: sau khi ghi chỉ đổi route phía client.
@@ -57,6 +57,57 @@ for (const device of ['desktop', 'tablet'] as const) {
     expect(browserErrors).toStrictEqual([])
   })
 }
+
+/**
+ * LM-071: màn kho chạy bằng `?lang=en`, nút chuyển ngôn ngữ trên header đạt 56px, đổi ngôn ngữ giữa phiên giữ bước đang xếp,
+ * chữ tiếng Anh không tràn ở tablet dọc (project) và ngang 1024×768. Không ghi kho nên được tải trang để đặt `?lang`.
+ */
+test('tablet: the warehouse runs in English and switching language mid-session keeps the step', { tag: '@tablet' }, async ({ page, login, browserErrors }, testInfo) => {
+  await login('/chuyen')
+  await page.goto('/kho?lang=en')
+  const plan = await page.evaluate(async (db) => {
+    const { getMockDb } = (await import(db)) as typeof import('@/lib/mock-db')
+    const store = getMockDb()
+    const trips = await store.listTrips()
+    for (const trip of trips) {
+      const revision = (await store.listRevisions(trip.id)).findLast((item) => item.approvedAt !== undefined)
+      if (!revision) continue
+      const byOrder = (order: number) => revision.result.placements.find((placement) => placement.loadingOrder === order)!.packageInstanceId
+      return { first: byOrder(1), second: byOrder(2), total: revision.result.placements.length }
+    }
+    throw new Error('seed has no approved revision')
+  }, MOCK_DB)
+
+  await expect(page.getByRole('heading', { level: 1, name: plan.first, exact: true })).toBeVisible()
+  await expect(page.getByText(`Step 1 / ${plan.total}`)).toBeVisible()
+  await expect(page.getByText('Package to load', { exact: true })).toBeVisible()
+  await expect(page.getByText('MOCK RESULT', { exact: true })).toBeVisible()
+  const english = page.getByRole('button', { name: 'EN English', exact: true })
+  const vietnamese = page.getByRole('button', { name: 'VI Tiếng Việt', exact: true })
+  await expect(english).toHaveAttribute('aria-pressed', 'true')
+  expect(await heightOf(english)).toBeGreaterThanOrEqual(56)
+  expect(await heightOf(vietnamese)).toBeGreaterThanOrEqual(56)
+  expect(await overflowingText(page)).toStrictEqual([])
+  await attachScreenshot(page, testInfo, 'warehouse-en-tablet-portrait')
+
+  await page.getByRole('button', { name: 'Confirm loaded', exact: true }).click()
+  await expect(page.getByRole('heading', { level: 1, name: plan.second, exact: true })).toBeVisible()
+  await expect(page.getByText(`Step 2 / ${plan.total}`)).toBeVisible()
+
+  await vietnamese.tap()
+  await expect(page.getByText(`Bước 2 / ${plan.total}`)).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: plan.second, exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Xác nhận đã xếp', exact: true })).toBeVisible()
+  await english.tap()
+  await expect(page.getByText(`Step 2 / ${plan.total}`)).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: plan.second, exact: true })).toBeVisible()
+
+  await page.setViewportSize({ width: 1024, height: 768 })
+  await expect(page.getByRole('button', { name: 'Package not in the warehouse', exact: true })).toBeVisible()
+  expect(await overflowingText(page)).toStrictEqual([])
+  await attachScreenshot(page, testInfo, 'warehouse-en-tablet-landscape')
+  expect(browserErrors).toStrictEqual([])
+})
 
 test('a trip without an approved plan shows the empty state with a way out', async ({ page, login, browserErrors }) => {
   await login('/chuyen')

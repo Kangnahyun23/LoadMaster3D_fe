@@ -48,6 +48,7 @@ export function LoadingStepPage() {
 }
 
 function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
+  const t = useT()
   const model = useMemo(() => adaptResult(plan), [plan])
   const session = useLoadingSession(model.placements)
   const exitTo = `/chuyen/${plan.trip.id}`
@@ -75,7 +76,7 @@ function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
               fallback={
                 <div
                   role="status"
-                  aria-label="Đang dựng sơ đồ thùng xe"
+                  aria-label={t('warehouse.viewerLoading')}
                   className="grid min-h-80 place-items-center rounded-md bg-canvas-1"
                 >
                   <Spinner tone="light" />
@@ -87,10 +88,10 @@ function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
           </>
         ) : (
           <div className="col-span-2 flex flex-col items-start justify-center gap-3 rounded-md border border-border p-8">
-            <span className="text-h1 font-semibold">Đã xếp xong toàn bộ {session.totalSteps} kiện</span>
-            <span className="text-text-2">Đóng cửa thùng và bàn giao cho tài xế.</span>
+            <span className="text-h1 font-semibold">{t('warehouse.finished.title', { count: session.totalSteps })}</span>
+            <span className="text-text-2">{t('warehouse.finished.description')}</span>
             <Button variant="secondary" size="touch" asChild>
-              <Link to={exitTo}>Về chi tiết chuyến</Link>
+              <Link to={exitTo}>{t('warehouse.finished.backToTrip')}</Link>
             </Button>
           </div>
         )}
@@ -110,12 +111,12 @@ function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
             disabled={Boolean(session.confirmedId)}
           >
             <Check strokeWidth={2.5} />
-            Xác nhận đã xếp
+            {t('warehouse.confirm')}
           </Button>
           <div className="flex flex-wrap justify-center gap-2">
             <Button variant="ghost" size="touch" className="font-medium text-text-2 hover:text-text" onClick={session.reportMissing}>
               <PackageX className="size-4.5" strokeWidth={2} />
-              Kiện này không có ở kho
+              {t('warehouse.missing')}
             </Button>
           </div>
         </div>

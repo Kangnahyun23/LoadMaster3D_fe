@@ -34,11 +34,6 @@ const PENDING: readonly string[] = [
   '/src/components/',
   '/src/app/App.tsx',
   '/src/lib/stops.ts',
-  // LM-071
-  '/src/app/design-system/',
-  '/src/features/admin/',
-  '/src/features/warehouse/',
-  '/src/types/',
 ]
 
 test('no hard-coded Vietnamese UI text outside the dictionaries', () => {

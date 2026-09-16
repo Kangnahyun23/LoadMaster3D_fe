@@ -4,31 +4,33 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip
 import { OptimizationErrorDialog } from '@/features/optimization/OptimizationErrorDialog'
 import { OptimizationRunDialog } from '@/features/optimization/OptimizationRunDialog'
 import { ApprovePlanDialog } from '@/features/viewer3d/ApprovePlanDialog'
+import { useT } from '@/lib/i18n'
 import { SheetRow, SheetSection } from '../SheetLayout'
 
 
 export function OverlaySection() {
+  const t = useT()
   const [open, setOpen] = useState<'running' | 'failed' | 'error' | 'approve' | null>(null)
 
   return (
-    <SheetSection id="overlay" number="05" title="Lớp phủ">
-      <SheetRow name="Modal · ConfirmDialog · ErrorDialog · ProgressModal" note="Rộng 640 (tiến trình, lỗi) · 560 (xác nhận). Radius 12px, bóng --e3, lớp phủ rgba(17,24,39,.45), mở 220ms. Chân: nút phụ trái hoặc cặp nút phải.">
-        <Button variant="secondary" onClick={() => setOpen('running')}>Đang tối ưu · 80 / 132 kiện</Button>
-        <Button variant="secondary" onClick={() => setOpen('failed')}>Đầu vào không hợp lệ</Button>
-        <Button variant="secondary" onClick={() => setOpen('error')}>Lỗi tối ưu</Button>
-        <Button variant="secondary" onClick={() => setOpen('approve')}>Xác nhận duyệt</Button>
+    <SheetSection id="overlay" number="05" title={t('designSystem.components.nav.overlay')}>
+      <SheetRow name="Modal · ConfirmDialog · ErrorDialog · ProgressModal" note={t('designSystem.components.overlay.modalNote')}>
+        <Button variant="secondary" onClick={() => setOpen('running')}>{t('designSystem.components.overlay.running')}</Button>
+        <Button variant="secondary" onClick={() => setOpen('failed')}>{t('designSystem.components.overlay.invalidInput')}</Button>
+        <Button variant="secondary" onClick={() => setOpen('error')}>{t('designSystem.components.overlay.optimizationError')}</Button>
+        <Button variant="secondary" onClick={() => setOpen('approve')}>{t('designSystem.components.overlay.confirmApproval')}</Button>
       </SheetRow>
 
-      <SheetRow name="Tooltip · Dropdown" note="Tooltip nền tối, chữ 12px, radius 6px, bóng --e2; hiện sau 200ms. Dropdown/Select: viền 1px, bóng --e2, mục 36px.">
+      <SheetRow name="Tooltip · Dropdown" note={t('designSystem.components.overlay.tooltipNote')}>
         <Tooltip>
-          <TooltipTrigger asChild><Button variant="secondary">Rê chuột vào đây</Button></TooltipTrigger>
-          <TooltipContent side="right">Máy tính bảng kho</TooltipContent>
+          <TooltipTrigger asChild><Button variant="secondary">{t('designSystem.components.overlay.hoverHere')}</Button></TooltipTrigger>
+          <TooltipContent side="right">{t('designSystem.components.overlay.tooltip')}</TooltipContent>
         </Tooltip>
       </SheetRow>
 
       {open === 'running' ? <OptimizationRunDialog progress={{ placed: 80, total: 132 }} onCancel={() => setOpen(null)} /> : null}
       {open === 'error' ? <OptimizationErrorDialog failure={{ kind: 'service', code: 'SERVICE_UNAVAILABLE' }} onRetry={() => setOpen(null)} onClose={() => setOpen(null)} /> : null}
-      {open === 'failed' ? <OptimizationErrorDialog failure={{ kind: 'failed', messages: ['PKG-009 không có hướng đặt nào được phép.'] }} onRetry={() => setOpen(null)} onClose={() => setOpen(null)} /> : null}
+      {open === 'failed' ? <OptimizationErrorDialog failure={{ kind: 'failed', messages: [t('designSystem.components.overlay.noOrientation')] }} onRetry={() => setOpen(null)} onClose={() => setOpen(null)} /> : null}
       <ApprovePlanDialog
         open={open === 'approve'}
         onOpenChange={(o) => setOpen(o ? 'approve' : null)}
@@ -39,7 +41,7 @@ export function OverlaySection() {
         }}
         canSubmit
         approval={{ blockers: { canApprove: true, issues: [], stale: false }, warnings: [], patches: [] }}
-        checks={[{ tone: 'success', text: 'Thứ tự xếp phù hợp thứ tự điểm giao' }]}
+        checks={[{ tone: 'success', text: t('designSystem.components.overlay.stopOrderOk') }]}
         pending={false}
         onConfirm={() => setOpen(null)}
       />

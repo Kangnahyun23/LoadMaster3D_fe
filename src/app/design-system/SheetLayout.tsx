@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { LanguageSwitch } from '@/components/LanguageSwitch'
+import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
@@ -22,6 +24,7 @@ export function SheetLayout({
   nav: SheetNavItem[]
   children: ReactNode
 }) {
+  const t = useT()
   return (
     <div className="min-h-dvh bg-bg">
       <div className="mx-auto flex max-w-300 flex-col gap-16 px-10 pt-14 pb-24">
@@ -34,10 +37,11 @@ export function SheetLayout({
             <span className="rounded-full border border-border px-2 py-0.5 font-mono text-caption font-medium text-text-3">
               {badge}
             </span>
+            <LanguageSwitch className="ml-auto" />
           </div>
           <h1 className="text-display font-semibold tracking-[-0.02em]">{title}</h1>
           <p className="max-w-190 text-body-lg text-pretty text-text-2">{description}</p>
-          <nav aria-label="Mục" className="flex flex-wrap gap-2 text-caption">
+          <nav aria-label={t('designSystem.sections')} className="flex flex-wrap gap-2 text-caption">
             {nav.map((item, index) => (
               <a
                 key={item.id}

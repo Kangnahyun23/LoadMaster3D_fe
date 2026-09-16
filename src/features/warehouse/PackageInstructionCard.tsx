@@ -42,7 +42,7 @@ export function PackageInstructionCard({
     <Card className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <span className="text-body-lg font-medium text-text-3">Kiện cần xếp</span>
+          <span className="text-body-lg font-medium text-text-3">{t('warehouse.card.title')}</span>
           <h1 className="font-mono text-[40px] leading-12 font-semibold tracking-[-0.02em]">{placement.id}</h1>
           <span className="text-body-lg text-text-2">{placement.name}</span>
         </div>
@@ -50,7 +50,7 @@ export function PackageInstructionCard({
           className="inline-flex min-h-9 items-center gap-2 rounded-md px-3 text-body-lg font-semibold"
           style={{ background: stopColor(placement.stop), color: stopForeground(placement.stop) }}
         >
-          Điểm {placement.stop} · {stopName}
+          {t('warehouse.card.stop', { number: placement.stop, name: stopName })}
         </span>
       </div>
 

@@ -1,29 +1,12 @@
-/** Năm vai trò trong hệ thống (CLAUDE.md mục 1). */
-export type Role = 'dispatcher' | 'warehouse' | 'driver' | 'manager' | 'admin'
+/** Năm vai trò trong hệ thống (CLAUDE.md mục 1). Tên hiển thị: key `roles.<vai trò>` của từ điển. */
+export const ROLES = ['dispatcher', 'warehouse', 'driver', 'manager', 'admin'] as const
 
-export const ROLE_LABELS: Record<Role, string> = {
-  dispatcher: 'Điều phối viên',
-  warehouse: 'Nhân viên kho',
-  driver: 'Tài xế',
-  manager: 'Quản lý',
-  admin: 'Quản trị hệ thống',
-}
+export type Role = (typeof ROLES)[number]
 
-/** Thiết bị chính của từng vai trò — quyết định màn hình mặc định sau đăng nhập. */
-export const ROLE_DEVICES: Record<Role, string> = {
-  dispatcher: 'Máy tính',
-  warehouse: 'Máy tính bảng tại kho',
-  driver: 'Điện thoại',
-  manager: 'Máy tính / máy tính bảng',
-  admin: 'Máy tính',
-}
+/** Tên hiển thị: key `admin.users.status.<trạng thái>` của từ điển (LM-071). */
+export const USER_STATUSES = ['active', 'suspended'] as const
 
-export type UserStatus = 'active' | 'suspended'
-
-export const USER_STATUS_LABELS: Record<UserStatus, string> = {
-  active: 'Đang hoạt động',
-  suspended: 'Đã khoá',
-}
+export type UserStatus = (typeof USER_STATUSES)[number]
 
 export type User = {
   id: string
