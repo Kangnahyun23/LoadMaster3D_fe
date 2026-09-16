@@ -427,6 +427,21 @@ export const en = {
       deleteTitle: 'Delete package {id}?',
       deleteDescription: 'The package is removed from the trip. An optimized plan becomes outdated.',
       cancel: 'Cancel',
+      // Messages for `cargoPackageSchema` issue codes shown under each package form field (LM-054)
+      errors: {
+        numberInvalid: 'Enter a number.',
+        dimensionPositive: 'Dimensions must be greater than 0 cm.',
+        weightNonNegative: 'Weight cannot be less than 0 kg.',
+        quantityInteger: 'Quantity must be a whole number.',
+        quantityMin: 'Quantity must be at least 1.',
+        orientationsEmpty: 'Select at least one orientation.',
+        maxTopLoadNonNegative: 'Load on top cannot be less than 0 kg.',
+        maxTopLoadNotStackable: 'A package that cannot be stacked on must have 0 kg load on top.',
+        maxStackCountInteger: 'Stack count must be a whole number.',
+        maxStackCountMin: 'Stack count must be at least 1.',
+        minSupportRatioRange: 'Base support ratio must be between 0 and 1.',
+        invalid: 'Invalid value.',
+      },
     },
     packages: {
       title: 'Packages',

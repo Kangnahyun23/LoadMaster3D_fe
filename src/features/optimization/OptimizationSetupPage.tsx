@@ -42,6 +42,9 @@ export function OptimizationSetupPage() {
   }), [t])
   const form = useForm<OptimizationSettings>({ resolver: zodResolver(schema), defaultValues: DEFAULT_SETTINGS, mode: 'onChange' })
   const watched = useWatch({ control: form.control })
+  // Đọc ngay ở mỗi lần render để react-hook-form theo dõi `isValid` từ lúc mount. Đọc sau `!summary?.canRun ||` thì
+  // lần mở lại với bản cache còn lỗi bỏ qua nó, và nút Tối ưu kẹt ở trạng thái tắt sau khi dữ liệu đã sửa (LM-054).
+  const { isValid } = form.formState
 
   const setup = query.data
   const request = setup ? buildOptimizationRequest(setup.trip, setup.vehicle, { ...DEFAULT_SETTINGS, ...watched }) : null
@@ -87,7 +90,7 @@ export function OptimizationSetupPage() {
         <div className="flex-1" />
         <Button
           variant="primary"
-          disabled={!summary?.canRun || run.isPending || !form.formState.isValid}
+          disabled={!summary?.canRun || run.isPending || !isValid}
           onClick={form.handleSubmit(start)}
         >
           <Play strokeWidth={1.5} />

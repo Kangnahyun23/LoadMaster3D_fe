@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { expect, test } from 'vitest'
 import type { CargoPackage } from '@/domain/models'
@@ -10,9 +10,8 @@ import { OptimizationSetupPage } from './OptimizationSetupPage'
 const TRIP_ID = 'TRIP-2026-0914'
 
 /** Seam: kho dùng chung → `optimization-api.ts` → hook → màn hình, không giả lập module nào. */
-function renderSetup() {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  render(
+function renderSetup(client = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
+  return render(
     <QueryClientProvider client={client}>
       <I18nProvider>
         <MemoryRouter initialEntries={[`/chuyen/${TRIP_ID}/toi-uu`]}>
@@ -45,4 +44,25 @@ test('a package with no usable orientation disables Optimize and the summary lin
   expect(screen.getByRole('button', { name: 'Tối ưu' })).toBeDisabled()
 
   await db.updateTrip(TRIP_ID, { packages: trip.packages })
+})
+
+test('fixing the cargo and coming back enables Optimize without touching the settings (LM-054)', async () => {
+  const db = getMockDb()
+  const trip = await db.getTrip(TRIP_ID)
+  const source = trip.packages[0] as CargoPackage
+  const broken: CargoPackage = { ...source, id: 'PKG-901', allowedOrientations: ['HWL'], keepUpright: true }
+  await db.updateTrip(TRIP_ID, { packages: [...trip.packages, broken] })
+
+  // Cùng QueryClient như app: lần mở lại đọc bản cache còn lỗi trước, rồi mới nhận dữ liệu đã sửa
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const first = renderSetup(client)
+  expect(await screen.findByRole('link', { name: /PKG-901/ })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Tối ưu' })).toBeDisabled()
+  first.unmount()
+
+  await db.updateTrip(TRIP_ID, { packages: trip.packages })
+  void client.invalidateQueries({ queryKey: ['trips', TRIP_ID] })
+  renderSetup(client)
+  expect(await screen.findByText('Không có lỗi — có thể tối ưu.')).toBeInTheDocument()
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Tối ưu' })).toBeEnabled())
 })
