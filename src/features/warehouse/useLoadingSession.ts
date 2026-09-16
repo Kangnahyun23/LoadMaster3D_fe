@@ -42,18 +42,10 @@ export function useLoadingSession(plan: LoadPlan, initialStep: number) {
     }, CONFIRMED_OVERLAY_MS)
   }, [current, confirmedId, clearTimer])
 
-  const reportDeviation = useCallback(() => {
-    if (!current) return
-    toast.warning(`Đã ghi nhận sai lệch cho ${current.id}`, {
-      description: 'Điều phối viên sẽ thấy trong mục "Cần xem lại" của chuyến.',
-    })
-  }, [current])
-
   const reportMissing = useCallback(() => {
     if (!current) return
-    toast.error(`${current.id} được đánh dấu không có ở kho`, {
-      description: 'Bỏ qua kiện này và chuyển sang bước kế tiếp.',
-    })
+    // Chưa có nơi lưu báo cáo thiếu kiện (D-20): toast chỉ nói việc thật sự xảy ra — bỏ qua bước này.
+    toast.warning(`Đã bỏ qua ${current.id}`, { description: 'Chuyển sang bước kế tiếp.' })
     setStep((s) => s + 1)
   }, [current])
 
@@ -67,7 +59,6 @@ export function useLoadingSession(plan: LoadPlan, initialStep: number) {
     finished,
     confirmedId,
     confirm,
-    reportDeviation,
     reportMissing,
   }
 }

@@ -1,4 +1,4 @@
-import { Check, PackageX, TriangleAlert } from 'lucide-react'
+import { Check, PackageX } from 'lucide-react'
 import { lazy, Suspense, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
@@ -98,10 +98,6 @@ function LoadingSessionPage({ plan }: { plan: LoadPlan }) {
             Xác nhận đã xếp
           </Button>
           <div className="flex flex-wrap justify-center gap-2">
-            <Button variant="ghost" size="touch" className="font-medium text-text-2 hover:text-text" onClick={session.reportDeviation}>
-              <TriangleAlert className="size-4.5" strokeWidth={2} />
-              Ghi nhận sai lệch
-            </Button>
             <Button variant="ghost" size="touch" className="font-medium text-text-2 hover:text-text" onClick={session.reportMissing}>
               <PackageX className="size-4.5" strokeWidth={2} />
               Kiện này không có ở kho

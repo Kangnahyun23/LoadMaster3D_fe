@@ -18,7 +18,6 @@ export const vi = {
     driver: 'Màn hình tài xế',
     fleet: 'Đội xe',
     users: 'Người dùng',
-    settings: 'Cài đặt',
     account: 'Tài khoản {name}',
     signOut: 'Đăng xuất',
   },

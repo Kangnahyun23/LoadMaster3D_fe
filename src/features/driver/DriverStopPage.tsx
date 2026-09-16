@@ -10,7 +10,6 @@ import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
 import { DeliveryItemRow } from './DeliveryItemRow'
 import { DELIVERY_STOP } from './driver.mock'
-import { DriverTabBar } from './DriverTabBar'
 import { useDeliveryStop } from './useDeliveryStop'
 
 const DriverCargoViewer = lazy(() => import('@/features/viewer3d/DriverCargoViewer').then((m) => ({ default: m.DriverCargoViewer })))
@@ -21,7 +20,7 @@ const DriverCargoViewer = lazy(() => import('@/features/viewer3d/DriverCargoView
  *
  * Lệch có chủ ý khỏi design: nút chỉ đường trong design màu primary — mỗi màn
  * chỉ một nút primary (mục 5) nên đổi sang secondary; nhãn nút chính viết hoa
- * trong design — mục 5 cấm; thanh đáy bỏ bóng đổ vì không phải lớp nổi.
+ * trong design — mục 5 cấm; bỏ thanh tab đáy vì các tab khác chưa có màn (LM-053, D-20).
  */
 export function DriverStopPage() {
   const stop = DELIVERY_STOP
@@ -127,14 +126,11 @@ export function DriverStopPage() {
         </span>
       </div>
 
-      <div className="flex-none border-t border-border bg-bg">
-        <div className="px-4 py-3">
-          <Button variant="primary" block className="h-15 gap-2.5 text-[18px] [&_svg]:size-5.5" onClick={state.complete}>
-            Hoàn tất điểm giao
-            <ArrowRight strokeWidth={2.5} />
-          </Button>
-        </div>
-        <DriverTabBar />
+      <div className="flex-none border-t border-border bg-bg px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]">
+        <Button variant="primary" block className="h-15 gap-2.5 text-[18px] [&_svg]:size-5.5" onClick={state.complete}>
+          Hoàn tất điểm giao
+          <ArrowRight strokeWidth={2.5} />
+        </Button>
       </div>
     </div>
     {cargoOpen ? <DialogContent className="fixed inset-0 h-dvh max-h-dvh w-full max-w-full rounded-none">

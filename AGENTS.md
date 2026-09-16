@@ -374,7 +374,11 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
   không dùng toast báo "đang chờ", không báo thành công giả.
 - Ngoại lệ duy nhất: nơi Spec yêu cầu giữ vị trí cho tính năng sau (tải trục) hiển thị nhãn
   **"Sẽ có sau" / "Coming later"** dạng chữ, không bấm được.
-- Code hiện còn `notifyPendingFeature()` ở một số màn cũ — gỡ ở LM-053, không thêm lời gọi mới.
+- Toast chỉ nói việc **thật sự đã xảy ra** trên màn: không hứa "sẽ đồng bộ", "điều phối viên sẽ thấy"
+  khi không có nơi lưu. *(LM-053)* Đã gỡ nút Cài đặt ở nav rail, "Ghi nhận sai lệch" ở kho, thanh tab
+  đáy của tài xế (ba tab không có màn); "Kiện này không có ở kho" giữ vì nó thật sự bỏ qua bước.
+- `lib/pending-feature.ts` chỉ còn một lời gọi ("Nhập từ Excel" ở `TripListPage`), gỡ cùng lượt viết lại
+  màn danh sách chuyến; sau đó xoá file. Không thêm lời gọi mới.
 
 ### Không bịa số *(bổ sung 16/09/2026, LM-052, D-20)*
 
