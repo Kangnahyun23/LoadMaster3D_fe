@@ -5,6 +5,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { Badge } from '@/components/ui/Badge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { DeliveryItemRow } from '@/features/driver/DeliveryItemRow'
+import type { DeliveryItem } from '@/features/driver/driver-plan'
 import { KpiTile } from '@/features/manager/KpiTile'
 import { StopCard } from '@/features/trips/StopCard'
 import type { StopRow } from '@/features/trips/trip-summary'
@@ -12,7 +13,9 @@ import { formatInteger } from '@/lib/format'
 import { stopColor, stopForeground, stopLabel } from '@/lib/stops'
 import { SheetRow, SheetSection } from '../SheetLayout'
 
-const DRIVER_ITEM = { id: 'PKG-00194', orderId: 'DH-51031', description: 'Thùng sữa tươi 12 hộp', where: 'Gần cửa, lớp trên' }
+const DRIVER_ITEM: DeliveryItem = {
+  id: 'PKG-002-12', packageId: 'PKG-002', name: 'Thùng sữa tươi tiệt trùng 48 hộp', weightKg: 52, unloadingOrder: 3, area: 'door', layer: 'upper',
+}
 
 export function DataSection() {
   const stop: StopRow = {
@@ -45,12 +48,11 @@ export function DataSection() {
         {(['nhap', 'dang_toi_uu', 'da_toi_uu', 'da_duyet', 'dang_xep_hang', 'da_xep_xong', 'dang_giao', 'hoan_thanh', 'can_xem_lai', 'da_huy'] as const).map((s) => <StatusBadge key={s} status={s} />)}
       </SheetRow>
 
-      <SheetRow name="StopCard (kéo thả) · PackageRow · UnplacedCard" note="StopCard: mặc định · đang kéo (viền primary, bóng --e3). PackageRow tài xế: chờ · đã dỡ · từ chối. UnplacedCard: viền đứt." className="flex-col items-stretch">
+      <SheetRow name="StopCard (kéo thả) · PackageRow · UnplacedCard" note="StopCard: mặc định · đang kéo (viền primary, bóng --e3). PackageRow tài xế: chờ · đã dỡ. UnplacedCard: viền đứt." className="flex-col items-stretch">
         <DndContext><SortableContext items={[stop.id]}><ul className="m-0 w-140 list-none p-0"><StopCard stop={stop} onRemove={() => undefined} /></ul></SortableContext></DndContext>
         <ul className="m-0 w-95 list-none overflow-hidden rounded-md border border-border p-0 text-body-lg">
-          <DeliveryItemRow item={DRIVER_ITEM} status="pending" onToggle={() => undefined} />
-          <DeliveryItemRow item={{ ...DRIVER_ITEM, id: 'PKG-00193' }} status="done" onToggle={() => undefined} />
-          <DeliveryItemRow item={{ ...DRIVER_ITEM, id: 'PKG-00191', description: 'Nước mắm 900 ml × 12' }} status="rejected" onToggle={() => undefined} />
+          <DeliveryItemRow item={DRIVER_ITEM} done={false} onToggle={() => undefined} />
+          <DeliveryItemRow item={{ ...DRIVER_ITEM, id: 'PKG-002-11', unloadingOrder: 4 }} done onToggle={() => undefined} />
         </ul>
         <div className="flex w-62 gap-3 rounded-md border border-dashed border-switch-off p-3">
           <span className="grid size-9 flex-none place-items-center rounded-sm font-mono text-caption font-semibold" style={{ background: stopColor(3), color: stopForeground(3) }}>3</span>

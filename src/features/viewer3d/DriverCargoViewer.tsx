@@ -2,31 +2,40 @@ import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
 import { useFormat, useT } from '@/lib/i18n'
-import type { CameraPreset, LoadPlan, PlaybackSpeed } from '@/types/load-plan'
-import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import type { CameraPreset, PlaybackSpeed } from '@/types/load-plan'
+import { adaptResult, type ScenePlacement, type ViewerSceneModel } from '@/features/viewer3d/scene-input'
 import { SceneCanvas } from './scene/SceneCanvas'
 import { usePerformanceFlags } from './usePerformanceFlags'
-import { adaptLoadPlan } from '@/features/viewer3d/scene-input'
 import { deriveSceneSemantics } from './operations/scene-semantics'
 import { useUnloadPlayback } from './operations/useUnloadPlayback'
 import { BlockerPanel } from './operations/BlockerPanel'
 import { placementMeasurements } from './operations/placement-measurements'
 import { createPerfStore, DebugOverlay } from './DebugOverlay'
-import { benchmarkCountFromSearch, createBenchmarkPlan } from './benchmark.mock'
+import { benchmarkCountFromSearch, createBenchmarkInput } from './benchmark.mock'
 import { debugQualityTier } from './viewer-options'
 import { Timeline } from './Timeline'
 
-export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedIds }: {
-  plan: LoadPlan; stopNumber: number; doneIds: ReadonlySet<string>; retainedIds: ReadonlySet<string>
+const PRESETS = [['cua-sau', 'rear'], ['tren', 'top'], ['goc-cheo', 'diagonal'], ['ben-hong', 'side']] as const
+
+/**
+ * Khung 3D "Xem vị trí hàng" của tài xế (LM-061): scene cm của revision đã duyệt (LM-030), mô phỏng dỡ theo `unloadingOrder` của
+ * kết quả, LIFO từ domain — `LIFO_BLOCKED` dừng mô phỏng và tô kiện chắn. Không có editor, không đánh dấu đã giao.
+ * `?debug&packages=N` thay scene bằng fixture benchmark cm.
+ */
+export function DriverCargoViewer({ model: source, stopNumber, doneIds }: {
+  model: ViewerSceneModel; stopNumber: number; doneIds: ReadonlySet<string>
 }) {
   const t = useT()
   const format = useFormat()
   const [search] = useSearchParams()
   const count = benchmarkCountFromSearch(search.toString())
-  const plan = useMemo(() => count ? createBenchmarkPlan(count) : source, [count, source])
-  const model = useMemo(() => adaptLoadPlan(plan), [plan])
-  const available = useMemo(() => model.placements.filter((p) => p.stop === stopNumber && !doneIds.has(p.id) && !retainedIds.has(p.id)),
-    [model, stopNumber, doneIds, retainedIds])
+  const model = useMemo(() => {
+    if (!count) return source
+    const input = createBenchmarkInput(count)
+    return adaptResult({ trip: input.trip, revision: input })
+  }, [count, source])
+  const available = useMemo(() => model.placements.filter((p) => p.stop === stopNumber && !doneIds.has(p.id)),
+    [model, stopNumber, doneIds])
   const [speed, setSpeed] = useState<PlaybackSpeed>(2)
   const unloadContext = useMemo(() => model.placements.filter((p) => !doneIds.has(p.id)), [model, doneIds])
   const unload = useUnloadPlayback(available, speed, unloadContext)
@@ -39,18 +48,18 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
   const removed = useMemo(() => new Set([...doneIds, ...unload.unloadedIds]), [doneIds, unload.unloadedIds])
   const selected = model.placements.find((p) => p.id === selectedId && !removed.has(p.id) && p.stop >= stopNumber) ?? unload.current
   const semantics = useMemo(() => deriveSceneSemantics(model.placements, {
-    kind: 'unloading', step: 0, focusStop: stopNumber, unloadedIds: removed,
+    kind: 'unloading', step: 0, focusStop: stopNumber, unloadedIds: removed, lifo: unload.lifo,
     currentId: unload.current?.id, nextId: unload.next?.id, inspectId: inspect || unload.warning ? unload.current?.id : null,
-  }), [model, stopNumber, removed, unload.current, unload.next, inspect, unload.warning])
+  }), [model, stopNumber, removed, unload.lifo, unload.current, unload.next, inspect, unload.warning])
   const measurements = selected ? placementMeasurements(selected, model.placements, model.vehicle) : null
   const stop = model.stops.find((s) => s.number === stopNumber)
   const handleFocus = (p: ScenePlacement) => { setSelectedId(p.id); setFocus((f) => ({ placement: p, request: (f?.request ?? 0) + 1 })) }
   return <div className="flex min-h-0 flex-1 flex-col text-body-lg">
     <div className="flex flex-none flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2">
-      <p>Điểm {stopNumber} / {model.stops.length} · {stop?.name}</p>
-      <select aria-label="Góc nhìn hàng" value={preset} onChange={(e) => setPreset(e.target.value as CameraPreset)}
+      <p>{t('driver.cargo.stop', { number: stopNumber, total: model.stops.length, name: stop?.name ?? '' })}</p>
+      <select aria-label={t('driver.cargo.view')} value={preset} onChange={(e) => setPreset(e.target.value as CameraPreset)}
         className="h-14 rounded-md border border-border bg-bg px-2 focus-visible:outline-2 focus-visible:outline-primary">
-        <option value="cua-sau">Cửa sau</option><option value="tren">Trên</option><option value="goc-cheo">Góc chéo</option><option value="ben-hong">Bên hông</option>
+        {PRESETS.map(([value, key]) => <option key={value} value={value}>{t(`driver.cargo.presets.${key}`)}</option>)}
       </select>
     </div>
     <div className="relative min-h-48 flex-1 bg-canvas-1">
@@ -61,19 +70,18 @@ export function DriverCargoViewer({ plan: source, stopNumber, doneIds, retainedI
       {search.has('debug') ? <DebugOverlay store={perf} className="top-2 bottom-auto left-2 translate-x-0" /> : null}
     </div>
     <div className="max-h-[30dvh] shrink-0 overflow-y-auto border-t border-border p-3">
-      <p className="font-medium">{t(unload.fromResult ? 'viewer.operations.unloadingOrder' : 'viewer.operations.suggestedUnloadingOrder')} · Mô phỏng không đánh dấu giao hàng</p>
-      <p className="mt-1">{unload.current ? `Hiện tại ${unload.current.id}` : 'Đã xem hết các kiện cần dỡ'}{unload.next ? ` · Tiếp theo ${unload.next.id}` : ''}</p>
+      <p className="font-medium">{t(unload.fromResult ? 'viewer.operations.unloadingOrder' : 'viewer.operations.suggestedUnloadingOrder')} · {t('driver.cargo.noDelivery')}</p>
+      <p className="mt-1">{unload.current ? t('driver.cargo.current', { id: unload.current.id }) : t('driver.cargo.allViewed')}{unload.next ? ` · ${t('driver.cargo.next', { id: unload.next.id })}` : ''}</p>
       {selected && measurements ? <>
         <div className="my-2 flex flex-wrap gap-2">
-          <Button variant="secondary" size="touch" onClick={() => handleFocus(selected)}>Tập trung vào kiện</Button>
+          <Button variant="secondary" size="touch" onClick={() => handleFocus(selected)}>{t('driver.cargo.focus')}</Button>
           <Button variant="secondary" size="touch" aria-pressed={inspect} onClick={() => setInspect(!inspect)}>{t(inspect ? 'viewer.operations.blockers.toggleHide' : 'viewer.operations.blockers.toggleShow')}</Button>
         </div>
-        <p>{selected.id} · Điểm {selected.stop} · {selected.orientation}</p>
+        <p>{t('driver.cargo.selected', { id: selected.id, stop: selected.stop, orientation: selected.orientation })}</p>
         <p>{t('viewer.measurements.summary', { rear: format.length(measurements.rearCm), left: format.length(measurements.leftCm), layer: measurements.layer })}</p>
-        {retainedIds.has(selected.id) ? <p>Kiện khách từ chối, còn trên xe; không đưa vào mô phỏng dỡ.</p> : null}
-        {selected.id !== unload.current?.id && unload.current ? <Button variant="secondary" size="touch" onClick={() => handleFocus(unload.current!)}>Quay lại kiện cần dỡ</Button> : null}
+        {selected.id !== unload.current?.id && unload.current ? <Button variant="secondary" size="touch" onClick={() => handleFocus(unload.current!)}>{t('driver.cargo.backToCurrent')}</Button> : null}
         {unload.warning ? <p className="text-badge-warning-fg">{t('viewer.operations.blockers.paused')}</p> : null}
-        {unload.warning ? <Button variant="secondary" size="touch" onClick={() => unload.setCursor(unload.cursor + 1)}>Bỏ qua bước trong mô phỏng</Button> : null}
+        {unload.warning ? <Button variant="secondary" size="touch" onClick={() => unload.setCursor(unload.cursor + 1)}>{t('driver.cargo.skipStep')}</Button> : null}
         {inspect ? <BlockerPanel target={unload.current} lifo={semantics.lifo} onSelect={handleFocus} /> : null}
       </> : null}
     </div>
