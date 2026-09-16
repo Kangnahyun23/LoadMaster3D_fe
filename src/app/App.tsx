@@ -20,6 +20,7 @@ const ViewerPage = lazy(() => import('@/features/viewer3d/ViewerPage').then((m) 
 const LoadingStepPage = lazy(() => import('@/features/warehouse/LoadingStepPage').then((m) => ({ default: m.LoadingStepPage })))
 const DriverStopPage = lazy(() => import('@/features/driver/DriverStopPage').then((m) => ({ default: m.DriverStopPage })))
 const FleetPage = lazy(() => import('@/features/fleet/FleetPage').then((m) => ({ default: m.FleetPage })))
+const VehicleDetailPage = lazy(() => import('@/features/fleet/VehicleDetailPage').then((m) => ({ default: m.VehicleDetailPage })))
 const UsersPage = lazy(() => import('@/features/admin/UsersPage').then((m) => ({ default: m.UsersPage })))
 const StyleSheetPage = lazy(() => import('./design-system/StyleSheetPage').then((m) => ({ default: m.StyleSheetPage })))
 const ComponentSheetPage = lazy(() => import('./design-system/ComponentSheetPage').then((m) => ({ default: m.ComponentSheetPage })))
@@ -61,6 +62,8 @@ const router = createBrowserRouter([
                   { path: '/chuyen/:tripId/sua', element: <TripFormPage /> },
                   { path: '/chuyen/:tripId/so-sanh', element: <PlanComparisonPage /> },
                   { path: '/doi-xe', element: <FleetPage /> },
+                  { path: '/doi-xe/moi', element: <VehicleDetailPage /> },
+                  { path: '/doi-xe/:vehicleId', element: <VehicleDetailPage /> },
                   { path: '/nguoi-dung', element: <UsersPage /> },
                 ],
               },

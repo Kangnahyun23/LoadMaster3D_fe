@@ -1,179 +1,139 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { Plus } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { Plus, RotateCcw } from 'lucide-react'
+import { useMemo } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
-import { Badge } from '@/components/ui/Badge'
+import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/Button'
-import { formatDimensions, formatInteger } from '@/lib/format'
-import type { VehicleFormValues } from './vehicle-form.schema'
-import { VehicleFormDialog } from './VehicleFormDialog'
-import {
-  BODY_TYPE_LABELS,
-  VEHICLE_STATUS_LABELS,
-  VEHICLES,
-  type Vehicle,
-  type VehicleStatus,
-} from './vehicles.mock'
+import { Spinner } from '@/components/ui/Spinner'
+import type { VehicleConfig } from '@/domain/models'
+import type { Formatter } from '@/lib/format'
+import { useFormat, useT, type TFunction } from '@/lib/i18n'
+import { useVehiclesQuery } from './useVehiclesQuery'
 
-const STATUS_TONE: Record<VehicleStatus, 'success' | 'cyan' | 'warning' | 'neutral'> = {
-  san_sang: 'success',
-  dang_chay: 'cyan',
-  bao_duong: 'warning',
-  ngung: 'neutral',
-}
-
-const helper = createColumnHelper<BaseTableFeatures, Vehicle>()
+const helper = createColumnHelper<BaseTableFeatures, VehicleConfig>()
 const mono = 'font-mono text-caption'
 
-const columns = helper.columns([
-  helper.accessor('plate', {
-    header: 'Biển số',
-    meta: { width: '130px' } satisfies ColumnMeta,
-    cell: (info) => <span className={mono}>{info.getValue()}</span>,
-  }),
-  helper.accessor('name', {
-    header: 'Xe',
-    cell: (info) => (
-      <span className="block truncate">
-        {info.getValue()}{' '}
-        <span className="text-text-3">{BODY_TYPE_LABELS[info.row.original.bodyType]}</span>
-      </span>
-    ),
-  }),
-  helper.accessor('innerLengthMm', {
-    header: 'Lòng thùng (D × R × C)',
-    meta: { align: 'right', width: '220px' } satisfies ColumnMeta,
-    cell: (info) => {
-      const v = info.row.original
-      return (
-        <span className={mono}>
-          {formatDimensions(v.innerLengthMm, v.innerWidthMm, v.innerHeightMm).replace(' mm', '')}{' '}
-          <span className="text-text-3">mm</span>
+/** Cột phụ thuộc ngôn ngữ đang chọn (số và tiêu đề), nên dựng trong component chứ không ở module. */
+function createColumns(t: TFunction, format: Formatter) {
+  return helper.columns([
+    helper.accessor('name', {
+      header: t('fleet.columns.name'),
+      cell: (info) => (
+        <span className="block truncate">
+          {info.getValue()} <span className={`${mono} text-text-3`}>{info.row.original.id}</span>
         </span>
-      )
-    },
-  }),
-  helper.accessor('payloadKg', {
-    header: 'Tải trọng',
-    meta: { align: 'right', width: '120px' } satisfies ColumnMeta,
-    cell: (info) => (
-      <span className={mono}>
-        {formatInteger(info.getValue())} <span className="text-text-3">kg</span>
-      </span>
-    ),
-  }),
-  helper.accessor('assignedDriver', {
-    header: 'Tài xế',
-    meta: { width: '170px' } satisfies ColumnMeta,
-    cell: (info) => {
-      const driver = info.getValue()
-      return driver ? (
-        <span className="block truncate">{driver}</span>
-      ) : (
-        <span className="text-text-3">Chưa gán</span>
-      )
-    },
-  }),
-  helper.accessor('status', {
-    header: 'Trạng thái',
-    meta: { width: '160px' } satisfies ColumnMeta,
-    cell: (info) => (
-      <Badge tone={STATUS_TONE[info.getValue()]} dot={info.getValue() === 'dang_chay'}>
-        {VEHICLE_STATUS_LABELS[info.getValue()]}
-      </Badge>
-    ),
-  }),
-])
+      ),
+    }),
+    helper.accessor('innerLengthCm', {
+      header: t('fleet.columns.inner'),
+      meta: { align: 'right', width: '230px' } satisfies ColumnMeta,
+      cell: (info) => {
+        const vehicle = info.row.original
+        return (
+          <span className={mono}>
+            {format.dimensions(vehicle.innerLengthCm, vehicle.innerWidthCm, vehicle.innerHeightCm)}
+          </span>
+        )
+      },
+    }),
+    helper.accessor('maxPayloadKg', {
+      header: t('fleet.columns.payload'),
+      meta: { align: 'right', width: '130px' } satisfies ColumnMeta,
+      cell: (info) => <span className={mono}>{format.weight(info.getValue())}</span>,
+    }),
+    helper.accessor('doorWidthCm', {
+      header: t('fleet.columns.door'),
+      meta: { align: 'right', width: '160px' } satisfies ColumnMeta,
+      cell: (info) => (
+        <span className={mono}>{format.widthByHeight(info.getValue(), info.row.original.doorHeightCm)}</span>
+      ),
+    }),
+    helper.accessor((vehicle) => vehicle.obstacles.length, {
+      id: 'obstacleCount',
+      header: t('fleet.columns.obstacles'),
+      meta: { align: 'right', width: '100px' } satisfies ColumnMeta,
+      cell: (info) => <span className={mono}>{format.integer(info.getValue())}</span>,
+    }),
+  ])
+}
 
 /**
- * Đội xe — danh sách phương tiện, thêm và sửa bằng hộp thoại form.
- * Dữ liệu giữ ở state màn này; khi nối backend sẽ chuyển sang TanStack Query.
+ * Đội xe — danh sách xe đọc qua TanStack Query từ kho mock dùng chung (D-06, LM-040).
+ * Bấm một dòng mở trang cấu hình xe; không giữ dữ liệu ở `useState` nữa.
  */
 export function FleetPage() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>(VEHICLES)
-  const [editing, setEditing] = useState<Vehicle | undefined>(undefined)
-  const [dialogOpen, setDialogOpen] = useState(false)
-
-  function openCreate() {
-    setEditing(undefined)
-    setDialogOpen(true)
-  }
-
-  function openEdit(vehicle: Vehicle) {
-    setEditing(vehicle)
-    setDialogOpen(true)
-  }
-
-  function handleSubmit(values: VehicleFormValues) {
-    const base = {
-      name: values.name,
-      plate: values.plate,
-      bodyType: values.bodyType,
-      innerLengthMm: values.innerLengthMm,
-      innerWidthMm: values.innerWidthMm,
-      innerHeightMm: values.innerHeightMm,
-      payloadKg: values.payloadKg,
-      depot: values.depot,
-      status: values.status,
-      assignedDriver: values.assignedDriver?.trim() ? values.assignedDriver.trim() : null,
-    }
-
-    if (editing) {
-      const updated: Vehicle = {
-        ...editing,
-        ...base,
-        frontAxle: { ...editing.frontAxle, capacityKg: values.frontAxleKg },
-        rearAxle: { ...editing.rearAxle, capacityKg: values.rearAxleKg },
-      }
-      setVehicles((current) => current.map((v) => (v.id === editing.id ? updated : v)))
-      toast.success(`Đã cập nhật xe ${values.plate}`)
-      return
-    }
-
-    const created: Vehicle = {
-      id: `XE-${String(vehicles.length + 1).padStart(4, '0')}`,
-      ...base,
-      frontAxle: { loadKg: 0, capacityKg: values.frontAxleKg },
-      rearAxle: { loadKg: 0, capacityKg: values.rearAxleKg },
-    }
-    setVehicles((current) => [created, ...current])
-    toast.success(`Đã thêm xe ${values.plate} vào đội`)
-  }
+  const t = useT()
+  const format = useFormat()
+  const navigate = useNavigate()
+  const query = useVehiclesQuery()
+  const columns = useMemo(() => createColumns(t, format), [t, format])
+  const vehicles = query.data ?? []
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-bg px-6">
         <div className="flex items-baseline gap-2">
-          <h1 className="text-h2 font-semibold">Đội xe</h1>
-          <span className="font-mono text-caption text-text-3">
-            {formatInteger(vehicles.length)} xe
-          </span>
+          <h1 className="text-h2 font-semibold">{t('fleet.title')}</h1>
+          {query.isSuccess ? (
+            <span className="font-mono text-caption text-text-3">
+              {t('fleet.count', { count: vehicles.length })}
+            </span>
+          ) : null}
         </div>
-        <Button variant="primary" className="h-9 px-3.5" onClick={openCreate}>
-          <Plus strokeWidth={1.5} />
-          Thêm xe
-        </Button>
+        {vehicles.length > 0 ? (
+          <Button variant="primary" asChild>
+            <Link to="/doi-xe/moi">
+              <Plus strokeWidth={1.5} />
+              {t('fleet.add')}
+            </Link>
+          </Button>
+        ) : null}
       </header>
 
       <div className="min-h-0 flex-1 overflow-auto p-6">
-        <div className="overflow-hidden rounded-md border border-border bg-bg">
-          <DataTable
-            data={vehicles}
-            columns={columns}
-            density="comfortable"
-            onRowClick={openEdit}
+        {query.isPending ? (
+          <div className="flex items-center justify-center py-16" role="status" aria-label={t('fleet.loading')}>
+            <Spinner />
+          </div>
+        ) : query.isError ? (
+          <EmptyState
+            title={t('fleet.error.title')}
+            description={t('fleet.error.description')}
+            action={
+              <Button variant="secondary" onClick={() => void query.refetch()} loading={query.isFetching}>
+                <RotateCcw strokeWidth={1.5} />
+                {t('fleet.error.retry')}
+              </Button>
+            }
           />
-        </div>
-        <p className="mt-3 text-caption text-text-3">Bấm vào một dòng để sửa thông tin xe.</p>
+        ) : vehicles.length === 0 ? (
+          <EmptyState
+            title={t('fleet.empty.title')}
+            description={t('fleet.empty.description')}
+            action={
+              <Button variant="primary" asChild>
+                <Link to="/doi-xe/moi">
+                  <Plus strokeWidth={1.5} />
+                  {t('fleet.empty.action')}
+                </Link>
+              </Button>
+            }
+          />
+        ) : (
+          <>
+            <div className="overflow-hidden rounded-md border border-border bg-bg">
+              <DataTable
+                data={vehicles}
+                columns={columns}
+                density="comfortable"
+                onRowClick={(vehicle) => void navigate(`/doi-xe/${vehicle.id}`)}
+              />
+            </div>
+            <p className="mt-3 text-caption text-text-3">{t('fleet.rowHint')}</p>
+          </>
+        )}
       </div>
-
-      <VehicleFormDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        vehicle={editing}
-        onSubmit={handleSubmit}
-      />
     </div>
   )
 }

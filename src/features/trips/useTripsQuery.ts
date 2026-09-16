@@ -29,10 +29,13 @@ export function usePackagesQuery(tripId: string) {
 
 /**
  * Mọi thay đổi xe, điểm giao hay kiện đều đổi đầu vào tối ưu: làm mới cả chuyến, kiện và danh sách revision
- * (revision cũ thành lỗi thời theo `inputVersion`, D-31).
+ * (revision cũ thành lỗi thời theo `inputVersion`, D-31), và tổng kiện/khối lượng của bảng điều khiển (LM-052).
  */
 function invalidateTrip(client: QueryClient, tripId: string) {
-  return client.invalidateQueries({ queryKey: ['trips', tripId] })
+  return Promise.all([
+    client.invalidateQueries({ queryKey: ['trips', tripId] }),
+    client.invalidateQueries({ queryKey: ['dashboard'] }),
+  ])
 }
 
 export function useTripStopsMutation(tripId: string) {
