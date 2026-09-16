@@ -191,7 +191,7 @@ export async function cameraPreset(page: Page, label: CameraPresetLabel) {
   await page.getByRole('combobox', { name: 'Góc nhìn', exact: true }).selectOption(PRESET_VALUES[label])
 }
 
-const INSPECTOR_TABS = { package: 'Kiện', operations: 'Vận hành', display: 'Hiển thị', packages: 'Danh sách' } as const
+const INSPECTOR_TABS = { package: 'Kiện', operations: 'Vận hành', display: 'Hiển thị', packages: 'Danh sách', metrics: 'Chỉ số' } as const
 export type InspectorTab = keyof typeof INSPECTOR_TABS
 
 export async function openInspector(page: Page, tab: InspectorTab = 'operations') {

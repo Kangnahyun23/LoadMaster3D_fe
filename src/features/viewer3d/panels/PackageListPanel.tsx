@@ -1,16 +1,20 @@
 import { ChevronLeft, Pin } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router'
+import type { ConstraintIssue } from '@/domain/constraints'
 import { TabCount, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { formatInteger } from '@/lib/format'
 import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
 import { describeWhere } from './placement-relations'
-import type { ScenePlacement, SceneUnplaced } from '@/features/viewer3d/scene-input'
+import type { ScenePlacement, SceneStop, SceneUnplaced } from '@/features/viewer3d/scene-input'
 import type { VehicleConfig } from '@/domain/models'
 import type { LeftTab } from '../useLoadPlanViewer'
+import { PlacedPackageList } from './PlacedPackageList'
 
 /**
- * Panel trái: kiện chưa xếp và kiện đã ghim. Thu gọn còn 48px.
+ * Danh sách kiện: chưa xếp (lọc theo lý do), đã ghim, đã xếp (LM-049: tìm, lọc điểm giao, chỉ kiện có cảnh báo).
  * Lệch có chủ ý: bản design gợi ý "kéo vào vùng 3D để xếp thủ công" —
  * thao tác đó chưa được nối nên không hiện cursor kéo lẫn câu gợi ý.
  */
@@ -25,6 +29,9 @@ export function PackageListPanel({
   onTabChange,
   selectedId,
   onSelect,
+  stops,
+  issues,
+  tripId,
 }: {
   unplaced: readonly SceneUnplaced[]
   pinned: ScenePlacement[]
@@ -36,9 +43,16 @@ export function PackageListPanel({
   onTabChange: (tab: LeftTab) => void
   selectedId: string | null
   onSelect: (id: string) => void
+  stops: readonly SceneStop[]
+  issues: readonly ConstraintIssue[]
+  /** Mở kiện gốc trong Chi tiết chuyến (`?kien=`, LM-046) */
+  tripId: string
 }) {
   const t = useT()
   const format = useFormat()
+  const [reason, setReason] = useState('')
+  const reasons = useMemo(() => [...new Set(unplaced.flatMap((item) => item.reasonCode ? [item.reasonCode] : []))], [unplaced])
+  const shownUnplaced = reason === '' ? unplaced : unplaced.filter((item) => item.reasonCode === reason)
   return (
     <aside
       aria-label="Danh sách kiện"
@@ -70,7 +84,7 @@ export function PackageListPanel({
       {open ? (
         <Tabs
           value={tab}
-          onValueChange={(value) => onTabChange(value === 'pinned' ? 'pinned' : 'unplaced')}
+          onValueChange={(value) => onTabChange(value === 'pinned' || value === 'placed' ? value : 'unplaced')}
           className="flex min-h-0 flex-1 flex-col"
         >
           <TabsList>
@@ -80,24 +94,36 @@ export function PackageListPanel({
             <TabsTrigger value="pinned">
               Kiện đã ghim <TabCount>{pinned.length}</TabCount>
             </TabsTrigger>
+            <TabsTrigger value="placed">
+              {t('viewer.plan.filters.placedTab')} <TabCount>{placements.length}</TabCount>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="unplaced" className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-3">
             <p className="px-1 pb-1 text-caption text-text-3">
               Không vừa chỗ trống còn lại.
             </p>
-            {unplaced.map((item) => (
+            {reasons.length > 1 ? (
+              <select aria-label={t('viewer.plan.filters.reason')} value={reason} onChange={(event) => setReason(event.target.value)}
+                className="h-14 rounded-md border border-border bg-bg px-2 text-body-lg xl:h-10 xl:text-body">
+                <option value="">{t('viewer.plan.filters.allReasons')}</option>
+                {reasons.map((code) => <option key={code} value={code}>{t(`viewer.unplacedReasons.${code}`)}</option>)}
+              </select>
+            ) : null}
+            {shownUnplaced.map((item) => (
               <div
                 key={item.id}
                 className="flex gap-3 rounded-md border border-dashed border-switch-off bg-bg p-3"
               >
                 <StopSquare stop={item.stop} />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="font-mono text-body font-medium">{item.id}</span>
+                  <Link to={`/chuyen/${tripId}?kien=${encodeURIComponent(item.packageId)}`} className="font-mono text-body font-medium text-primary">{item.id}</Link>
                   <span className="truncate font-mono text-caption text-text-3">
                     {format.dimensions(item.lengthCm, item.widthCm, item.heightCm)} · {format.weight(item.weightKg)}
                   </span>
                   <span className="text-caption text-badge-warning-fg">{item.reasonText ?? t(`viewer.unplacedReasons.${item.reasonCode ?? 'UNKNOWN'}`)}</span>
+                  {/* `message` của service thật có thể khác mã lý do; mock ghi lại đúng mã nên không lặp */}
+                  {item.message && item.message !== item.reasonCode ? <span className="text-caption text-text-2">{item.message}</span> : null}
                 </div>
               </div>
             ))}
@@ -137,6 +163,10 @@ export function PackageListPanel({
                 </button>
               )
             })}
+          </TabsContent>
+
+          <TabsContent value="placed" className="flex min-h-0 flex-1 flex-col">
+            <PlacedPackageList placements={placements} stops={stops} issues={issues} selectedId={selectedId} onSelect={onSelect} />
           </TabsContent>
         </Tabs>
       ) : null}

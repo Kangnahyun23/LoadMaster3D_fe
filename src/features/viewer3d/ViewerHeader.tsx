@@ -1,35 +1,31 @@
 import { Check, ChevronLeft, Columns2 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { StatusBadge } from '@/components/StatusBadge'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { formatDecimal, formatInteger } from '@/lib/format'
+import type { OptimizationResult } from '@/domain/models'
+import { useFormat, useT } from '@/lib/i18n'
 
 /**
- * Thanh trên của màn xem phương án. Cao 56px — bản mỏng dành riêng cho màn
- * 3D, khác 72px của các màn còn lại (mục 5 CLAUDE.md).
+ * Thanh trên của Planner (LM-049). Cao 56px — bản mỏng dành riêng cho màn 3D (AGENTS mục 5). Số lấy thẳng từ
+ * `result.metrics` của revision; không có revision (fixture benchmark) thì chỉ hiện số kiện của scene.
  */
-export function ViewerHeader({
-  tripId,
-  fillRate,
-  totalWeightKg,
-  payloadKg,
-  isMockResult,
-  placedCount,
-  totalCount,
-  onApprove,
-}: {
+export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockResult, approved, manuallyEdited, blockedReason, onApprove }: {
   tripId: string
-  fillRate: number
-  totalWeightKg: number
-  payloadKg: number
-  /** Spec: mọi kết quả từ mock mang nhãn MOCK RESULT, không dịch. */
-  isMockResult: boolean
+  metrics: OptimizationResult['metrics'] | null
   placedCount: number
   totalCount: number
+  /** Spec: mọi kết quả từ mock mang nhãn MOCK RESULT, không dịch. */
+  isMockResult: boolean
+  approved: boolean
+  /** Có draft chỉnh tay trong phiên, hoặc revision đã mang chỉnh tay. */
+  manuallyEdited: boolean
+  /** Lý do chặn Duyệt (LM-050) — hiện cạnh nút; `null` là duyệt được. */
+  blockedReason: string | null
   onApprove: () => void
 }) {
+  const t = useT()
+  const format = useFormat()
   return (
     <header className="flex h-14 flex-none items-center gap-2 border-b border-border bg-bg px-2 xl:gap-4 xl:px-5">
       <Link
@@ -40,44 +36,37 @@ export function ViewerHeader({
         <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
       </Link>
 
-      <div className="hidden items-center gap-2.5 xl:flex">
-        <h1 className="font-mono text-[18px] leading-6 font-semibold tracking-[-0.02em]">
-          {tripId}
-        </h1>
-        <StatusBadge status="da_toi_uu" />
-      </div>
+      <h1 className="hidden font-mono text-[18px] leading-6 font-semibold tracking-[-0.02em] xl:block">{tripId}</h1>
       {isMockResult ? <Badge tone="warning">MOCK RESULT</Badge> : null}
+      {approved ? <Badge tone="success">{t('viewer.plan.approved')}</Badge> : null}
+      {manuallyEdited ? <Badge tone="info">{t('viewer.plan.manuallyEdited')}</Badge> : null}
 
       <span aria-hidden className="hidden h-6 w-px bg-border xl:block" />
 
       <dl className="hidden items-center gap-5 xl:flex">
-        <Stat label="Lấp đầy">
-          <span className="font-semibold text-primary">{formatDecimal(fillRate)}%</span>
+        {metrics ? <>
+          <Stat label={t('viewer.plan.volume')}><span className="font-semibold text-primary">{format.percent(metrics.volumeUtilizationPercent)}</span></Stat>
+          <Stat label={t('viewer.plan.payload')}>{format.percent(metrics.payloadUtilizationPercent)}</Stat>
+        </> : null}
+        <Stat label={t('viewer.plan.placed')}>
+          {format.integer(placedCount)} <span className="font-normal text-text-3">/ {format.integer(totalCount)}</span>
         </Stat>
-        <span aria-hidden className="h-5 w-px bg-border" />
-        <Stat label="Tải trọng">
-          {formatInteger(totalWeightKg)}{' '}
-          <span className="font-normal text-text-3">/ {formatInteger(payloadKg)} kg</span>
-        </Stat>
-        <span aria-hidden className="h-5 w-px bg-border" />
-        <Stat label="Kiện">
-          {formatInteger(placedCount)}{' '}
-          <span className="font-normal text-text-3">/ {formatInteger(totalCount)}</span>
-        </Stat>
+        {metrics ? <Stat label={t('viewer.plan.runtime')}>{t('viewer.plan.metrics.runtimeValue', { ms: format.integer(metrics.runtimeMs) })}</Stat> : null}
       </dl>
 
       <div className="flex-1" />
 
+      {blockedReason ? <span role="status" className="hidden max-w-72 text-caption text-badge-danger-fg xl:block">{blockedReason}</span> : null}
       <div className="flex gap-2">
         <Button variant="secondary" className="hidden h-10 px-3.5 xl:flex" asChild>
           <Link to={`/chuyen/${tripId}/so-sanh`}>
             <Columns2 strokeWidth={1.5} />
-            So sánh phương án
+            {t('viewer.plan.compare')}
           </Link>
         </Button>
         <Button variant="primary" className="h-14 px-4 text-body-lg xl:h-10 xl:text-body" onClick={onApprove}>
           <Check strokeWidth={1.5} />
-          Duyệt phương án
+          {t('viewer.plan.approve')}
         </Button>
       </div>
     </header>
