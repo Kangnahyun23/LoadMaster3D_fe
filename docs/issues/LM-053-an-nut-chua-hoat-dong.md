@@ -16,12 +16,12 @@ spec: [9.3]
 - [x] Tìm mọi lời gọi `notifyPendingFeature` và nút không có `onClick` (đã thấy: "Nhập từ Excel" ở danh sách/chi tiết chuyến, "Xuất báo cáo" và bộ lọc Dashboard, "Thêm đơn hàng", nút Cài đặt ở `NavRail`, menu thêm của `StopCard`, các nút lý do trong `OptimizationErrorDialog`, tab chưa có màn của `DriverTabBar`, "Ghi nhận sai lệch" ở kho).
 - [x] Nút có chức năng thật trong PRD thì nối; không có thì gỡ khỏi UI.
 - [x] "Lưu nháp" ở chi tiết chuyến đang báo thành công giả → nối mutation thật hoặc gỡ.
-- [ ] Xoá `lib/pending-feature.ts` khi không còn nơi dùng; cập nhật AGENTS mục 6.
+- [x] Xoá `lib/pending-feature.ts` khi không còn nơi dùng; cập nhật AGENTS mục 6.
 - [x] Ngoại lệ duy nhất: nhãn "Sẽ có sau" không bấm được ở tải trục (LM-037).
 
 ## Tiêu chí nghiệm thu
 
-- [ ] Tìm `notifyPendingFeature` trong `src/` không còn kết quả.
+- [x] Tìm `notifyPendingFeature` trong `src/` không còn kết quả.
 - [ ] E2E bấm lần lượt mọi nút hiển thị trên các màn luồng Spec: mỗi nút đều gây thay đổi nhìn thấy được.
 
 ## Kết quả (16/09/2026)
@@ -49,9 +49,12 @@ Quét toàn `src/` (trừ `features/viewer3d` và các file màn danh sách/form
 (không có "Lưu nháp"/"Nhập từ Excel"/"Thêm đơn hàng"), nút gọi `tel:` và chỉ đường Google Maps của tài xế (link thật).
 Admin `UsersPage` giữ state cục bộ theo AGENTS mục 9. Nhãn "Sẽ có sau" của tải trục giữ nguyên.
 
-Còn lại: lời gọi `notifyPendingFeature` cuối cùng ("Nhập từ Excel" ở `TripListPage`) gỡ trong lượt viết lại
-màn danh sách chuyến; sau đó xoá `src/lib/pending-feature.ts` và đánh dấu tiêu chí đầu.
+Danh sách chuyến và form chuyến (người điều phối, commit `23964cc`): gỡ "Nhập từ Excel" và `lib/pending-feature.ts`;
+`TripListPage` đọc kho qua `trip-list.ts` (tên, xe, điểm giao, số kiện, tỷ lệ thể tích của revision Planner mở,
+trạng thái Nháp / Đã tối ưu / Đã duyệt / Cần xem lại — không còn ngày và trạng thái giao bịa); `TripFormPage` tạo chuyến
+(tên, xe, điểm giao) và sửa tên/xe bằng mutation thật thay cho toast thành công giả. Gỡ `trip-list.mock.ts`,
+`trip-vehicles.mock.ts`. Test: `trip-list.test.ts` (4), `TripFormPage.dom.test.tsx` (2).
 
 Test: `src/app/NavRail.dom.test.tsx`, `src/features/warehouse/useLoadingSession.dom.test.tsx`,
 `src/features/driver/DriverStopPage.dom.test.tsx` (viết đỏ trước, xanh sau). Tiêu chí E2E "bấm lần lượt mọi nút"
-chưa làm: chưa có suite quét nút, để lại cho lượt kiểm thử luồng Spec.
+chưa làm như một suite quét nút riêng: luồng Spec E2E (LM-054) bấm các nút chính của từng màn.

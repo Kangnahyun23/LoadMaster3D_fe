@@ -377,8 +377,8 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
 - Toast chỉ nói việc **thật sự đã xảy ra** trên màn: không hứa "sẽ đồng bộ", "điều phối viên sẽ thấy"
   khi không có nơi lưu. *(LM-053)* Đã gỡ nút Cài đặt ở nav rail, "Ghi nhận sai lệch" ở kho, thanh tab
   đáy của tài xế (ba tab không có màn); "Kiện này không có ở kho" giữ vì nó thật sự bỏ qua bước.
-- `lib/pending-feature.ts` chỉ còn một lời gọi ("Nhập từ Excel" ở `TripListPage`), gỡ cùng lượt viết lại
-  màn danh sách chuyến; sau đó xoá file. Không thêm lời gọi mới.
+- `notifyPendingFeature` và `lib/pending-feature.ts` đã xoá (LM-053); "Nhập từ Excel" gỡ khi danh sách chuyến
+  chuyển sang đọc kho. Danh sách và form tạo/sửa chuyến ghi thật vào kho, không báo thành công giả.
 
 ### Không bịa số *(bổ sung 16/09/2026, LM-052, D-20)*
 
