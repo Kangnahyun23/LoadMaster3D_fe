@@ -2,22 +2,54 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tansta
 import type { CargoPackage } from '@/domain/models'
 import type { DeliveryStop } from '@/lib/mock-db'
 import {
+  createTrip,
   deletePackage,
   duplicateTripPackage,
   fetchPackages,
   fetchTripDetail,
   fetchTripRevisions,
   fetchTrips,
+  fetchVehicleOptions,
   removeTripStop,
   savePackage,
   setTripVehicle,
+  updateTripFrame,
   updateTripStops,
+  type TripFrame,
 } from './trips-api'
 
 /** Chuyến và kiện qua TanStack Query — component không gọi API trực tiếp (mục 9). */
 
-export function useTripsQuery({ empty = false }: { empty?: boolean } = {}) {
-  return useQuery({ queryKey: ['trips', { empty }], queryFn: () => fetchTrips({ empty }) })
+export function useTripsQuery() {
+  // Trạng thái và tỷ lệ của từng dòng đổi theo mọi mutation của từng chuyến (khoá `['trips', tripId]`): đọc lại mỗi lần mở màn.
+  return useQuery({ queryKey: ['trips', 'list'], queryFn: fetchTrips, staleTime: 0 })
+}
+
+export function useVehicleOptionsQuery() {
+  return useQuery({ queryKey: ['vehicles'], queryFn: fetchVehicleOptions })
+}
+
+/** Tạo chuyến: làm mới danh sách chuyến và bảng điều khiển. */
+export function useCreateTripMutation() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (frame: TripFrame) => createTrip(frame),
+    onSuccess: () => Promise.all([
+      client.invalidateQueries({ queryKey: ['trips'] }),
+      client.invalidateQueries({ queryKey: ['dashboard'] }),
+    ]),
+  })
+}
+
+export function useUpdateTripFrameMutation(tripId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (frame: Pick<TripFrame, 'name' | 'vehicleId'>) => updateTripFrame(tripId, frame),
+    onSuccess: () => Promise.all([
+      invalidateTrip(client, tripId),
+      client.invalidateQueries({ queryKey: ['trips', 'list'] }),
+    ]),
+  })
 }
 
 export function useTripDetailQuery(tripId: string) {
