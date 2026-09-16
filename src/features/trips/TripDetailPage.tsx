@@ -1,42 +1,82 @@
-import { Calendar, ChevronLeft, FileUp, Play, Plus, Save } from 'lucide-react'
-import { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { ChevronLeft, Play } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
-import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/ui/Spinner'
 import { OptimizationDialog } from '@/features/optimization/OptimizationDialog'
 import { OptimizationErrorDialog } from '@/features/optimization/OptimizationErrorDialog'
 import { useOptimizationJob } from '@/features/optimization/useOptimizationJob'
-import { formatInteger } from '@/lib/format'
-import { notifyPendingFeature } from '@/lib/pending-feature'
+import type { CargoPackage } from '@/domain/models'
+import { useT } from '@/lib/i18n'
 import { CargoSummaryCard } from './CargoSummaryCard'
-import { OrdersTable } from './OrdersTable'
+import { PackageFormPanel } from './PackageFormPanel'
+import { emptyPackage } from './package-defaults'
+import { PackagesTable } from './PackagesTable'
 import { StopList } from './StopList'
-import { ORDERS, TRIP, VEHICLE } from './trip-detail.mock'
+import { cargoSummary, stopRows, type StopRow } from './trip-summary'
+import {
+  useDeletePackageMutation,
+  useDuplicatePackageMutation,
+  useRemoveStopMutation,
+  useSavePackageMutation,
+  useTripDetailQuery,
+  useTripStopsMutation,
+} from './useTripsQuery'
 import { VehicleCard } from './VehicleCard'
 
 /**
- * Chi tiết chuyến hàng — ba cột: phương tiện & hàng hoá, thứ tự điểm giao,
- * đơn hàng. Hành động chính duy nhất là "Chạy tối ưu" (CLAUDE.md mục 5).
- * Thêm `?mo-phong=loi` vào URL để xem hộp thoại lỗi tối ưu (chưa có backend).
+ * Chi tiết chuyến hàng (LM-043, LM-044, LM-046): xe và tóm tắt hàng hoá, thứ tự điểm giao kéo thả, bảng kiện.
+ * Dữ liệu đọc từ mock repository qua Query; hành động chính duy nhất là "Chạy tối ưu" (AGENTS mục 5).
  */
 export function TripDetailPage() {
+  const { tripId = '' } = useParams()
+  const t = useT()
+  const query = useTripDetailQuery(tripId)
+  const stopsMutation = useTripStopsMutation(tripId)
+  const removeStop = useRemoveStopMutation(tripId)
+  const savePackage = useSavePackageMutation(tripId)
+  const deletePackage = useDeletePackageMutation(tripId)
+  const duplicatePackage = useDuplicatePackageMutation(tripId)
+  const [editing, setEditing] = useState<CargoPackage | null>(null)
+  // Màn Thiết lập tối ưu và job thật đến ở LM-047/LM-048; tới lúc đó nút vẫn chạy hộp thoại hiện có.
   const [dialogOpen, setDialogOpen] = useState(false)
   const [searchParams] = useSearchParams()
-  const { progress, start, cancel } = useOptimizationJob()
   const navigate = useNavigate()
-  const simulateFailure = searchParams.get('mo-phong') === 'loi'
+  const { progress, start, cancel } = useOptimizationJob()
 
-  function handleRunOptimization() {
-    start({ simulateFailure })
-    setDialogOpen(true)
-  }
+  const trip = query.data?.trip
+  const vehicle = query.data?.vehicle
+  const stops = useMemo<StopRow[]>(() => (trip ? stopRows(trip.stops, trip.packages) : []), [trip])
+  const summary = useMemo(() => (trip && vehicle ? cargoSummary(trip.packages, vehicle) : null), [trip, vehicle])
 
   function handleDialogOpenChange(open: boolean) {
     setDialogOpen(open)
-    // Đóng khi đang chạy chỉ ẩn modal; job vẫn tiếp tục như ghi chú trong design.
-    // Đóng hộp thoại lỗi thì bỏ job để lần chạy sau bắt đầu sạch.
     if (!open && (progress.phase === 'idle' || progress.phase === 'error')) cancel()
+  }
+
+  function handleRemoveStop(stop: StopRow) {
+    removeStop.mutate(stop.id, {
+      onSuccess: (result) => {
+        if (result.allowed) toast.success(t('trips.stops.removed', { name: stop.name }))
+        else toast.error(t('trips.stops.removeBlocked', { name: stop.name, count: result.affectedInstances }))
+      },
+    })
+  }
+
+  function handleSave(pkg: CargoPackage, keepOpen: boolean) {
+    savePackage.mutate(pkg, {
+      onSuccess: () => {
+        toast.success(t('trips.form.saved', { id: pkg.id }))
+        setEditing(keepOpen ? emptyPackage(trip?.packages ?? [], pkg.deliveryStop) : null)
+      },
+    })
+  }
+
+  function handleDuplicate(pkg: CargoPackage) {
+    duplicatePackage.mutate(pkg.id, {
+      onSuccess: (copy) => { toast.success(t('trips.form.duplicated', { id: copy.id })); setEditing(copy) },
+    })
   }
 
   return (
@@ -51,82 +91,71 @@ export function TripDetailPage() {
         </Link>
 
         <div className="flex min-w-0 items-center gap-3">
-          <h1 className="font-mono text-[22px] leading-8 font-semibold tracking-[-0.02em]">
-            {TRIP.id}
-          </h1>
-          <StatusBadge status={TRIP.status} />
-          <span aria-hidden className="h-5 w-px bg-border" />
-          <span className="inline-flex items-center gap-1.5 text-body text-text-2">
-            <Calendar className="size-4" strokeWidth={1.5} aria-hidden />
-            <span className="font-mono">{TRIP.date}</span>
-          </span>
-          <span className="text-body text-text-3">{TRIP.depot}</span>
+          <h1 className="font-mono text-[22px] leading-8 font-semibold tracking-[-0.02em]">{tripId}</h1>
+          {trip ? <span className="truncate text-body text-text-2">{trip.name}</span> : null}
         </div>
 
         <div className="flex-1" />
 
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={() => toast.success(`Đã lưu nháp ${TRIP.id}`)}
-          >
-            <Save strokeWidth={1.5} />
-            Lưu nháp
-          </Button>
-          <Button variant="primary" onClick={handleRunOptimization}>
-            <Play strokeWidth={1.5} />
-            Chạy tối ưu
-          </Button>
-        </div>
+        <Button variant="primary" onClick={() => { start({ simulateFailure: searchParams.get('mo-phong') === 'loi' }); setDialogOpen(true) }}>
+          <Play strokeWidth={1.5} />
+          Chạy tối ưu
+        </Button>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)_360px] items-start gap-6 overflow-auto px-8 pt-6">
-        <div className="flex flex-col gap-4">
-          <VehicleCard vehicle={VEHICLE} tripId={TRIP.id} />
-          <CargoSummaryCard />
+      {query.isPending ? (
+        <div role="status" aria-label="Đang tải chuyến" className="grid flex-1 place-items-center"><Spinner /></div>
+      ) : !trip || !vehicle || !summary ? (
+        <div className="flex flex-1 flex-col items-start gap-3 p-8">
+          <h2 className="text-h2 font-semibold">Không tìm thấy chuyến {tripId}</h2>
+          <Button variant="secondary" asChild><Link to="/chuyen">Về danh sách chuyến</Link></Button>
         </div>
-
-        <StopList />
-
-        <div className="flex h-full min-w-0 flex-col gap-3">
-          <div className="flex items-baseline gap-2 px-1">
-            <h2 className="text-h3 font-semibold">Đơn hàng</h2>
-            <span className="font-mono text-caption text-text-3">
-              {formatInteger(ORDERS.length)} đơn
-            </span>
+      ) : (
+        <div className="flex min-h-0 flex-1 flex-wrap items-start gap-6 overflow-auto px-8 pt-6 pb-8">
+          <div className="flex w-80 flex-col gap-4">
+            <VehicleCard vehicle={vehicle} tripId={tripId} />
+            <CargoSummaryCard summary={summary} />
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="primary"
-              className="h-9 px-3"
-              onClick={() => notifyPendingFeature('Thêm đơn hàng', 'Cần API đơn hàng của backend.')}
-            >
-              <Plus strokeWidth={1.5} />
-              Thêm đơn hàng
-            </Button>
-            <Button
-              variant="secondary"
-              className="h-9 px-3"
-              onClick={() => notifyPendingFeature('Nhập đơn từ Excel', 'Cần dịch vụ đọc file phía máy chủ.')}
-            >
-              <FileUp strokeWidth={1.5} />
-              Nhập từ Excel
-            </Button>
+          <div className="w-80"><StopList
+            stops={stops}
+            onReorder={(next) => stopsMutation.mutate(next)}
+            onRemove={handleRemoveStop}
+          /></div>
+
+          <div className="flex h-full min-h-0 min-w-80 flex-1 flex-col gap-3">
+            <div className="flex items-baseline gap-2 px-1">
+              <h2 className="text-h3 font-semibold">{t('trips.packages.title')}</h2>
+              <span className="font-mono text-caption text-text-3">
+                {t('trips.stops.count', { count: summary.lines })}
+              </span>
+            </div>
+            <PackagesTable
+              packages={trip.packages}
+              vehicle={vehicle}
+              stops={stops}
+              selectedId={editing?.id ?? null}
+              onSelect={(pkg) => setEditing(editing?.id === pkg.id ? null : pkg)}
+              onAdd={() => setEditing(emptyPackage(trip.packages, stops[0]?.number ?? 1))}
+            />
           </div>
 
-          <OrdersTable />
-
-          <div className="flex-1" />
-
-          <p className="px-1 pb-6 text-right text-caption text-text-3">
-            Lần tối ưu gần nhất:{' '}
-            <span className="text-text-2">
-              {TRIP.lastOptimisedAt ?? 'chưa có'}
-            </span>
-          </p>
+          {editing ? (
+            <PackageFormPanel
+              key={editing.id}
+              value={editing}
+              vehicle={vehicle}
+              stops={stops}
+              onSave={handleSave}
+              onDelete={trip.packages.some((pkg) => pkg.id === editing.id)
+                ? (pkg) => deletePackage.mutate(pkg.id, { onSuccess: () => setEditing(null) })
+                : undefined}
+              onDuplicate={trip.packages.some((pkg) => pkg.id === editing.id) ? handleDuplicate : undefined}
+              onClose={() => setEditing(null)}
+            />
+          ) : null}
         </div>
-      </div>
+      )}
 
       {progress.phase === 'error' && progress.failure ? (
         <OptimizationErrorDialog
@@ -140,10 +169,7 @@ export function TripDetailPage() {
           open={dialogOpen}
           onOpenChange={handleDialogOpenChange}
           progress={progress}
-          onViewPlan={() => {
-            setDialogOpen(false)
-            void navigate(`/chuyen/${TRIP.id}/phuong-an`)
-          }}
+          onViewPlan={() => { setDialogOpen(false); void navigate(`/chuyen/${tripId}/phuong-an`) }}
         />
       )}
     </div>

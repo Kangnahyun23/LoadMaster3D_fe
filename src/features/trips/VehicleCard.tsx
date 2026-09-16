@@ -1,8 +1,8 @@
 import { Truck } from 'lucide-react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/Card'
-import { formatDimensions, formatInteger } from '@/lib/format'
-import type { Vehicle } from './trip-detail.mock'
+import type { VehicleConfig } from '@/domain/models'
+import { useFormat, useT } from '@/lib/i18n'
 
 /**
  * Thẻ phương tiện ở cột trái.
@@ -10,19 +10,15 @@ import type { Vehicle } from './trip-detail.mock'
  * Lệch có chủ ý khỏi design: nhãn mục trong bản design viết hoa toàn bộ
  * kèm letter-spacing, CLAUDE.md mục 5 cấm cả hai — ở đây viết thường.
  */
-export function VehicleCard({
-  vehicle,
-  tripId,
-}: {
-  vehicle: Vehicle
-  tripId: string
-}) {
+export function VehicleCard({ vehicle, tripId }: { vehicle: VehicleConfig; tripId: string }) {
+  const t = useT()
+  const format = useFormat()
   return (
     <Card className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-caption font-medium text-text-3">Phương tiện</span>
+        <span className="text-caption font-medium text-text-3">{t('trips.vehicle')}</span>
         <Link to={`/chuyen/${tripId}/sua`} className="text-caption text-primary">
-          Đổi xe
+          {t('trips.changeVehicle')}
         </Link>
       </div>
 
@@ -33,7 +29,7 @@ export function VehicleCard({
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="text-body-lg font-medium">{vehicle.name}</span>
           <span className="font-mono text-caption text-text-3">
-            {vehicle.plate}
+            {t('fields.maxPayloadKg')}: {format.weight(vehicle.maxPayloadKg)}
           </span>
         </div>
       </div>
@@ -42,26 +38,20 @@ export function VehicleCard({
         <div className="flex flex-col gap-0.5 border-b border-border py-2.5">
           <dt className="text-body text-text-2">Lòng thùng (D × R × C)</dt>
           <dd className="font-mono text-body font-medium whitespace-nowrap">
-            {formatDimensions(
-              vehicle.innerLengthMm,
-              vehicle.innerWidthMm,
-              vehicle.innerHeightMm,
-            ).replace(' mm', '')}{' '}
-            <span className="font-normal text-text-3">mm</span>
+            {format.dimensions(vehicle.innerLengthCm, vehicle.innerWidthCm, vehicle.innerHeightCm)}
           </dd>
         </div>
 
         <div className="flex items-baseline justify-between gap-3 border-b border-border py-2.5">
-          <dt className="text-body text-text-2">Tải trọng</dt>
-          <dd className="font-mono text-body font-medium">
-            {formatInteger(vehicle.payloadKg)}{' '}
-            <span className="font-normal text-text-3">kg</span>
+          <dt className="text-body text-text-2">Cửa (R × C)</dt>
+          <dd className="font-mono text-body font-medium whitespace-nowrap">
+            {format.widthByHeight(vehicle.doorWidthCm, vehicle.doorHeightCm)}
           </dd>
         </div>
 
         <div className="flex items-baseline justify-between gap-3 py-2.5">
-          <dt className="text-body text-text-2">Cửa xếp dỡ</dt>
-          <dd className="text-body">{vehicle.loadingDoor}</dd>
+          <dt className="text-body text-text-2">Vật cản</dt>
+          <dd className="font-mono text-body font-medium">{format.integer(vehicle.obstacles.length)}</dd>
         </div>
       </dl>
     </Card>

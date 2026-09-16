@@ -11,7 +11,7 @@ import { FillRateChart } from '@/features/manager/FillRateChart'
 import { KpiTile } from '@/features/manager/KpiTile'
 import { GenerationSparkline } from '@/features/optimization/GenerationSparkline'
 import { StopCard } from '@/features/trips/StopCard'
-import { STOPS } from '@/features/trips/trip-detail.mock'
+import type { StopRow } from '@/features/trips/trip-summary'
 import { formatInteger } from '@/lib/format'
 import { stopColor, stopForeground, stopLabel } from '@/lib/stops'
 import { Sample, SheetRow, SheetSection } from '../SheetLayout'
@@ -20,7 +20,10 @@ const DRIVER_ITEM = { id: 'PKG-00194', orderId: 'DH-51031', description: 'Thùng
 
 export function DataSection() {
   const kpi = KPIS[0]
-  const stop = STOPS[0]
+  const stop: StopRow = {
+    id: 'STOP-1', number: 1, name: 'Công ty TNHH Thực phẩm Sài Gòn',
+    address: '12 Nguyễn Văn Linh, Q.7, TP. Hồ Chí Minh', packageCount: 38, weightKg: 2400,
+  }
 
   return (
     <SheetSection id="data" number="03" title="Hiển thị dữ liệu">
@@ -48,9 +51,7 @@ export function DataSection() {
       </SheetRow>
 
       <SheetRow name="StopCard (kéo thả) · PackageRow · UnplacedCard" note="StopCard: mặc định · đang kéo (viền primary, bóng --e3). PackageRow tài xế: chờ · đã dỡ · từ chối. UnplacedCard: viền đứt." className="flex-col items-stretch">
-        {stop ? (
-          <DndContext><SortableContext items={[stop.id]}><ul className="m-0 w-140 list-none p-0"><StopCard stop={stop} index={0} /></ul></SortableContext></DndContext>
-        ) : null}
+        <DndContext><SortableContext items={[stop.id]}><ul className="m-0 w-140 list-none p-0"><StopCard stop={stop} onRemove={() => undefined} /></ul></SortableContext></DndContext>
         <ul className="m-0 w-95 list-none overflow-hidden rounded-md border border-border p-0 text-body-lg">
           <DeliveryItemRow item={DRIVER_ITEM} status="pending" onToggle={() => undefined} />
           <DeliveryItemRow item={{ ...DRIVER_ITEM, id: 'PKG-00193' }} status="done" onToggle={() => undefined} />
