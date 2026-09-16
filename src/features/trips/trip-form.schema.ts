@@ -1,28 +1,21 @@
 import { z } from 'zod'
+import type { TFunction } from '@/lib/i18n'
 
-/** Ngày chạy chỉ nhận yyyy-MM-dd từ <input type="date">. */
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
-
-export const tripFormSchema = z.object({
-  date: z
-    .string()
-    .min(1, 'Chọn ngày chạy')
-    .regex(ISO_DATE, 'Ngày không hợp lệ'),
-  depot: z.string().trim().min(1, 'Nhập kho xuất phát'),
-  vehicleId: z.string().min(1, 'Chọn xe'),
-  note: z.string().trim().max(500, 'Ghi chú tối đa 500 ký tự').optional(),
-})
-
-export type TripFormValues = z.infer<typeof tripFormSchema>
-
-/** yyyy-MM-dd → dd/MM/yyyy để hiển thị theo mục 6. */
-export function isoToDisplayDate(iso: string): string {
-  const [year, month, day] = iso.split('-')
-  return year && month && day ? `${day}/${month}/${year}` : iso
+/**
+ * Form khung chuyến (LM-053): tên, xe và điểm giao — đúng các trường kho lưu (`Trip`). Kiện thêm ở Chi tiết chuyến.
+ * Sửa chuyến chỉ đổi tên và xe; điểm giao sắp xếp/xoá ở Chi tiết chuyến để kiện được đánh số lại cùng lúc.
+ * Câu lỗi lấy từ từ điển nên schema dựng theo `t` của ngôn ngữ đang chọn.
+ */
+export function createTripFormSchema(t: TFunction, { withStops }: { withStops: boolean }) {
+  const stop = z.object({
+    name: z.string().trim().min(1, t('trips.create.stopNameRequired')).max(120, t('trips.create.tooLong')),
+    address: z.string().trim().max(200, t('trips.create.tooLong')),
+  })
+  return z.object({
+    name: z.string().trim().min(1, t('trips.create.nameRequired')).max(120, t('trips.create.tooLong')),
+    vehicleId: z.string().min(1, t('trips.create.vehicleRequired')),
+    stops: withStops ? z.array(stop).min(1, t('trips.create.stopsRequired')) : z.array(stop),
+  })
 }
 
-/** dd/MM/yyyy → yyyy-MM-dd để đổ vào <input type="date">. */
-export function displayDateToIso(display: string): string {
-  const [day, month, year] = display.split('/')
-  return year && month && day ? `${year}-${month}-${day}` : ''
-}
+export type TripFormValues = z.infer<ReturnType<typeof createTripFormSchema>>
