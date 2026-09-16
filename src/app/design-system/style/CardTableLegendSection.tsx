@@ -3,7 +3,7 @@ import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader, CardTitle } from '@/components/ui/Card'
-import { formatDimensions, formatInteger } from '@/lib/format'
+import { createFormatter, formatInteger } from '@/lib/format'
 import { STOP_COLORS, stopColor, stopForeground, stopLabel } from '@/lib/stops'
 import { SheetSection } from '../SheetLayout'
 
@@ -29,7 +29,7 @@ const columns = helper.columns([
     ),
   }),
   helper.accessor('weightKg', { header: 'Khối lượng', meta: { align: 'right' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption">{formatInteger(i.getValue())} kg</span> }),
-  helper.accessor('dims', { header: 'Kích thước', meta: { align: 'right' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption text-text-2">{formatDimensions(...i.getValue()).replace(' mm', '')}</span> }),
+  helper.accessor('dims', { header: 'Kích thước', meta: { align: 'right' } satisfies ColumnMeta, cell: (i) => <span className="font-mono text-caption text-text-2">{createFormatter('vi-VN').dimensions(...i.getValue())}</span> }),
 ])
 
 export function CardTableSection() {

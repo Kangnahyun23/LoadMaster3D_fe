@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { CameraPreset, ColorMode, PlaybackSpeed } from '@/types/load-plan'
+import type { CameraPreset, ColorMode, PlaybackSpeed } from '@/features/viewer3d/viewer-types'
 import type { OrientationCode } from '@/domain/geometry'
 import type { ViewerSceneModel } from '@/features/viewer3d/scene-input'
 import { resolveEffectiveScene, type PlacementPatch } from './viewer-draft'
@@ -33,7 +33,6 @@ export function useLoadPlanViewer(
   const [selectedId, setSelectedId] = useState<string | null>(
     initialSelected?.id ?? null,
   )
-  const [leftOpen, setLeftOpen] = useState(true)
   const [leftTab, setLeftTab] = useState<LeftTab>('unplaced')
   const [history, setHistory] = useState(createDraftHistory)
   const draft = history.draft
@@ -74,7 +73,6 @@ export function useLoadPlanViewer(
     return () => window.clearInterval(id)
   }, [playing, speed, totalSteps])
 
-  const toggleLeft = useCallback(() => setLeftOpen((o) => !o), [])
 
   const commitDraft = useCallback((type: CommandType, id?: string, patch?: PlacementPatch) => {
     setHistory((current) => commitCommand(sceneModel, current, type, id, patch))
@@ -131,8 +129,6 @@ export function useLoadPlanViewer(
     selectedId,
     selected,
     select: setSelectedId,
-    leftOpen,
-    toggleLeft,
     leftTab,
     setLeftTab,
     setOrientation,

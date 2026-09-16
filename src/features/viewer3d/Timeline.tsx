@@ -5,7 +5,7 @@ import { formatInteger } from '@/lib/format'
 import { useT } from '@/lib/i18n'
 import { stopColor } from '@/lib/stops'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
-import type { PlaybackSpeed } from '@/types/load-plan'
+import type { PlaybackSpeed } from '@/features/viewer3d/viewer-types'
 import { timelineBins } from './operations/operations-model'
 
 export type TimelineProps = {

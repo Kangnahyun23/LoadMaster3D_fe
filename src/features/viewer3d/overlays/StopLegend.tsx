@@ -1,7 +1,7 @@
 import { formatDecimal, formatInteger } from '@/lib/format'
 import { stopColor } from '@/lib/stops'
 import { weightColor, type ColorContext } from '../colors'
-import type { ColorMode } from '@/types/load-plan'
+import type { ColorMode } from '@/features/viewer3d/viewer-types'
 import type { SceneStop } from '../scene-input'
 
 /**

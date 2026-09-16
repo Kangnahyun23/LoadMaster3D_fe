@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
-import type { CameraPreset, ColorMode } from '@/types/load-plan'
+import type { CameraPreset, ColorMode } from '@/features/viewer3d/viewer-types'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 import type { ViewerSceneModel } from '@/features/viewer3d/scene-input'
 import type { VehicleConfig } from '@/domain/models'

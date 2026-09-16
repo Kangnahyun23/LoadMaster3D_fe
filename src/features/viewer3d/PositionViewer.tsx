@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
-import type { CameraPreset } from '@/types/load-plan'
+import type { CameraPreset } from '@/features/viewer3d/viewer-types'
 import type { ScenePlacement, ViewerSceneModel } from '@/features/viewer3d/scene-input'
 import { deriveSceneSemantics } from './operations/scene-semantics'
 import { SceneCanvas } from './scene/SceneCanvas'

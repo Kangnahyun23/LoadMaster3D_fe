@@ -5,13 +5,13 @@ import { Checkbox } from '@/components/ui/Checkbox'
 import { Input } from '@/components/ui/Input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/RadioGroup'
 import { Switch } from '@/components/ui/Switch'
-import { ORIENTATION_LABELS, type Orientation } from '@/types/load-plan'
+import { ORIENTATION_CODES, orientDimensions, type OrientationCode } from '@/domain/geometry'
 import { cn } from '@/lib/utils'
 import { Sample, SheetRow, SheetSection } from '../SheetLayout'
 
 export function InputSection() {
-  const [orientation, setOrientation] = useState<Orientation>(0)
-  const [slice, setSlice] = useState(4350)
+  const [orientation, setOrientation] = useState<OrientationCode>('LWH')
+  const [slice, setSlice] = useState(435)
 
   return (
     <SheetSection id="input" number="02" title="Nhập liệu">
@@ -47,24 +47,24 @@ export function InputSection() {
         </button>
       </SheetRow>
 
-      <SheetRow name="Checkbox · Radio · Switch · RangeSlider · OrientationPicker" note="18px checkbox/radio, switch 36×20, thanh trượt native tô primary phần đã đi qua, bộ chọn hướng 3 ô." className="flex-col items-stretch gap-6">
+      <SheetRow name="Checkbox · Radio · Switch · RangeSlider · OrientationPicker" note="18px checkbox/radio, switch 36×20, thanh trượt native tô primary phần đã đi qua, bộ chọn 6 hướng đặt theo mã Spec." className="flex-col items-stretch gap-6">
         <div className="flex flex-wrap gap-10">
           <div className="flex flex-col gap-3"><Checkbox defaultChecked label="Cho phép xoay kiện" /><Checkbox label="Chồng lên kiện dễ vỡ" /><Checkbox disabled label="Xếp hàng lạnh" /></div>
           <RadioGroup defaultValue="weight"><RadioGroupItem value="weight" label="Ưu tiên khối lượng" /><RadioGroupItem value="stops" label="Ưu tiên thứ tự điểm giao" /><RadioGroupItem value="volume" disabled label="Ưu tiên thể tích" /></RadioGroup>
           <div className="flex flex-col gap-3"><Switch defaultChecked label="Hiển thị trọng tâm" /><Switch label="Lưới sàn xe" /><Switch disabled label="Chế độ tối" /></div>
         </div>
         <div className="flex w-70 flex-col gap-2">
-          <div className="flex justify-between text-caption"><span className="font-medium text-text-3">Cắt lớp theo chiều dài</span><span className="font-mono font-medium">{slice.toLocaleString('vi-VN')} mm</span></div>
-          <input type="range" className="lm-range" min={0} max={7200} step={50} value={slice} onChange={(e) => setSlice(Number(e.target.value))} aria-label="Cắt lớp" style={{ '--lm-range-fill': `${(slice / 7200) * 100}%` } as CSSProperties} />
+          <div className="flex justify-between text-caption"><span className="font-medium text-text-3">Cắt lớp theo chiều dài</span><span className="font-mono font-medium">{slice.toLocaleString('vi-VN')} cm</span></div>
+          <input type="range" className="lm-range" min={0} max={720} step={5} value={slice} onChange={(e) => setSlice(Number(e.target.value))} aria-label="Cắt lớp" style={{ '--lm-range-fill': `${(slice / 720) * 100}%` } as CSSProperties} />
         </div>
         <div role="group" aria-label="Hướng xoay" className="grid w-70 grid-cols-3 gap-1.5">
-          {([[0, 28, 18], [1, 18, 24], [2, 14, 28]] as const).map(([value, w, h]) => (
+          {ORIENTATION_CODES.map((value) => { const { placedLengthCm: w, placedHeightCm: h } = orientDimensions({ lengthCm: 28, widthCm: 18, heightCm: 12 }, value); return (
             <button key={value} type="button" aria-pressed={orientation === value} onClick={() => setOrientation(value)}
               className={cn('flex flex-col items-center gap-1 rounded-md border px-1 py-2', orientation === value ? 'border-primary bg-primary-bg text-primary-hover' : 'border-border text-text-2 hover:bg-surface')}>
               <span aria-hidden className="block rounded-xs bg-current opacity-85" style={{ width: w, height: h }} />
-              <span className="font-mono text-[11px] leading-3.5 font-medium">{ORIENTATION_LABELS[value]}</span>
+              <span className="font-mono text-[11px] leading-3.5 font-medium">{value}</span>
             </button>
-          ))}
+          ) })}
         </div>
       </SheetRow>
     </SheetSection>

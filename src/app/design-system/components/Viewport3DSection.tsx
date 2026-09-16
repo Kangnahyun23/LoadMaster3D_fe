@@ -4,10 +4,11 @@ import { createColorContext } from '@/features/viewer3d/colors'
 import { AxleLoadPanel } from '@/features/viewer3d/overlays/AxleLoadPanel'
 import { SlicePanel } from '@/features/viewer3d/overlays/SlicePanel'
 import { StopLegend } from '@/features/viewer3d/overlays/StopLegend'
-import { adaptLoadPlan } from '@/features/viewer3d/scene-input'
+import { adaptResult } from '@/features/viewer3d/scene-input'
 import { Timeline } from '@/features/viewer3d/Timeline'
-import { LOAD_PLAN } from '@/lib/load-plan.mock'
-import type { CameraPreset, ColorMode, PlaybackSpeed } from '@/types/load-plan'
+import { seedRevisions } from '@/lib/mock-db/seed-revisions'
+import { seedTrip } from '@/lib/mock-db/seed-trip'
+import type { CameraPreset, ColorMode, PlaybackSpeed } from '@/features/viewer3d/viewer-types'
 import { DarkStage, SheetRow, SheetSection } from '../SheetLayout'
 
 const CAMERAS: ReadonlyArray<{ value: CameraPreset; label: string }> = [
@@ -24,7 +25,12 @@ const MODES: ReadonlyArray<{ value: ColorMode; label: string }> = [
 ]
 
 export function Viewport3DSection() {
-  const plan = useMemo(() => adaptLoadPlan(LOAD_PLAN), [])
+  // Revision đã duyệt của chuyến seed — cùng dữ liệu Planner mở mặc định, không dựng phương án riêng cho trang tài liệu.
+  const plan = useMemo(() => {
+    const approved = seedRevisions().findLast((revision) => revision.approvedAt !== undefined)
+    if (!approved) throw new Error('seed has no approved revision')
+    return adaptResult({ trip: seedTrip(), revision: approved })
+  }, [])
   const colorContext = useMemo(() => createColorContext(plan), [plan])
   const [camera, setCamera] = useState<CameraPreset>('goc-cheo')
   const [mode, setMode] = useState<ColorMode>('diem-giao')

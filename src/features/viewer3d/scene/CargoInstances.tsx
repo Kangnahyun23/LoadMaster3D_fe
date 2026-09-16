@@ -1,7 +1,7 @@
 import { useThree, type ThreeEvent } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { BackSide, BoxGeometry, InstancedBufferAttribute, type InstancedMesh } from 'three'
-import type { ColorMode } from '@/types/load-plan'
+import type { ColorMode } from '@/features/viewer3d/viewer-types'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
 
 import type { ColorContext } from '../colors'

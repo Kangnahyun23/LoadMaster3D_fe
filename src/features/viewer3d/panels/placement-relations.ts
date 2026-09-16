@@ -3,7 +3,7 @@ import type { ScenePlacement } from '../scene-input'
 
 /**
  * Quan hệ trên/dưới của kiện trong scene cm, cho panel và mô tả vị trí bằng lời. Chỉ là chỉ dẫn đọc, không phải kiểm nâng đỡ
- * (domain làm việc đó). Bản mm của kho vẫn ở `lib/placement.ts` tới LM-060.
+ * (domain làm việc đó).
  */
 
 /** Gần vách trước / gần cửa sau trong khoảng này thì mô tả theo đầu thùng. */

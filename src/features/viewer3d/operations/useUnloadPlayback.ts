@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
-import type { PlaybackSpeed } from '@/types/load-plan'
+import type { PlaybackSpeed } from '@/features/viewer3d/viewer-types'
 import { createLifoIndex, unloadSequence } from './unloading'
 
 /**
