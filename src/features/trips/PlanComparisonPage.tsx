@@ -2,8 +2,6 @@ import { ArrowRight, ChevronLeft } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
-import { OptimizationDialog } from '@/features/optimization/OptimizationDialog'
-import { useOptimizationJob } from '@/features/optimization/useOptimizationJob'
 import { formatInteger } from '@/lib/format'
 import { CARD_HEIGHTS, METRIC_LABELS, PlanCard } from './PlanCard'
 import {
@@ -23,17 +21,10 @@ export function PlanComparisonPage() {
   const params = useParams()
   const tripId = params.tripId ?? TRIP.id
   const [selectedKey, setSelectedKey] = useState<PlanKey>(DEFAULT_PLAN_KEY)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const { progress, start } = useOptimizationJob()
 
   const best = useMemo(() => bestValues(PLANS), [])
   const selected = PLANS.find((p) => p.key === selectedKey) ?? PLANS[0]
   const totalCount = PLANS[0]?.totalCount ?? 0
-
-  function handleRunAnother() {
-    start()
-    setDialogOpen(true)
-  }
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
@@ -94,8 +85,8 @@ export function PlanComparisonPage() {
           · Tất cả phương án dùng cùng {formatInteger(ORDER_COUNT)} đơn hàng và cấu hình xe.
         </span>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={handleRunAnother}>
-            Chạy thêm phương án
+          <Button variant="secondary" asChild>
+            <Link to={`/chuyen/${tripId}/toi-uu`}>Chạy thêm phương án</Link>
           </Button>
           <Button variant="primary" asChild>
             <Link to={`/chuyen/${tripId}/phuong-an?plan=${selectedKey}`}>
@@ -106,12 +97,6 @@ export function PlanComparisonPage() {
         </div>
       </div>
 
-      <OptimizationDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        progress={progress}
-        onViewPlan={() => setDialogOpen(false)}
-      />
     </div>
   )
 }

@@ -1,12 +1,9 @@
 import { ChevronLeft, Play } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
-import { OptimizationDialog } from '@/features/optimization/OptimizationDialog'
-import { OptimizationErrorDialog } from '@/features/optimization/OptimizationErrorDialog'
-import { useOptimizationJob } from '@/features/optimization/useOptimizationJob'
 import type { CargoPackage } from '@/domain/models'
 import { useT } from '@/lib/i18n'
 import { CargoSummaryCard } from './CargoSummaryCard'
@@ -38,21 +35,19 @@ export function TripDetailPage() {
   const savePackage = useSavePackageMutation(tripId)
   const deletePackage = useDeletePackageMutation(tripId)
   const duplicatePackage = useDuplicatePackageMutation(tripId)
-  const [editing, setEditing] = useState<CargoPackage | null>(null)
-  // Màn Thiết lập tối ưu và job thật đến ở LM-047/LM-048; tới lúc đó nút vẫn chạy hộp thoại hiện có.
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const { progress, start, cancel } = useOptimizationJob()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [draft, setDraft] = useState<CargoPackage | null>(null)
 
   const trip = query.data?.trip
   const vehicle = query.data?.vehicle
   const stops = useMemo<StopRow[]>(() => (trip ? stopRows(trip.stops, trip.packages) : []), [trip])
   const summary = useMemo(() => (trip && vehicle ? cargoSummary(trip.packages, vehicle) : null), [trip, vehicle])
-
-  function handleDialogOpenChange(open: boolean) {
-    setDialogOpen(open)
-    if (!open && (progress.phase === 'idle' || progress.phase === 'error')) cancel()
+  // `?kien=<mã>` mở panel của kiện đó — liên kết từ validation summary của Thiết lập tối ưu (LM-047).
+  const linkedId = searchParams.get('kien')
+  const editing = draft ?? trip?.packages.find((pkg) => pkg.id === linkedId) ?? null
+  function setEditing(next: CargoPackage | null) {
+    setDraft(next)
+    if (linkedId !== null) setSearchParams((params) => { params.delete('kien'); return params }, { replace: true })
   }
 
   function handleRemoveStop(stop: StopRow) {
@@ -97,9 +92,11 @@ export function TripDetailPage() {
 
         <div className="flex-1" />
 
-        <Button variant="primary" onClick={() => { start({ simulateFailure: searchParams.get('mo-phong') === 'loi' }); setDialogOpen(true) }}>
-          <Play strokeWidth={1.5} />
-          Chạy tối ưu
+        <Button variant="primary" asChild>
+          <Link to={`/chuyen/${tripId}/toi-uu${searchParams.get('mo-phong') === 'loi' ? '?mo-phong=loi' : ''}`}>
+            <Play strokeWidth={1.5} />
+            Chạy tối ưu
+          </Link>
         </Button>
       </header>
 
@@ -157,21 +154,6 @@ export function TripDetailPage() {
         </div>
       )}
 
-      {progress.phase === 'error' && progress.failure ? (
-        <OptimizationErrorDialog
-          open={dialogOpen}
-          onOpenChange={handleDialogOpenChange}
-          failure={progress.failure}
-          onAdjustTrip={() => handleDialogOpenChange(false)}
-        />
-      ) : (
-        <OptimizationDialog
-          open={dialogOpen}
-          onOpenChange={handleDialogOpenChange}
-          progress={progress}
-          onViewPlan={() => { setDialogOpen(false); void navigate(`/chuyen/${tripId}/phuong-an`) }}
-        />
-      )}
     </div>
   )
 }

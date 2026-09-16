@@ -6,12 +6,11 @@ import { Badge } from '@/components/ui/Badge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { DeliveryItemRow } from '@/features/driver/DeliveryItemRow'
 import { KpiTile } from '@/features/manager/KpiTile'
-import { GenerationSparkline } from '@/features/optimization/GenerationSparkline'
 import { StopCard } from '@/features/trips/StopCard'
 import type { StopRow } from '@/features/trips/trip-summary'
 import { formatInteger } from '@/lib/format'
 import { stopColor, stopForeground, stopLabel } from '@/lib/stops'
-import { Sample, SheetRow, SheetSection } from '../SheetLayout'
+import { SheetRow, SheetSection } from '../SheetLayout'
 
 const DRIVER_ITEM = { id: 'PKG-00194', orderId: 'DH-51031', description: 'Thùng sữa tươi 12 hộp', where: 'Gần cửa, lớp trên' }
 
@@ -61,7 +60,6 @@ export function DataSection() {
 
       <SheetRow name="UtilizationBar · ProgressBar · StepProgress · Sparkline" note="Thanh 8px pill; >90% chuyển warning. StepProgress 10px cho tablet. Sparkline hội tụ. Bảng điều khiển chưa có biểu đồ: chưa có nguồn số thật (LM-052)." className="flex-col items-stretch gap-6">
         <div className="flex w-80 flex-col gap-3"><ProgressBar label="Thể tích sử dụng" value={78} /><ProgressBar label="Trục sau" value={93} tone="warning" /><ProgressBar label="Quá tải" value={100} tone="danger" /></div>
-        <Sample label="sparkline · 200 vòng → 89,2%"><div className="w-146"><GenerationSparkline generations={200} target={89.2} done /></div></Sample>
         <span className="font-mono text-caption text-text-3">{formatInteger(132)} kiện · trục 0–100%</span>
       </SheetRow>
     </SheetSection>
