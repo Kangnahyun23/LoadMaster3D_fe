@@ -1,43 +1,44 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import type { DeliveryStop } from './driver.mock'
+import { useT } from '@/lib/i18n'
+import type { StopDelivery } from './driver-plan'
 
 /**
- * Trạng thái dỡ hàng tại một điểm giao. Đánh dấu từng kiện đã dỡ;
- * kiện khách từ chối thì khoá lại, không đổi được từ màn này.
+ * Phiên giao hàng trong trình duyệt (LM-061): bắt đầu ở điểm 1, đánh dấu từng kiện đã dỡ, "Hoàn tất điểm giao" chuyển sang điểm kế tiếp.
+ * Chỉ giữ trong phiên của màn — không lưu, không đồng bộ, nên không báo điều gì ngoài việc đã làm ở đây.
  */
-export function useDeliveryStop(stop: DeliveryStop) {
-  const [done, setDone] = useState<ReadonlySet<string>>(new Set(stop.initiallyDone))
-  const rejected = useMemo(() => new Set(stop.rejected), [stop.rejected])
+export function useDeliveryStop(stops: readonly StopDelivery[]) {
+  const t = useT()
+  const [index, setIndex] = useState(0)
+  const [done, setDone] = useState<ReadonlySet<string>>(() => new Set())
+  const stop = stops[Math.min(index, stops.length - 1)]
 
-  const toggle = useCallback(
-    (id: string) => {
-      if (rejected.has(id)) return
-      setDone((current) => {
-        const next = new Set(current)
-        if (next.has(id)) next.delete(id)
-        else next.add(id)
-        return next
-      })
-    },
-    [rejected],
-  )
+  const toggle = useCallback((id: string) => {
+    setDone((current) => {
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
 
-  const total = stop.items.length
-  const doneCount = done.size
-  const remaining = total - doneCount - rejected.size
-  const percent = Math.round((doneCount / total) * 100)
+  const total = stop?.items.length ?? 0
+  const doneCount = stop?.items.filter((item) => done.has(item.id)).length ?? 0
+  const remaining = total - doneCount
+  const percent = total === 0 ? 100 : Math.round((doneCount / total) * 100)
+  const isLast = index >= stops.length - 1
 
   const complete = useCallback(() => {
+    if (!stop) return
     if (remaining > 0) {
-      toast.warning(`Còn ${remaining} kiện chưa dỡ`, {
-        description: 'Đánh dấu hết các kiện hoặc ghi nhận khách từ chối trước khi hoàn tất.',
-      })
+      toast.warning(t('driver.remaining', { count: remaining }), { description: t('driver.incompleteDescription') })
       return
     }
-    // Chưa có đồng bộ hay điểm kế tiếp (D-20): chỉ xác nhận điều màn này kiểm được.
-    toast.success(`Đã dỡ đủ kiện tại điểm giao ${stop.number}`)
-  }, [remaining, stop.number])
+    toast.success(t('driver.stopDone', { number: stop.number }), {
+      description: isLast ? t('driver.lastStop') : t('driver.nextStop', { number: stop.number + 1 }),
+    })
+    if (!isLast) setIndex(index + 1)
+  }, [stop, remaining, isLast, index, t])
 
-  return { done, rejected, toggle, total, doneCount, remaining, percent, complete }
+  return { stop, done, toggle, total, doneCount, remaining, percent, complete }
 }
