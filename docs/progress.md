@@ -18,18 +18,41 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 0 | Git, luật, Vitest, Playwright, CI, bug LM-055 | 6 / 7 | ~4,5 ngày | ✅ Xong 15/09/2026 — CI xanh trên GitHub; còn LM-002 chờ backend |
 | 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 19 / 19 | ~18,5 ngày | ✅ Xong 15/09/2026 — 403 test, cổng benchmark đạt |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 10 / 10 | ~10,5 ngày | ✅ Xong 15/09/2026 — 427 unit, 28 E2E, draw call không đổi |
-| 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 0 / 15 | ~16,5 ngày | ⬜ |
+| 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **35 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **50 / 57 issue** | **~56 ngày công** | |
 
-**Phase 2 xong (15/09/2026).** LM-030 → LM-038 và LM-056 đủ 10 issue. Phase 3 (màn luồng Spec) chờ người dùng xác nhận sau báo cáo phase.
+**Phase 3 xong (16/09/2026).** LM-040 → LM-054 đủ 15 issue. Phase 4 (kho, tài xế đọc revision duyệt, gỡ mock mm) chờ người dùng xác nhận sau báo cáo phase.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 16/09/2026 — Xong phase 3: màn luồng Spec (LM-040 → LM-054)
+
+**Đã làm**
+- Trips (LM-043 → LM-046, `9e4c54a`): chi tiết chuyến, bảng kiện, panel form kiện, điểm giao ↔ `deliveryStop` đọc/ghi kho mock.
+- Dashboard (LM-052, agent, `45abf2f`): số từ kho; gỡ biểu đồ và "so với kỳ trước" không có nguồn (AGENTS mục 6 "Không bịa số").
+- Đội xe (LM-040/041, `d7f4d52`): agent bị dừng giữa chừng → commit WIP, người điều phối gộp và sửa.
+- Thiết lập tối ưu + chạy job (LM-047/048, `07f0b8f`): request thật, nhóm lỗi đầu vào có link, Worker, huỷ, lỗi service, kết quả một phần.
+- Planner + Duyệt (LM-049/050, `b953f61`): header metrics, tab Chỉ số, danh sách Đã xếp có lọc, lọc lý do chưa xếp, chi tiết kiện có tỷ lệ đỡ + ràng buộc; Duyệt qua constraint engine theo draft, banner lỗi thời.
+- So sánh revision (LM-051, agent, `90f458c`): thẻ từ revision thật; `?revision=` nay nhận **mã revision** (bản duyệt dùng chung `jobId` với bản nguồn nên mở theo job luôn ra bản duyệt).
+- Xem trước 3D xe (LM-042, agent, `3224adf`).
+- LM-053 (agent `031f9f5` + `23964cc`, `d15f273`): gỡ nút Cài đặt, "Ghi nhận sai lệch", tab đáy tài xế, `pending-feature.ts`; danh sách chuyến và form tạo/sửa chuyến ghi thật vào kho (trước đó báo thành công giả).
+- LM-054 (agent, `84f5ead`): `e2e/spec-flow.spec.ts` 7 test, 6 kịch bản; agent dừng trước khi commit → người điều phối commit, sửa lỗi kiểu, chạy lại. Hai bug tìm được: nút Tối ưu kẹt tắt sau khi sửa dữ liệu; form kiện hiện mã lỗi zod thô.
+
+**Kiểm tra**
+- pnpm lint: ✅ · pnpm build: ✅ · pnpm test: 492/492 · pnpm test:e2e: 45/45 (desktop, tablet, phone)
+
+**Vướng mắc / quyết định mới**
+- Nút primary các màn dispatcher (Tạo chuyến, Tối ưu, xác nhận Duyệt) vẫn 40 px trên tablet; AGENTS mục 5/10 đòi 56 px. Chưa sửa — cần quyết định: `Button` tự đổi cỡ theo breakpoint, hay coi màn dispatcher là desktop-only.
+- Màn kho và tài xế vẫn đọc mock mm, chưa đọc revision đã duyệt (phase 4: LM-060 → LM-062).
+
+**Việc tiếp theo**
+- Báo cáo phase 3, chờ xác nhận phase 4.
 
 ### 15/09/2026 — Xong phase 2: engine 3D sang cm (LM-030 → LM-038, LM-056)
 
@@ -386,21 +409,21 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 | ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
 |---|---|---|---|---|---|
-| [LM-040](issues/LM-040-vehicles-api-danh-sach-doi-xe.md) | Danh sách Đội xe | ⬜ | | | |
-| [LM-041](issues/LM-041-trang-chi-tiet-xe-form-vat-can.md) | Chi tiết xe, vật cản | ⬜ | | | |
-| [LM-042](issues/LM-042-xem-truoc-3d-xe.md) | Xem trước 3D xe | ⬜ | | | |
-| [LM-043](issues/LM-043-trips-packages-api.md) | API chuyến và kiện | ⬜ | | | |
-| [LM-044](issues/LM-044-bang-kien-ao-hoa-tong-hop.md) | Bảng kiện | ⬜ | | | Cần duyệt dependency mới |
-| [LM-045](issues/LM-045-panel-form-kien.md) | Panel form kiện | ⬜ | | | |
-| [LM-046](issues/LM-046-diem-giao-danh-so-lai.md) | Điểm giao ↔ deliveryStop | ⬜ | | | |
-| [LM-047](issues/LM-047-man-thiet-lap-toi-uu.md) | Thiết lập tối ưu | ⬜ | | | |
-| [LM-048](issues/LM-048-chay-job-trang-thai.md) | Chạy job, trạng thái | ⬜ | | | |
-| [LM-049](issues/LM-049-planner-mock-badge-metrics-unplaced.md) | Planner hiển thị kết quả | ⬜ | | | |
-| [LM-050](issues/LM-050-duyet-phuong-an-revision.md) | Duyệt phương án | ⬜ | | | |
-| [LM-051](issues/LM-051-so-sanh-revision.md) | So sánh revision | ⬜ | | | |
-| [LM-052](issues/LM-052-dashboard-kpi-spec.md) | Dashboard | ⬜ | | | |
-| [LM-053](issues/LM-053-an-nut-chua-hoat-dong.md) | Ẩn nút chưa hoạt động | ⬜ | | | |
-| [LM-054](issues/LM-054-e2e-luong-spec.md) | E2E luồng Spec | ⬜ | | | |
+| [LM-040](issues/LM-040-vehicles-api-danh-sach-doi-xe.md) | Danh sách Đội xe | ✅ | 16/09/2026 | 16/09/2026 | d7f4d52 (agent, người điều phối hoàn tất) |
+| [LM-041](issues/LM-041-trang-chi-tiet-xe-form-vat-can.md) | Chi tiết xe, vật cản | ✅ | 16/09/2026 | 16/09/2026 | d7f4d52 |
+| [LM-042](issues/LM-042-xem-truoc-3d-xe.md) | Xem trước 3D xe | ✅ | 16/09/2026 | 16/09/2026 | 3224adf (agent) |
+| [LM-043](issues/LM-043-trips-packages-api.md) | API chuyến và kiện | ✅ | 16/09/2026 | 16/09/2026 | 9e4c54a |
+| [LM-044](issues/LM-044-bang-kien-ao-hoa-tong-hop.md) | Bảng kiện | ✅ | 16/09/2026 | 16/09/2026 | 9e4c54a — phân trang 50 dòng, không thêm react-virtual |
+| [LM-045](issues/LM-045-panel-form-kien.md) | Panel form kiện | ✅ | 16/09/2026 | 16/09/2026 | 9e4c54a |
+| [LM-046](issues/LM-046-diem-giao-danh-so-lai.md) | Điểm giao ↔ deliveryStop | ✅ | 16/09/2026 | 16/09/2026 | 9e4c54a |
+| [LM-047](issues/LM-047-man-thiet-lap-toi-uu.md) | Thiết lập tối ưu | ✅ | 16/09/2026 | 16/09/2026 | 07f0b8f |
+| [LM-048](issues/LM-048-chay-job-trang-thai.md) | Chạy job, trạng thái | ✅ | 16/09/2026 | 16/09/2026 | 07f0b8f — không hỏi bỏ draft (draft không qua trang) |
+| [LM-049](issues/LM-049-planner-mock-badge-metrics-unplaced.md) | Planner hiển thị kết quả | ✅ | 16/09/2026 | 16/09/2026 | b953f61 |
+| [LM-050](issues/LM-050-duyet-phuong-an-revision.md) | Duyệt phương án | ✅ | 16/09/2026 | 16/09/2026 | b953f61 — nút Duyệt ở header vẫn bấm được để đọc lý do chặn |
+| [LM-051](issues/LM-051-so-sanh-revision.md) | So sánh revision | ✅ | 16/09/2026 | 16/09/2026 | 90f458c (agent); `?revision=` nhận mã revision |
+| [LM-052](issues/LM-052-dashboard-kpi-spec.md) | Dashboard | ✅ | 16/09/2026 | 16/09/2026 | 45abf2f (agent) — gỡ biểu đồ bịa số |
+| [LM-053](issues/LM-053-an-nut-chua-hoat-dong.md) | Ẩn nút chưa hoạt động | ✅ | 16/09/2026 | 16/09/2026 | 031f9f5 (agent) + 23964cc danh sách/form chuyến đọc kho |
+| [LM-054](issues/LM-054-e2e-luong-spec.md) | E2E luồng Spec | ✅ | 16/09/2026 | 16/09/2026 | 84f5ead (agent) — sửa 2 bug; nút primary dispatcher trên tablet còn 40 px |
 
 ### Phase 4 — Kho, tài xế, dọn dẹp
 
