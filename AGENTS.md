@@ -140,7 +140,7 @@ component. Mọi hàm tính toán ở đây là pure function có unit test. Fea
 domain, không bao giờ ngược lại. Three.js không quyết định tính hợp lệ của placement.
 
 **Đặt mock ở đâu** *(bổ sung)*: mock chỉ một feature dùng thì để trong feature đó
-(`features/trips/trip-detail.mock.ts`). Mock nhiều feature dùng chung thì lên `lib/`
+(`features/trips/trip-list.mock.ts`). Mock nhiều feature dùng chung thì lên `lib/`
 (`lib/load-plan.mock.ts` — viewer3d, warehouse và driver cùng đọc).
 
 ## 4. Design tokens
@@ -362,7 +362,8 @@ thuật toán. *(LM-048)* Nay hộp thoại chỉ hiện số service báo thậ
 
 Tên trường dữ liệu trong code vẫn giữ đúng hợp đồng với backend (`generation`);
 giao diện làm lớp dịch. Ngoại lệ: màn **So sánh phương án** được dùng từ vựng thuật
-toán ("GA 500 thế hệ", "GA có ràng buộc LIFO") vì ở đó người đọc đang so sánh thuật toán.
+toán (tên phương pháp, random seed, LIFO) vì ở đó người đọc đang so sánh thuật toán. *(LM-051)* Màn này
+chỉ hiện thiết lập và metrics có trong revision đã lưu; không đặt nhãn thuật toán nào chưa thật sự chạy.
 
 ### Nút chưa hoạt động *(đã điều chỉnh 15/09/2026, D-20)*
 

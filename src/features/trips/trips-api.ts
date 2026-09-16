@@ -1,5 +1,5 @@
 import type { CargoPackage, VehicleConfig } from '@/domain/models'
-import { getMockDb, type DeliveryStop, type Trip } from '@/lib/mock-db'
+import { getMockDb, type DeliveryStop, type Revision, type Trip } from '@/lib/mock-db'
 import { TRIPS, type TripSummary } from './trip-list.mock'
 import { duplicatePackage, renumberDeliveryStops, stopRemoval, type StopRemoval } from './trip-packages'
 
@@ -77,4 +77,13 @@ export async function duplicateTripPackage(tripId: string, packageId: string): P
   const copy = duplicatePackage(source, packages.map((item) => item.id))
   await db.updateTrip(tripId, { packages: packages.toSpliced(index + 1, 0, copy) })
   return copy
+}
+
+export type TripRevisions = { readonly trip: Trip; readonly revisions: Revision[] }
+
+/** Chuyến kèm mọi revision đã lưu, cũ trước — màn So sánh phương án cần `inputVersion` của chuyến để biết bản lỗi thời (LM-051). */
+export async function fetchTripRevisions(tripId: string): Promise<TripRevisions> {
+  const db = getMockDb()
+  const [trip, revisions] = await Promise.all([db.getTrip(tripId), db.listRevisions(tripId)])
+  return { trip, revisions }
 }

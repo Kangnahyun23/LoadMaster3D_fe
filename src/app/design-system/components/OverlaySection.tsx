@@ -35,7 +35,7 @@ export function OverlaySection() {
         // Số của revision đã duyệt trong seed (chuyến TRIP-2026-0914): 132 kiện, 5.844 / 9.500 kg.
         metrics={{
           totalVehicleVolumeCm3: 40_608_000, usedVolumeCm3: 16_568_064, volumeUtilizationPercent: 40.8, maxPayloadKg: 9500,
-          usedPayloadKg: 5844, payloadUtilizationPercent: 61.5, placedCount: 132, unplacedCount: 0, runtimeMs: 12,
+          usedPayloadKg: 5844, payloadUtilizationPercent: 61.5, placedCount: 132, unplacedCount: 0, runtimeMs: 0,
         }}
         canSubmit
         approval={{ blockers: { canApprove: true, issues: [], stale: false }, warnings: [], patches: [] }}

@@ -5,7 +5,7 @@ import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components
 import { useFormat, useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { DashboardPlan } from './dashboard-summary'
-import { plannerPath } from './plan-link'
+import { plannerPath } from '@/lib/planner-path'
 
 const helper = createColumnHelper<BaseTableFeatures, DashboardPlan>()
 

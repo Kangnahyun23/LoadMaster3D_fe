@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { useFormat, useT } from '@/lib/i18n'
 import type { DashboardPlan } from './dashboard-summary'
-import { plannerPath } from './plan-link'
+import { plannerPath } from '@/lib/planner-path'
 
 /**
  * Thẻ job tối ưu gần nhất: chuyến, phương pháp, trạng thái, tỷ lệ lấp đầy và thời gian chạy lấy thẳng từ
