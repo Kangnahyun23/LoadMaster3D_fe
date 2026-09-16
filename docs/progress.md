@@ -19,17 +19,36 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 1 | Domain, constraint engine, mock service, dữ liệu mẫu, i18n nền | 19 / 19 | ~18,5 ngày | ✅ Xong 15/09/2026 — 403 test, cổng benchmark đạt |
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 10 / 10 | ~10,5 ngày | ✅ Xong 15/09/2026 — 427 unit, 28 E2E, draw call không đổi |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
-| 4 | Kho, tài xế, dọn mock mm | 0 / 3 | ~2,5 ngày | ⬜ |
+| 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
 | 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **50 / 57 issue** | **~56 ngày công** | |
+| **Tổng** | | **53 / 57 issue** | **~56 ngày công** | |
 
-**Phase 3 xong (16/09/2026).** LM-040 → LM-054 đủ 15 issue. Phase 4 (kho, tài xế đọc revision duyệt, gỡ mock mm) chờ người dùng xác nhận sau báo cáo phase.
+**Phase 4 xong (16/09/2026).** LM-060 → LM-062 đủ 3 issue; không còn dữ liệu mm trong app. Phase 5 (i18n còn lại, nghiệm thu) chờ người dùng xác nhận sau báo cáo phase.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 16/09/2026 — Xong phase 4: kho và tài xế đọc revision đã duyệt, gỡ mock mm (LM-060 → LM-062)
+
+**Đã làm**
+- Người dùng chốt: màn điều phối tạm thời chỉ desktop (nút 40 px); luật 56 px áp cho kho, tài xế, Planner — ghi AGENTS mục 5 (`a0e0336`).
+- LM-060 (agent, `3bc6795`): `/kho` đọc revision đã duyệt mới nhất (`?chuyen=`, không có thì chuyến đầu tiên có bản duyệt), bước theo `loadingOrder`, khoảng cách cm theo locale, 6 hướng đặt, vật cản gần; trạng thái rỗng, cảnh báo lỗi thời. Gộp có xung đột AGENTS mục 6/7 với LM-061, đã hợp nhất tay.
+- LM-061 (agent, `93275bc`): màn tài xế đọc revision đã duyệt, danh sách kiện theo `unloadingOrder`, chuyển điểm giao trong phiên, LIFO domain trong mô phỏng; gỡ `driver.mock.ts`, huy hiệu "chờ đồng bộ", nút gọi không có số.
+- LM-062 (`66cd09c`): gỡ `load-plan.mock`, `types/load-plan`, `lib/placement`, `adaptLoadPlan`, `createBenchmarkPlan`, `OperationsToolbar`, `formatDimensions` mm; kiểu viewer sang `viewer3d/viewer-types.ts`.
+
+**Kiểm tra**
+- pnpm lint: ✅ · pnpm build: ✅ · pnpm test: 515/515 · pnpm test:e2e: 50/50
+
+**Vướng mắc / quyết định mới**
+- Kích thước JS cả phase +6,9 kB (+0,3%) vì màn kho/tài xế mới và từ điển; riêng LM-062 −4,2 kB. Tiêu chí "không tăng" của LM-062 chưa đạt theo nghĩa đen.
+- `/kho` bỏ fixture `?debug&packages=N`: hiệu năng 3D ở kho chỉ còn đo trên 132 kiện seed (Planner và tài xế vẫn đo 1.000 kiện).
+- Chuỗi cũ của màn kho ("Xác nhận đã xếp", toast bỏ qua) chưa qua từ điển → LM-071.
+
+**Việc tiếp theo**
+- Báo cáo phase 4, chờ xác nhận phase 5 (LM-070 → LM-072).
 
 ### 16/09/2026 — Xong phase 3: màn luồng Spec (LM-040 → LM-054)
 
@@ -429,9 +448,9 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 | ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
 |---|---|---|---|---|---|
-| [LM-060](issues/LM-060-kho-doc-revision-duyet.md) | Kho đọc revision duyệt | ⬜ | | | |
-| [LM-061](issues/LM-061-tai-xe-doc-revision-duyet.md) | Tài xế đọc revision duyệt | ⬜ | | | |
-| [LM-062](issues/LM-062-go-mock-mm-code-thua.md) | Gỡ mock mm, code thừa | ⬜ | | | |
+| [LM-060](issues/LM-060-kho-doc-revision-duyet.md) | Kho đọc revision duyệt | ✅ | 16/09/2026 | 16/09/2026 | 3bc6795 (agent) — kho không còn `?debug&packages=N` |
+| [LM-061](issues/LM-061-tai-xe-doc-revision-duyet.md) | Tài xế đọc revision duyệt | ✅ | 16/09/2026 | 16/09/2026 | 93275bc (agent) — gỡ nút gọi (chuyến không có số điện thoại) |
+| [LM-062](issues/LM-062-go-mock-mm-code-thua.md) | Gỡ mock mm, code thừa | ✅ | 16/09/2026 | 16/09/2026 | 66cd09c — JS −4,2 kB; cả phase +6,9 kB do màn mới |
 
 ### Phase 5 — i18n và nghiệm thu
 
