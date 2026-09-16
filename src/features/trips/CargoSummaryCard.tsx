@@ -1,64 +1,42 @@
 import { Card } from '@/components/ui/Card'
 import { ProgressBar } from '@/components/ui/ProgressBar'
-import { formatDecimal, formatInteger } from '@/lib/format'
-import { CARGO_SUMMARY } from './trip-detail.mock'
+import { useFormat, useT } from '@/lib/i18n'
+import type { CargoSummary } from './trip-summary'
 
-/** Tóm tắt hàng hoá: 3 số lớn + 2 thanh sử dụng thùng. */
-export function CargoSummaryCard() {
+/** Tóm tắt hàng hoá: 3 số lớn + 2 thanh sử dụng thùng, tính từ kiện của chuyến và xe đang gán (LM-044). */
+export function CargoSummaryCard({ summary }: { summary: CargoSummary }) {
+  const t = useT()
+  const format = useFormat()
   return (
     <Card className="flex flex-col gap-4 p-5">
-      <span className="text-caption font-medium text-text-3">
-        Tóm tắt hàng hoá
-      </span>
+      <span className="text-caption font-medium text-text-3">{t('trips.cargoSummary')}</span>
 
       <div className="grid grid-cols-3 gap-3">
-        <Metric label="Kiện" value={formatInteger(CARGO_SUMMARY.packageCount)} />
-        <Metric
-          label="Thể tích"
-          value={formatDecimal(CARGO_SUMMARY.volumeM3)}
-          unit="m³"
-        />
-        <Metric
-          label="Khối lượng"
-          value={formatInteger(CARGO_SUMMARY.weightKg)}
-          unit="kg"
-        />
+        <Metric label={t('trips.instances')} value={format.integer(summary.instances)} />
+        <Metric label={t('trips.volume')} value={format.volumeM3(summary.volumeCm3)} />
+        <Metric label={t('trips.weight')} value={format.weight(summary.weightKg)} />
       </div>
 
       <div className="flex flex-col gap-3 border-t border-border pt-3">
+        <ProgressBar label={t('trips.volumeUsage')} value={summary.volumePercent} />
         <ProgressBar
-          label="Thể tích sử dụng"
-          value={CARGO_SUMMARY.volumeUsage}
+          label={t('trips.payloadUsage')}
+          value={summary.payloadPercent}
+          tone={summary.overPayload ? 'danger' : 'primary'}
         />
-        <ProgressBar
-          label="Tải trọng sử dụng"
-          value={CARGO_SUMMARY.payloadUsage}
-        />
+        {summary.overPayload ? (
+          <p className="text-caption text-badge-danger-fg">{t('trips.overPayload')}</p>
+        ) : null}
       </div>
     </Card>
   )
 }
 
-function Metric({
-  label,
-  value,
-  unit,
-}: {
-  label: string
-  value: string
-  unit?: string
-}) {
+function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
       <span className="text-caption text-text-3">{label}</span>
-      <span className="font-mono text-h2 font-semibold tracking-[-0.01em]">
-        {value}
-        {unit ? (
-          <span className="ml-1 font-sans text-caption font-normal text-text-3">
-            {unit}
-          </span>
-        ) : null}
-      </span>
+      <span className="font-mono text-[22px] leading-7 font-semibold tracking-[-0.01em]">{value}</span>
     </div>
   )
 }

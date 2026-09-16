@@ -1,10 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, MapPin, MoreHorizontal } from 'lucide-react'
-import { formatInteger } from '@/lib/format'
+import { GripVertical, MapPin, Trash2 } from 'lucide-react'
+import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
-import type { DeliveryStop } from './trip-detail.mock'
+import type { StopRow } from './trip-summary'
 
 /**
  * Thẻ một điểm giao, kéo được để đổi thứ tự.
@@ -13,14 +13,9 @@ import type { DeliveryStop } from './trip-detail.mock'
  * Luật cấm bóng áp cho thẻ ở trạng thái nghỉ; thẻ đang kéo là lớp đang
  * nhấc khỏi mặt phẳng nên xử lý như lớp nổi, đúng như bản design.
  */
-export function StopCard({
-  stop,
-  index,
-}: {
-  stop: DeliveryStop
-  /** Vị trí trong danh sách, 0-based */
-  index: number
-}) {
+export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => void }) {
+  const t = useT()
+  const format = useFormat()
   const {
     attributes,
     listeners,
@@ -31,7 +26,7 @@ export function StopCard({
     isDragging,
   } = useSortable({ id: stop.id })
 
-  const stopNumber = index + 1
+  const stopNumber = stop.number
 
   return (
     <li
@@ -86,26 +81,27 @@ export function StopCard({
 
       <div className="flex flex-none flex-col items-end gap-0.5">
         <span className="font-mono text-body font-medium">
-          {formatInteger(stop.packageCount)}{' '}
+          {format.integer(stop.packageCount)}{' '}
           <span className="font-sans text-caption font-normal text-text-3">
-            kiện
+            {t('trips.instances').toLowerCase()}
           </span>
         </span>
         <span className="font-mono text-caption text-text-3">
-          {formatInteger(stop.weightKg)} kg
+          {format.weight(stop.weightKg)}
         </span>
       </div>
 
       <button
         type="button"
-        aria-label={`Thao tác với ${stop.name}`}
+        aria-label={t('trips.stops.remove', { name: stop.name })}
+        onClick={onRemove}
         className={cn(
           'grid size-8 flex-none place-items-center rounded-md text-text-3',
           'transition-colors duration-(--dur-fast) ease-standard hover:bg-surface',
           'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
         )}
       >
-        <MoreHorizontal className="size-4" aria-hidden />
+        <Trash2 className="size-4" aria-hidden />
       </button>
     </li>
   )
