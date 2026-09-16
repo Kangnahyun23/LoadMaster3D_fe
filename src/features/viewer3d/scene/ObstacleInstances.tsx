@@ -35,10 +35,12 @@ if (vObstacleHatch > 0.5 && fract((vObstacleWorld.x + vObstacleWorld.y + vObstac
  * viền gộp; không có vật cản thì không vẽ gì. Không đổ bóng để shadow pass không thêm draw call.
  * `picking = false` (chế độ chỉnh sửa) tắt hẳn raycast; lúc kéo kiện editor còn tắt toàn bộ sự kiện R3F.
  */
-export function ObstacleInstances({ obstacles, picking, onSelect }: {
+export function ObstacleInstances({ obstacles, picking, onSelect, highlightedId = null }: {
   obstacles: readonly VehicleObstacle[]
   picking: boolean
   onSelect: (id: string) => void
+  /** Vật cản tô `--highlight` (LM-042); chỉ đổi màu instance, không thêm draw call. */
+  highlightedId?: string | null
 }) {
   const body = useRef<InstancedMesh>(null)
   const gl = useThree((state) => state.gl)
@@ -58,18 +60,28 @@ export function ObstacleInstances({ obstacles, picking, onSelect }: {
       Float32Array.from(obstacles, (obstacle) => obstacleStyle(obstacle) === 'hatched' ? 1 : 0), 1))
     const mesh = body.current
     if (!mesh) return
-    const matrix = new Matrix4(), rotation = new Quaternion(), color = new Color()
+    const matrix = new Matrix4(), rotation = new Quaternion()
     obstacles.forEach((obstacle, index) => {
       matrix.compose(new Vector3(...obstacleCenter(obstacle)), rotation, new Vector3(...obstacleSize(obstacle)))
       mesh.setMatrixAt(index, matrix)
-      mesh.setColorAt(index, color.set(readToken(obstacleColorToken(obstacle))))
     })
     mesh.instanceMatrix.needsUpdate = true
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
     // Dữ liệu tĩnh: bounds cho raycast tính một lần mỗi khi danh sách đổi.
     mesh.computeBoundingSphere()
     invalidate()
   }, [obstacles, geometry, invalidate])
+
+  // Màu tách khỏi ma trận: đổi vật cản làm nổi chỉ ghi lại màu instance (LM-042).
+  useLayoutEffect(() => {
+    const mesh = body.current
+    if (!mesh) return
+    const color = new Color()
+    obstacles.forEach((obstacle, index) => {
+      mesh.setColorAt(index, color.set(readToken(obstacle.id === highlightedId ? '--highlight' : obstacleColorToken(obstacle))))
+    })
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+    invalidate()
+  }, [obstacles, highlightedId, invalidate])
 
   useEffect(() => () => { gl.domElement.style.removeProperty('cursor') }, [gl])
 

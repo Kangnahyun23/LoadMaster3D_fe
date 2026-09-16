@@ -155,6 +155,14 @@ export const en = {
       obstaclesTitle: 'Obstacles inside the cargo space',
       axlesTitle: 'Axles',
     },
+    preview: {
+      title: '3D preview',
+      label: '3D preview of the cargo space and obstacles',
+      pending: 'Waiting for valid values',
+      loading: 'Building the 3D model',
+      unsupported: 'This browser cannot render 3D; the sketch shows the cargo space proportions only.',
+      hint: 'Click an obstacle in the model or a row in the obstacle table to highlight it.',
+    },
     form: {
       name: 'Vehicle name',
       namePlaceholder: 'Hyundai HD210 · 60C-446.32',

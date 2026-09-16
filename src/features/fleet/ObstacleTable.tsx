@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/Input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/Switch'
 import { useT } from '@/lib/i18n'
+import { cn } from '@/lib/utils'
 import { newObstacle, OBSTACLE_TYPES, type VehicleFormValues } from './vehicle-form'
 import { CM_STEP, KG_STEP, NUMERIC_FIELD_PROPS } from './VehicleSpecFields'
 
@@ -38,10 +39,15 @@ export function ObstacleTable({
   control,
   register,
   setValue,
+  highlightedId,
+  onHighlight,
 }: {
   control: Control<VehicleFormValues>
   register: UseFormRegister<VehicleFormValues>
   setValue: UseFormSetValue<VehicleFormValues>
+  /** Vật cản đang làm nổi trong xem trước 3D (LM-042). */
+  highlightedId: string | null
+  onHighlight: (id: string) => void
 }) {
   const t = useT()
   const { fields, append, remove } = useFieldArray({ control, name: 'obstacles', keyName: 'rowKey' })
@@ -76,7 +82,14 @@ export function ObstacleTable({
               {fields.map((field, index) => {
                 const rowError = errors.obstacles?.[index]
                 return (
-                  <tr key={field.rowKey} className="align-top">
+                  <tr
+                    key={field.rowKey}
+                    // Bấm hoặc đưa focus vào dòng làm nổi vật cản trong xem trước 3D, dùng được cả bằng bàn phím
+                    onClick={() => onHighlight(field.id)}
+                    onFocusCapture={() => onHighlight(field.id)}
+                    aria-current={field.id === highlightedId ? 'true' : undefined}
+                    className={cn('align-top', field.id === highlightedId && 'bg-primary-bg')}
+                  >
                     <td className="px-2.5 py-2 font-mono text-caption text-text-2">{field.id}</td>
                     <td className="px-2.5 py-2">
                       <Controller
