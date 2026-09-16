@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/Button'
 import type { CameraPreset, PlanStop } from '@/types/load-plan'
 import { CAMERA_PRESETS } from '../viewer-options'
 import type { OperationsState } from '../operations/useOperations'
-export type InspectorTab = 'operations' | 'package' | 'display' | 'packages'
+export type InspectorTab = 'operations' | 'package' | 'display' | 'packages' | 'metrics'
 
 /** One workspace bar. Less-used controls live in a labelled inspector. */
 export function WorkspaceToolbar({ operations, stops, preset, onPreset, onInspect, onEdit }: {

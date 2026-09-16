@@ -7,6 +7,8 @@ import { effectiveOrientations, type OrientationRules } from '@/domain/geometry'
 import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
+import type { ConstraintIssue } from '@/domain/constraints'
+import { formatIssue } from '@/lib/i18n'
 import type { SceneStop, ScenePlacement } from '@/features/viewer3d/scene-input'
 import { findAbove, findBelow, layerOf } from './placement-relations'
 
@@ -18,6 +20,7 @@ export function SelectedPackagePanel({
   totalSteps,
   stops,
   tripId,
+  issues = [],
   onClose,
   onEdit,
   onFocus,
@@ -29,6 +32,8 @@ export function SelectedPackagePanel({
   totalSteps: number
   stops: readonly SceneStop[]
   tripId: string
+  /** Lỗi/cảnh báo ràng buộc của phương án; panel lọc theo kiện đang chọn (LM-049) */
+  issues?: readonly ConstraintIssue[]
   onClose: () => void
   onEdit: () => void
   onFocus: () => void
@@ -60,6 +65,7 @@ export function SelectedPackagePanel({
           totalSteps={totalSteps}
           stops={stops}
           tripId={tripId}
+          issues={issues}
           onEdit={onEdit}
           onFocus={onFocus}
         />
@@ -79,6 +85,7 @@ function PackageDetails({
   totalSteps,
   stops,
   tripId,
+  issues,
   onEdit,
   onFocus,
 }: {
@@ -89,6 +96,7 @@ function PackageDetails({
   totalSteps: number
   stops: readonly SceneStop[]
   tripId: string
+  issues: readonly ConstraintIssue[]
   onEdit: () => void
   onFocus: () => void
 }) {
@@ -98,6 +106,7 @@ function PackageDetails({
   const layer = layerOf(placement, placements)
   const below = findBelow(placement, placements)
   const above = findAbove(placement, placements)
+  const ownIssues = issues.filter((issue) => issue.packageInstanceId === placement.id || issue.relatedIds?.includes(placement.id))
 
   return (
     <>
@@ -135,7 +144,7 @@ function PackageDetails({
             </span>
           </Row>
           <Row label="Kiện gốc">
-            <Link to={`/chuyen/${tripId}`} className="font-mono font-medium text-primary">
+            <Link to={`/chuyen/${tripId}?kien=${encodeURIComponent(placement.packageId)}`} className="font-mono font-medium text-primary">
               {placement.packageId}
             </Link>
           </Row>
@@ -144,6 +153,9 @@ function PackageDetails({
               <span aria-hidden className="size-2.5 rounded-[3px]" style={{ background: stopColor(placement.stop) }} />
               {placement.stop} · {stopName}
             </span>
+          </Row>
+          <Row label={t('viewer.plan.detail.supportRatio')}>
+            <span className="font-mono font-medium">{format.percent(placement.supportRatio * 100)}</span>
           </Row>
           <Row label={t('viewer.operations.loadingOrder')}>
             <span className="font-mono font-medium">
@@ -159,6 +171,19 @@ function PackageDetails({
             </span>
           </Row>
         </dl>
+
+        <section className="flex flex-col gap-2" aria-label={t('viewer.plan.detail.issues')}>
+          <span className="text-body-lg xl:text-caption font-medium text-text-3">{t('viewer.plan.detail.issues')}</span>
+          {ownIssues.length === 0 ? <span className="text-body text-text-2">{t('viewer.plan.detail.noIssues')}</span> : (
+            <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+              {ownIssues.map((issue, index) => (
+                <li key={`${issue.code}-${index}`} className={cn('text-body', issue.severity === 'error' ? 'text-danger' : 'text-badge-warning-fg')}>
+                  {formatIssue(issue, t, format)}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         <div className="flex flex-col gap-2">
           <span className="text-body-lg xl:text-caption font-medium text-text-3">Hướng xoay</span>

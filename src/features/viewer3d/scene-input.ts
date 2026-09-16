@@ -7,8 +7,8 @@ import {
   type OrientationRules,
   type PackageDimensions,
 } from '@/domain/geometry'
-import type { FragilityLevel, UnplacedPackage, VehicleConfig } from '@/domain/models'
-import type { DeliveryStop, Revision } from '@/lib/mock-db'
+import type { FragilityLevel, OptimizationResult, UnplacedPackage, VehicleConfig } from '@/domain/models'
+import { isStale, type DeliveryStop, type Revision } from '@/lib/mock-db'
 import type { LoadPlan, Orientation, Packaging } from '@/types/load-plan'
 
 /**
@@ -42,6 +42,9 @@ export type ScenePlacement = {
   readonly fragile: boolean
   readonly stackable: boolean
   readonly pinned: boolean
+  /** Tỷ lệ đỡ đáy và mã cảnh báo do engine tính trên kết quả (Spec 7.6, LM-049); phương án mm cũ: 1 và rỗng. */
+  readonly supportRatio: number
+  readonly constraintWarnings: readonly string[]
 }
 
 export type SceneUnplaced = {
@@ -55,6 +58,8 @@ export type SceneUnplaced = {
   readonly weightKg: number
   /** Kết quả theo contract: mã lý do, UI dịch */
   readonly reasonCode?: UnplacedPackage['reasonCode']
+  /** `message` của contract — mock ghi lại mã lý do; service thật có thể ghi câu riêng. */
+  readonly message?: string
   /** Phương án mm cũ: lý do đã là câu tiếng Việt */
   readonly reasonText?: string
 }
@@ -79,6 +84,18 @@ export type ViewerSceneModel = {
   readonly ordersRecomputed: boolean
   /** Đầu vào constraint engine cho editor (LM-035); `null` với `LoadPlan` mm cũ — kho/tài xế không chỉnh sửa. */
   readonly engineInput: ConstraintEngineInput | null
+  /** `result.metrics` của kết quả (LM-049); `null` với phương án mm cũ. */
+  readonly metrics: OptimizationResult['metrics'] | null
+  /** Revision nguồn (LM-049, LM-050); `null` với phương án mm cũ và fixture benchmark. */
+  readonly revision: {
+    readonly id: string
+    readonly jobId: string
+    readonly method: string
+    readonly approved: boolean
+    readonly manuallyEdited: boolean
+    /** Xe hoặc kiện của chuyến đổi sau khi tối ưu (D-31) — Duyệt bị chặn. */
+    readonly stale: boolean
+  } | null
 }
 
 /** Kích thước đã xoay của kiện theo tên trường scene; luôn áp lên kích thước danh nghĩa. */
@@ -98,8 +115,8 @@ function indexById<T extends { readonly id: string }>(items: readonly T[]): Map<
 
 /** Revision của mock repository (LM-026) → scene cm. Kích thước, luật xoay, tên và điểm giao lấy từ kiện gốc của request. */
 export type ResultSceneSource = {
-  readonly trip: { readonly id: string; readonly stops: readonly Pick<DeliveryStop, 'name'>[] }
-  readonly revision: Pick<Revision, 'request' | 'result' | 'ordersRecomputed'>
+  readonly trip: { readonly id: string; readonly stops: readonly Pick<DeliveryStop, 'name'>[]; readonly inputVersion?: number }
+  readonly revision: Pick<Revision, 'request' | 'result' | 'ordersRecomputed'> & Partial<Pick<Revision, 'id' | 'jobId' | 'inputVersion' | 'approvedAt' | 'manuallyEdited'>>
 }
 
 export function adaptResult({ trip, revision }: ResultSceneSource): ViewerSceneModel {
@@ -133,6 +150,8 @@ export function adaptResult({ trip, revision }: ResultSceneSource): ViewerSceneM
       fragile: instance.fragilityLevel === 'HIGH',
       stackable: instance.stackable,
       pinned: false,
+      supportRatio: placement.supportRatio,
+      constraintWarnings: Object.freeze([...placement.constraintWarnings]),
     })
   })
   const unplaced = result.unplacedPackages.map((item): SceneUnplaced => {
@@ -148,6 +167,7 @@ export function adaptResult({ trip, revision }: ResultSceneSource): ViewerSceneM
       heightCm: instance.heightCm,
       weightKg: instance.weightKg,
       reasonCode: item.reasonCode,
+      message: item.message,
     })
   })
   return Object.freeze({
@@ -172,6 +192,16 @@ export function adaptResult({ trip, revision }: ResultSceneSource): ViewerSceneM
       placements: result.placements,
       settings: { enforceLifo: request.settings.enforceLifo },
     }),
+    revision: revision.id === undefined || revision.jobId === undefined ? null : Object.freeze({
+      id: revision.id,
+      jobId: revision.jobId,
+      method: result.method,
+      approved: revision.approvedAt !== undefined,
+      manuallyEdited: revision.manuallyEdited ?? false,
+      stale: trip.inputVersion !== undefined && revision.inputVersion !== undefined
+        && isStale({ inputVersion: revision.inputVersion }, { inputVersion: trip.inputVersion }),
+    }),
+    metrics: result.metrics,
   })
 }
 
@@ -205,6 +235,8 @@ export function adaptLoadPlan(plan: LoadPlan): ViewerSceneModel {
       fragile: p.fragile,
       stackable: true,
       pinned: p.pinned,
+      supportRatio: 1,
+      constraintWarnings: [],
     })
   })
   const { vehicle } = plan
@@ -236,6 +268,8 @@ export function adaptLoadPlan(plan: LoadPlan): ViewerSceneModel {
     isMockResult: false,
     ordersRecomputed: false,
     engineInput: null,
+    revision: null,
+    metrics: null,
   })
 }
 

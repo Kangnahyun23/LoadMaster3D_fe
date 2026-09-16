@@ -1,12 +1,15 @@
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/Dialog'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import type { ConstraintIssue } from '@/domain/constraints'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
+import { useT } from '@/lib/i18n'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import type { OperationsState } from '../operations/useOperations'
 import { OperationsPanel } from '../operations/OperationsPanel'
 import { SelectedPackagePanel } from './SelectedPackagePanel'
 import { PackageListPanel } from './PackageListPanel'
+import { PlanMetricsPanel } from './PlanMetricsPanel'
 import { SlicePanel } from '../overlays/SlicePanel'
 import { StopLegend } from '../overlays/StopLegend'
 import { ObstacleLegend } from '../overlays/ObstacleLegend'
@@ -14,11 +17,17 @@ import { COLOR_MODES } from '../viewer-options'
 import type { ColorContext } from '../colors'
 import type { InspectorTab } from './WorkspaceToolbar'
 
-export function SceneInspector({ state, operations, tripId, colorContext, onEdit, onFocus, onSelect, tab, onTab, onClose }: {
+export function SceneInspector({ state, operations, tripId, colorContext, issues, onEdit, onFocus, onSelect, tab, onTab, onClose }: {
   state: LoadPlanViewerState; operations: OperationsState; tripId: string; colorContext: ColorContext
+  /** Lỗi và cảnh báo ràng buộc của phương án đang xem (gồm chỉnh tay), LM-049 */
+  issues: readonly ConstraintIssue[]
   onEdit: () => void; onFocus: () => void; onSelect: (p: ScenePlacement) => void
   tab: InspectorTab | null; onTab: (tab: InspectorTab) => void; onClose: () => void
 }) {
+  const t = useT()
+  const metrics = state.sceneModel.metrics
+  const tabs = [['operations', 'Vận hành'], ['package', 'Kiện'], ['display', 'Hiển thị'], ['packages', 'Danh sách'],
+    ...(metrics ? [['metrics', t('viewer.plan.metricsTab')] as const] : [])] as const
   return <Dialog open={tab !== null} onOpenChange={(open) => { if (!open) onClose() }}>
     <DialogContent className="fixed inset-x-0 bottom-0 max-h-[75dvh] w-full rounded-b-none xl:inset-x-auto xl:top-14 xl:right-0 xl:max-h-none xl:w-100 xl:rounded-none">
       <div className="flex shrink-0 items-center justify-between border-b border-border px-4">
@@ -26,8 +35,8 @@ export function SceneInspector({ state, operations, tripId, colorContext, onEdit
         <Button variant="ghost" className="h-14 text-body-lg xl:h-11 xl:text-body" onClick={onClose}>Đóng</Button>
       </div>
       <DialogDescription className="sr-only">Thông tin kiện, vận hành và lớp hiển thị. Đóng để trở lại mô hình.</DialogDescription>
-      <div className="grid shrink-0 grid-cols-4 gap-1 border-b border-border p-2" role="group" aria-label="Thông tin mô phỏng">
-        {([['operations', 'Vận hành'], ['package', 'Kiện'], ['display', 'Hiển thị'], ['packages', 'Danh sách']] as const).map(([value, label]) =>
+      <div className={`grid shrink-0 gap-1 border-b border-border p-2 ${metrics ? 'grid-cols-3 xl:grid-cols-5' : 'grid-cols-4'}`} role="group" aria-label="Thông tin mô phỏng">
+        {tabs.map(([value, label]) =>
           <Button key={value} variant="secondary" className="h-14 px-1 text-body-lg aria-pressed:bg-primary-bg xl:h-11 xl:text-body"
             aria-pressed={tab === value} onClick={() => onTab(value)}>{label}</Button>)}
       </div>
@@ -42,7 +51,7 @@ export function SceneInspector({ state, operations, tripId, colorContext, onEdit
           </label>
           <SelectedPackagePanel placement={state.selected} placements={state.placements} totalSteps={state.totalSteps}
             orientationRules={state.selected ? state.sceneModel.orientationRulesById.get(state.selected.id) : undefined}
-            stops={[...state.sceneModel.stops]} tripId={tripId} onClose={() => state.select(null)}
+            stops={[...state.sceneModel.stops]} tripId={tripId} issues={issues} onClose={() => state.select(null)}
             onEdit={() => { onClose(); onEdit() }} onFocus={() => { onClose(); onFocus() }} />
         </> : null}
         {tab === 'display' ? <div className="flex flex-col gap-4 p-4 text-body-lg xl:text-body">
@@ -61,7 +70,9 @@ export function SceneInspector({ state, operations, tripId, colorContext, onEdit
         </div> : null}
         {tab === 'packages' ? <PackageListPanel unplaced={state.sceneModel.unplaced} pinned={state.placements.filter((p) => p.pinned)}
           placements={state.placements} vehicle={state.sceneModel.vehicle} open onToggle={onClose} tab={state.leftTab}
-          onTabChange={state.setLeftTab} selectedId={state.selectedId} onSelect={(id) => { state.select(id); onTab('package') }} /> : null}
+          onTabChange={state.setLeftTab} selectedId={state.selectedId} onSelect={(id) => { state.select(id); onTab('package') }}
+          stops={state.sceneModel.stops} issues={issues} tripId={tripId} /> : null}
+        {tab === 'metrics' && metrics ? <PlanMetricsPanel metrics={metrics} /> : null}
       </div>
     </DialogContent>
   </Dialog>

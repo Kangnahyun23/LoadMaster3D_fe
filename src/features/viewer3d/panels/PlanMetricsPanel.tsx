@@ -1,0 +1,40 @@
+import type { ReactNode } from 'react'
+import type { OptimizationResult } from '@/domain/models'
+import { useFormat, useT } from '@/lib/i18n'
+
+/** Tab "Chỉ số" (LM-049): đủ `metrics` của Spec, số lấy thẳng từ kết quả, định dạng theo ngôn ngữ. */
+export function PlanMetricsPanel({ metrics }: { metrics: OptimizationResult['metrics'] }) {
+  const t = useT()
+  const format = useFormat()
+  const cog = metrics.centerOfGravityCm
+  return (
+    <section className="flex flex-col gap-3 p-4 text-body-lg xl:text-body">
+      <h2 className="font-medium">{t('viewer.plan.metrics.title')}</h2>
+      <dl className="flex flex-col border-t border-border">
+        <Row label={t('viewer.plan.metrics.totalVehicleVolume')}>{format.volumeM3(metrics.totalVehicleVolumeCm3)}</Row>
+        <Row label={t('viewer.plan.metrics.usedVolume')}>{format.volumeM3(metrics.usedVolumeCm3)}</Row>
+        <Row label={t('viewer.plan.metrics.volumeUtilization')}>{format.percent(metrics.volumeUtilizationPercent)}</Row>
+        <Row label={t('viewer.plan.metrics.maxPayload')}>{format.weight(metrics.maxPayloadKg)}</Row>
+        <Row label={t('viewer.plan.metrics.usedPayload')}>{format.weight(metrics.usedPayloadKg)}</Row>
+        <Row label={t('viewer.plan.metrics.payloadUtilization')}>{format.percent(metrics.payloadUtilizationPercent)}</Row>
+        <Row label={t('viewer.plan.metrics.placedCount')}>{format.integer(metrics.placedCount)}</Row>
+        <Row label={t('viewer.plan.metrics.unplacedCount')}>{format.integer(metrics.unplacedCount)}</Row>
+        {cog ? (
+          <Row label={t('viewer.plan.metrics.centerOfGravity')}>
+            {[cog.x, cog.y, cog.z].map((value) => format.length(value)).join(' · ')}
+          </Row>
+        ) : null}
+        <Row label={t('viewer.plan.metrics.runtime')}>{t('viewer.plan.metrics.runtimeValue', { ms: format.integer(metrics.runtimeMs) })}</Row>
+      </dl>
+    </section>
+  )
+}
+
+function Row({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex justify-between gap-3 border-b border-border py-2.5">
+      <dt className="text-text-2">{label}</dt>
+      <dd className="text-right font-mono">{children}</dd>
+    </div>
+  )
+}

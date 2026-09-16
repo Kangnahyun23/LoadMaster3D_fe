@@ -13,7 +13,7 @@ import { commitCommand, createDraftHistory, travelHistory, type CommandType } fr
 /** Một bước phát lại ở tốc độ 1× — trong khoảng 400–700ms của mục 8. */
 export const STEP_DURATION_MS = 600
 
-export type LeftTab = 'unplaced' | 'pinned'
+export type LeftTab = 'unplaced' | 'pinned' | 'placed'
 
 export function useLoadPlanViewer(
   sceneModel: ViewerSceneModel,
