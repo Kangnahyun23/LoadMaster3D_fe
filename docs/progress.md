@@ -20,16 +20,34 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 2 | Engine 3D sang cm, 6 hướng, vật cản, editor, bug LM-056 | 10 / 10 | ~10,5 ngày | ✅ Xong 15/09/2026 — 427 unit, 28 E2E, draw call không đổi |
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
-| 5 | i18n phần còn lại, nghiệm thu | 0 / 3 | ~3,5 ngày | ⬜ |
-| **Tổng** | | **53 / 57 issue** | **~56 ngày công** | |
+| 5 | i18n phần còn lại, nghiệm thu | 3 / 3 | ~3,5 ngày | ✅ Xong 16/09/2026 — 520 unit/DOM, 55 E2E, cổng chuỗi cứng |
+| **Tổng** | | **56 / 57 issue** | **~56 ngày công** | |
 
-**Phase 4 xong (16/09/2026).** LM-060 → LM-062 đủ 3 issue; không còn dữ liệu mm trong app. Phase 5 (i18n còn lại, nghiệm thu) chờ người dùng xác nhận sau báo cáo phase.
+**Phase 5 xong (16/09/2026) — MVP nghiệm thu.** 56/57 issue; LM-002 chờ backend. Nợ sau nghiệm thu: [acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend), LM-073.
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 16/09/2026 — Xong phase 5: i18n toàn `src/`, nghiệm thu và bàn giao (LM-070 → LM-072)
+
+**Đã làm**
+- Cổng i18n (`fa9b798`, TDD): `findHardcodedVietnamese` bỏ chú thích và lỗi lập trình viên, test quét toàn `src/`; lúc bắt đầu còn 510 dòng.
+- LM-070 (agent, `38d64e0`): Planner 3D, chuyến, component chung, App — 218 dòng → 0; module thuần trả mã (snap, đo khoảng cách, `describeWhere`), `StopLabel` thay `stopLabel()`; sửa tràn chữ en; E2E `i18n-en` ở 1.440/1.024/390 px.
+- LM-071 (agent, `2ff95f3`): kho, người dùng, trang tài liệu, `types/user` — 292 dòng → 0; nút ngôn ngữ 56 px ở kho và tài xế, đổi giữa phiên giữ bước/điểm giao. Gộp xung đột `DataSection`, `CardTableLegendSection`, danh sách `PENDING` với LM-070 bằng tay.
+- LM-072: [acceptance.md](acceptance.md) đối chiếu Spec §15 + PRD §12; benchmark cuối; 18 ảnh vi/en (`tests/handoff-screenshots.mjs`); viết lại `handoff.md`; PRD và AGENTS cập nhật; mở LM-073 cho E2E chồng vật cản.
+
+**Kiểm tra**
+- pnpm lint: ✅ · pnpm build: ✅ · pnpm test: 520/520 · pnpm test:bench: ✅ (1.000 kiện p95 30,8 ms) · pnpm test:e2e cục bộ: 54/55 và 54/55 ở hai lượt, mỗi lượt đỏ một test khác nhau không tái hiện khi chạy riêng (`warehouse` desktop "addEventListener" 16/16 xanh khi lặp; `ERR_NO_BUFFER_SPACE` là hết socket máy) — chờ CI.
+
+**Vướng mắc / quyết định mới**
+- Spec §15 dòng 12 (chồng vật cản) chỉ có test ở seam engine → LM-073.
+- `DriverStopPage.dom.test.tsx` đỏ một lần khi chạy cả bộ Vitest, xanh 3/3 khi chạy riêng — theo dõi.
+
+**Việc tiếp theo**
+- Báo cáo phase 5 và bàn giao.
 
 ### 16/09/2026 — Xong phase 4: kho và tài xế đọc revision đã duyệt, gỡ mock mm (LM-060 → LM-062)
 
@@ -456,9 +474,9 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 | ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
 |---|---|---|---|---|---|
-| [LM-070](issues/LM-070-i18n-dot-1-con-lai.md) | i18n đợt 1 phần còn lại | ⬜ | | | |
-| [LM-071](issues/LM-071-i18n-dot-2.md) | i18n đợt 2 | ⬜ | | | |
-| [LM-072](issues/LM-072-nghiem-thu-tai-lieu.md) | Nghiệm thu, bàn giao | ⬜ | | | |
+| [LM-070](issues/LM-070-i18n-dot-1-con-lai.md) | i18n đợt 1 phần còn lại | ✅ | 16/09/2026 | 16/09/2026 | 38d64e0 (agent) — 218 dòng → 0; E2E `i18n-en` |
+| [LM-071](issues/LM-071-i18n-dot-2.md) | i18n đợt 2 | ✅ | 16/09/2026 | 16/09/2026 | 2ff95f3 (agent) — 292 dòng → 0; nút ngôn ngữ ở kho/tài xế |
+| [LM-072](issues/LM-072-nghiem-thu-tai-lieu.md) | Nghiệm thu, bàn giao | ✅ | 16/09/2026 | 16/09/2026 | acceptance.md, handoff.md, benchmark + ảnh vi/en; mở LM-073 |
 
 ---
 

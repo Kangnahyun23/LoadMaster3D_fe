@@ -113,6 +113,7 @@ Mỗi issue là một file `LM-0xx-ten-ngan.md` với frontmatter:
 | [LM-070](LM-070-i18n-dot-1-con-lai.md) | i18n đợt 1 phần còn lại | 1,5d | 054 |
 | [LM-071](LM-071-i18n-dot-2.md) | i18n đợt 2 | 1,5d | 060, 061, 070 |
 | [LM-072](LM-072-nghiem-thu-tai-lieu.md) | Nghiệm thu và bàn giao | 0,5d | 062, 071 |
+| [LM-073](LM-073-e2e-keo-kien-vao-vat-can.md) | E2E kéo kiện vào vật cản (nợ sau nghiệm thu) | 0,5d | 035, 072 |
 
 ## 3. Đường găng và luồng song song
 

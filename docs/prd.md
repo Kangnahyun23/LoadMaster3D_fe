@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Ngày | 14/09/2026 |
-| Trạng thái | Bản nháp, chờ nhóm duyệt |
+| Trạng thái | Đã hiện thực trên `feat/spec-mvp` (16/09/2026) — nghiệm thu: [acceptance.md](acceptance.md); còn chờ backend: mục 14 |
 | Nguồn | [LoadMaster_FE_MVP_Build_Spec.md](../LoadMaster_FE_MVP_Build_Spec.md) (gọi tắt **Spec**), [AGENTS.md](../AGENTS.md), buổi chốt quyết định 14/09/2026 |
 | Phạm vi repo | Frontend `E:\SEP490\LoadMaster` |
 
@@ -270,13 +270,13 @@ Mỗi phase: `pnpm lint`, `pnpm build`, test xanh, rồi dừng cho nhóm duyệ
 
 Toàn bộ checklist Spec mục 15, cộng thêm:
 
-- [ ] Không còn giá trị mm trong state, payload, mock hay test; chỉ `scene/units.ts` đổi scale.
-- [ ] Planner, kho và tài xế cùng đọc một kết quả đã duyệt.
-- [ ] Editor chặn commit khi constraint engine báo lỗi; hoàn tác được mọi lệnh.
-- [ ] Chuyển vi ↔ en ở mọi màn thuộc đợt 1 mà không mất dữ liệu đang nhập.
-- [ ] Không còn nút nào bấm vào mà không làm gì hoặc chỉ báo "đang chờ".
-- [ ] Tải trục hiện "Sẽ có sau", không có số giả.
-- [ ] Draw call vẫn dưới 100 ở 1.000 kiện.
+- [x] Không còn giá trị mm trong state, payload, mock hay test; chỉ `scene/units.ts` đổi scale.
+- [x] Planner, kho và tài xế cùng đọc một kết quả đã duyệt.
+- [x] Editor chặn commit khi constraint engine báo lỗi; hoàn tác được mọi lệnh.
+- [x] Chuyển vi ↔ en ở mọi màn thuộc đợt 1 mà không mất dữ liệu đang nhập.
+- [x] Không còn nút nào bấm vào mà không làm gì hoặc chỉ báo "đang chờ".
+- [x] Tải trục hiện "Sẽ có sau", không có số giả.
+- [x] Draw call vẫn dưới 100 ở 1.000 kiện.
 
 ## 13. Rủi ro
 

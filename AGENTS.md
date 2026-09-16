@@ -344,8 +344,10 @@ format nhận locale đang chọn.
   **thiếu hoặc thừa key là lỗi TypeScript** lúc build.
 - Ngôn ngữ đọc theo thứ tự `?lang` → `sessionStorage` → `vi`. Không dùng `localStorage`.
   Đổi ngôn ngữ không tải lại trang, không mất dữ liệu đang nhập.
-- Chuỗi hiển thị viết qua `t()`; từ LM-027 mọi chuỗi mới **phải** qua từ điển. Chuỗi cũ được
-  chuyển theo đợt (LM-070, LM-071), không sửa rải rác ngoài issue.
+- Chuỗi hiển thị viết qua `t()`, kể cả `aria-label`, `title`, `sr-only`. *(LM-070, LM-071)* Toàn `src/` đã qua từ điển;
+  `src/lib/i18n/no-hardcoded-vietnamese.test.ts` chặn chữ có dấu tiếng Việt ngoài từ điển, `*.mock.ts`, seed kho, fixture và test.
+  Lỗi bất biến cho lập trình viên (`throw new Error(...)`) được viết tiếng Việt. Ngoại lệ khác ghi vào `ALLOWED` kèm lý do.
+  Module thuần (domain, snapping, mô tả vị trí) trả mã; component dịch.
 - Không dịch: badge **MOCK RESULT**; tên riêng trong dữ liệu (tên kho, điểm giao, người).
 - `src/domain` **không chứa câu chữ hiển thị**: validation và constraint trả **mã lỗi + tham số**
   (`{ code, severity, params }`, D-28); zod schema dùng mã làm message. UI dịch mã và format số
