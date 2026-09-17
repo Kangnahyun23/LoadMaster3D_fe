@@ -18,7 +18,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useT, type MessageKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
@@ -40,13 +39,10 @@ const NAV_ITEMS = [
   { to: '/nguoi-dung', labelKey: 'nav.users', icon: Users },
 ] as const satisfies readonly NavItem[]
 
-const RAIL_BUTTON = [
-  'grid size-11 place-items-center rounded-md',
-  'transition-colors duration-(--dur-fast) ease-standard',
-  'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-].join(' ')
-
-/** Nav rail 72px, nút 44px, icon 20px stroke 1.5, tooltip bên phải khi hover. */
+/**
+ * Nav rail 96px: mỗi mục là icon 24px kèm nhãn chữ, vùng bấm ≥ 56px. Mục đang mở có nền `--primary-bg`,
+ * chữ đậm màu primary và vạch 4px ở mép trái — không chỉ dựa vào màu nhạt để phân biệt.
+ */
 export function NavRail() {
   const t = useT()
   const { user, signOut } = useAuth()
@@ -60,33 +56,46 @@ export function NavRail() {
   return (
     <nav
       aria-label={t('nav.label')}
-      className="flex w-18 flex-none flex-col items-center gap-1 border-r border-border bg-surface py-3"
+      className="flex w-24 flex-none flex-col items-center gap-1 overflow-y-auto border-r border-border bg-surface py-3"
     >
-      <div className="mb-3 grid size-9 place-items-center rounded-md bg-primary">
-        <div className="h-2.75 w-4 rounded-xs border-2 border-t-4 border-white" />
+      <div className="mb-3 grid size-10 place-items-center rounded-md bg-primary">
+        <div className="h-3 w-4.5 rounded-xs border-2 border-t-4 border-white" />
       </div>
 
       {NAV_ITEMS.map(({ to, labelKey, icon: Icon }) => (
-        <Tooltip key={to}>
-          <TooltipTrigger asChild>
-            <NavLink
-              to={to}
-              end={to === '/'}
-              aria-label={t(labelKey)}
-              className={({ isActive }) =>
-                cn(
-                  RAIL_BUTTON,
-                  isActive
-                    ? 'bg-primary-bg text-primary-hover'
-                    : 'text-text-2 hover:bg-primary-bg',
-                )
-              }
-            >
-              <Icon className="size-5" strokeWidth={1.5} aria-hidden />
-            </NavLink>
-          </TooltipTrigger>
-          <TooltipContent side="right">{t(labelKey)}</TooltipContent>
-        </Tooltip>
+        <NavLink
+          key={to}
+          to={to}
+          end={to === '/'}
+          className={({ isActive }) =>
+            cn(
+              'group relative flex min-h-16 w-full flex-col items-center justify-center gap-1 px-2 py-2 text-center',
+              'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary',
+              isActive ? 'text-primary-hover' : 'text-text-2 hover:text-text',
+            )
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <span
+                aria-hidden
+                className={cn(
+                  'absolute top-1/2 left-0 h-10 w-1 -translate-y-1/2 rounded-r-sm bg-primary transition-opacity duration-(--dur-fast) ease-standard',
+                  isActive ? 'opacity-100' : 'opacity-0',
+                )}
+              />
+              <span
+                className={cn(
+                  'grid h-8 w-14 place-items-center rounded-md transition-colors duration-(--dur-fast) ease-standard',
+                  isActive ? 'bg-primary-bg' : 'group-hover:bg-border',
+                )}
+              >
+                <Icon className="size-6" strokeWidth={isActive ? 2 : 1.5} aria-hidden />
+              </span>
+              <span className={cn('text-caption leading-4', isActive ? 'font-semibold' : 'font-medium')}>{t(labelKey)}</span>
+            </>
+          )}
+        </NavLink>
       ))}
 
       <div className="flex-1" />
@@ -97,7 +106,7 @@ export function NavRail() {
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label={t('nav.account', { name: user.fullName })}
-            className="mt-2 grid size-8 place-items-center rounded-full bg-primary-bg text-caption font-semibold leading-none text-primary-hover outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="mt-2 grid size-11 place-items-center rounded-full bg-primary-bg text-body font-semibold leading-none text-primary-hover outline-none hover:bg-border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {initialsOf(user.fullName)}
           </DropdownMenuTrigger>

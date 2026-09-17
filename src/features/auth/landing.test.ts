@@ -1,0 +1,23 @@
+import { expect, test } from 'vitest'
+import { landingPath } from './landing'
+
+test('each role lands on its own screen when nothing else was asked for', () => {
+  expect(landingPath('dispatcher')).toBe('/chuyen')
+  expect(landingPath('manager')).toBe('/')
+  expect(landingPath('warehouse')).toBe('/kho')
+  expect(landingPath('driver')).toBe('/tai-xe/diem-giao')
+  expect(landingPath('admin')).toBe('/nguoi-dung')
+})
+
+test('opening the app root is not a choice: the role screen wins', () => {
+  expect(landingPath('warehouse', '/')).toBe('/kho')
+  expect(landingPath('driver', '/?lang=en')).toBe('/tai-xe/diem-giao?lang=en')
+})
+
+test('a deep link opened before signing in is kept', () => {
+  expect(landingPath('warehouse', '/chuyen/TRIP-2026-0914/phuong-an?revision=REV-002')).toBe('/chuyen/TRIP-2026-0914/phuong-an?revision=REV-002')
+})
+
+test('the login page itself is never a landing target', () => {
+  expect(landingPath('admin', '/dang-nhap')).toBe('/nguoi-dung')
+})

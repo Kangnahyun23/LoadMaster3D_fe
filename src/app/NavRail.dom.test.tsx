@@ -22,3 +22,22 @@ test('nav rail không có nút Cài đặt', () => {
   expect(screen.getByRole('link', { name: 'Chuyến hàng' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Cài đặt' })).not.toBeInTheDocument()
 })
+
+/** Mục đang mở phải nhận ra được bằng trình đọc màn hình (aria-current) và mỗi mục có nhãn chữ nhìn thấy được. */
+test('nav rail đánh dấu mục đang mở và hiện nhãn chữ cho từng mục', () => {
+  render(
+    <I18nProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <MemoryRouter initialEntries={['/chuyen/TRIP-2026-0914']}>
+            <NavRail />
+          </MemoryRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </I18nProvider>,
+  )
+  const trips = screen.getByRole('link', { name: 'Chuyến hàng' })
+  expect(trips).toHaveAttribute('aria-current', 'page')
+  expect(trips).toHaveTextContent('Chuyến hàng')
+  expect(screen.getByRole('link', { name: 'Bảng điều khiển' })).not.toHaveAttribute('aria-current')
+})

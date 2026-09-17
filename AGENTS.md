@@ -23,7 +23,10 @@ Giao diện **tiếng Việt**. Một codebase responsive phục vụ 5 vai trò
 Backend là Spring Boot monolith + PostgreSQL, cộng một Python FastAPI service riêng cho tối ưu. Giao tiếp REST + WebSocket.
 
 **Trạng thái hiện tại:** backend chưa nối. Toàn bộ dữ liệu là mẫu. Đăng nhập đã có nhưng
-**chưa phân quyền theo vai trò** — mọi tài khoản đăng nhập đều vào được mọi màn.
+**chưa phân quyền theo vai trò** — mọi tài khoản đăng nhập đều vào được mọi màn. *(bổ sung 17/09/2026)* Đăng nhập xong mở
+màn của vai trò (`features/auth/landing.ts`: điều phối `/chuyen`, quản lý `/`, kho `/kho`, tài xế `/tai-xe/diem-giao`,
+quản trị `/nguoi-dung`); liên kết sâu mở trước khi đăng nhập được giữ, gốc `/` thì không. Nav rail 96px có nhãn chữ,
+mục đang mở có nền, chữ đậm và vạch mép trái (`app/NavRail.tsx`).
 
 ### MVP theo Build Spec *(bổ sung 15/09/2026)*
 

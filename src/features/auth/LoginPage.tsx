@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input'
 import { useT, type MessageKey, type TFunction } from '@/lib/i18n'
 import { AuthError, type AuthErrorCode } from './auth-api'
 import { DemoAccounts } from './DemoAccounts'
+import { landingPath } from './landing'
 import { LoginArtwork } from './LoginArtwork'
 import { useAuth } from './AuthProvider'
 
@@ -64,16 +65,16 @@ export function LoginPage() {
     defaultValues: { email: '', password: '' },
   })
 
-  /** Quay lại đúng trang người dùng định vào trước khi bị chuyển tới đây. */
-  const from = (location.state as { from?: string } | null)?.from ?? '/'
+  /** Trang người dùng định vào trước khi bị chuyển tới đây; không có (hoặc là gốc `/`) thì mở màn của vai trò. */
+  const from = (location.state as { from?: string } | null)?.from
 
-  if (user) return <Navigate to={from} replace />
+  if (user) return <Navigate to={landingPath(user.role, from)} replace />
 
   async function onSubmit(values: FormValues) {
     setServerError(null)
     try {
-      await signIn(values.email, values.password)
-      void navigate(from, { replace: true })
+      const signedIn = await signIn(values.email, values.password)
+      void navigate(landingPath(signedIn.role, from), { replace: true })
     } catch (error) {
       setServerError(
         error instanceof AuthError ? AUTH_ERRORS[error.code] : 'auth.login.serverUnreachable',
