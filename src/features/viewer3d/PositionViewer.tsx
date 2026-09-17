@@ -40,7 +40,7 @@ export function PositionViewer({ model, current }: { model: ViewerSceneModel; cu
         </Button>
         <select aria-label={t('viewer.position.camera')} value={preset} onChange={(e) => setPreset(e.target.value as CameraPreset)}
           className="h-14 min-w-0 rounded-md border border-border bg-bg px-2 text-body-lg focus-visible:outline-2 focus-visible:outline-primary">
-          {CAMERA_PRESETS.filter((p) => p !== 'truoc').map((p) => <option key={p} value={p}>{t(`viewer.camera.${p}`)}</option>)}
+          {CAMERA_PRESETS.filter((p) => p !== 'truoc' && p !== 'gam-xe').map((p) => <option key={p} value={p}>{t(`viewer.camera.${p}`)}</option>)}
         </select>
       </div>
       <span className="text-center text-body-lg text-bg">{t('viewer.position.legend')}</span>

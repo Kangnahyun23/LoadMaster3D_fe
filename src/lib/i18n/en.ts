@@ -844,6 +844,7 @@ export const en = {
       'ben-hong': 'Side',
       tren: 'Top',
       'goc-cheo': 'Diagonal',
+      'gam-xe': 'Underside',
     },
     colorModes: {
       'diem-giao': 'By stop',

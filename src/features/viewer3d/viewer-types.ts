@@ -1,6 +1,6 @@
 /** Kiểu điều khiển của viewer 3D, không gắn đơn vị (LM-062: tách khỏi `types/load-plan` mm cũ). */
 
-export type CameraPreset = 'truoc' | 'cua-sau' | 'ben-hong' | 'tren' | 'goc-cheo'
+export type CameraPreset = 'truoc' | 'cua-sau' | 'ben-hong' | 'tren' | 'goc-cheo' | 'gam-xe'
 
 export type ColorMode = 'diem-giao' | 'kien-goc' | 'khoi-luong'
 
