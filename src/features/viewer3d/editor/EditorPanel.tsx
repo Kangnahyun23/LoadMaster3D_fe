@@ -11,7 +11,6 @@ import type { ManualEditor } from './useManualEditor'
 export function EditorPanel({ state, editor }: { state: LoadPlanViewerState; editor: ManualEditor }) {
   const preview = useSyncExternalStore(editor.preview.subscribe, editor.preview.getSnapshot, editor.preview.getSnapshot)
   const [resetOpen, setResetOpen] = useState(false)
-  const format = useFormat()
   const t = useT()
   const p = state.selected
   const active = preview?.id === p?.id ? preview : null
@@ -28,7 +27,7 @@ export function EditorPanel({ state, editor }: { state: LoadPlanViewerState; edi
       </div>
       <div role="status" aria-live="polite" data-editor-status data-valid={result.valid} data-dragging={dragging}
         data-x={position?.x} data-y={position?.y} data-z={position?.z} data-orientation={p.orientation}
-        className="mb-4 max-h-40 overflow-y-auto rounded-md border border-border bg-surface p-3">
+        className="mb-4 max-h-56 overflow-y-auto rounded-md border border-border bg-surface p-3">
         <div className="flex items-center gap-2 font-medium">
           {!result.valid || warning ? <AlertCircle className={`size-5 ${result.valid ? 'text-warning' : 'text-danger'}`} strokeWidth={1.5} />
             : <CheckCircle2 className="size-5 text-success" strokeWidth={1.5} />}
@@ -36,7 +35,7 @@ export function EditorPanel({ state, editor }: { state: LoadPlanViewerState; edi
         </div>
         {active?.message ? <p className="mt-1">{active.message}</p> : null}
         {[...result.errors, ...result.advisories].map((reason) => <p key={reason} className="mt-1">{reason}</p>)}
-        {position ? <p className="mt-2 font-mono">X {format.length(position.x)} · Y {format.length(position.y)} · Z {format.length(position.z)}</p> : null}
+        {position ? <PlacementReadout position={position} lengthCm={p.lengthCm} widthCm={p.widthCm} heightCm={p.heightCm} /> : null}
         {active?.sources.length ? <p className="mt-1">{active.sources.map((s) => formatSnapSource(s, t)).join(' · ')}</p> : null}
       </div>
     </> : <p className="mb-4">{t('viewer.editor.empty')}</p>}
@@ -62,4 +61,28 @@ export function EditorPanel({ state, editor }: { state: LoadPlanViewerState; edi
       </DialogContent>
     </Dialog>
   </aside>
+}
+
+/**
+ * Vị trí (góc sát vách trước – vách trái – sàn), kích thước đã theo hướng đặt và phạm vi chiếm chỗ của kiện, cùng đơn vị cm.
+ * Khi kéo, vị trí và phạm vi theo proxy; kích thước không đổi vì kéo không xoay kiện.
+ */
+function PlacementReadout({ position, lengthCm, widthCm, heightCm }: {
+  position: { x: number; y: number; z: number }; lengthCm: number; widthCm: number; heightCm: number
+}) {
+  const format = useFormat()
+  const t = useT()
+  const cm = format.lengthValue
+  return <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+    <dt className="text-text-2">{t('viewer.editor.position')}</dt>
+    <dd className="font-mono">{t('viewer.editor.positionValue', { x: cm(position.x), y: cm(position.y), z: cm(position.z) })}</dd>
+    <dt className="text-text-2">{t('viewer.editor.size')}</dt>
+    <dd className="font-mono">{format.dimensions(lengthCm, widthCm, heightCm)}</dd>
+    <dt className="col-span-2 text-text-2">{t('viewer.editor.extent')}</dt>
+    <dd className="col-span-2 font-mono">{t('viewer.editor.extentValue', {
+      x0: cm(position.x), x1: cm(position.x + lengthCm),
+      y0: cm(position.y), y1: cm(position.y + widthCm),
+      z0: cm(position.z), z1: cm(position.z + heightCm),
+    })}</dd>
+  </dl>
 }
