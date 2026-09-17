@@ -15,6 +15,7 @@ export const en = {
     users: 'Users',
     account: 'Account {name}',
     signOut: 'Sign out',
+    backHome: 'Back to home',
   },
   roles: {
     dispatcher: 'Dispatcher',

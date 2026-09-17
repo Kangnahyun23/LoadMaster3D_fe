@@ -3,6 +3,9 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { toast } from 'sonner'
 import { MemoryRouter } from 'react-router'
 import { expect, test, vi } from 'vitest'
+import { AuthProvider } from '@/features/auth/AuthProvider'
+import { signedInAs } from '@/test/signed-in'
+import type { Role } from '@/types/user'
 import { I18nProvider } from '@/lib/i18n'
 import { getMockDb } from '@/lib/mock-db'
 import { twoCartonTrip } from '@/test/mock-db-samples'
@@ -16,14 +19,17 @@ vi.mock('sonner', () => ({ toast: { error: vi.fn(), warning: vi.fn(), success: v
  */
 const SEED_TRIP = 'TRIP-2026-0914'
 
-function renderDriver(route = '/tai-xe/diem-giao') {
+function renderDriver(route = '/tai-xe/diem-giao', role: Role = 'dispatcher') {
+  signedInAs(role)
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
       <I18nProvider>
-        <MemoryRouter initialEntries={[route]}>
-          <DriverStopPage />
-        </MemoryRouter>
+        <AuthProvider>
+          <MemoryRouter initialEntries={[route]}>
+            <DriverStopPage />
+          </MemoryRouter>
+        </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>,
   )
@@ -87,6 +93,13 @@ test('?chuyen trỏ tới chuyến chưa duyệt: trạng thái rỗng nói cầ
   expect(await screen.findByText('Chưa có phương án đã duyệt')).toBeInTheDocument()
   expect(screen.getByText(`Chuyến ${trip.id} chưa có phương án đã duyệt. Điều phối viên cần duyệt phương án xếp hàng của chuyến trước.`)).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Về danh sách chuyến' })).toHaveAttribute('href', '/chuyen')
+})
+
+test('tài xế: nút thoát là Đăng xuất, không dẫn sang trang chuyến của điều phối viên', async () => {
+  renderDriver('/tai-xe/diem-giao', 'driver')
+  await screen.findByRole('heading', { name: 'Điểm 1 / 4' })
+  expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument()
+  expect(screen.queryByRole('link', { name: 'Thoát màn hình tài xế' })).not.toBeInTheDocument()
 })
 
 test('bản duyệt lỗi thời vẫn hiện, kèm cảnh báo', async () => {

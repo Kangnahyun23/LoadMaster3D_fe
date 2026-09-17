@@ -20,6 +20,7 @@ export const vi = {
     users: 'Người dùng',
     account: 'Tài khoản {name}',
     signOut: 'Đăng xuất',
+    backHome: 'Về màn chính',
   },
   roles: {
     dispatcher: 'Điều phối viên',

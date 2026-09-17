@@ -1,7 +1,5 @@
-import { ChevronLeft } from 'lucide-react'
-import { Link } from 'react-router'
 import { EmptyState } from '@/components/EmptyState'
-import { Button } from '@/components/ui/Button'
+import { ExitActionButton, ExitIconButton } from '@/features/auth/ExitControl'
 import { useT } from '@/lib/i18n'
 
 /**
@@ -17,13 +15,7 @@ export function WarehouseEmpty({ tripId, failed }: { tripId?: string; failed: bo
   return (
     <div className="flex h-dvh flex-col bg-bg text-body-lg">
       <header className="flex h-18 flex-none items-center border-b border-border pl-3">
-        <Link
-          to="/chuyen"
-          aria-label={t('warehouse.exit')}
-          className="grid size-14 place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          <ChevronLeft className="size-7" strokeWidth={2} aria-hidden />
-        </Link>
+        <ExitIconButton screenHome="/kho" contextual="/chuyen" label={t('warehouse.exit')} iconClassName="size-7" />
       </header>
       <div className="grid flex-1 place-items-center p-6">
         <EmptyState
@@ -31,11 +23,7 @@ export function WarehouseEmpty({ tripId, failed }: { tripId?: string; failed: bo
           className="w-full max-w-160 [&_span]:text-body-lg"
           title={failed ? t('warehouse.loadErrorTitle') : t('warehouse.emptyTitle')}
           description={description}
-          action={
-            <Button variant="primary" size="touch" asChild>
-              <Link to="/chuyen">{t('warehouse.toTrips')}</Link>
-            </Button>
-          }
+          action={<ExitActionButton screenHome="/kho" contextual="/chuyen" label={t('warehouse.toTrips')} />}
         />
       </div>
     </div>
