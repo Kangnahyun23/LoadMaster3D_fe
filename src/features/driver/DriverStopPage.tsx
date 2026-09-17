@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { useSearchParams } from 'react-router'
 import { EmptyState } from '@/components/EmptyState'
-import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { ExitActionButton } from '@/features/auth/ExitControl'
 import { adaptResult } from '@/features/viewer3d/scene-input'
 import { useT } from '@/lib/i18n'
 import { DeliveryStopView } from './DeliveryStopView'
@@ -33,7 +33,7 @@ export function DriverStopPage() {
           title={query.isError ? t('driver.loadErrorTitle') : t('driver.emptyTitle')}
           description={query.isError ? t('driver.loadErrorDescription')
             : tripId ? t('driver.emptyTripDescription', { tripId }) : t('driver.emptyDescription')}
-          action={<Button variant="primary" size="touch" asChild><Link to="/chuyen">{t('driver.toTrips')}</Link></Button>}
+          action={<ExitActionButton screenHome="/tai-xe/diem-giao" label={t('driver.toTrips')} />}
         />
       </div>
     )

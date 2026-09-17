@@ -3,6 +3,9 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { expect, test } from 'vitest'
+import { AuthProvider } from '@/features/auth/AuthProvider'
+import { signedInAs } from '@/test/signed-in'
+import type { Role } from '@/types/user'
 import { I18nProvider } from '@/lib/i18n'
 import { getMockDb } from '@/lib/mock-db'
 import { optimizedTwoCartonTrip } from '@/test/mock-db-samples'
@@ -24,16 +27,19 @@ window.matchMedia ??= (query: string) => ({
   addEventListener: () => {}, removeEventListener: () => {}, addListener: () => {}, removeListener: () => {}, dispatchEvent: () => false,
 })
 
-function renderWarehouse(route = '/kho') {
+function renderWarehouse(route = '/kho', role: Role = 'dispatcher') {
+  signedInAs(role)
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
       <I18nProvider>
-        <MemoryRouter initialEntries={[route]}>
-          <Routes>
-            <Route path="/kho" element={<LoadingStepPage />} />
-          </Routes>
-        </MemoryRouter>
+        <AuthProvider>
+          <MemoryRouter initialEntries={[route]}>
+            <Routes>
+              <Route path="/kho" element={<LoadingStepPage />} />
+            </Routes>
+          </MemoryRouter>
+        </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>,
   )
@@ -70,6 +76,28 @@ test('chuyến chỉ định chưa có bản duyệt: trạng thái rỗng dẫn
   expect(screen.getByRole('link', { name: 'Tới danh sách chuyến' })).toHaveAttribute('href', '/chuyen')
   expect(screen.getByRole('link', { name: 'Thoát màn kho' })).toHaveAttribute('href', '/chuyen')
   expect(screen.queryByRole('button', { name: 'Xác nhận đã xếp' })).not.toBeInTheDocument()
+})
+
+test('nhân viên kho: nút thoát và nút ở trạng thái rỗng là Đăng xuất, không dẫn sang trang chuyến của điều phối viên', async () => {
+  const { trip } = await optimizedTwoCartonTrip(getMockDb())
+  renderWarehouse(`/kho?chuyen=${trip.id}`, 'warehouse')
+
+  expect(await screen.findByText('Chưa có phương án đã duyệt', {}, LOAD)).toBeInTheDocument()
+  expect(screen.queryByRole('link', { name: 'Thoát màn kho' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('link', { name: 'Tới danh sách chuyến' })).not.toBeInTheDocument()
+  expect(screen.getAllByRole('button', { name: 'Đăng xuất' })).toHaveLength(2)
+})
+
+test('nhân viên kho đang xếp: nút thoát ở thanh trên là Đăng xuất', async () => {
+  renderWarehouse('/kho', 'warehouse')
+  expect(await screen.findByRole('button', { name: 'Xác nhận đã xếp' }, LOAD)).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument()
+  expect(screen.queryByRole('link', { name: 'Thoát phiên xếp hàng' })).not.toBeInTheDocument()
+})
+
+test('quản lý mở màn kho: thoát về màn chính của quản lý', async () => {
+  renderWarehouse('/kho', 'manager')
+  expect(await screen.findByRole('link', { name: 'Thoát phiên xếp hàng' }, LOAD)).toHaveAttribute('href', '/')
 })
 
 test('chuyến chỉ định đã duyệt: khoảng cách cm theo locale, hướng đặt theo mã, vật cản sát kiện', async () => {

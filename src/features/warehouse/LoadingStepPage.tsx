@@ -1,8 +1,9 @@
 import { Check, PackageX } from 'lucide-react'
 import { lazy, Suspense, useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { ExitActionButton } from '@/features/auth/ExitControl'
 import { adaptResult } from '@/features/viewer3d/scene-input'
 import { useT } from '@/lib/i18n'
 import { ConfirmedOverlay } from './ConfirmedOverlay'
@@ -51,7 +52,6 @@ function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
   const t = useT()
   const model = useMemo(() => adaptResult(plan), [plan])
   const session = useLoadingSession(model.placements)
-  const exitTo = `/chuyen/${plan.trip.id}`
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-bg text-body-lg">
@@ -59,7 +59,6 @@ function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
         step={session.step}
         totalSteps={session.totalSteps}
         tripId={plan.trip.id}
-        exitTo={exitTo}
       />
       <PlanNotices model={model} stale={plan.stale} />
 
@@ -90,9 +89,7 @@ function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
           <div className="col-span-2 flex flex-col items-start justify-center gap-3 rounded-md border border-border p-8">
             <span className="text-h1 font-semibold">{t('warehouse.finished.title', { count: session.totalSteps })}</span>
             <span className="text-text-2">{t('warehouse.finished.description')}</span>
-            <Button variant="secondary" size="touch" asChild>
-              <Link to={exitTo}>{t('warehouse.finished.backToTrip')}</Link>
-            </Button>
+            <ExitActionButton screenHome="/kho" contextual={`/chuyen/${plan.trip.id}`} label={t('warehouse.finished.backToTrip')} variant="secondary" />
           </div>
         )}
 

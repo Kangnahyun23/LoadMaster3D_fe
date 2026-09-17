@@ -1,6 +1,5 @@
-import { ChevronLeft } from 'lucide-react'
-import { Link } from 'react-router'
 import { LanguageSwitch } from '@/components/LanguageSwitch'
+import { ExitIconButton } from '@/features/auth/ExitControl'
 import { useFormat, useT } from '@/lib/i18n'
 
 /**
@@ -9,18 +8,17 @@ import { useFormat, useT } from '@/lib/i18n'
  * Bản design không có nút thoát vì vẽ màn kiosk chạy suốt ca; thực tế nhân
  * viên vẫn cần rời phiên khi chọn nhầm chuyến hoặc xếp xong, nên thêm nút
  * quay lại cỡ cảm ứng 56px (mục 10). Nút chuyển ngôn ngữ cũng 56px (LM-071);
- * đổi ngôn ngữ không remount phiên nên bước đang xếp giữ nguyên.
+ * đổi ngôn ngữ không remount phiên nên bước đang xếp giữ nguyên. Nút thoát theo vai trò: nhân viên kho đăng xuất,
+ * điều phối viên về chi tiết chuyến (`exitAction`).
  */
 export function StepHeader({
   step,
   totalSteps,
   tripId,
-  exitTo,
 }: {
   step: number
   totalSteps: number
   tripId: string
-  exitTo: string
 }) {
   const t = useT()
   const format = useFormat()
@@ -28,13 +26,7 @@ export function StepHeader({
 
   return (
     <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg pr-6 pl-3">
-      <Link
-        to={exitTo}
-        aria-label={t('warehouse.header.exit')}
-        className="grid size-14 flex-none place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-      >
-        <ChevronLeft className="size-7" strokeWidth={2} aria-hidden />
-      </Link>
+      <ExitIconButton screenHome="/kho" contextual={`/chuyen/${tripId}`} label={t('warehouse.header.exit')} iconClassName="size-7" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex items-baseline justify-between gap-4">

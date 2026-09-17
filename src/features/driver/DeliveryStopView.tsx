@@ -1,8 +1,8 @@
-import { ArrowRight, ChevronLeft, Navigation } from 'lucide-react'
+import { ArrowRight, Navigation } from 'lucide-react'
 import { lazy, Suspense, useState } from 'react'
-import { Link } from 'react-router'
 import { LanguageSwitch } from '@/components/LanguageSwitch'
 import { Button } from '@/components/ui/Button'
+import { ExitIconButton } from '@/features/auth/ExitControl'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/Dialog'
 import { Spinner } from '@/components/ui/Spinner'
 import type { ViewerSceneModel } from '@/features/viewer3d/scene-input'
@@ -35,13 +35,7 @@ export function DeliveryStopView({ model, stops }: { model: ViewerSceneModel; st
     <div className="flex h-dvh flex-col bg-bg text-body-lg">
       <header className="flex flex-none flex-col gap-2.5 border-b border-border bg-bg px-4 pt-[calc(env(safe-area-inset-top)+12px)] pb-3">
         <div className="flex items-center gap-1.5">
-          <Link
-            to="/chuyen"
-            aria-label={t('driver.exit')}
-            className="-ml-2 grid size-14 flex-none place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            <ChevronLeft className="size-6" strokeWidth={2} aria-hidden />
-          </Link>
+          <ExitIconButton screenHome="/tai-xe/diem-giao" label={t('driver.exit')} className="-ml-2" iconClassName="size-6" />
           <span
             className="grid size-8 flex-none place-items-center rounded-full font-mono text-body-lg font-semibold leading-none"
             style={{ background: stopColor(stop.number), color: stopForeground(stop.number) }}
