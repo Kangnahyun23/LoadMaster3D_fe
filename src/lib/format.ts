@@ -18,6 +18,8 @@ export type Formatter = {
   decimal(value: number): string
   /** Bước 0,1 cm, bỏ phần thập phân khi tròn: 1250.55 → "1.250,6 cm" · 240 → "240 cm" */
   length(centimeters: number): string
+  /** Như `length` nhưng không kèm đơn vị, cho dãy số ghi "cm" một lần ở cuối: 1250.55 → "1.250,6" */
+  lengthValue(centimeters: number): string
   /** Dài × rộng × cao, một đơn vị ở cuối: "1.203,5 × 235 × 239,2 cm" */
   dimensions(lengthCm: number, widthCm: number, heightCm: number): string
   /** Rộng × cao của cửa, một đơn vị ở cuối: "220 × 230 cm" */
@@ -86,6 +88,7 @@ export function createFormatter(locale: FormatLocale): Formatter {
     integer: (value) => whole.format(value),
     decimal: (value) => oneDecimal.format(value),
     length: (value) => centimeters.format(value),
+    lengthValue: (value) => upToOneDecimal.format(value),
     dimensions: (lengthCm, widthCm, heightCm) =>
       `${upToOneDecimal.format(lengthCm)} × ${upToOneDecimal.format(widthCm)} × ${centimeters.format(heightCm)}`,
     widthByHeight: (widthCm, heightCm) => `${upToOneDecimal.format(widthCm)} × ${centimeters.format(heightCm)}`,

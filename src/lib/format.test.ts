@@ -26,6 +26,12 @@ test('length in cm rounds to the 0.1 cm step and drops the decimal for whole cm'
   expect(vi.length(240)).toBe('240 cm')
 })
 
+test('a cm value without its unit keeps the 0.1 cm step, for lists that write "cm" once at the end', () => {
+  expect(vi.lengthValue(1250.55)).toBe('1.250,6')
+  expect(en.lengthValue(1250.55)).toBe('1,250.6')
+  expect(vi.lengthValue(275)).toBe('275')
+})
+
 test('dimensions read length × width × height with one cm unit at the end', () => {
   expect(vi.dimensions(1203.5, 235, 239.2)).toBe('1.203,5 × 235 × 239,2 cm')
   expect(en.dimensions(1203.5, 235, 239.2)).toBe('1,203.5 × 235 × 239.2 cm')
