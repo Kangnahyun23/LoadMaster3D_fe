@@ -867,6 +867,7 @@ export const vi = {
       'ben-hong': 'Bên hông',
       tren: 'Trên',
       'goc-cheo': 'Góc chéo',
+      'gam-xe': 'Gầm xe',
     },
     colorModes: {
       'diem-giao': 'Theo điểm giao',

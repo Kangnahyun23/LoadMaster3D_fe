@@ -17,6 +17,8 @@ export type SceneMaterials = {
   metal: string
   light: string
   tailLight: string
+  /** Đèn cờ, đèn phản quang hông */
+  marker: string
 }
 
 function derive(token: `--${string}`, fallback: string, factor: number): string {
@@ -40,5 +42,6 @@ export function sceneMaterials(): SceneMaterials {
     metal: derive('--text-disabled', '#9ca3af', 0.8),
     light: `#${bg.getHexString()}`,
     tailLight: readToken('--danger'),
+    marker: readToken('--warning') || '#d97706',
   }
 }

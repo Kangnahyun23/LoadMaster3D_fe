@@ -24,7 +24,15 @@ const PRESET_POSITIONS: Record<CameraPreset, Vec3> = {
   'cua-sau': [10.5, 2.5, 0.001],
   'ben-hong': [0.001, 3, 9.5],
   tren: [0.001, 11, 0.01],
+  // Từ dưới đất nhìn chếch lên khung gầm, trục và bánh (camera nằm dưới mặt đất, mặt đất chỉ nhận bóng một phía).
+  'gam-xe': [5.5, -4.2, 7],
 }
+
+/** Khoảng hạ tâm nhìn so với tâm thùng, tính từ sàn thùng (m): góc gầm xe nhìn vào khung sườn, không vào giữa thùng. */
+const PRESET_TARGET_BELOW_FLOOR: Partial<Record<CameraPreset, number>> = { 'gam-xe': 0.5 }
+
+/** Cho phép xoay xuống dưới gầm; chừa một chút để không lật qua cực dưới. */
+const MAX_POLAR_ANGLE = Math.PI - 0.12
 
 /** smoothTime của SmoothDamp ≈ 60% thời gian tới đích → ~500ms */
 const SMOOTH_TIME = 0.3
@@ -86,7 +94,9 @@ export function CameraRig({
       const scale = distance / Math.hypot(x, y, z)
       x *= scale; y *= scale; z *= scale
     }
-    void controls.setLookAt(x, y, z, 0, 0, 0, !reducedMotion)
+    const below = PRESET_TARGET_BELOW_FLOOR[preset]
+    const targetY = below !== undefined && vehicle ? -containerCenter(vehicle)[1] - below : 0
+    void controls.setLookAt(x, y + targetY, z, 0, targetY, 0, !reducedMotion)
     invalidate()
   }, [preset, reducedMotion, vehicle, fit, vehicleDecoration, size.width, size.height, camera, invalidate])
 
@@ -134,7 +144,7 @@ export function CameraRig({
       minDistance={3}
       maxDistance={80}
       minPolarAngle={0.02}
-      maxPolarAngle={Math.PI / 2 - 0.03}
+      maxPolarAngle={MAX_POLAR_ANGLE}
       dollySpeed={0.6}
     />
   )
