@@ -1,6 +1,6 @@
 import { attachJson, expect, test } from './fixtures'
 import { addPackage, heightOf, MOCK_DB, navigateInApp, optimizeAndOpenPlanner, SEED_TRIP } from './spec-flow-helpers'
-import { closeInspector, openInspector, renderCameraChange, sceneSnapshot, waitCameraSettled } from './viewer-helpers'
+import { cameraPreset, closeInspector, openInspector, renderCameraChange, sceneSnapshot, waitCameraSettled } from './viewer-helpers'
 
 /**
  * Luồng Spec đầu cuối (LM-054, Spec mục 15 và 16). Mỗi assertion gắn một dòng checklist Spec §15 ghi dạng
@@ -33,7 +33,8 @@ for (const device of ['desktop', 'tablet'] as const) {
     await expect(page.getByRole('spinbutton', { name: 'Dài OBS-001', exact: true }).locator('xpath=..')).toContainText('cm')
     await page.getByRole('button', { name: 'Lưu', exact: true }).click()
     await page.waitForURL(/\/doi-xe$/)
-    await expect(page.getByRole('row', { name: /Truck 6m VEHICLE-009 600 × 240 × 250 cm 5\.000 kg/ })).toBeVisible()
+    // Seed có 8 xe (LM-083) nên xe mới là VEHICLE-009; cột trạng thái đứng sau tên (LM-089)
+    await expect(page.getByRole('row', { name: /Truck 6m VEHICLE-009 Sẵn sàng 600 × 240 × 250 cm 5\.000 kg/ })).toBeVisible()
 
     // Dashboard → Tạo kế hoạch xếp → form chuyến
     await page.getByRole('link', { name: 'Bảng điều khiển', exact: true }).click()
@@ -119,9 +120,9 @@ for (const device of ['desktop', 'tablet'] as const) {
         await page.mouse.up({ button: 'right' })
       })
       expect((await sceneSnapshot(page)).target, 'pan').not.toStrictEqual(rotated.target)
-      const presets = page.getByRole('combobox', { name: 'Góc nhìn', exact: true })
-      await renderCameraChange(page, () => presets.selectOption('tren'))
-      await renderCameraChange(page, () => presets.selectOption('goc-cheo'))
+      // Góc nhìn là Select Radix trên thanh công cụ (LM-094)
+      await renderCameraChange(page, () => cameraPreset(page, 'Trên'))
+      await renderCameraChange(page, () => cameraPreset(page, 'Góc chéo'))
       const reset = await sceneSnapshot(page)
       reset.direction.forEach((value, axis) => expect(value, 'reset').toBeCloseTo(initial.direction[axis]!, 2))
     }

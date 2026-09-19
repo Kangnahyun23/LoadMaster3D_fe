@@ -184,20 +184,32 @@ export function hasSceneObject(page: Page, name: string): Promise<boolean> {
   }, { url: R3F_DEPS, name })
 }
 
-const PRESET_VALUES = { 'Trên': 'tren', 'Cửa sau': 'cua-sau', 'Bên hông': 'ben-hong', 'Trước': 'truoc', 'Góc chéo': 'goc-cheo' } as const
-export type CameraPresetLabel = keyof typeof PRESET_VALUES
+export type CameraPresetLabel = 'Trên' | 'Cửa sau' | 'Bên hông' | 'Trước' | 'Góc chéo' | 'Gầm xe'
+
+/** Chọn một dòng của `Select` Radix trên thanh công cụ Planner (LM-094): bấm nút mở, bấm dòng, chờ danh sách đóng. */
+async function pickOption(page: Page, combobox: string, option: string | RegExp) {
+  await page.getByRole('combobox', { name: combobox, exact: true }).click()
+  const item = page.getByRole('option', { name: option, exact: typeof option === 'string' })
+  await item.click()
+  await item.waitFor({ state: 'detached' })
+}
 
 export async function cameraPreset(page: Page, label: CameraPresetLabel) {
-  await page.getByRole('combobox', { name: 'Góc nhìn', exact: true }).selectOption(PRESET_VALUES[label])
+  await pickOption(page, 'Góc nhìn', label)
+}
+
+/** Tập trung một điểm giao bằng ô "Tập trung điểm giao" (dòng "Điểm N · <tên>"). */
+export async function focusStop(page: Page, stop: number) {
+  await pickOption(page, 'Tập trung điểm giao', new RegExp(`^Điểm ${stop} · `))
 }
 
 const INSPECTOR_TABS = { package: 'Kiện', operations: 'Vận hành', display: 'Hiển thị', packages: 'Danh sách', metrics: 'Chỉ số' } as const
 export type InspectorTab = keyof typeof INSPECTOR_TABS
 
+/** Hộp thông tin mở từ thẻ kiện (tab Kiện) hoặc từ nút "Chi tiết / Hiển thị" ở góc khung 3D — lối vào duy nhất (LM-094). */
 export async function openInspector(page: Page, tab: InspectorTab = 'operations') {
   if (!await page.getByRole('dialog').count()) {
     if (tab === 'package') await page.getByRole('button', { name: 'Chọn kiện', exact: true }).click()
-    else if (tab === 'display') await page.getByRole('button', { name: 'Hiển thị', exact: true }).click()
     else await page.getByRole('button', { name: 'Chi tiết / Hiển thị', exact: true }).click()
   }
   const dialog = page.getByRole('dialog')

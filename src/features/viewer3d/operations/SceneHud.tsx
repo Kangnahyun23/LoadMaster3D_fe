@@ -53,7 +53,7 @@ export function SceneHud({ state, operations, onInspect, onFocus, onEdit, onRese
         {onEdit ? <Button variant="ghost" className="size-14 p-0 xl:size-11" aria-label={t('viewer.hud.edit')} disabled={!state.selected} onClick={onEdit}><Pencil strokeWidth={1.5} /></Button> : null}
       </div>
       <Button variant="secondary" className="pointer-events-auto size-14 shrink-0 p-0 xl:h-11 xl:w-auto xl:px-3" aria-label={t('viewer.hud.detailsLabel')} onClick={() => onInspect('operations')}>
-        <Settings2 strokeWidth={1.5} /><span className="hidden xl:inline">{t('viewer.hud.details')}</span>
+        <Settings2 strokeWidth={1.5} /><span className="hidden xl:inline">{t('viewer.hud.detailsLabel')}</span>
       </Button>
     </div>
   </div>

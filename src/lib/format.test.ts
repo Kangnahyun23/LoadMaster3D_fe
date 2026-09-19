@@ -90,10 +90,10 @@ test('dates are day-first in Vietnamese and spell the month in English so they c
   expect(vi.date('2026-09-14T14:30:00')).toBe('14/09/2026')
 })
 
-test('a chart axis date drops the year but keeps the same day and month order as the full date', () => {
-  const departure = new Date(2026, 8, 4, 14, 30)
-  expect(vi.dayMonth(departure)).toBe('04/09')
-  expect(en.dayMonth(departure)).toBe('Sep 4')
+test('a day and month without the year keeps the same order as the full date of each language', () => {
+  const approved = new Date(2026, 8, 4, 9, 15)
+  expect(vi.dayMonth(approved)).toBe('04/09')
+  expect(en.dayMonth(approved)).toBe('Sep 4')
 })
 
 test('times use the 24-hour clock in both languages', () => {

@@ -1,8 +1,11 @@
+import { Lock } from 'lucide-react'
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useCan } from '@/features/auth/useCan'
 import { useT } from '@/lib/i18n'
+import type { TripPhase } from '@/lib/mock-db'
 import { ApprovePlanDialog } from './ApprovePlanDialog'
+import { plannerAccess } from './approval/planner-access'
 import { useViewerApproval } from './approval/useViewerApproval'
 import { createColorContext } from './colors'
 import { createPerfStore, DebugOverlay } from './DebugOverlay'
@@ -13,8 +16,9 @@ import { useManualEditor } from './editor/useManualEditor'
 import { operationApprovalChecks } from './operations/approval-checks'
 import { SceneHud } from './operations/SceneHud'
 import { useOperations } from './operations/useOperations'
+import { PlannerActions } from './panels/PlannerActions'
 import { SceneInspector } from './panels/SceneInspector'
-import { WorkspaceToolbar, type InspectorTab } from './panels/WorkspaceToolbar'
+import { SimulationControls, WorkspaceToolbar, type InspectorTab } from './panels/WorkspaceToolbar'
 import type { ViewerSceneModel } from './scene-input'
 import { Timeline } from './Timeline'
 import { useLoadPlanViewer } from './useLoadPlanViewer'
@@ -27,25 +31,30 @@ import { ViewerSkeleton } from './ViewerSkeleton'
 const LoadPlanViewer = lazy(() => import('./LoadPlanViewer').then((module) => ({ default: module.LoadPlanViewer })))
 
 /**
- * Một phiên Planner trên một snapshot (LM-049, LM-050): header chỉ số, banner lỗi thời, scene, inspector, timeline và Duyệt.
- * Hành động chính duy nhất: "Duyệt phương án". Phím tắt: Space phát/dừng, ←/→ lùi/tiến một bước, Home về đầu.
+ * Một phiên Planner trên một snapshot (LM-049, LM-050, LM-094): hàng điều khiển, thông báo khoá/lỗi thời, scene, inspector,
+ * timeline và Duyệt. Hành động chính duy nhất: nút Duyệt ("Duyệt phương án" / "Duyệt bản chỉnh"), vắng khi bản đã duyệt chưa có
+ * chỉnh sửa. `phase` của chuyến (D-45): từ `loading` trở đi phương án đã chốt — không Chỉnh sửa, không Duyệt; fixture benchmark
+ * không có chuyến trong kho nên coi như đang lập kế hoạch.
+ * Phím tắt: Space phát/dừng, ←/→ lùi/tiến một bước, Home về đầu.
  */
-export function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
+export function ViewerSession({ model: plan, phase }: { model: ViewerSceneModel; phase?: TripPhase }) {
   const params = useParams()
   const [searchParams] = useSearchParams()
   const tripId = params.tripId ?? plan.tripId
   const showPerf = searchParams.has('debug')
   const t = useT()
   const can = useCan()
-  // Quản lý xem phương án chỉ đọc: không Duyệt, không Chỉnh sửa, không tới Thiết lập tối ưu (D-41)
-  const canApprove = can('plans.approve')
-  const handleEdit = canApprove ? () => handleModeChange('edit') : undefined
 
   const flags = usePerformanceFlags(debugQualityTier(searchParams))
   const state = useLoadPlanViewer(plan, { initialSelectedId: plan.placements[0]?.id })
   const editor = useManualEditor(state)
   const operations = useOperations(state)
   const approval = useViewerApproval(plan, state)
+  // Chỉ dời/xoay kiện là chỉnh sửa cần Duyệt lại; ghim không thuộc phương án gửi Duyệt.
+  const hasEdits = (approval.approval?.patches.length ?? 0) > 0
+  // Quản lý xem phương án chỉ đọc (D-41); chuyến đã sang pha vận hành thì phương án đã chốt (D-45).
+  const access = plannerAccess({ phase, canApprove: can('plans.approve'), approvedAt: plan.revision?.approvedAt ?? null, hasEdits })
+  const handleEdit = access.lock === null ? () => handleModeChange('edit') : undefined
   const colorContext = useMemo(() => createColorContext(plan), [plan])
   const perfStore = useMemo(() => createPerfStore(), [])
   const [approveOpen, setApproveOpen] = useState(false)
@@ -64,9 +73,9 @@ export function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
   useEffect(() => {
     if (editor.mode === 'edit') return
     function handleKeyDown(event: KeyboardEvent) {
-      // Không cướp phím khi người dùng đang gõ trong ô nhập hoặc hộp thoại đang mở.
+      // Không cướp phím khi người dùng đang gõ trong ô nhập, hộp thoại hoặc danh sách của Select đang mở (Space chọn dòng).
       const target = event.target instanceof HTMLElement ? event.target : null
-      if (target?.closest('input, textarea, select, button, a, [contenteditable="true"], [role="dialog"]')) return
+      if (target?.closest('input, textarea, select, button, a, [contenteditable="true"], [role="dialog"], [role="listbox"]')) return
       if (event.key === ' ') { event.preventDefault(); togglePlaying() }
       else if (event.key === 'ArrowRight') stepForward()
       else if (event.key === 'ArrowLeft') stepBackward()
@@ -78,6 +87,7 @@ export function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
 
   function handleModeChange(mode: 'view' | 'edit') { operations.stop(); operations.setFollow('off'); editor.setMode(mode) }
 
+  const simulation = { operations, stops: plan.stops, preset: state.cameraPreset, onPreset: state.setCameraPreset }
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-bg">
       <ViewerHeader
@@ -86,20 +96,26 @@ export function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
         placedCount={plan.placements.length}
         totalCount={totalPackages}
         isMockResult={plan.isMockResult}
-        approved={plan.revision?.approved ?? false}
-        manuallyEdited={state.draft.patches.size > 0 || (plan.revision?.manuallyEdited ?? false)}
-        blockedReason={approval.blockedReason}
-        onApprove={canApprove ? () => setApproveOpen(true) : undefined}
-      />
+        manuallyEdited={!hasEdits && (plan.revision?.manuallyEdited ?? false)}
+        controls={editor.mode === 'view' ? <SimulationControls {...simulation} /> : undefined}
+      >
+        <PlannerActions tripId={tripId} access={access} blockedReason={approval.blockedReason}
+          onApprove={() => setApproveOpen(true)} onEdit={editor.mode === 'view' ? handleEdit : undefined} />
+      </ViewerHeader>
+      {access.lock ? (
+        <div role="status" className="flex flex-none items-center gap-2 border-b border-border bg-surface px-4 py-2 text-body-lg text-text-2 xl:text-body" data-planner-lock={access.lock}>
+          <Lock className="size-4 flex-none" strokeWidth={1.5} aria-hidden />
+          <span>{t(`viewer.lock.${access.lock}`)}</span>
+        </div>
+      ) : null}
       {plan.revision?.stale ? (
         <div role="alert" className="flex flex-none flex-wrap items-center gap-3 border-b border-badge-warning-border bg-badge-warning-bg px-4 py-2 text-body text-badge-warning-fg">
           <span>{t('viewer.plan.staleBanner')}</span>
-          {can('optimization.run') ? <Link to={`/chuyen/${tripId}/toi-uu`} className="font-medium text-primary">{t('viewer.plan.rerun')}</Link> : null}
+          {can('optimization.run') && access.lock === null ? <Link to={`/chuyen/${tripId}/toi-uu`} className="font-medium text-primary">{t('viewer.plan.rerun')}</Link> : null}
         </div>
       ) : null}
       {editor.mode === 'edit' ? <EditorToolbar state={state} editor={editor} onModeChange={handleModeChange} /> :
-        <WorkspaceToolbar operations={operations} stops={plan.stops} preset={state.cameraPreset} onPreset={state.setCameraPreset}
-          onInspect={setInspectorTab} onEdit={handleEdit} />}
+        <WorkspaceToolbar {...simulation} onEdit={handleEdit} />}
       <div className={`relative flex min-h-0 flex-1 ${editor.mode === 'edit' ? 'flex-col xl:flex-row' : ''}`}>
         <div className="relative min-h-48 min-w-0 flex-1 overflow-hidden bg-canvas-1">
           <Suspense fallback={<ViewerSkeleton packageCount={plan.placements.length} stopCount={plan.stops.length} />}>

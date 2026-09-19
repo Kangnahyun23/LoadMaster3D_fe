@@ -89,6 +89,8 @@ export type ViewerSceneModel = {
     readonly jobId: string
     readonly method: string
     readonly approved: boolean
+    /** Thời điểm duyệt (ISO 8601) của revision đã duyệt, `null` với revision chưa duyệt (LM-094: "Đã duyệt lúc …"). */
+    readonly approvedAt: string | null
     readonly manuallyEdited: boolean
     /** Xe hoặc kiện của chuyến đổi sau khi tối ưu (D-31) — Duyệt bị chặn. */
     readonly stale: boolean
@@ -194,6 +196,7 @@ export function adaptResult({ trip, revision }: ResultSceneSource): ViewerSceneM
       jobId: revision.jobId,
       method: result.method,
       approved: revision.approvedAt !== undefined,
+      approvedAt: revision.approvedAt ?? null,
       manuallyEdited: revision.manuallyEdited ?? false,
       stale: trip.inputVersion !== undefined && revision.inputVersion !== undefined
         && isStale({ inputVersion: revision.inputVersion }, { inputVersion: trip.inputVersion }),

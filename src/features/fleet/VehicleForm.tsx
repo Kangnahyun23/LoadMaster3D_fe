@@ -1,5 +1,5 @@
 import { ChevronLeft, Save, Trash2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useForm, type FieldPath } from 'react-hook-form'
 import { Link, useBlocker, useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -28,9 +28,16 @@ function focusTarget(path: string): FieldPath<VehicleFormValues> {
 /**
  * Form cấu hình xe (Spec 9.2, LM-041) dùng cho cả `/doi-xe/moi` và `/doi-xe/:vehicleId`.
  * `vehicle` vắng nghĩa là thêm xe mới; khi đó `id` rỗng và kho cấp mã lúc lưu. `readOnly`: người không có quyền sửa đội xe
- * (quản lý, D-41) xem cấu hình nhưng không có nút Lưu/Xoá và ô nhập bị khoá.
+ * (quản lý, D-41) hoặc xe đang chạy chuyến (LM-089) — xem cấu hình nhưng không có nút Lưu/Xoá và ô nhập bị khoá.
+ * Ba chỗ trống cho trạng thái xe (LM-089): `status` cạnh tên, `actions` trước nút Xoá, `notice` đầu nội dung.
  */
-export function VehicleForm({ vehicle, readOnly = false }: { vehicle?: VehicleConfig; readOnly?: boolean }) {
+export function VehicleForm({ vehicle, readOnly = false, status, actions, notice }: {
+  vehicle?: VehicleConfig
+  readOnly?: boolean
+  status?: ReactNode
+  actions?: ReactNode
+  notice?: ReactNode
+}) {
   const t = useT()
   const format = useFormat()
   const navigate = useNavigate()
@@ -96,9 +103,12 @@ export function VehicleForm({ vehicle, readOnly = false }: { vehicle?: VehicleCo
             <ChevronLeft strokeWidth={1.5} />
           </Link>
         </Button>
-        <h1 className="min-w-0 flex-1 truncate text-h2 font-semibold">
+        <h1 className="min-w-0 truncate text-h2 font-semibold">
           {vehicle ? vehicle.name : t('fleet.detail.newTitle')}
         </h1>
+        {status}
+        <div className="flex-1" />
+        {actions}
         {vehicle && !readOnly ? (
           <Button type="button" variant="secondary" onClick={() => setConfirmDelete(true)}>
             <Trash2 strokeWidth={1.5} />
@@ -114,6 +124,7 @@ export function VehicleForm({ vehicle, readOnly = false }: { vehicle?: VehicleCo
       </header>
 
       <div className="min-h-0 flex-1 overflow-auto p-6">
+        {notice ? <div className="mb-5">{notice}</div> : null}
         {/* Màn rộng: xem trước 3D là cột phải dính khi cuộn; màn hẹp: nằm cuối form (LM-042) */}
         <div className="grid max-w-400 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
           <fieldset disabled={readOnly} className="m-0 flex min-w-0 flex-col gap-5 border-0 p-0">

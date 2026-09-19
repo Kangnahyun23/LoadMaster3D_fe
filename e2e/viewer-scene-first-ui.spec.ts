@@ -1,7 +1,7 @@
 import type { Page, TestInfo } from '@playwright/test'
 import { attachJson, attachScreenshot, expect, PLANNER_ROUTE, test } from './fixtures'
 import {
-  cameraPreset, closeInspector, enterEdit, hasSceneObject, instancePoint, metrics, openInspector, proxyPoint, sceneSnapshot,
+  cameraPreset, closeInspector, enterEdit, focusStop, hasSceneObject, instancePoint, metrics, openInspector, proxyPoint, sceneSnapshot,
   selectPlacement, settle as settleFor, SOURCE_MODULES, waitCameraSettled, type ViewerMetrics,
 } from './viewer-helpers'
 
@@ -51,7 +51,7 @@ test('planner defaults to the scene; follow step, stop focus, unloading advisory
   await button(page, 'Tiếp tục theo bước').waitFor(); await page.keyboard.press('Escape')
   await settle(page)
   await button(page, 'Xem toàn xe').click(); await settle(page)
-  await page.getByRole('combobox', { name: 'Tập trung điểm giao', exact: true }).selectOption('2'); await shot('03-stop-two')
+  await focusStop(page, 2); await shot('03-stop-two')
   expect(await page.evaluate(async (url) => {
     const { seedScene } = (await import(url)) as typeof import('@/test/scene')
     return (await seedScene()).placements.find((p) => p.step === Number(document.querySelector<HTMLInputElement>('input[aria-label="Bước xếp"]')!.value))?.stop

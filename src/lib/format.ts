@@ -38,7 +38,7 @@ export type Formatter = {
   ratio(value: number): string
   /** "14/09/2026" · "Sep 14, 2026" */
   date(value: Date | string): string
-  /** Ngày như `date` nhưng bỏ năm, cho nhãn trục biểu đồ: "14/09" · "Sep 14" */
+  /** Ngày và tháng không kèm năm — nhãn trục biểu đồ, mốc gần đây ("Đã duyệt lúc 14:30 14/09"): "14/09" · "Sep 14" */
   dayMonth(value: Date | string): string
   /** Đồng hồ 24 giờ ở mọi ngôn ngữ: "14:30" */
   time(value: Date | string): string
@@ -53,6 +53,18 @@ const CUBIC_CENTIMETERS_PER_CUBIC_METER = 1_000_000
 const DATE_OPTIONS: Record<FormatLocale, Intl.DateTimeFormatOptions> = {
   'vi-VN': { day: '2-digit', month: '2-digit', year: 'numeric' },
   'en-US': { day: 'numeric', month: 'short', year: 'numeric' },
+}
+
+/**
+ * Ngày tháng không năm lấy từ chính mẫu ngày đầy đủ, bỏ phần năm và dấu nối liền nó. Không xin Intl mẫu "ngày + tháng" riêng:
+ * CLDR tiếng Việt cho mẫu đó là "dd-MM", lệch với "dd/MM/yyyy" ở mọi chỗ khác trong app.
+ */
+function withoutYear(formatter: Intl.DateTimeFormat, value: Date): string {
+  const parts = formatter.formatToParts(value)
+  const year = parts.findIndex((part) => part.type === 'year')
+  if (year < 0) return formatter.format(value)
+  const joint = parts[year - 1]?.type === 'literal' ? year - 1 : year + 1
+  return parts.filter((_, index) => index !== year && index !== joint).map((part) => part.value).join('')
 }
 
 /**
@@ -101,7 +113,7 @@ export function createFormatter(locale: FormatLocale): Formatter {
     percent: (value) => percent.format(value),
     ratio: (value) => twoDecimals.format(value),
     date: (value) => date.format(toDate(value)),
-    dayMonth: (value) => withoutYear(date.formatToParts(toDate(value))),
+    dayMonth: (value) => withoutYear(date, toDate(value)),
     time: (value) => time.format(toDate(value)),
   }
 }
@@ -114,11 +126,6 @@ function toDate(value: Date | string): Date {
  * Bỏ năm và dấu nối nó khỏi ngày đầy đủ của ngôn ngữ, để "14/09" cùng kiểu với "14/09/2026" (tuỳ chọn ngày + tháng riêng
  * của Intl cho vi-VN lại ra "14-09").
  */
-function withoutYear(parts: readonly Intl.DateTimeFormatPart[]): string {
-  const yearAt = parts.findIndex((part) => part.type === 'year')
-  const joinerAt = yearAt === parts.length - 1 ? yearAt - 1 : yearAt + 1
-  return parts.filter((_, index) => index !== yearAt && index !== joinerAt).map((part) => part.value).join('')
-}
 
 /* ---------------------------------------------------------------------------
    Lớp cũ cho các màn chưa dịch: cố định vi-VN.
