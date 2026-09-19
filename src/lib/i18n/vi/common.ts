@@ -13,4 +13,20 @@ export const common = {
   backToTrips: 'Về danh sách chuyến',
   on: 'Bật',
   off: 'Tắt',
+  /** `DataTable` (LM-085): chân bảng phân trang và trạng thái không có kết quả khớp bộ lọc. */
+  table: {
+    rowsPerPage: 'Số dòng mỗi trang',
+    range: '{from}–{to} / {total}',
+    previousPage: 'Trang trước',
+    nextPage: 'Trang sau',
+    noMatch: 'Không có kết quả khớp bộ lọc',
+  },
+  /** `FilterBar` (LM-085): thanh tìm và lọc của các màn danh sách. */
+  filters: {
+    region: 'Tìm và lọc',
+    all: 'Tất cả',
+    from: 'Từ ngày',
+    to: 'Đến ngày',
+    clear: 'Xoá lọc',
+  },
 } as const
