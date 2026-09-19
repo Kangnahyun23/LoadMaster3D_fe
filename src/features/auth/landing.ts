@@ -5,7 +5,7 @@ export const ROLE_HOME: Readonly<Record<Role, string>> = {
   dispatcher: '/chuyen',
   manager: '/',
   warehouse: '/kho',
-  driver: '/tai-xe/diem-giao',
+  driver: '/tai-xe',
   admin: '/nguoi-dung',
 }
 

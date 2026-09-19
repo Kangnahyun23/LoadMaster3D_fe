@@ -38,7 +38,7 @@ const NAV_ITEMS = [
   { to: '/', labelKey: 'nav.dashboard', icon: LayoutDashboard, permission: 'dashboard.view' },
   { to: '/chuyen', labelKey: 'nav.trips', icon: Truck, permission: 'trips.view' },
   { to: '/kho', labelKey: 'nav.warehouse', icon: Tablet, permission: 'warehouse.operate' },
-  { to: '/tai-xe/diem-giao', labelKey: 'nav.driver', icon: Box, permission: 'driver.operate' },
+  { to: '/tai-xe', labelKey: 'nav.driver', icon: Box, permission: 'driver.operate' },
   { to: '/doi-xe', labelKey: 'nav.fleet', icon: Warehouse, permission: 'fleet.view' },
   { to: '/nguoi-dung', labelKey: 'nav.users', icon: Users, permission: 'users.manage' },
 ] as const satisfies readonly NavItem[]

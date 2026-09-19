@@ -3,24 +3,31 @@ import { attachScreenshot, expect, test } from './fixtures'
 import { heightOf, MOCK_DB, navigateInApp, overflowingText, SEED_TRIP } from './spec-flow-helpers'
 
 /**
- * Màn tài xế đọc revision đã duyệt (LM-061). Thứ tự kỳ vọng đọc thẳng từ kho in-memory của trang qua đúng module app dùng;
- * sau khi ghi kho chỉ đổi route phía client.
+ * Màn tài xế đọc revision đã duyệt (LM-061); `/tai-xe` là "Chuyến của tôi", `/tai-xe/diem-giao?chuyen=` là một chuyến (LM-087).
+ * Thứ tự kỳ vọng đọc thẳng từ kho in-memory của trang qua đúng module app dùng; sau khi ghi kho chỉ đổi route phía client.
  */
 const DRIVER = '/tai-xe/diem-giao'
 
-/** `{ revisionId, ids }`: kiện điểm `stop` của revision đã duyệt mới nhất, theo `unloadingOrder`. */
-function approvedUnloadOrder(page: Page, stop: number) {
+/**
+ * `{ revisionId, ids }`: kiện điểm `stop` theo `unloadingOrder` của phương án tài xế làm theo — bản kho đã xếp, kho chưa xếp thì bản
+ * duyệt mới nhất.
+ */
+function planUnloadOrder(page: Page, tripId: string, stop: number) {
   return page.evaluate(async ({ url, tripId, stop }) => {
     const { getMockDb } = (await import(url)) as typeof import('@/lib/mock-db')
-    const revisions = await getMockDb().listRevisions(tripId)
-    const approved = revisions.findLast((revision) => revision.approvedAt !== undefined)!
-    const prefixes = approved.request.packages.filter((pkg) => pkg.deliveryStop === stop).map((pkg) => `${pkg.id}-`)
-    const ids = approved.result.placements
+    const db = getMockDb()
+    const trip = await db.getTrip(tripId)
+    const revisions = await db.listRevisions(tripId)
+    const plan = trip.loading
+      ? revisions.find((revision) => revision.id === trip.loading?.revisionId)!
+      : revisions.findLast((revision) => revision.approvedAt !== undefined)!
+    const prefixes = plan.request.packages.filter((pkg) => pkg.deliveryStop === stop).map((pkg) => `${pkg.id}-`)
+    const ids = plan.result.placements
       .filter((p) => prefixes.some((prefix) => p.packageInstanceId.startsWith(prefix)))
       .sort((a, b) => a.unloadingOrder - b.unloadingOrder)
       .map((p) => p.packageInstanceId)
-    return { revisionId: approved.id, ids }
-  }, { url: MOCK_DB, tripId: SEED_TRIP, stop })
+    return { revisionId: plan.id, ids }
+  }, { url: MOCK_DB, tripId, stop })
 }
 
 function rowIds(page: Page) {
@@ -30,10 +37,11 @@ function rowIds(page: Page) {
 test('phone: unload order equals the approved revision; Three.js loads only on "Xem vị trí hàng"', { tag: '@phone' }, async ({ page, login, browserErrors }) => {
   const requests: string[] = []
   page.on('request', (request) => requests.push(request.url()))
-  await login(DRIVER, 'driver')
+  // Chuyến chính kho chưa xếp: tài xế xem trước điểm 1 theo bản duyệt
+  await login(`${DRIVER}?chuyen=${SEED_TRIP}`, 'driver')
   await expect(page.getByRole('heading', { name: 'Điểm 1 / 4', exact: true })).toBeVisible()
 
-  const expected = await approvedUnloadOrder(page, 1)
+  const expected = await planUnloadOrder(page, SEED_TRIP, 1)
   expect(expected.ids.length).toBeGreaterThan(0)
   expect(await rowIds(page)).toStrictEqual(expected.ids)
   expect(await page.locator('canvas').count()).toBe(0)
@@ -52,13 +60,20 @@ test('phone: unload order equals the approved revision; Three.js loads only on "
 })
 
 /**
- * LM-071: màn tài xế chạy bằng `?lang=en` ở 390×844, nút chuyển ngôn ngữ trên header đạt 56px, chữ tiếng Anh không tràn,
- * đổi ngôn ngữ giữa phiên giữ điểm giao hiện tại và kiện đã đánh dấu. Không ghi kho nên được tải trang để đặt `?lang`.
+ * LM-071, LM-087: "Chuyến của tôi" và màn điểm giao chạy bằng `?lang=en` ở 390×844, nút chuyển ngôn ngữ 56px, chữ tiếng Anh không
+ * tràn, đổi ngôn ngữ giữa phiên giữ điểm giao và kiện đã đánh dấu. Tải trang để đặt `?lang` trước mọi lần ghi kho.
  */
-test('phone: the driver screen runs in English and switching language mid-session keeps the stop', { tag: '@phone' }, async ({ page, login, browserErrors }, testInfo) => {
-  await login(DRIVER, 'driver')
-  await page.goto(`${DRIVER}?lang=en`)
-  await expect(page.getByRole('heading', { name: 'Stop 1 / 4', exact: true })).toBeVisible()
+test('phone: the driver screens run in English and switching language mid-delivery keeps the stop', { tag: '@phone' }, async ({ page, login, browserErrors }, testInfo) => {
+  await login('/tai-xe', 'driver')
+  await page.goto('/tai-xe?lang=en')
+  await expect(page.getByRole('heading', { level: 1, name: 'My trips', exact: true })).toBeVisible()
+  const open = page.getByRole('region', { name: 'Ready to deliver' }).getByRole('link', { name: 'Open trip', exact: true })
+  expect(await heightOf(open)).toBeGreaterThanOrEqual(56)
+  expect(await overflowingText(page)).toStrictEqual([])
+  await attachScreenshot(page, testInfo, 'driver-list-en-phone')
+
+  await open.tap()
+  await expect(page.getByRole('heading', { name: 'Stop 1 / 3', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'View cargo positions', exact: true })).toBeVisible()
   const english = page.getByRole('button', { name: 'EN English', exact: true })
   const vietnamese = page.getByRole('button', { name: 'VI Tiếng Việt', exact: true })
@@ -68,21 +83,18 @@ test('phone: the driver screen runs in English and switching language mid-sessio
   expect(await overflowingText(page)).toStrictEqual([])
   await attachScreenshot(page, testInfo, 'driver-en-phone')
 
-  const first = await approvedUnloadOrder(page, 1)
-  for (const id of first.ids) await page.getByRole('button', { name: `Mark ${id} as unloaded`, exact: true }).tap()
-  await page.getByRole('button', { name: 'Complete stop', exact: true }).tap()
-  await expect(page.getByRole('heading', { name: 'Stop 2 / 4', exact: true })).toBeVisible()
-
-  const second = await approvedUnloadOrder(page, 2)
-  await page.getByRole('button', { name: `Mark ${second.ids[0]} as unloaded`, exact: true }).tap()
+  await page.getByRole('button', { name: 'Start delivery', exact: true }).tap()
+  const first = await planUnloadOrder(page, 'TRIP-010', 1)
+  await page.getByRole('button', { name: `Mark ${first.ids[0]} as unloaded`, exact: true }).tap()
+  await expect(page.getByRole('button', { name: 'Report an issue', exact: true })).toBeVisible()
   expect(await overflowingText(page)).toStrictEqual([])
-  await attachScreenshot(page, testInfo, 'driver-en-phone-stop-2')
+  await attachScreenshot(page, testInfo, 'driver-en-phone-delivering')
 
   await vietnamese.tap()
-  await expect(page.getByRole('heading', { name: 'Điểm 2 / 4', exact: true })).toBeVisible()
-  await expect(page.getByRole('button', { name: `Bỏ đánh dấu đã dỡ ${second.ids[0]}`, exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('heading', { name: 'Điểm 1 / 3', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: `Bỏ đánh dấu đã dỡ ${first.ids[0]}`, exact: true })).toHaveAttribute('aria-pressed', 'true')
   await english.tap()
-  await expect(page.getByRole('heading', { name: 'Stop 2 / 4', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Stop 1 / 3', exact: true })).toBeVisible()
   expect(browserErrors).toStrictEqual([])
 })
 
@@ -96,7 +108,7 @@ test('a newly approved revision reaches the driver screen without reload', async
 
   await navigateInApp(page, `${DRIVER}?chuyen=${SEED_TRIP}`)
   await expect(page.getByRole('heading', { name: 'Điểm 1 / 4', exact: true })).toBeVisible()
-  const expected = await approvedUnloadOrder(page, 1)
+  const expected = await planUnloadOrder(page, SEED_TRIP, 1)
   expect(expected.revisionId).not.toBe('REV-002')
   await expect.poll(() => rowIds(page)).toStrictEqual(expected.ids)
   expect(browserErrors).toStrictEqual([])
