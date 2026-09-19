@@ -5,11 +5,12 @@ import {
   ScrollText,
   Tablet,
   Truck,
+  UserRound,
   Users,
   Warehouse,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { NavLink, useNavigate } from 'react-router'
+import { Link, NavLink, useNavigate } from 'react-router'
 import { LanguageSwitch } from '@/components/LanguageSwitch'
 import {
   DropdownMenu,
@@ -126,6 +127,12 @@ export function NavRail() {
               </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/ho-so">
+                <UserRound strokeWidth={1.5} aria-hidden />
+                {t('nav.profile')}
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => void handleSignOut()}>
               <LogOut strokeWidth={1.5} aria-hidden />
               {t('nav.signOut')}

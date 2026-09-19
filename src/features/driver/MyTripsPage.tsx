@@ -3,6 +3,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { LanguageSwitch } from '@/components/LanguageSwitch'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { AccountMenu } from '@/features/auth/AccountMenu'
 import { ExitIconButton } from '@/features/auth/ExitControl'
 import { dataErrorMessage, useT } from '@/lib/i18n'
 import { MyTripCard } from './MyTripCard'
@@ -10,7 +11,8 @@ import { useMyTripsQuery } from './useDriverQueries'
 
 /**
  * "Chuyến của tôi" `/tai-xe` (LM-087, D-46) — màn chính của tài xế: chuyến gán cho mình (quản trị thấy mọi chuyến) chia ba nhóm: sẵn
- * sàng giao, kho đang chuẩn bị (không bấm được), đã hoàn thành gần đây. Điện thoại: chữ 16px, nút 56px. Nút thoát ở đây là đăng xuất.
+ * sàng giao, kho đang chuẩn bị (không bấm được), đã hoàn thành gần đây. Điện thoại: chữ 16px, nút 56px. Nút thoát ở đây là đăng xuất;
+ * nút tài khoản mở hồ sơ cá nhân hoặc đăng xuất (LM-096).
  */
 export function MyTripsPage() {
   const t = useT()
@@ -20,6 +22,7 @@ export function MyTripsPage() {
         <ExitIconButton screenHome="/tai-xe" label={t('driver.exit')} className="-ml-2" iconClassName="size-6" />
         <h1 className="min-w-0 flex-1 text-h2 font-semibold">{t('driver.list.title')}</h1>
         <LanguageSwitch size="touch" className="flex-none [&>svg]:hidden min-[400px]:[&>svg]:block" />
+        <AccountMenu className="-mr-2" />
       </header>
       <main className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
         <TripGroups />

@@ -12,5 +12,6 @@ export const nav = {
   audit: 'Log',
   account: 'Account {name}',
   signOut: 'Sign out',
+  profile: 'My profile',
   backHome: 'Back to home',
 } satisfies Dictionary<typeof source>

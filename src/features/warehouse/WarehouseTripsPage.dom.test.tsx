@@ -37,6 +37,8 @@ test('in-progress trip first with Continue (110/280), then the approved trip, th
   expect(container.querySelectorAll('a.bg-primary, button.bg-primary')).toHaveLength(1)
   expect(loading.getByRole('link', { name: 'Tiếp tục (110/280)' })).toHaveClass('bg-primary')
   expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument()
+  // LM-096: nút tài khoản 56px mở hồ sơ cá nhân
+  expect(screen.getByRole('button', { name: 'Tài khoản Lê Văn Hải' })).toHaveClass('size-14')
 })
 
 test('missing packages recorded at the warehouse show next to the progress', async () => {

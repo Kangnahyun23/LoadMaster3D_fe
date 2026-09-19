@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { expect, test } from 'vitest'
 import { TooltipProvider } from '@/components/ui/Tooltip'
@@ -8,38 +9,31 @@ import { signedInAs } from '@/test/signed-in'
 import type { Role } from '@/types/user'
 import { NavRail } from './NavRail'
 
-/** LM-053 (D-20): nút Cài đặt chưa mở màn nào nên không hiển thị. */
-test('nav rail không có nút Cài đặt', () => {
-  signedInAs('dispatcher')
+function renderRail(role: Role, route = '/') {
+  signedInAs(role)
   render(
     <I18nProvider>
       <AuthProvider>
         <TooltipProvider>
-          <MemoryRouter>
+          <MemoryRouter initialEntries={[route]}>
             <NavRail />
           </MemoryRouter>
         </TooltipProvider>
       </AuthProvider>
     </I18nProvider>,
   )
+}
+
+/** LM-053 (D-20): nút Cài đặt chưa mở màn nào nên không hiển thị. */
+test('nav rail không có nút Cài đặt', () => {
+  renderRail('dispatcher')
   expect(screen.getByRole('link', { name: 'Chuyến hàng' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Cài đặt' })).not.toBeInTheDocument()
 })
 
 /** Mục đang mở phải nhận ra được bằng trình đọc màn hình (aria-current) và mỗi mục có nhãn chữ nhìn thấy được. */
 test('nav rail đánh dấu mục đang mở và hiện nhãn chữ cho từng mục', () => {
-  signedInAs('dispatcher')
-  render(
-    <I18nProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <MemoryRouter initialEntries={['/chuyen/TRIP-2026-0914']}>
-            <NavRail />
-          </MemoryRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </I18nProvider>,
-  )
+  renderRail('dispatcher', '/chuyen/TRIP-2026-0914')
   const trips = screen.getByRole('link', { name: 'Chuyến hàng' })
   expect(trips).toHaveAttribute('aria-current', 'page')
   expect(trips).toHaveTextContent('Chuyến hàng')
@@ -54,18 +48,17 @@ test.each<[Role, string[]]>([
   ['driver', ['Tài xế']],
   ['admin', ['Bảng điều khiển', 'Chuyến hàng', 'Kho', 'Tài xế', 'Đội xe', 'Người dùng', 'Nhật ký']],
 ])('nav rail của %s chỉ có mục được phép', (role, items) => {
-  signedInAs(role)
-  render(
-    <I18nProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <MemoryRouter>
-            <NavRail />
-          </MemoryRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </I18nProvider>,
-  )
+  renderRail(role)
   const nav = screen.getByRole('navigation')
   expect([...nav.querySelectorAll('a')].map((link) => link.textContent)).toStrictEqual(items)
+})
+
+/** LM-096: menu tài khoản mở hồ sơ cá nhân trước mục đăng xuất. */
+test('menu tài khoản có mục Hồ sơ cá nhân mở /ho-so', async () => {
+  const user = userEvent.setup()
+  renderRail('manager')
+  await user.click(screen.getByRole('button', { name: 'Tài khoản Trần Thị Mai' }))
+  const items = await screen.findAllByRole('menuitem')
+  expect(items.map((item) => item.textContent)).toStrictEqual(['Hồ sơ cá nhân', 'Đăng xuất'])
+  expect(items[0]).toHaveAttribute('href', '/ho-so')
 })

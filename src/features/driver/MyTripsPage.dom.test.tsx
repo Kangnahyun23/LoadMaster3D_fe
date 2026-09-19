@@ -35,6 +35,8 @@ test('the demo driver: the loaded trip to open, the main trip still at the wareh
   expect(container.querySelectorAll('a.bg-primary, button.bg-primary')).toHaveLength(1)
   expect(loaded.getByRole('link', { name: 'Mở chuyến' })).toHaveClass('bg-primary')
   expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument()
+  // LM-096: nút tài khoản 56px mở hồ sơ cá nhân
+  expect(screen.getByRole('button', { name: 'Tài khoản Phạm Quốc Dũng' })).toHaveClass('size-14')
 }, 15_000)
 
 test('an admin sees every trip: delivering first with its current stop, loading before approved; exit leaves the driver screen', async () => {
