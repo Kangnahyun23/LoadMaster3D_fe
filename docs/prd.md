@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Ngày | 14/09/2026 |
-| Trạng thái | Đã hiện thực trên `feat/spec-mvp` (16/09/2026) — nghiệm thu: [acceptance.md](acceptance.md); còn chờ backend: mục 14 |
+| Trạng thái | MVP đã hiện thực trên `feat/spec-mvp` (16/09/2026) — nghiệm thu: [acceptance.md](acceptance.md); còn chờ backend: mục 14. Đợt 6 (hoàn thiện 5 vai trò): mục 15 |
 | Nguồn | [LoadMaster_FE_MVP_Build_Spec.md](../LoadMaster_FE_MVP_Build_Spec.md) (gọi tắt **Spec**), [AGENTS.md](../AGENTS.md), buổi chốt quyết định 14/09/2026 |
 | Phạm vi repo | Frontend `E:\SEP490\LoadMaster` |
 
@@ -301,3 +301,29 @@ Cần nhóm backend trả lời (theo dõi ở issue LM-002):
 4. Ngưỡng trọng tâm D-36 có được nghiệp vụ xác nhận không?
 
 Đã chốt trong buổi hỏi đáp 14/09/2026: ngưỡng trọng tâm (D-36), route (D-38), màn So sánh (D-37), nhãn "Sẽ có sau" (D-38).
+
+## 15. Đợt 6 — Hoàn thiện 5 vai trò (19/09/2026)
+
+Nguồn: [rà soát giao diện 19/09](ui-audit-2026-09-19.md) và buổi hỏi đáp cùng ngày. Mục tiêu: bảo vệ đồ án SEP490 với cả 5 vai trò
+của AGENTS mục 1 có luồng đầu-cuối; hạn 2–4 tuần; làm hết P0, P1, P2. Issue: [LM-080 → LM-101](issues/README.md#phase-6--hoàn-thiện-5-vai-trò).
+
+| Mã | Quyết định |
+|---|---|
+| D-40 | Thước đo "đủ" là bảng 5 vai trò ở AGENTS mục 1, không chỉ Spec §15. Làm cả P0, P1, P2; không xếp ưu tiên bỏ bớt. |
+| D-41 | Không chờ backend: FE **giả lập phân quyền** theo vai trò (chặn route, màn 403, ẩn mục nav, ẩn hành động không có quyền) nhưng **không giả lập lưu bền** — kho vẫn in-memory, tải lại trang là mất. Quyền: quản trị toàn quyền; điều phối — bảng điều khiển, chuyến, đội xe, Planner, so sánh; quản lý — bảng điều khiển, xuất báo cáo, xem chuyến/đội xe/Planner **chỉ đọc**; kho — `/kho`; tài xế — `/tai-xe`. Ma trận quyền là một hằng số dùng cho route, nav, nút và màn "Ma trận quyền". |
+| D-42 | Người dùng và mật khẩu nằm trong kho mock; đăng nhập đi qua kho, nên tài khoản quản trị tạo mới đăng nhập được. Kho giữ **phiên** (người đang đăng nhập) như cookie của server để ghi người làm vào nhật ký. Có hồ sơ cá nhân và đổi mật khẩu thật; không có "quên mật khẩu" (cần email). Quản trị đặt lại mật khẩu thì kho sinh mật khẩu tạm và hiện một lần. |
+| D-43 | Mọi thao tác ghi của kho thêm một **sự kiện nhật ký** `{ mã hành động, người làm, đối tượng, tham số, thời điểm }`; kho không lưu câu chữ, UI dịch mã. Seed có lịch sử khớp với dữ liệu chuyến. Màn `/nhat-ky` cho quản trị: lọc theo kỳ, người, loại, tìm theo đối tượng, phân trang. |
+| D-44 | Seed **neo theo ngày hiện tại** (giờ Việt Nam) khi tạo kho; test truyền ngày neo cố định. 8 xe (1 xe bảo dưỡng), 12 người dùng, 15 chuyến trải 30 ngày gồm đủ trạng thái; chuyến `TRIP-2026-0914` giữ nguyên xe, điểm giao, kiện và `REV-001`/`REV-002`, làm chuyến chính của ngày neo. Số liệu dashboard và biểu đồ lấy từ seed này, không gõ tay. |
+| D-45 | Vòng đời chuyến: kho lưu **pha** `planning → loading → loaded → delivering → completed`, và `cancelled`. Trạng thái hiển thị = pha; riêng pha `planning` suy từ revision như cũ (Nháp / Đã tối ưu / Đã duyệt / Cần xem lại). Kho chuyển `loading`, `loaded`; tài xế chuyển `delivering`, `completed`. Từ `loading` trở đi khoá sửa xe, điểm giao, kiện, chặn chạy tối ưu và Duyệt (mã `TRIP_LOCKED`), UI nói lý do. Huỷ được trước `delivering`, bắt buộc lý do, ghi nhật ký. |
+| D-46 | Chuyến có **ngày chạy** và **tài xế** (người dùng vai trò tài xế). Tài xế chỉ thấy chuyến của mình; kho thấy mọi chuyến đã duyệt chờ xếp hoặc đang xếp. Điểm giao có số điện thoại; màn tài xế có nút Gọi (`tel:`). |
+| D-47 | Tiến độ vận hành ghi vào kho in-memory: kiện đã xếp, kiện thiếu ở kho, kiện đã dỡ theo điểm, sự cố giao (hỏng / thiếu / khách từ chối / khác + ghi chú). Điều phối thấy ở chi tiết chuyến. Mở lại màn kho/tài xế trong phiên thì tiếp tục đúng chỗ. Không chữ ký, không ảnh. |
+| D-48 | Bảng điều khiển có lọc khoảng ngày, KPI theo kỳ và **3 biểu đồ recharts** (tỷ lệ lấp đầy theo ngày, chuyến theo trạng thái, khối lượng theo xe), mọi số truy về kho. Sửa luật "Không bịa số" của LM-052: biểu đồ được phép khi kho có chuỗi theo ngày thật. Xuất báo cáo **.xlsx** bằng `write-excel-file`, tải lười khi bấm. |
+| D-49 | Nhập kiện từ **CSV và .xlsx** (`read-excel-file`, tải lười): tải file mẫu, xem trước, lỗi theo từng dòng bằng mã domain, **thêm** vào kiện hiện có; mã kiện trùng là lỗi dòng. Một lần nhập tăng `inputVersion` một lần. |
+| D-50 | Không bản đồ địa lý. Chi tiết chuyến có **sơ đồ tuyến SVG** (kho → điểm 1 → … theo màu điểm giao, kèm số kiện/khối lượng). |
+| D-51 | Planner gọn: header và thanh công cụ gộp còn một hàng điều khiển; revision đã duyệt không có draft thì **không** hiện nút Duyệt (hiện "Đã duyệt lúc …"); inspector đóng mặc định; lý do chặn Duyệt nằm trong nút/tooltip thay vì chữ đỏ chen header. |
+| D-52 | Danh sách chuyến, đội xe, người dùng, nhật ký có tìm, lọc, sắp xếp, phân trang qua `DataTable` dùng chung (tính năng của TanStack Table v9), trạng thái lọc giữ trên URL. |
+| D-53 | Đội xe có trạng thái: Sẵn sàng / Đang chạy (suy từ chuyến `loading`–`delivering`) / Bảo dưỡng (đặt tay). Cờ bảo dưỡng lưu ngoài `VehicleConfig` (D-04 không thêm trường vào type Spec). Không chọn được xe bảo dưỡng cho chuyến. |
+| D-54 | Màn điều phối giữ desktop-only (quyết định 16/09); sửa bố cục chật ở 1.366–1.600 px. Không làm dark mode. |
+| D-55 | P2: chuông thông báo trong app (lọc sự kiện nhật ký theo vai trò), tìm kiếm toàn cục Ctrl+K (chuyến, xe, kiện, người dùng). |
+| D-56 | Git: `main` = MVP đã nghiệm thu (`751fdc8`). Đợt 6 làm trên `feat/ui-complete`, mỗi issue một worktree; push `main` và `feat/ui-complete` sau mỗi mốc. |
+| D-57 | Thiết bị thật: chỉ có điện thoại — thử màn tài xế trên máy thật ở LM-101; màn kho kiểm bằng giả lập. |

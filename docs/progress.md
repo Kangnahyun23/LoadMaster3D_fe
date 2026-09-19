@@ -1,6 +1,6 @@
 # Theo dõi tiến độ — LoadMaster FE MVP
 
-Cập nhật lần cuối: **17/09/2026**
+Cập nhật lần cuối: **19/09/2026**
 
 Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](../LoadMaster_FE_MVP_Build_Spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](../handoff.md)
 
@@ -21,15 +21,33 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
 | 5 | i18n phần còn lại, nghiệm thu | 3 / 3 | ~3,5 ngày | ✅ Xong 16/09/2026 — 520 unit/DOM, 55 E2E, cổng chuỗi cứng |
-| **Tổng** | | **56 / 57 issue** | **~56 ngày công** | |
+| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 0 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
+| **Tổng** | | **56 / 80 issue** | **~83,5 ngày công** | |
 
 **Phase 5 xong (16/09/2026) — MVP nghiệm thu.** 56/57 issue; LM-002 chờ backend. Nợ sau nghiệm thu: [acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend), LM-073.
+
+**Đợt 6 (19/09/2026):** [rà soát giao diện](ui-audit-2026-09-19.md), [PRD mục 15](prd.md#15-đợt-6--hoàn-thiện-5-vai-trò-1909-2026), issue LM-080 → LM-101 (+ LM-073).
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 19/09/2026 — Rà soát giao diện, chốt đợt 6
+
+**Đã làm**
+- Hỏi đáp chốt phạm vi: bảo vệ SEP490, thước đo 5 vai trò AGENTS mục 1, 2–4 tuần, làm hết P0/P1/P2; giả lập phân quyền, không giả lập lưu bền.
+- [Báo cáo rà soát](ui-audit-2026-09-19.md): hiện trạng từng vai trò, 8 lỗi UX trên ảnh 17/09, danh sách thiếu của một web hoàn chỉnh.
+- PRD mục 15 (D-40 → D-57); 22 issue LM-080 → LM-101 trong [gói issue](issues/README.md#phase-6--hoàn-thiện-5-vai-trò).
+- Git: commit gói bàn giao nghiên cứu (`751fdc8`, bỏ file zip qua `.gitignore`), fast-forward `main` ← `feat/spec-mvp`, mở `feat/ui-complete`, push cả ba nhánh.
+
+**Kiểm tra**
+- Chỉ tài liệu, không đổi code.
+
+**Việc tiếp theo**
+- Đợt nền tuần tự: LM-080 → LM-085; sau đó đợt màn song song.
+
 
 ### 17/09/2026 — Gói bàn giao cho nhóm nghiên cứu
 
@@ -485,6 +503,34 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-070](issues/LM-070-i18n-dot-1-con-lai.md) | i18n đợt 1 phần còn lại | ✅ | 16/09/2026 | 16/09/2026 | 38d64e0 (agent) — 218 dòng → 0; E2E `i18n-en` |
 | [LM-071](issues/LM-071-i18n-dot-2.md) | i18n đợt 2 | ✅ | 16/09/2026 | 16/09/2026 | 2ff95f3 (agent) — 292 dòng → 0; nút ngôn ngữ ở kho/tài xế |
 | [LM-072](issues/LM-072-nghiem-thu-tai-lieu.md) | Nghiệm thu, bàn giao | ✅ | 16/09/2026 | 16/09/2026 | acceptance.md, handoff.md, benchmark + ảnh vi/en; mở LM-073 |
+
+### Phase 6 — Hoàn thiện 5 vai trò
+
+| ID | Việc | Trạng thái | Bắt đầu | Xong | Ghi chú |
+|---|---|---|---|---|---|
+| [LM-080](issues/LM-080-tach-tu-dien-theo-nhanh.md) | Tách từ điển theo nhánh | ⬜ | | | |
+| [LM-081](issues/LM-081-vong-doi-chuyen-kho-mock.md) | Vòng đời chuyến trong kho | ⬜ | | | |
+| [LM-082](issues/LM-082-nguoi-dung-phien-nhat-ky.md) | Người dùng, phiên, nhật ký | ⬜ | | | |
+| [LM-083](issues/LM-083-seed-mo-rong-theo-ngay.md) | Seed mở rộng | ⬜ | | | |
+| [LM-084](issues/LM-084-phan-quyen-mock-403.md) | Phân quyền, 403 | ⬜ | | | |
+| [LM-085](issues/LM-085-bang-du-lieu-loc-sap-xep-phan-trang.md) | Bảng lọc/sắp xếp/phân trang | ⬜ | | | |
+| [LM-086](issues/LM-086-kho-chon-chuyen-tien-do.md) | Kho | ⬜ | | | |
+| [LM-087](issues/LM-087-tai-xe-chuyen-cua-toi-tong-ket.md) | Tài xế | ⬜ | | | |
+| [LM-088](issues/LM-088-chuyen-trang-thai-loc-tien-trinh.md) | Chuyến | ⬜ | | | |
+| [LM-089](issues/LM-089-doi-xe-trang-thai-bao-duong.md) | Đội xe | ⬜ | | | |
+| [LM-090](issues/LM-090-dashboard-bieu-do-xuat-xlsx.md) | Dashboard | ⬜ | | | |
+| [LM-091](issues/LM-091-nhat-ky-he-thong.md) | Nhật ký | ⬜ | | | |
+| [LM-092](issues/LM-092-nguoi-dung-quan-tri-day-du.md) | Người dùng | ⬜ | | | |
+| [LM-093](issues/LM-093-nhap-kien-csv-xlsx.md) | Nhập kiện CSV/.xlsx | ⬜ | | | |
+| [LM-094](issues/LM-094-planner-gon.md) | Planner gọn | ⬜ | | | |
+| [LM-095](issues/LM-095-bo-cuc-1366-het-cat-chu.md) | Bố cục 1.366 px | ⬜ | | | |
+| [LM-096](issues/LM-096-ho-so-doi-mat-khau.md) | Hồ sơ | ⬜ | | | |
+| [LM-097](issues/LM-097-so-do-tuyen-svg.md) | Sơ đồ tuyến | ⬜ | | | |
+| [LM-098](issues/LM-098-chuong-thong-bao.md) | Thông báo | ⬜ | | | |
+| [LM-099](issues/LM-099-tim-kiem-toan-cuc.md) | Ctrl+K | ⬜ | | | |
+| [LM-100](issues/LM-100-hoan-thien-nho.md) | Hoàn thiện nhỏ | ⬜ | | | |
+| [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) | E2E kéo kiện vào vật cản | ⬜ | | | |
+| [LM-101](issues/LM-101-nghiem-thu-dot-6.md) | Nghiệm thu đợt 6 | ⬜ | | | |
 
 ---
 

@@ -44,6 +44,12 @@ Việc chia nhỏ: [docs/issues/](docs/issues/README.md). Tiến độ theo ngà
   không đặt tên service là `AIService`.
 - Giao diện chuyển được **vi / en** (D-07); tiếng Việt là ngôn ngữ mặc định và nguồn chuẩn của từ điển.
 
+### Đợt 6 — hoàn thiện 5 vai trò *(bổ sung 19/09/2026)*
+
+MVP đã nghiệm thu và nằm ở `main`. Đợt 6 làm trên `feat/ui-complete` để cả 5 vai trò ở bảng trên có luồng đầu-cuối
+(bảo vệ SEP490): [rà soát giao diện](docs/ui-audit-2026-09-19.md), [PRD mục 15](docs/prd.md) (D-40 → D-57), issue LM-080 → LM-101.
+Không chờ backend: giả lập phân quyền, **không** giả lập lưu bền — kho vẫn in-memory.
+
 ## 2. Tech stack
 
 Khóa version trong lockfile, không tự nâng major. Dùng **pnpm**, không dùng npm/yarn
