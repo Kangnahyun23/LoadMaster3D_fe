@@ -37,3 +37,6 @@ blob-report/
 
 # git worktree tạm của agent chạy song song (xem AGENTS.md mục 12)
 .claude/worktrees/
+
+# gói bàn giao nén — bản sao của docs/research-handoff-*/
+docs/*.zip
