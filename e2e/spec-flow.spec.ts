@@ -33,7 +33,7 @@ for (const device of ['desktop', 'tablet'] as const) {
     await expect(page.getByRole('spinbutton', { name: 'Dài OBS-001', exact: true }).locator('xpath=..')).toContainText('cm')
     await page.getByRole('button', { name: 'Lưu', exact: true }).click()
     await page.waitForURL(/\/doi-xe$/)
-    await expect(page.getByRole('row', { name: /Truck 6m VEHICLE-005 600 × 240 × 250 cm 5\.000 kg/ })).toBeVisible()
+    await expect(page.getByRole('row', { name: /Truck 6m VEHICLE-009 600 × 240 × 250 cm 5\.000 kg/ })).toBeVisible()
 
     // Dashboard → Tạo kế hoạch xếp → form chuyến
     await page.getByRole('link', { name: 'Bảng điều khiển', exact: true }).click()
