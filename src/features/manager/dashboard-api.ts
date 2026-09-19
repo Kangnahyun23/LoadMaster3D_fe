@@ -1,16 +1,28 @@
-import { getMockDb } from '@/lib/mock-db'
-import type { Revision } from '@/lib/mock-db'
-import { deriveDashboardSummary, type DashboardSummary } from './dashboard-summary'
+import { getMockDb, vnDate } from '@/lib/mock-db'
+import type { DashboardData } from './dashboard-summary'
 
 /**
- * Lớp dữ liệu của bảng điều khiển (mục 9): nơi duy nhất trong `manager` biết về kho. Nối backend thật chỉ thay
- * thân hàm — hook và component giữ nguyên.
+ * Lớp dữ liệu của bảng điều khiển (mục 9): nơi duy nhất trong `manager` biết về kho. Nối backend thật chỉ thay thân hàm —
+ * hook và component giữ nguyên.
  *
- * Kho chưa có hàm liệt kê revision toàn hệ thống nên đọc theo từng chuyến rồi gộp lại; backend thật sẽ trả sẵn.
+ * Đọc một lần mọi chuyến kèm revision, xe, trạng thái xe và người dùng; kỳ được lọc lại trên máy (`summarizeDashboard`) nên đổi
+ * kỳ không đọc lại kho. Kho chưa có hàm liệt kê revision toàn hệ thống nên đọc theo từng chuyến; backend thật sẽ trả sẵn tổng hợp.
  */
-export async function fetchDashboardSummary(): Promise<DashboardSummary> {
+export async function fetchDashboardData(): Promise<DashboardData> {
   const db = getMockDb()
-  const [vehicles, trips] = await Promise.all([db.listVehicles(), db.listTrips()])
-  const revisions: Revision[] = (await Promise.all(trips.map((trip) => db.listRevisions(trip.id)))).flat()
-  return deriveDashboardSummary({ vehicles, trips, revisions })
+  const today = vnDate(new Date())
+  const [trips, vehicles, vehicleStates, users] = await Promise.all([
+    db.listTrips(),
+    db.listVehicles(),
+    db.listVehicleStates(),
+    db.listUsers(),
+  ])
+  const revisions = await Promise.all(trips.map((trip) => db.listRevisions(trip.id)))
+  return {
+    today,
+    trips: trips.map((trip, index) => ({ trip, revisions: revisions[index] ?? [] })),
+    vehicles,
+    vehicleStates,
+    users,
+  }
 }
