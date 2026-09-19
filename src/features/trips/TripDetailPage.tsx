@@ -9,6 +9,7 @@ import type { CargoPackage } from '@/domain/models'
 import { useT } from '@/lib/i18n'
 import { CargoSummaryCard } from './CargoSummaryCard'
 import { PackageFormPanel } from './PackageFormPanel'
+import { PackageImportDialog } from './PackageImportDialog'
 import { emptyPackage } from './package-defaults'
 import { PackagesTable } from './PackagesTable'
 import { RouteDiagram } from './RouteDiagram'
@@ -27,8 +28,8 @@ import {
 import { VehicleCard } from './VehicleCard'
 
 /**
- * Chi tiết chuyến hàng (LM-043 → LM-046, LM-088, LM-097): sơ đồ tuyến, xe và tài xế, tóm tắt hàng, tiến trình, thứ tự điểm giao
- * kéo thả, bảng kiện.
+ * Chi tiết chuyến hàng (LM-043 → LM-046, LM-088, LM-093, LM-097): sơ đồ tuyến, xe và tài xế, tóm tắt hàng, tiến trình, thứ tự điểm
+ * giao kéo thả, bảng kiện và nhập kiện từ file.
  * Dữ liệu đọc từ mock repository qua Query. Chỉ sửa được khi có quyền và chuyến còn lập kế hoạch (D-41, D-45); từ lúc kho bắt đầu
  * xếp, banner nói lý do và mọi thao tác sửa ẩn đi.
  */
@@ -44,6 +45,7 @@ export function TripDetailPage() {
   const duplicatePackage = useDuplicatePackageMutation(tripId)
   const [searchParams, setSearchParams] = useSearchParams()
   const [draft, setDraft] = useState<CargoPackage | null>(null)
+  const [importing, setImporting] = useState(false)
 
   const trip = query.data?.trip
   const vehicle = query.data?.vehicle
@@ -128,7 +130,9 @@ export function TripDetailPage() {
                 selectedId={editing?.id ?? null}
                 onSelect={(pkg) => setEditing(editing?.id === pkg.id ? null : pkg)}
                 onAdd={editable ? () => setEditing(emptyPackage(trip.packages, stops[0]?.number ?? 1)) : undefined}
+                onImport={editable ? () => setImporting(true) : undefined}
               />
+              {editable ? <PackageImportDialog trip={trip} vehicle={vehicle} open={importing} onOpenChange={setImporting} /> : null}
             </div>
 
             {editing ? (
