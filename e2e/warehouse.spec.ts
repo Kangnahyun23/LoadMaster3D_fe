@@ -2,7 +2,8 @@ import { attachScreenshot, expect, PLANNER_ROUTE, test } from './fixtures'
 import { heightOf, MOCK_DB, navigateInApp, overflowingText, SEED_TRIP } from './spec-flow-helpers'
 
 /**
- * Màn kho đọc revision đã duyệt (LM-060). Kho dữ liệu nằm trong bộ nhớ trang: sau khi ghi chỉ đổi route phía client.
+ * Màn kho đọc revision đã duyệt (LM-060); `/kho` là danh sách chuyến, `/kho?chuyen=` là phiên xếp (LM-086). Kho dữ liệu nằm trong
+ * bộ nhớ trang: sau khi ghi chỉ đổi route phía client.
  */
 
 test.use({ collectConsoleErrors: true })
@@ -10,7 +11,7 @@ test.use({ collectConsoleErrors: true })
 for (const device of ['desktop', 'tablet'] as const) {
   const details = device === 'tablet' ? { tag: '@tablet' } : {}
 
-  test(`${device}: approving in the Planner then opening /kho starts at loadingOrder 1 of that revision`, details, async ({ page, login, browserErrors }) => {
+  test(`${device}: approving in the Planner then opening the trip in /kho starts at loadingOrder 1 of that revision`, details, async ({ page, login, browserErrors }) => {
     await login(PLANNER_ROUTE, 'admin')
     await page.locator('canvas').waitFor()
     await page.getByRole('button', { name: 'Duyệt phương án', exact: true }).click()
@@ -26,7 +27,7 @@ for (const device of ['desktop', 'tablet'] as const) {
     }, { db: MOCK_DB, tripId: SEED_TRIP })
     expect(approved.id).toBe(approvedId)
 
-    await navigateInApp(page, '/kho')
+    await navigateInApp(page, `/kho?chuyen=${SEED_TRIP}`)
     const heading = page.getByRole('heading', { level: 1, name: approved.first, exact: true })
     await expect(heading).toBeVisible()
     await expect(page.getByText(`Bước 1 / ${approved.total}`)).toBeVisible()
@@ -59,24 +60,27 @@ for (const device of ['desktop', 'tablet'] as const) {
 }
 
 /**
- * LM-071: màn kho chạy bằng `?lang=en`, nút chuyển ngôn ngữ trên header đạt 56px, đổi ngôn ngữ giữa phiên giữ bước đang xếp,
- * chữ tiếng Anh không tràn ở tablet dọc (project) và ngang 1024×768. Không ghi kho nên được tải trang để đặt `?lang`.
+ * LM-071, LM-086: danh sách chuyến và phiên kho chạy bằng `?lang=en`, nút chuyển ngôn ngữ trên header đạt 56px, đổi ngôn ngữ giữa
+ * phiên giữ bước đang xếp, chữ tiếng Anh không tràn ở tablet dọc (project) và ngang 1024×768. Tải trang để đặt `?lang` trước mọi
+ * lần ghi kho; sau đó chỉ bấm trong app.
  */
 test('tablet: the warehouse runs in English and switching language mid-session keeps the step', { tag: '@tablet' }, async ({ page, login, browserErrors }, testInfo) => {
   await login('/kho', 'warehouse')
   await page.goto('/kho?lang=en')
-  const plan = await page.evaluate(async (db) => {
+  await expect(page.getByRole('heading', { level: 1, name: 'Trips to load', exact: true })).toBeVisible()
+  const card = page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: SEED_TRIP, exact: true }) })
+  const start = card.getByRole('link', { name: 'Start loading', exact: true })
+  expect(await heightOf(start)).toBeGreaterThanOrEqual(56)
+  expect(await overflowingText(page)).toStrictEqual([])
+  await attachScreenshot(page, testInfo, 'warehouse-list-en-tablet-portrait')
+
+  const plan = await page.evaluate(async ({ db, tripId }) => {
     const { getMockDb } = (await import(db)) as typeof import('@/lib/mock-db')
-    const store = getMockDb()
-    const trips = await store.listTrips()
-    for (const trip of trips) {
-      const revision = (await store.listRevisions(trip.id)).findLast((item) => item.approvedAt !== undefined)
-      if (!revision) continue
-      const byOrder = (order: number) => revision.result.placements.find((placement) => placement.loadingOrder === order)!.packageInstanceId
-      return { first: byOrder(1), second: byOrder(2), total: revision.result.placements.length }
-    }
-    throw new Error('seed has no approved revision')
-  }, MOCK_DB)
+    const revision = (await getMockDb().listRevisions(tripId)).findLast((item) => item.approvedAt !== undefined)!
+    const byOrder = (order: number) => revision.result.placements.find((placement) => placement.loadingOrder === order)!.packageInstanceId
+    return { first: byOrder(1), second: byOrder(2), total: revision.result.placements.length }
+  }, { db: MOCK_DB, tripId: SEED_TRIP })
+  await start.tap()
 
   await expect(page.getByRole('heading', { level: 1, name: plan.first, exact: true })).toBeVisible()
   await expect(page.getByText(`Step 1 / ${plan.total}`)).toBeVisible()
@@ -123,7 +127,8 @@ test('a trip without an approved plan shows the empty state with a way out', asy
   await expect(page.getByText('Chưa có phương án đã duyệt', { exact: true })).toBeVisible()
   await expect(page.getByText(`Chuyến ${tripId} chưa có phương án đã duyệt.`, { exact: false })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Xác nhận đã xếp', exact: true })).toHaveCount(0)
-  await page.getByRole('link', { name: 'Tới danh sách chuyến', exact: true }).click()
-  await page.waitForURL(/\/chuyen$/)
+  await page.getByRole('link', { name: 'Về danh sách chuyến', exact: true }).click()
+  await page.waitForURL((url) => url.pathname === '/kho' && url.search === '')
+  await expect(page.getByRole('list', { name: 'Chuyến cần xếp' })).toBeVisible()
   expect(browserErrors).toStrictEqual([])
 })

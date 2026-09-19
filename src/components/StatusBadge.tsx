@@ -22,11 +22,12 @@ const STATUS: Record<TripStatus, StatusSpec> = {
   da_huy: { tone: 'danger' },
 }
 
-export function StatusBadge({ status }: { status: TripStatus }) {
+/** `className` đè cỡ của badge, ví dụ bản 16px cho màn cảm ứng kho và tài xế (mục 10). */
+export function StatusBadge({ status, className }: { status: TripStatus; className?: string }) {
   const t = useT()
   const spec = STATUS[status]
   return (
-    <Badge tone={spec.tone} dot={spec.dot}>
+    <Badge tone={spec.tone} dot={spec.dot} className={className}>
       {t(`status.${status}`)}
     </Badge>
   )

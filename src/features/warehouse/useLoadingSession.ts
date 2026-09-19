@@ -1,61 +1,71 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { ScenePlacement } from '@/features/viewer3d/scene-input'
-import { useT } from '@/lib/i18n'
+import { dataErrorMessage, useT } from '@/lib/i18n'
+import type { LoadingProgress } from '@/lib/mock-db'
+import { loadingProgress } from './loading-session'
+import { useRecordLoadingStepMutation } from './useWarehouseQueries'
 
-/** Thời gian hiện lớp phủ "Đã xếp" trước khi chuyển bước kế tiếp. */
+/** Thời gian tối thiểu hiện lớp phủ "Đã xếp" trước khi sang kiện kế tiếp. */
 const CONFIRMED_OVERLAY_MS = 1200
 
+type Overlay = { readonly id: string; readonly nextStep: number | undefined }
+
 /**
- * Phiên xếp hàng tại kho: đi tuần tự theo `step` (= `loadingOrder` của revision đã duyệt, LM-060).
- * Xác nhận xong hiện lớp phủ xanh rồi tự chuyển sang kiện kế tiếp.
+ * Phiên xếp hàng tại kho (LM-086): kiện hiện tại là kiện chưa có kết quả đầu tiên theo `loadingOrder`, đọc từ tiến độ trong kho — mở
+ * lại màn là tiếp tục đúng chỗ (D-47). Xác nhận ghi "đã xếp" rồi hiện lớp phủ xanh tới khi vừa hết 1,2 giây vừa ghi xong; kiện
+ * thiếu ghi "thiếu". Kiện cuối có kết quả thì kho tự hoàn tất xếp (`warehouse-api`). Ghi lỗi: toast nói lỗi, kiện hiện tại giữ nguyên.
  */
-export function useLoadingSession(placements: readonly ScenePlacement[], initialStep = 1) {
+export function useLoadingSession(tripId: string, placements: readonly ScenePlacement[], loading: LoadingProgress | undefined) {
   const t = useT()
-  const totalSteps = placements.length
-  const [step, setStep] = useState(initialStep)
-  const [confirmedId, setConfirmedId] = useState<string | null>(null)
+  const progress = useMemo(() => loadingProgress(placements, loading), [placements, loading])
+  const record = useRecordLoadingStepMutation(tripId)
+  const [overlay, setOverlay] = useState<Overlay | null>(null)
+  const [holding, setHolding] = useState(false)
   const timerRef = useRef<number | null>(null)
 
-  const byStep = useMemo(() => new Map(placements.map((p) => [p.step, p])), [placements])
-  const current = byStep.get(step)
-  const next = byStep.get(step + 1)
-  const finished = step > totalSteps
-
-  const clearTimer = useCallback(() => {
-    if (timerRef.current !== null) {
-      window.clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
+  useEffect(() => () => {
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current)
   }, [])
 
-  const confirm = useCallback(() => {
-    if (!current || confirmedId) return
-    setConfirmedId(current.id)
-    clearTimer()
+  const busy = holding || record.isPending
+
+  function showError(error: unknown) {
+    toast.error(dataErrorMessage(error, t))
+  }
+
+  function confirm() {
+    const current = progress.current
+    if (!current || busy) return
+    setOverlay({ id: current.id, nextStep: progress.next?.step })
+    setHolding(true)
     timerRef.current = window.setTimeout(() => {
-      setStep((s) => s + 1)
-      setConfirmedId(null)
       timerRef.current = null
+      setHolding(false)
     }, CONFIRMED_OVERLAY_MS)
-  }, [current, confirmedId, clearTimer])
+    record.mutate({ packageInstanceId: current.id, outcome: 'loaded' }, { onError: showError })
+  }
 
-  const reportMissing = useCallback(() => {
-    if (!current) return
-    // Chưa có nơi lưu báo cáo thiếu kiện (D-20): toast chỉ nói việc thật sự xảy ra — bỏ qua bước này.
-    toast.warning(t('warehouse.skipped', { id: current.id }), { description: t('warehouse.skippedDescription') })
-    setStep((s) => s + 1)
-  }, [current, t])
-
-  useEffect(() => clearTimer, [clearTimer])
+  /** Ghi kiện `id` thiếu ở kho; `true` khi kho đã ghi. */
+  async function reportMissing(id: string): Promise<boolean> {
+    // Lớp phủ chỉ dành cho "đã xếp": lần ghi thiếu không được làm hiện lại lớp phủ của kiện xác nhận trước đó
+    setOverlay(null)
+    try {
+      await record.mutateAsync({ packageInstanceId: id, outcome: 'missing' })
+      toast.warning(t('warehouse.missingRecorded', { id }), { description: t('warehouse.missingRecordedDescription') })
+      return true
+    } catch (error) {
+      showError(error)
+      return false
+    }
+  }
 
   return {
-    step,
-    totalSteps,
-    current,
-    next,
-    finished,
-    confirmedId,
+    ...progress,
+    busy,
+    /** Lớp phủ "Đã xếp": giữ tới khi vừa hết thời gian tối thiểu vừa ghi xong, để không lộ lại kiện vừa xác nhận. */
+    overlay: overlay !== null && busy ? overlay : null,
+    recording: record.isPending,
     confirm,
     reportMissing,
   }

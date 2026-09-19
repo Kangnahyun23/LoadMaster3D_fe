@@ -2,16 +2,16 @@ import { Check } from 'lucide-react'
 import { useFormat, useT } from '@/lib/i18n'
 
 /**
- * Lớp phủ xác nhận sau khi bấm "Xác nhận đã xếp": vòng tròn xanh lớn,
- * mã kiện vừa xếp và bước kế tiếp. Tự ẩn sau ~1,2 giây.
- * Là lớp nổi nên vòng tròn được phép có bóng (mục 5).
+ * Lớp phủ xác nhận sau khi bấm "Xác nhận đã xếp": vòng tròn xanh lớn, mã kiện vừa xếp và bước kế tiếp — kiện cuối thì báo đang
+ * hoàn tất xếp hàng. Hiện tối thiểu ~1,2 giây và tới khi kho ghi xong. Là lớp nổi nên vòng tròn được phép có bóng (mục 5).
  */
 export function ConfirmedOverlay({
   confirmedId,
   nextStep,
 }: {
   confirmedId: string
-  nextStep: number
+  /** Bước kế tiếp; vắng khi vừa xếp kiện cuối. */
+  nextStep?: number
 }) {
   const t = useT()
   const format = useFormat()
@@ -28,7 +28,7 @@ export function ConfirmedOverlay({
         {t('warehouse.confirmed', { id: confirmedId })}
       </span>
       <span className="text-[18px] leading-6 text-text-2">
-        {t('warehouse.nextStep', { step: format.integer(nextStep) })}
+        {nextStep === undefined ? t('warehouse.finishing') : t('warehouse.nextStep', { step: format.integer(nextStep) })}
       </span>
     </div>
   )

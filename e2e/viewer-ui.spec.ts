@@ -116,7 +116,8 @@ test('benchmark fixture requires debug; warehouse camera, next step and driver 2
   expect(await page.locator('[data-viewer-performance]').count()).toBe(0)
   expect(await page.locator('header').innerText()).toMatch(/132/)
 
-  await page.goto('/kho')
+  // Tải trang là kho mới: vào phiên chuyến seed là bắt đầu xếp ở bước 1 (LM-086)
+  await page.goto('/kho?chuyen=TRIP-2026-0914')
   await page.locator('canvas').waitFor()
   await page.getByRole('combobox', { name: 'Góc nhìn thùng xe', exact: true }).selectOption('cua-sau')
   await page.waitForTimeout(1000)

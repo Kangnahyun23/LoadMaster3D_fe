@@ -7,7 +7,10 @@ import { useAuth } from './AuthProvider'
 import { exitAction } from './exit'
 
 type ExitTarget = {
-  /** Màn chính mà nút này nằm trên (`/kho`, `/tai-xe/diem-giao`). */
+  /**
+   * Đường dẫn màn nút này nằm trên (`/kho`, `/kho?chuyen=TRIP-…`). Trùng màn chính của vai trò thì thoát là đăng xuất; khác thì
+   * về màn chính (`exitAction`).
+   */
   screenHome: string
   /** Trang của điều phối viên đã mở màn này, ví dụ chi tiết chuyến. */
   contextual?: string
