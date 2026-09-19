@@ -44,7 +44,8 @@ export function StopList({ stops, onReorder, onRemove, readOnly = false }: {
     const from = stops.findIndex((stop) => stop.id === active.id)
     const to = stops.findIndex((stop) => stop.id === over.id)
     if (from === -1 || to === -1) return
-    onReorder(arrayMove([...stops], from, to).map(({ id, name, address }) => ({ id, name, address })))
+    // Bỏ các trường tính từ kiện, giữ nguyên dữ liệu điểm giao (kể cả số điện thoại, người liên hệ — D-46)
+    onReorder(arrayMove([...stops], from, to).map(({ number: _number, packageCount: _count, weightKg: _weight, ...stop }) => stop))
     toast.success(t('trips.stops.reordered'))
   }
 

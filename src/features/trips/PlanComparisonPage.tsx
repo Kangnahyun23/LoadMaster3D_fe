@@ -20,6 +20,8 @@ export function PlanComparisonPage() {
   const t = useT()
   const query = useTripRevisionsQuery(tripId)
   const cards = useMemo(() => (query.data ? revisionCards(query.data.trip, query.data.revisions) : []), [query.data])
+  // Chuyến đã sang pha vận hành thì không tối ưu thêm (D-45, LM-088): bỏ lối tới Thiết lập tối ưu
+  const canRun = query.data?.trip.phase === 'planning'
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
@@ -52,15 +54,15 @@ export function PlanComparisonPage() {
           </Button>
         </div>
       ) : cards.length < 2 ? (
-        <NotEnoughRevisions tripId={tripId} cards={cards} />
+        <NotEnoughRevisions tripId={tripId} cards={cards} canRun={canRun} />
       ) : (
-        <Comparison tripId={tripId} cards={cards} />
+        <Comparison tripId={tripId} cards={cards} canRun={canRun} />
       )}
     </div>
   )
 }
 
-function NotEnoughRevisions({ tripId, cards }: { tripId: string; cards: readonly RevisionCardModel[] }) {
+function NotEnoughRevisions({ tripId, cards, canRun }: { tripId: string; cards: readonly RevisionCardModel[]; canRun: boolean }) {
   const t = useT()
   const only = cards[0]
   return (
@@ -75,9 +77,11 @@ function NotEnoughRevisions({ tripId, cards }: { tripId: string; cards: readonly
                 <Link to={plannerPath({ tripId, jobId: only.jobId, revisionId: only.id })}>{t('trips.compare.openOnly')}</Link>
               </Button>
             ) : null}
-            <Button variant="primary" asChild>
-              <Link to={`/chuyen/${tripId}/toi-uu`}>{t('trips.compare.emptyAction')}</Link>
-            </Button>
+            {canRun ? (
+              <Button variant="primary" asChild>
+                <Link to={`/chuyen/${tripId}/toi-uu`}>{t('trips.compare.emptyAction')}</Link>
+              </Button>
+            ) : null}
           </div>
         }
       />
@@ -85,7 +89,7 @@ function NotEnoughRevisions({ tripId, cards }: { tripId: string; cards: readonly
   )
 }
 
-function Comparison({ tripId, cards }: { tripId: string; cards: readonly RevisionCardModel[] }) {
+function Comparison({ tripId, cards, canRun }: { tripId: string; cards: readonly RevisionCardModel[]; canRun: boolean }) {
   const t = useT()
   const [chosenId, setChosenId] = useState<string>()
   const best = useMemo(() => bestValues(cards), [cards])
@@ -112,9 +116,11 @@ function Comparison({ tripId, cards }: { tripId: string; cards: readonly Revisio
           {selected ? t('trips.compare.selectedLabel', { id: selected.id }) : null}
         </span>
         <div className="flex flex-none gap-2">
-          <Button variant="secondary" asChild>
-            <Link to={`/chuyen/${tripId}/toi-uu`}>{t('trips.compare.runMore')}</Link>
-          </Button>
+          {canRun ? (
+            <Button variant="secondary" asChild>
+              <Link to={`/chuyen/${tripId}/toi-uu`}>{t('trips.compare.runMore')}</Link>
+            </Button>
+          ) : null}
           {selected ? (
             <Button variant="primary" asChild>
               <Link to={plannerPath({ tripId, jobId: selected.jobId, revisionId: selected.id })}>

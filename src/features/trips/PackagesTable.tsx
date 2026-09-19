@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { AlertCircle, Plus } from 'lucide-react'
+import { AlertCircle, FileUp, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
 import { EmptyState } from '@/components/EmptyState'
@@ -16,14 +16,14 @@ import type { StopRow } from './trip-summary'
 /**
  * Bảng kiện của chuyến (LM-044). Phân trang 50 dòng thay vì ảo hoá: giữ số node DOM nhỏ ở 500 kiện mà không thêm
  * `@tanstack/react-virtual` vào stack (AGENTS mục 2 — chỉ thêm dependency khi có nhu cầu đã chứng minh).
- * Không có nút Import CSV/Excel (D-20).
+ * "Nhập từ file" (LM-093) chỉ hiện khi được sửa chuyến — nút hoạt động thật (Spec 9.3, D-20).
  */
 const PAGE_SIZE = 50
 const mono = 'font-mono text-caption'
 
 type Row = CargoPackage & { readonly errorCount: number; readonly warningCount: number; readonly stopName: string }
 
-export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, onAdd }: {
+export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, onAdd, onImport }: {
   packages: readonly CargoPackage[]
   vehicle: VehicleConfig
   stops: readonly StopRow[]
@@ -31,6 +31,8 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
   onSelect: (pkg: CargoPackage) => void
   /** Vắng khi không được thêm kiện (chỉ xem, chuyến đã khoá): ẩn nút Thêm kiện. */
   onAdd?: () => void
+  /** Mở hộp thoại nhập kiện từ file (LM-093); vắng như `onAdd`. */
+  onImport?: () => void
 }) {
   const t = useT()
   const format = useFormat()
@@ -111,11 +113,17 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
   }, [t, format])
 
   if (packages.length === 0) {
+    // Nút phụ: hành động chính của màn là "Chạy tối ưu" ở header (AGENTS mục 5, mỗi màn một nút primary)
     return <EmptyState
       illustration={<EmptyTripsIllustration />}
       title={t('trips.packages.emptyTitle')}
       description={t('trips.packages.emptyDescription')}
-      action={onAdd ? <Button variant="primary" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button> : undefined}
+      action={onAdd || onImport ? (
+        <div className="flex flex-wrap justify-center gap-2">
+          {onAdd ? <Button variant="secondary" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button> : null}
+          {onImport ? <Button variant="secondary" onClick={onImport}><FileUp strokeWidth={1.5} />{t('trips.import.open')}</Button> : null}
+        </div>
+      ) : undefined}
     />
   }
 
@@ -123,6 +131,7 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
     <div className="flex min-h-0 min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         {onAdd ? <Button variant="secondary" className="h-9 px-3" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button> : null}
+        {onImport ? <Button variant="secondary" className="h-9 px-3" onClick={onImport}><FileUp strokeWidth={1.5} />{t('trips.import.open')}</Button> : null}
         <label className="flex items-center gap-2 text-caption text-text-2">
           <span className="sr-only">{t('trips.packages.filterStop')}</span>
           <select

@@ -1,5 +1,5 @@
 import type { OptimizationRequest, OptimizationResult, VehicleConfig } from '@/domain/models'
-import { getMockDb, type Revision, type Trip } from '@/lib/mock-db'
+import { getMockDb, type Revision, type Trip, type VehicleStatus } from '@/lib/mock-db'
 import { createOptimizationService, type OptimizationProgress } from '@/services/optimization'
 
 /**
@@ -11,12 +11,15 @@ export type OptimizationSetup = {
   readonly trip: Trip
   readonly vehicle: VehicleConfig
   readonly vehicles: readonly VehicleConfig[]
+  /** Trạng thái từng xe (D-53): xe bảo dưỡng hiện trong ô chọn nhưng không chọn được (LM-088). */
+  readonly vehicleStatus: Readonly<Record<string, VehicleStatus>>
 }
 
 export async function fetchOptimizationSetup(tripId: string): Promise<OptimizationSetup> {
   const db = getMockDb()
-  const [trip, vehicles] = await Promise.all([db.getTrip(tripId), db.listVehicles()])
-  return { trip, vehicle: await db.getVehicle(trip.vehicleId), vehicles }
+  const [trip, vehicles, states] = await Promise.all([db.getTrip(tripId), db.listVehicles(), db.listVehicleStates()])
+  const vehicleStatus = Object.fromEntries(states.map((state) => [state.vehicleId, state.status]))
+  return { trip, vehicle: await db.getVehicle(trip.vehicleId), vehicles, vehicleStatus }
 }
 
 export async function changeTripVehicle(tripId: string, vehicleId: string): Promise<Trip> {
