@@ -1,0 +1,63 @@
+import type { Dictionary } from '../types'
+import type { admin as source } from '../vi/admin'
+
+export const admin = {
+  users: {
+    title: 'Users',
+    count: { one: '{count} account', other: '{count} accounts' },
+    rowHint: 'Click a row to edit the account.',
+    neverSignedIn: 'Never signed in',
+    updated: 'Updated {name}',
+    created: 'Added {name}',
+    createdDescription: 'A password setup email has been sent.',
+    columns: {
+      user: 'User',
+      phone: 'Phone',
+      role: 'Role',
+      depot: 'Warehouse / branch',
+      lastActive: 'Last active',
+      status: 'Status',
+    },
+    status: {
+      active: 'Active',
+      suspended: 'Locked',
+    },
+    devices: {
+      dispatcher: 'Computer',
+      warehouse: 'Warehouse tablet',
+      driver: 'Phone',
+      manager: 'Computer / tablet',
+      admin: 'Computer',
+    },
+    form: {
+      createTitle: 'Add user',
+      editTitle: 'Edit user',
+      createDescription: 'New users receive an email to set their first password.',
+      editDescription: 'Changes take effect the next time the user signs in.',
+      fullName: 'Full name',
+      fullNamePlaceholder: 'Nguyễn Thanh Tùng',
+      phone: 'Phone number',
+      email: 'Email',
+      emailPlaceholder: 'name@loadmaster.vn',
+      depot: 'Warehouse / branch',
+      depotPlaceholder: 'Kho Long Bình',
+      role: 'Role',
+      device: 'Main device: {device}',
+      status: 'Status',
+      cancel: 'Cancel',
+      save: 'Save changes',
+      create: 'Add user',
+    },
+    errors: {
+      fullNameRequired: 'Enter the full name',
+      fullNameTooLong: 'Full name can be at most 80 characters',
+      emailRequired: 'Enter an email',
+      emailInvalid: 'Enter a valid email address',
+      phoneRequired: 'Enter a phone number',
+      phoneInvalid: 'Phone number must be 10 digits starting with 0',
+      roleRequired: 'Choose a role',
+      statusRequired: 'Choose a status',
+      depotRequired: 'Enter a warehouse or branch',
+    },
+  },
+} satisfies Dictionary<typeof source>

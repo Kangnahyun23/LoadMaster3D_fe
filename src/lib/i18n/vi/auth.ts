@@ -1,0 +1,28 @@
+/** Màn đăng nhập, tài khoản demo và nút thoát theo vai trò. */
+export const auth = {
+  login: {
+    title: 'Đăng nhập',
+    subtitle: 'Hệ thống lập kế hoạch và tối ưu chất xếp hàng hoá 3D.',
+    email: 'Email',
+    emailPlaceholder: 'ten@loadmaster.vn',
+    password: 'Mật khẩu',
+    submit: 'Đăng nhập',
+    emailRequired: 'Nhập email',
+    emailInvalid: 'Email không đúng định dạng',
+    passwordRequired: 'Nhập mật khẩu',
+    invalidCredentials: 'Email hoặc mật khẩu không đúng',
+    accountSuspended: 'Tài khoản đã bị khoá. Liên hệ quản trị hệ thống.',
+    serverUnreachable: 'Không kết nối được máy chủ. Thử lại sau.',
+  },
+  showcase: {
+    tagline: 'Mỗi chuyến xe chở được nhiều hơn, và dỡ hàng đúng thứ tự.',
+    fillRate: 'Tăng tỷ lệ lấp đầy xe, giảm số chuyến phải chạy',
+    reverseOrder: 'Xếp ngược thứ tự giao — tới điểm nào lấy hàng điểm đó',
+    axleLoad: 'Kiểm soát tải trọng từng trục trước khi xe lăn bánh',
+    artworkLabel: 'Mô phỏng thùng xe được xếp hàng theo thứ tự dỡ',
+  },
+  demo: {
+    title: 'Tài khoản dùng thử',
+    password: 'mật khẩu {password}',
+  },
+} as const
