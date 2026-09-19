@@ -349,6 +349,16 @@
   }
 }
 
+/*
+ * Vòng focus của thành phần viết `outline-none focus-visible:outline-2 …` (Button, Input, Select… — mục 5: vòng 2px
+ * --primary cách 2px). Ở Tailwind v4, `outline-none` đặt `--tw-outline-style: none` và `outline-2` vẽ theo biến đó, nên
+ * vòng không hiện (LM-085 phát hiện khi kiểm bàn phím). Để ngoài @layer để thắng lớp utilities; `outline-none` và
+ * `focus-visible:outline-none` vẫn tắt vòng như cũ vì chúng ghi thẳng `outline-style`, không qua biến.
+ */
+:focus-visible {
+  --tw-outline-style: solid;
+}
+
 /* Mục 8 — mọi thời lượng trên 200ms rút về 100ms, tắt chuyển động lớn */
 @media (prefers-reduced-motion: reduce) {
   :root {
