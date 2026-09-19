@@ -138,6 +138,18 @@ export const trips = {
     issueKinds: { damaged: 'Hàng hỏng', missing: 'Thiếu hàng', refused: 'Khách từ chối', other: 'Khác' },
     wholeStop: 'Cả điểm giao',
   },
+  /** Sơ đồ tuyến ở Chi tiết chuyến (LM-097, D-50): kho → các điểm giao theo thứ tự, không bản đồ địa lý. */
+  route: {
+    title: 'Sơ đồ tuyến',
+    label: {
+      one: 'Kho xuất phát rồi {count} điểm giao theo thứ tự giao',
+      other: 'Kho xuất phát rồi {count} điểm giao theo thứ tự giao',
+    },
+    depot: 'Kho xuất phát',
+    stop: 'Điểm {number} / {total}: {name}, {packages}, {weight}',
+    state: { done: 'Đã giao {time}', current: 'Đang giao', pending: 'Chưa giao' },
+    stateA11y: { done: 'đã giao lúc {time}', current: 'đang giao', pending: 'chưa giao' },
+  },
   /** Bảng giữ chỗ khi danh sách chuyến đang tải. */
   skeleton: {
     loading: 'Đang tải danh sách chuyến',

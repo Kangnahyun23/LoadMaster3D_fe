@@ -11,6 +11,7 @@ import { CargoSummaryCard } from './CargoSummaryCard'
 import { PackageFormPanel } from './PackageFormPanel'
 import { emptyPackage } from './package-defaults'
 import { PackagesTable } from './PackagesTable'
+import { RouteDiagram } from './RouteDiagram'
 import { StopList } from './StopList'
 import { cargoSummary, stopRows, type StopRow } from './trip-summary'
 import { TripDetailHeader } from './TripDetailHeader'
@@ -26,7 +27,8 @@ import {
 import { VehicleCard } from './VehicleCard'
 
 /**
- * Chi tiết chuyến hàng (LM-043 → LM-046, LM-088): xe và tài xế, tóm tắt hàng, tiến trình, thứ tự điểm giao kéo thả, bảng kiện.
+ * Chi tiết chuyến hàng (LM-043 → LM-046, LM-088, LM-097): sơ đồ tuyến, xe và tài xế, tóm tắt hàng, tiến trình, thứ tự điểm giao
+ * kéo thả, bảng kiện.
  * Dữ liệu đọc từ mock repository qua Query. Chỉ sửa được khi có quyền và chuyến còn lập kế hoạch (D-41, D-45); từ lúc kho bắt đầu
  * xếp, banner nói lý do và mọi thao tác sửa ẩn đi.
  */
@@ -95,6 +97,8 @@ export function TripDetailPage() {
       ) : (
         <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-8 pt-6 pb-8">
           <TripLockBanner trip={trip} />
+          {/* Dấu đã giao chỉ khi chuyến đang giao hoặc đã hoàn thành (LM-097) */}
+          <RouteDiagram stops={stops} delivery={trip.phase === 'delivering' || trip.phase === 'completed' ? trip.delivery : undefined} />
 
           <div className="flex flex-wrap items-start gap-6">
             <div className="flex w-80 flex-col gap-4">

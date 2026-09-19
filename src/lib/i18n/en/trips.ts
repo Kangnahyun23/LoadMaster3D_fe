@@ -132,6 +132,17 @@ export const trips = {
     issueKinds: { damaged: 'Damaged', missing: 'Missing', refused: 'Refused by customer', other: 'Other' },
     wholeStop: 'Whole stop',
   },
+  route: {
+    title: 'Route',
+    label: {
+      one: 'Depot, then {count} delivery stop in delivery order',
+      other: 'Depot, then {count} delivery stops in delivery order',
+    },
+    depot: 'Depot',
+    stop: 'Stop {number} of {total}: {name}, {packages}, {weight}',
+    state: { done: 'Delivered {time}', current: 'Delivering', pending: 'Not delivered' },
+    stateA11y: { done: 'delivered at {time}', current: 'being delivered now', pending: 'not delivered yet' },
+  },
   skeleton: {
     loading: 'Loading trip list',
     loadingText: 'Loading trip list…',
