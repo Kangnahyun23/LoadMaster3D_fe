@@ -116,7 +116,8 @@ test('benchmark fixture requires debug; warehouse camera, next step and driver 2
   expect(await page.locator('[data-viewer-performance]').count()).toBe(0)
   expect(await page.locator('header').innerText()).toMatch(/132/)
 
-  await page.goto('/kho')
+  // Tải trang là kho mới: vào phiên chuyến seed là bắt đầu xếp ở bước 1 (LM-086)
+  await page.goto('/kho?chuyen=TRIP-2026-0914')
   await page.locator('canvas').waitFor()
   await page.getByRole('combobox', { name: 'Góc nhìn thùng xe', exact: true }).selectOption('cua-sau')
   await page.waitForTimeout(1000)
@@ -129,7 +130,8 @@ test('benchmark fixture requires debug; warehouse camera, next step and driver 2
   await page.getByRole('button', { name: 'Xác nhận đã xếp', exact: true }).click()
   await expect(page.getByRole('heading', { level: 1, name: second, exact: true })).toBeVisible()
 
-  await page.goto('/tai-xe/diem-giao')
+  // Chuyến đang giao của seed (quản trị thấy mọi chuyến, LM-087): màn điểm giao 2D, chưa tải Three.js
+  await page.goto('/tai-xe/diem-giao?chuyen=TRIP-009')
   await page.getByRole('button', { name: 'Hoàn tất điểm giao', exact: true }).waitFor()
   expect(await page.locator('canvas').count()).toBe(0)
   expect(browserErrors).toStrictEqual([])

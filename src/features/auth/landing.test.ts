@@ -5,13 +5,13 @@ test('each role lands on its own screen when nothing else was asked for', () => 
   expect(landingPath('dispatcher')).toBe('/chuyen')
   expect(landingPath('manager')).toBe('/')
   expect(landingPath('warehouse')).toBe('/kho')
-  expect(landingPath('driver')).toBe('/tai-xe/diem-giao')
+  expect(landingPath('driver')).toBe('/tai-xe')
   expect(landingPath('admin')).toBe('/nguoi-dung')
 })
 
 test('opening the app root is not a choice: the role screen wins', () => {
   expect(landingPath('warehouse', '/')).toBe('/kho')
-  expect(landingPath('driver', '/?lang=en')).toBe('/tai-xe/diem-giao?lang=en')
+  expect(landingPath('driver', '/?lang=en')).toBe('/tai-xe?lang=en')
 })
 
 test('a deep link opened before signing in is kept', () => {

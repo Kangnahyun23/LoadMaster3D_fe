@@ -1,20 +1,27 @@
-import { Check, Package } from 'lucide-react'
+import { Check, CircleCheck, Package, TriangleAlert } from 'lucide-react'
 import { useFormat, useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { DeliveryItem } from './driver-plan'
 
 /**
- * Một dòng kiện hàng cần dỡ, cao tối thiểu 80px, nút tròn 56px bên phải để bấm được khi đeo găng.
- * Thứ tự dỡ là `unloadingOrder` của phương án đã duyệt.
+ * Một dòng kiện hàng cần dỡ, cao tối thiểu 80px, nút tròn 56px bên phải để bấm được khi đeo găng. Thứ tự dỡ là `unloadingOrder`
+ * của phương án đã duyệt. Trạng thái không chỉ nằm ở viền (U-7): kiện đã dỡ có nền xanh nhạt và dòng "Đã dỡ" kèm dấu kiểm, kiện có
+ * sự cố có nền vàng nhạt và dòng nêu loại sự cố.
  */
 export function DeliveryItemRow({
   item,
   done,
   onToggle,
+  issueLabel,
+  readOnly = false,
 }: {
   item: DeliveryItem
   done: boolean
   onToggle: (id: string) => void
+  /** Loại sự cố đã báo cho kiện, đã dịch. */
+  issueLabel?: string
+  /** Chưa bắt đầu giao: chỉ xem, không có nút đánh dấu. */
+  readOnly?: boolean
 }) {
   const t = useT()
   const format = useFormat()
@@ -23,38 +30,54 @@ export function DeliveryItemRow({
   return (
     <li
       data-package-id={item.id}
-      className={cn('flex min-h-20 items-center gap-3 border-b border-border py-3 pr-3 pl-4 last:border-b-0', done ? 'bg-surface' : 'bg-bg')}
+      data-state={done ? 'unloaded' : issueLabel ? 'issue' : 'pending'}
+      className={cn(
+        'flex min-h-20 items-center gap-3 border-b border-border py-3 pr-3 pl-4 last:border-b-0',
+        done ? 'bg-badge-success-bg' : issueLabel ? 'bg-badge-warning-bg' : 'bg-bg',
+      )}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex flex-wrap items-center gap-x-2">
-          <span className={cn('font-mono text-body-lg leading-5.5 font-semibold', done ? 'text-text-3 line-through' : 'text-text')}>
-            {item.id}
-          </span>
+          <span className="font-mono text-body-lg leading-5.5 font-semibold text-text">{item.id}</span>
           <span className="font-mono text-body-lg leading-5.5 text-text-3">{t('driver.item.order', { order: item.unloadingOrder })}</span>
         </div>
-        <span className={cn('truncate text-body-lg leading-5.5', done ? 'text-text-3' : 'text-text-2')}>
+        <span className="truncate text-body-lg leading-5.5 text-text-2">
           {item.name} · <span className="font-mono">{format.weight(item.weightKg)}</span>
         </span>
         <span className="inline-flex items-center gap-1.5 text-body-lg leading-5.5 text-text-3">
           <Package className="size-4 flex-none" strokeWidth={2} aria-hidden />
           {where}
         </span>
+        {done ? (
+          <span className="inline-flex items-center gap-1.5 text-body-lg leading-5.5 font-medium text-badge-success-fg">
+            <CircleCheck className="size-4 flex-none" strokeWidth={2} aria-hidden />
+            {t('driver.item.done')}
+          </span>
+        ) : null}
+        {issueLabel ? (
+          <span className="inline-flex items-center gap-1.5 text-body-lg leading-5.5 font-medium text-badge-warning-fg">
+            <TriangleAlert className="size-4 flex-none" strokeWidth={2} aria-hidden />
+            {t('driver.item.issue', { kind: issueLabel })}
+          </span>
+        ) : null}
       </div>
 
-      <button
-        type="button"
-        aria-label={t(done ? 'driver.item.unmarkDone' : 'driver.item.markDone', { id: item.id })}
-        aria-pressed={done}
-        onClick={() => onToggle(item.id)}
-        className={cn(
-          'grid size-14 flex-none place-items-center rounded-full',
-          'transition-colors duration-(--dur-fast) ease-standard',
-          'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-          done ? 'bg-success text-white' : 'border-2 border-success bg-bg text-badge-success-fg',
-        )}
-      >
-        {done ? <Check className="size-7" strokeWidth={3} aria-hidden /> : <span className="text-body-lg leading-none font-semibold">{t('driver.item.done')}</span>}
-      </button>
+      {readOnly ? null : (
+        <button
+          type="button"
+          aria-label={t(done ? 'driver.item.unmarkDone' : 'driver.item.markDone', { id: item.id })}
+          aria-pressed={done}
+          onClick={() => onToggle(item.id)}
+          className={cn(
+            'grid size-14 flex-none place-items-center rounded-full',
+            'transition-colors duration-(--dur-fast) ease-standard',
+            'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+            done ? 'bg-success text-white' : 'border-2 border-success bg-bg text-badge-success-fg',
+          )}
+        >
+          {done ? <Check className="size-7" strokeWidth={3} aria-hidden /> : <span className="text-body-lg leading-none font-semibold">{t('driver.item.done')}</span>}
+        </button>
+      )}
     </li>
   )
 }

@@ -1,13 +1,55 @@
-import { getMockDb } from '@/lib/mock-db'
-import { pickDriverPlan, type DriverPlan } from './driver-plan'
+import { getMockDb, MockDbError, type DeliveryIssueInput, type MockDb, type Revision, type Trip } from '@/lib/mock-db'
+import type { User } from '@/types/user'
+import { driverPlan, isVisibleTo, myTrips, type MyTrips } from './my-trips'
 
 /**
- * Lớp dữ liệu của màn tài xế (LM-061): nơi duy nhất trong `features/driver` biết về kho. Nối backend thật chỉ thay thân hàm.
- * Tài xế chỉ đọc revision đã duyệt (D-14); `null` khi chuyến được chọn (hoặc mọi chuyến) chưa có bản duyệt.
+ * Lớp dữ liệu của màn tài xế (LM-061, LM-087): nơi duy nhất trong `features/driver` biết về kho. Nối backend thật chỉ thay thân hàm.
+ * Như server, kho biết người đang đăng nhập (phiên, D-42): tài xế chỉ đọc được chuyến gán cho mình (D-46); chuyến của người khác trả
+ * `NOT_FOUND` như chuyến không tồn tại. Tiến độ giao ghi vào kho (D-47).
  */
-export async function fetchDriverPlan(tripId?: string): Promise<DriverPlan | null> {
+
+function sessionUser(db: MockDb): User {
+  const user = db.sessionUser()
+  if (!user) throw new MockDbError('NOT_SIGNED_IN', {})
+  return user
+}
+
+export async function fetchMyTrips(): Promise<MyTrips> {
   const db = getMockDb()
-  const trips = (await db.listTrips()).filter((trip) => tripId === undefined || trip.id === tripId)
-  const plans = await Promise.all(trips.map(async (trip) => ({ trip, revisions: await db.listRevisions(trip.id) })))
-  return pickDriverPlan(plans, tripId) ?? null
+  const viewer = sessionUser(db)
+  const [trips, vehicles] = await Promise.all([db.listTrips(), db.listVehicles()])
+  const visible = trips.filter((trip) => isVisibleTo(trip, viewer))
+  const entries = await Promise.all(visible.map(async (trip) => ({ trip, revisions: await db.listRevisions(trip.id) })))
+  return myTrips(entries, new Map(vehicles.map((vehicle) => [vehicle.id, vehicle.name])), viewer)
+}
+
+/** Chuyến và phương án tài xế làm theo (bản kho đã xếp, chưa xếp thì bản duyệt mới nhất); `plan` là `null` khi chưa có bản duyệt. */
+export type DriverTrip = { readonly trip: Trip; readonly plan: Revision | null }
+
+export async function fetchDriverTrip(tripId: string): Promise<DriverTrip> {
+  const db = getMockDb()
+  const viewer = sessionUser(db)
+  const [trip, revisions] = await Promise.all([db.getTrip(tripId), db.listRevisions(tripId)])
+  if (!isVisibleTo(trip, viewer)) throw new MockDbError('NOT_FOUND', { collection: 'trips', id: tripId })
+  return { trip, plan: driverPlan(trip, revisions) ?? null }
+}
+
+/** Xe rời kho: `loaded` → `delivering` (D-45). */
+export function startDelivery(tripId: string): Promise<Trip> {
+  return getMockDb().startDelivery(tripId)
+}
+
+export type UnloadInput = { readonly stopNumber: number; readonly packageInstanceId: string; readonly unloaded: boolean }
+
+export function recordUnload(tripId: string, { stopNumber, packageInstanceId, unloaded }: UnloadInput): Promise<Trip> {
+  return getMockDb().recordUnload(tripId, stopNumber, packageInstanceId, unloaded)
+}
+
+export function reportDeliveryIssue(tripId: string, issue: DeliveryIssueInput): Promise<Trip> {
+  return getMockDb().reportDeliveryIssue(tripId, issue)
+}
+
+/** Hoàn tất điểm giao; điểm cuối chuyển chuyến sang `completed`. */
+export function completeStop(tripId: string, stopNumber: number): Promise<Trip> {
+  return getMockDb().completeStop(tripId, stopNumber)
 }

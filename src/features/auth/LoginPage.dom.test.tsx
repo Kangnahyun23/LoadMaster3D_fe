@@ -47,7 +47,7 @@ beforeEach(() => sessionStorage.clear())
 
 test.each([
   ['kho@loadmaster.vn', '/kho'],
-  ['taixe@loadmaster.vn', '/tai-xe/diem-giao'],
+  ['taixe@loadmaster.vn', '/tai-xe'],
   ['dieuphoi@loadmaster.vn', '/chuyen'],
   ['quanly@loadmaster.vn', '/'],
   ['quantri@loadmaster.vn', '/nguoi-dung'],

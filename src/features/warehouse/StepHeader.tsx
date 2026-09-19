@@ -1,32 +1,30 @@
 import { LanguageSwitch } from '@/components/LanguageSwitch'
 import { ExitIconButton } from '@/features/auth/ExitControl'
 import { useFormat, useT } from '@/lib/i18n'
+import { loadingSessionPath } from './warehouse-trips'
 
 /**
  * Thanh trên cùng: lối thoát, bước hiện tại, thanh tiến độ, nút chuyển ngôn ngữ, mã chuyến.
  *
- * Bản design không có nút thoát vì vẽ màn kiosk chạy suốt ca; thực tế nhân
- * viên vẫn cần rời phiên khi chọn nhầm chuyến hoặc xếp xong, nên thêm nút
- * quay lại cỡ cảm ứng 56px (mục 10). Nút chuyển ngôn ngữ cũng 56px (LM-071);
- * đổi ngôn ngữ không remount phiên nên bước đang xếp giữ nguyên. Nút thoát theo vai trò: nhân viên kho đăng xuất,
- * điều phối viên về chi tiết chuyến (`exitAction`).
+ * Bản design không có nút thoát vì vẽ màn kiosk chạy suốt ca; thực tế nhân viên vẫn cần rời phiên khi chọn nhầm chuyến hoặc xếp
+ * xong, nên thêm nút quay lại cỡ cảm ứng 56px (mục 10). Nút chuyển ngôn ngữ cũng 56px (LM-071); đổi ngôn ngữ không remount phiên
+ * nên bước đang xếp giữ nguyên. Nút thoát theo vai trò (`exitAction`): nhân viên kho về danh sách chuyến (LM-086), điều phối viên
+ * và quản trị viên về chi tiết chuyến. Thanh tiến độ tính theo số kiện đã có kết quả trong kho, không theo số bước.
  */
-export function StepHeader({
-  step,
-  totalSteps,
-  tripId,
-}: {
+export function StepHeader({ step, totalSteps, recorded, tripId }: {
   step: number
   totalSteps: number
+  /** Kiện đã có kết quả (đã xếp hoặc thiếu). */
+  recorded: number
   tripId: string
 }) {
   const t = useT()
   const format = useFormat()
-  const percent = Math.round((Math.min(step, totalSteps) / totalSteps) * 100)
+  const percent = totalSteps === 0 ? 100 : Math.round((recorded / totalSteps) * 100)
 
   return (
     <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg pr-6 pl-3">
-      <ExitIconButton screenHome="/kho" contextual={`/chuyen/${tripId}`} label={t('warehouse.header.exit')} iconClassName="size-7" />
+      <ExitIconButton screenHome={loadingSessionPath(tripId)} contextual={`/chuyen/${tripId}`} label={t('warehouse.header.exit')} iconClassName="size-7" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex items-baseline justify-between gap-4">

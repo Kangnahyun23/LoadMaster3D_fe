@@ -1,49 +1,43 @@
-import { useMemo } from 'react'
-import { useSearchParams } from 'react-router'
-import { EmptyState } from '@/components/EmptyState'
+import { Navigate, useSearchParams } from 'react-router'
 import { Spinner } from '@/components/ui/Spinner'
-import { ExitActionButton } from '@/features/auth/ExitControl'
-import { adaptResult } from '@/features/viewer3d/scene-input'
-import { useT } from '@/lib/i18n'
+import { dataErrorMessage, useT } from '@/lib/i18n'
 import { DeliveryStopView } from './DeliveryStopView'
-import { stopDeliveries, type DriverPlan } from './driver-plan'
-import { useDriverPlanQuery } from './useDriverPlanQuery'
+import { DriverNotice } from './DriverNotice'
+import { TripSummary } from './TripSummary'
+import { useDriverTripQuery } from './useDriverQueries'
 
 /**
- * Màn tài xế (LM-061): revision đã duyệt mới nhất của chuyến `?chuyen=<tripId>`, hoặc của chuyến đầu tiên có bản duyệt.
- * Chưa có bản duyệt thì nói rõ cần duyệt trước, không dựng phương án giả.
+ * Một chuyến của tài xế `/tai-xe/diem-giao?chuyen=<mã>` (LM-087). Không có `?chuyen` thì về "Chuyến của tôi" `/tai-xe`.
+ * `key` theo mã chuyến: đổi chuyến là dựng màn mới, không mang hộp thoại hay khung 3D đang mở sang.
  */
 export function DriverStopPage() {
-  const t = useT()
   const [search] = useSearchParams()
-  const tripId = search.get('chuyen') ?? undefined
-  const query = useDriverPlanQuery(tripId)
+  const tripId = search.get('chuyen')
+  if (!tripId) return <Navigate to="/tai-xe" replace />
+  return <DriverTripScreen key={tripId} tripId={tripId} />
+}
+
+/**
+ * Theo pha chuyến trong kho (D-45): đã hoàn thành → tổng kết; kho chưa xếp xong, đã xếp xong hoặc đang giao → màn điểm giao (xem trước,
+ * bắt đầu giao, giao); chưa có bản duyệt, đã huỷ hoặc không phải chuyến của tài xế này → nói lý do.
+ */
+function DriverTripScreen({ tripId }: { tripId: string }) {
+  const t = useT()
+  const query = useDriverTripQuery(tripId)
 
   if (query.isPending) {
     return (
-      <div className="grid h-dvh place-items-center bg-bg text-body-lg text-text-2">
+      <div role="status" className="grid h-dvh place-items-center bg-bg text-body-lg text-text-2">
         <span className="inline-flex items-center gap-2"><Spinner />{t('driver.loading')}</span>
       </div>
     )
   }
-  if (!query.data) {
-    return (
-      <div className="flex h-dvh flex-col justify-center bg-bg p-4 text-body-lg">
-        <EmptyState
-          title={query.isError ? t('driver.loadErrorTitle') : t('driver.emptyTitle')}
-          description={query.isError ? t('driver.loadErrorDescription')
-            : tripId ? t('driver.emptyTripDescription', { tripId }) : t('driver.emptyDescription')}
-          action={<ExitActionButton screenHome="/tai-xe/diem-giao" label={t('driver.toTrips')} />}
-        />
-      </div>
-    )
+  if (query.isError) return <DriverNotice title={t('driver.loadErrorTitle')} description={dataErrorMessage(query.error, t)} />
+  const { trip, plan } = query.data
+  if (trip.phase === 'cancelled') {
+    return <DriverNotice title={t('driver.cancelledTitle')} description={t('driver.cancelledDescription', { tripId, reason: trip.cancellation?.reason ?? '' })} />
   }
-  // Bản duyệt mới là một phiên giao mới: điểm hiện tại và kiện đã dỡ không mang sang.
-  return <LoadedPlan key={query.data.revision.id} plan={query.data} />
-}
-
-function LoadedPlan({ plan }: { plan: DriverPlan }) {
-  const model = useMemo(() => adaptResult(plan), [plan])
-  const stops = useMemo(() => stopDeliveries(plan.trip.stops, model), [plan, model])
-  return <DeliveryStopView model={model} stops={stops} />
+  if (!plan) return <DriverNotice title={t('driver.emptyTitle')} description={t('driver.emptyTripDescription', { tripId })} />
+  if (trip.phase === 'completed') return <TripSummary trip={trip} plan={plan} />
+  return <DeliveryStopView trip={trip} plan={plan} />
 }
