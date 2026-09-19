@@ -27,10 +27,11 @@ Backend là Spring Boot monolith + PostgreSQL, cộng một Python FastAPI servi
 mỗi nhóm route bọc `RequirePermission` trong `app/App.tsx`, thiếu quyền là màn 403 (`app/ForbiddenPage.tsx`) có nút về màn chính;
 nav rail chỉ hiện mục có quyền; nút ghi ẩn qua `useCan()`. Backend thật phải kiểm lại ở server. Màn mới thêm route vào đúng nhóm quyền;
 E2E đăng nhập bằng `login(route, role)`, kịch bản đi qua nhiều vai trò dùng `admin`. *(bổ sung 17/09/2026)* Đăng nhập xong mở
-màn của vai trò (`features/auth/landing.ts`: điều phối `/chuyen`, quản lý `/`, kho `/kho`, tài xế `/tai-xe/diem-giao`,
+màn của vai trò (`features/auth/landing.ts`: điều phối `/chuyen`, quản lý `/`, kho `/kho`, tài xế `/tai-xe` (LM-087),
 quản trị `/nguoi-dung`); liên kết sâu mở trước khi đăng nhập được giữ, gốc `/` thì không. Đăng xuất không ghi nhớ trang đang đứng
 (`RequireAuth` chỉ nhớ trang khi người **chưa** đăng nhập mở nó). Nút thoát ở màn kho/tài xế theo vai trò (`features/auth/exit.ts`):
-nhân viên kho và tài xế **đăng xuất** (màn đó là màn chính của họ), điều phối viên và quản trị viên về trang chuyến, vai trò khác về màn chính. Nav rail 96px có nhãn chữ,
+nhân viên kho và tài xế **ở màn danh sách** thì **đăng xuất** (màn chính của họ), **trong phiên xếp / trong chuyến** thì về danh sách
+(`/kho`, `/tai-xe`, LM-086/087); điều phối viên và quản trị viên về trang chuyến, vai trò khác về màn chính. Nav rail 96px có nhãn chữ,
 mục đang mở có nền, chữ đậm và vạch mép trái (`app/NavRail.tsx`).
 
 ### MVP theo Build Spec *(bổ sung 15/09/2026)*
@@ -375,6 +376,7 @@ format nhận locale đang chọn.
 - `src/domain` **không chứa câu chữ hiển thị**: validation và constraint trả **mã lỗi + tham số**
   (`{ code, severity, params }`, D-28); zod schema dùng mã làm message. UI dịch mã và format số
   theo locale. Test so mã, không so câu.
+- Câu số nhiều tiếng Việt: hai dạng `one`/`other` phải giống hệt nhau (tiếng Việt luôn dùng dạng `other`, LM-087).
 - Câu cho mã ràng buộc nằm ở nhánh `issues` của từ điển, key trùng tên mã, và chỉ gọi qua
   `formatIssue(issue, t, format)` của `@/lib/i18n` (LM-028). Thêm mã vào `CONSTRAINT_CODES` mà
   chưa có câu thì `tsc -b` báo lỗi. Bản en giữ đúng từng chữ câu mẫu Spec mục 13 (`src/test/spec-13.ts`).
@@ -437,7 +439,7 @@ kết quả tối ưu; không có nguồn thì **bỏ hẳn phần đó**, khôn
 
 ### Foundation engine *(bổ sung)*
 
-- *(đã điều chỉnh, LM-030)* Planner đọc revision của chuyến qua `viewer-api.ts` → `usePlanSourceQuery` → `adaptResult → ViewerSceneModel` (cm, snapshot bất biến): revision đã duyệt mới nhất, hoặc `?revision=<jobId>`. `ScenePlacement` ghép `PackagePlacement` với kiện gốc (`packageId`, tên, điểm giao, `fragilityLevel`); `step = loadingOrder`. *(LM-060)* Kho đọc revision **đã duyệt** qua `warehouse-api.ts` → `useWarehousePlanQuery` → `adaptResult` (`?chuyen=<mã>`, không có thì chuyến đầu tiên có bản duyệt; bản lỗi thời vẫn hiện kèm cảnh báo; không có bản duyệt → trạng thái rỗng) và đưa scene cm cho `PositionViewer`; kho không còn fixture benchmark. Tài xế (LM-061) đọc revision đã duyệt qua `driver-api.ts` → `useDriverPlanQuery` → `adaptResult`. Kết hợp `ViewerDraft` theo ID để sinh effective placements; chỉ commit `{ position?, orientation?, pinned? }`, vị trí draft là cm. Header hiện **MOCK RESULT** khi `isMockResult`. Chế độ màu thứ hai là **theo kiện gốc** (`packageId`) vì contract không có đơn hàng; `packaging` của kết quả là một kiểu trung tính.
+- *(đã điều chỉnh, LM-030)* Planner đọc revision của chuyến qua `viewer-api.ts` → `usePlanSourceQuery` → `adaptResult → ViewerSceneModel` (cm, snapshot bất biến): revision đã duyệt mới nhất, hoặc `?revision=<jobId>`. `ScenePlacement` ghép `PackagePlacement` với kiện gốc (`packageId`, tên, điểm giao, `fragilityLevel`); `step = loadingOrder`. *(đã điều chỉnh 19/09/2026, LM-086)* `/kho` là danh sách chuyến đã duyệt chờ xếp / đang xếp; `/kho?chuyen=<mã>` là phiên xếp theo bản duyệt chốt lúc `startLoading`, tiến độ và kiện thiếu ghi vào kho (`recordLoadingStep`), mở lại tiếp tục ở kiện chưa ghi đầu tiên; bản duyệt lỗi thời **không** vào phiên (chờ điều phối duyệt lại). Scene cm đưa cho `PositionViewer`; kho không còn fixture benchmark (khung 3D kho chưa làm mờ kiện báo thiếu). *(LM-087)* Tài xế: `/tai-xe` "Chuyến của tôi" (chỉ chuyến có `driverId` là mình, quản trị thấy tất cả); `/tai-xe/diem-giao?chuyen=` đọc qua `driver-api.ts` → `adaptResult`, phương án là bản kho đã xếp (chưa xếp thì bản duyệt mới nhất, chỉ xem); kiện kho báo thiếu không nằm trong danh sách dỡ và mô phỏng; dỡ, sự cố, hoàn tất điểm ghi vào kho. Kết hợp `ViewerDraft` theo ID để sinh effective placements; chỉ commit `{ position?, orientation?, pinned? }`, vị trí draft là cm. Header hiện **MOCK RESULT** khi `isMockResult`. Chế độ màu thứ hai là **theo kiện gốc** (`packageId`) vì contract không có đơn hàng; `packaging` của kết quả là một kiểu trung tính.
 - Kích thước placement **đã áp orientation**. Xoay luôn áp mã đích lên kích thước danh nghĩa `baseDimensionsById` (lấy từ `CargoPackage`), không đảo ngược kích thước đã xoay (`orientedSize` trong `scene-input.ts`). Xoay giữ nguyên góc vị trí của kiện.
 - Cả ba vai trò dùng chung `SceneCanvas` với `frameloop="demand"`. CameraControls tự invalidate khi chuyển động; mọi thay đổi buffer imperative phải gọi invalidate. Spring chỉ ghi ma trận/proxy kiện đang chạy, không đưa state từng frame qua React.
 - `frustumCulled={false}` không loại bỏ nhu cầu bounds của **raycast**. Cargo dùng sphere bao toàn bộ effective geometry và quãng animation, cập nhật khi geometry đổi. Không tính lại `computeBoundingSphere()` trong animation/step/slice path; cập nhật màu không ghi lại ma trận.
