@@ -52,7 +52,7 @@ test.each<[Role, string[]]>([
   ['manager', ['Bảng điều khiển', 'Chuyến hàng', 'Đội xe']],
   ['warehouse', ['Kho']],
   ['driver', ['Tài xế']],
-  ['admin', ['Bảng điều khiển', 'Chuyến hàng', 'Kho', 'Tài xế', 'Đội xe', 'Người dùng']],
+  ['admin', ['Bảng điều khiển', 'Chuyến hàng', 'Kho', 'Tài xế', 'Đội xe', 'Người dùng', 'Nhật ký']],
 ])('nav rail của %s chỉ có mục được phép', (role, items) => {
   signedInAs(role)
   render(

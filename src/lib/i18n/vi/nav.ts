@@ -7,6 +7,7 @@ export const nav = {
   driver: 'Tài xế',
   fleet: 'Đội xe',
   users: 'Người dùng',
+  audit: 'Nhật ký',
   account: 'Tài khoản {name}',
   signOut: 'Đăng xuất',
   backHome: 'Về màn chính',

@@ -9,6 +9,7 @@ export const nav = {
   driver: 'Driver',
   fleet: 'Fleet',
   users: 'Users',
+  audit: 'Log',
   account: 'Account {name}',
   signOut: 'Sign out',
   backHome: 'Back to home',

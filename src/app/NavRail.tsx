@@ -2,6 +2,7 @@ import {
   Box,
   LayoutDashboard,
   LogOut,
+  ScrollText,
   Tablet,
   Truck,
   Users,
@@ -41,6 +42,7 @@ const NAV_ITEMS = [
   { to: '/tai-xe/diem-giao', labelKey: 'nav.driver', icon: Box, permission: 'driver.operate' },
   { to: '/doi-xe', labelKey: 'nav.fleet', icon: Warehouse, permission: 'fleet.view' },
   { to: '/nguoi-dung', labelKey: 'nav.users', icon: Users, permission: 'users.manage' },
+  { to: '/nhat-ky', labelKey: 'nav.audit', icon: ScrollText, permission: 'audit.view' },
 ] as const satisfies readonly NavItem[]
 
 /**
