@@ -120,7 +120,7 @@ src/
   app/                  router, providers, app shell, nav rail
     design-system/      2 trang tài liệu bàn giao (/kieu-dang, /thanh-phan)
   components/ui/        primitive tự viết trên Radix
-  components/           component dùng chung: StatusBadge, DataTable, EmptyState...
+  components/           component dùng chung: StatusBadge, DataTable, FilterBar, EmptyState, TripLockBanner...
   features/
     auth/               đăng nhập, phiên, RequireAuth
     trips/              danh sách, chi tiết, form chuyến, so sánh phương án
@@ -515,7 +515,7 @@ Khi làm một issue trong nhóm này, sửa luật tương ứng ở các mục
 Ảnh nhỏ, không xoay được thì vẽ bằng SVG đẳng cự qua `lib/isometric.ts` — nhẹ hơn
 nhiều và không kéo Three.js vào chunk. Đang dùng ở: xem trước trong modal tối ưu,
 ảnh thu nhỏ màn so sánh phương án, hình minh hoạ hướng đặt kiện ở kho, skeleton lúc
-đang tải Three.js, và hình minh hoạ màn đăng nhập.
+đang tải Three.js, hình minh hoạ màn đăng nhập và sơ đồ tuyến ở chi tiết chuyến (`trips/RouteDiagram.tsx`, LM-097).
 
 Chỉ dùng Three.js khi người dùng **cần xoay hoặc bấm vào vật thể**.
 
@@ -580,6 +580,9 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
   trước khi gọi. `message` của kiện chưa xếp là `reasonCode`, UI dịch mã (LM-024).
 - Kết quả là **revision bất biến** theo `jobId`. Duyệt tạo revision approved mới; sửa xe/kiện sau
   khi tối ưu làm revision lỗi thời và chặn Duyệt. Kho và tài xế chỉ đọc revision đã duyệt.
+- *(LM-088)* Chi tiết chuyến chỉ cho sửa khi `can('trips.edit') && phase === 'planning'`; form sửa chuyến mở ở `planning`, `loading`,
+  `loaded` (hai pha sau khoá xe và điểm giao). Lý do khoá hiện bằng `TripLockBanner` (chi tiết chuyến, Thiết lập tối ưu). Hộp thoại mở từ
+  mục `DropdownMenu` dùng `modal={false}` cho menu để focus về đúng hộp thoại.
 - *(bổ sung 19/09/2026, LM-081 → LM-083)* Kho lưu **pha** chuyến `planning → loading → loaded → delivering → completed` (+ `cancelled`);
   trạng thái hiển thị lấy qua `tripStatus(trip, revisions)` (pha `planning` vẫn suy từ revision). Từ `loading` trở đi xe/điểm giao/kiện,
   tối ưu và Duyệt bị từ chối `TRIP_LOCKED`. Tiến độ kho (`loading.steps`) và giao (`delivery.stops`, `issues`) chỉ ghi qua hàm vận hành

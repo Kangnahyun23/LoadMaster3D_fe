@@ -1,6 +1,6 @@
 # Theo dõi tiến độ — LoadMaster FE MVP
 
-Cập nhật lần cuối: **19/09/2026**
+Cập nhật lần cuối: **20/09/2026**
 
 Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](../LoadMaster_FE_MVP_Build_Spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](../handoff.md)
 
@@ -21,8 +21,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
 | 5 | i18n phần còn lại, nghiệm thu | 3 / 3 | ~3,5 ngày | ✅ Xong 16/09/2026 — 520 unit/DOM, 55 E2E, cổng chuỗi cứng |
-| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 14 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
-| **Tổng** | | **70 / 80 issue** | **~83,5 ngày công** | |
+| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 17 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
+| **Tổng** | | **73 / 80 issue** | **~83,5 ngày công** | |
 
 **Phase 5 xong (16/09/2026) — MVP nghiệm thu.** 56/57 issue; LM-002 chờ backend. Nợ sau nghiệm thu: [acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend), LM-073.
 
@@ -33,6 +33,30 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 ---
 
 ## 2. Nhật ký
+
+### 19–20/09/2026 — Đợt 6: nền dữ liệu, phân quyền và 5 nhóm màn (LM-080 → LM-094, LM-097, LM-073)
+
+**Đã làm**
+- Tự làm tuần tự phần nền: LM-080 (tách từ điển), LM-081/082/083 (kho mock: vòng đời chuyến, người dùng + phiên + nhật ký, seed 15 chuyến
+  neo theo ngày), LM-084 (phân quyền, 403, quản lý chỉ đọc), LM-073 (E2E kéo kiện vào vật cản — đóng nợ N-1).
+- Giao agent theo nhóm, mỗi nhóm một worktree (tối đa 4 chạy cùng lúc): LM-085 bảng dùng chung; A kho + tài xế (LM-086/087); B chuyến
+  (LM-088/093/097 + cảnh báo rời form của LM-100); C dashboard + nhật ký + người dùng (LM-090/091/092); D đội xe + Planner (LM-089/094).
+  Người điều phối gộp nhánh, giải xung đột (`format.dayMonth` trùng, 4 spec E2E), áp đề xuất luật vào AGENTS.
+- Sửa thêm khi gộp: thứ tự giờ seed (xuất phát giao sau khi xếp xong); lỗi hộp thoại người dùng do review độc lập phát hiện (`d52a88b`);
+  spec-flow chờ mã xe `VEHICLE-009`.
+- Ba agent đợt sau (B, E, F) bị dừng vì chạm giới hạn phiên: B đã commit đủ; E, F chạy lại ngày 20/09.
+
+**Kiểm tra**
+- `pnpm lint` ✅ · `tsc -b` ✅ · `pnpm test` 729/729 ✅ (`06a09ed`) · E2E theo nhóm (agent chạy cổng riêng): kho/tài xế 30/30, dashboard/nhật ký/
+  người dùng 6/6, đội xe/Planner 31/31 + 27/27, chuyến theo issue. Bộ E2E đầy đủ chạy ở LM-101.
+
+**Vướng mắc / quyết định mới**
+- `useListUrlState`: hai thay đổi lọc liên tiếp trước khi router render lại thì lần sau ghi đè lần trước — giao sửa ở LM-100.
+- Kho mock chưa kiểm người ghi dỡ hàng có đúng tài xế của chuyến (FE chỉ chặn ở đọc) — backend thật phải kiểm.
+
+**Việc tiếp theo**
+- E: LM-096/098/099 · F: LM-095 + phần còn lại LM-100 · rồi LM-101 nghiệm thu.
+
 
 ### 19/09/2026 — Rà soát giao diện, chốt đợt 6
 
@@ -516,19 +540,19 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-085](issues/LM-085-bang-du-lieu-loc-sap-xep-phan-trang.md) | Bảng lọc/sắp xếp/phân trang | ✅ | 19/09/2026 | 19/09/2026 | Agent, `f0d2e87`; +23 test; sửa vòng focus toàn app |
 | [LM-086](issues/LM-086-kho-chon-chuyen-tien-do.md) | Kho | ✅ | 19/09/2026 | 19/09/2026 | Agent, `197818d`; danh sách + tiến độ bền trong phiên |
 | [LM-087](issues/LM-087-tai-xe-chuyen-cua-toi-tong-ket.md) | Tài xế | ✅ | 19/09/2026 | 19/09/2026 | Agent, `0184351`; chuyến của tôi, sự cố, tổng kết; E2E 30/30 |
-| [LM-088](issues/LM-088-chuyen-trang-thai-loc-tien-trinh.md) | Chuyến | ⬜ | | | |
+| [LM-088](issues/LM-088-chuyen-trang-thai-loc-tien-trinh.md) | Chuyến | ✅ | 19/09/2026 | 20/09/2026 | Agent, `811b73c`; ngày, tài xế, 10 trạng thái, lọc, tiến trình, huỷ |
 | [LM-089](issues/LM-089-doi-xe-trang-thai-bao-duong.md) | Đội xe | ✅ | 19/09/2026 | 19/09/2026 | Agent, `c64f7d3`; trạng thái, bảo dưỡng, lọc |
 | [LM-090](issues/LM-090-dashboard-bieu-do-xuat-xlsx.md) | Dashboard | ✅ | 19/09/2026 | 19/09/2026 | Agent, `917480c`; lọc kỳ, 5 KPI, 3 biểu đồ, .xlsx |
 | [LM-091](issues/LM-091-nhat-ky-he-thong.md) | Nhật ký | ✅ | 19/09/2026 | 19/09/2026 | Agent, `50aed9a`; /nhat-ky có lọc |
 | [LM-092](issues/LM-092-nguoi-dung-quan-tri-day-du.md) | Người dùng | ✅ | 19/09/2026 | 19/09/2026 | Agent, `d34acc0`; khoá/xoá/đặt lại mật khẩu, ma trận quyền |
-| [LM-093](issues/LM-093-nhap-kien-csv-xlsx.md) | Nhập kiện CSV/.xlsx | ⬜ | | | |
+| [LM-093](issues/LM-093-nhap-kien-csv-xlsx.md) | Nhập kiện CSV/.xlsx | ✅ | 19/09/2026 | 20/09/2026 | Agent, `763ef2d`; mẫu, xem trước, lỗi theo dòng |
 | [LM-094](issues/LM-094-planner-gon.md) | Planner gọn | ✅ | 19/09/2026 | 19/09/2026 | Agent, `46282cc`; một hàng 56 px từ 1.366 px, không Duyệt khi đã duyệt |
-| [LM-095](issues/LM-095-bo-cuc-1366-het-cat-chu.md) | Bố cục 1.366 px | ⬜ | | | |
-| [LM-096](issues/LM-096-ho-so-doi-mat-khau.md) | Hồ sơ | ⬜ | | | |
-| [LM-097](issues/LM-097-so-do-tuyen-svg.md) | Sơ đồ tuyến | ⬜ | | | |
-| [LM-098](issues/LM-098-chuong-thong-bao.md) | Thông báo | ⬜ | | | |
-| [LM-099](issues/LM-099-tim-kiem-toan-cuc.md) | Ctrl+K | ⬜ | | | |
-| [LM-100](issues/LM-100-hoan-thien-nho.md) | Hoàn thiện nhỏ | ⬜ | | | |
+| [LM-095](issues/LM-095-bo-cuc-1366-het-cat-chu.md) | Bố cục 1.366 px | 🟦 | 20/09/2026 | | Agent đang làm |
+| [LM-096](issues/LM-096-ho-so-doi-mat-khau.md) | Hồ sơ | 🟦 | 20/09/2026 | | Agent đang làm |
+| [LM-097](issues/LM-097-so-do-tuyen-svg.md) | Sơ đồ tuyến | ✅ | 19/09/2026 | 20/09/2026 | Agent, `78fc602`; SVG, trạng thái từng điểm |
+| [LM-098](issues/LM-098-chuong-thong-bao.md) | Thông báo | 🟦 | 20/09/2026 | | Agent đang làm |
+| [LM-099](issues/LM-099-tim-kiem-toan-cuc.md) | Ctrl+K | 🟦 | 20/09/2026 | | Agent đang làm |
+| [LM-100](issues/LM-100-hoan-thien-nho.md) | Hoàn thiện nhỏ | 🟦 | 19/09/2026 | | Cảnh báo rời form chuyến xong (`001ef6c`); phần còn lại đang làm |
 | [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) | E2E kéo kiện vào vật cản | ✅ | 19/09/2026 | 19/09/2026 | Spec §15 dòng 12 đủ E2E |
 | [LM-101](issues/LM-101-nghiem-thu-dot-6.md) | Nghiệm thu đợt 6 | ⬜ | | | |
 
