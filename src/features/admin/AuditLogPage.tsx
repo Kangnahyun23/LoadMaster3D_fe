@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
-import { useSearchParams } from 'react-router'
 import { DataTable } from '@/components/DataTable'
 import { EmptyState } from '@/components/EmptyState'
 import { FilterBar } from '@/components/FilterBar'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
-import { LIST_URL_PARAMS, useListUrlState } from '@/components/useListUrlState'
+import { useListUrlState } from '@/components/useListUrlState'
 import { useFormat, useT } from '@/lib/i18n'
 import { compareText } from '@/lib/list-filter'
 import { AUDIT_GROUPS, type AuditGroup } from '@/lib/mock-db'
@@ -18,7 +17,7 @@ import { useAuditDirectoryQuery, useAuditEventsQuery } from './useAuditLogQuery'
 /** Bộ lọc trên URL (D-52): khoảng ngày, người làm, nhóm hành động; ô tìm (`q`) là mã đối tượng. */
 const FILTERS = ['tu', 'den', 'nguoi-lam', 'nhom'] as const
 
-/** Nhật ký dày: mặc định 50 dòng một trang (người dùng vẫn chọn 25/100 ở chân bảng). */
+/** Nhật ký dày: mặc định 50 dòng một trang (`so-dong` vắng là 50; người dùng vẫn chọn 25/100 ở chân bảng). */
 const AUDIT_PAGE_SIZE = 50
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
@@ -34,8 +33,7 @@ function isAuditGroup(value: string): value is AuditGroup {
 export function AuditLogPage() {
   const t = useT()
   const format = useFormat()
-  const list = useListUrlState({ filters: FILTERS, defaultSort: { id: 'at', desc: true } })
-  const page = useAuditPageSize(list.pageSize)
+  const list = useListUrlState({ filters: FILTERS, defaultSort: { id: 'at', desc: true }, defaultPageSize: AUDIT_PAGE_SIZE })
   const { tu: from, den: to, 'nguoi-lam': actorId, nhom: group } = list.filters
   const targetId = list.query.trim()
 
@@ -116,7 +114,7 @@ export function AuditLogPage() {
               density="comfortable"
               sorting={list.sorting}
               onSortingChange={list.setSorting}
-              pagination={{ pageIndex: list.pageIndex, pageSize: page.size, onPageChange: list.setPage, onPageSizeChange: page.setSize }}
+              pagination={{ pageIndex: list.pageIndex, pageSize: list.pageSize, onPageChange: list.setPage, onPageSizeChange: list.setPageSize }}
               emptyMessage={t('audit.log.empty')}
               isFiltering={list.isFiltering}
               onClearFilters={list.clearAll}
@@ -127,25 +125,4 @@ export function AuditLogPage() {
       </div>
     </div>
   )
-}
-
-/**
- * Cỡ trang mặc định 50 thay cho 25 của `useListUrlState`: URL vắng `so-dong` là 50, chọn 25 thì ghi rõ `so-dong=25`
- * (`useListUrlState` xoá tham số khi bằng 25 nên không tự làm được).
- */
-function useAuditPageSize(listPageSize: number) {
-  const [params, setParams] = useSearchParams()
-  const { pageSize: SIZE, page: PAGE } = LIST_URL_PARAMS
-  return {
-    size: params.has(SIZE) ? listPageSize : AUDIT_PAGE_SIZE,
-    setSize(size: number) {
-      setParams((current) => {
-        const next = new URLSearchParams(current)
-        if (size === AUDIT_PAGE_SIZE) next.delete(SIZE)
-        else next.set(SIZE, String(size))
-        next.delete(PAGE)
-        return next
-      }, { replace: true })
-    },
-  }
 }

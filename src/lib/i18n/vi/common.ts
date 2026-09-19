@@ -13,6 +13,8 @@ export const common = {
   backToTrips: 'Về danh sách chuyến',
   on: 'Bật',
   off: 'Tắt',
+  /** Loại sự cố giao (`DeliveryIssueKind`, D-47): một nguồn cho báo sự cố của tài xế, tiến trình chuyến và nhật ký (LM-100). */
+  deliveryIssueKinds: { damaged: 'Hàng hỏng', missing: 'Thiếu hàng', refused: 'Khách từ chối', other: 'Khác' },
   /** `DataTable` (LM-085): chân bảng phân trang và trạng thái không có kết quả khớp bộ lọc. */
   table: {
     rowsPerPage: 'Số dòng mỗi trang',

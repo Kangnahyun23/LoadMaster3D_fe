@@ -52,7 +52,8 @@ test('mã trong tham số được dịch: tên trường, loại sự cố, vai
   expect(describe(edited, en).details).toBe('Fields changed: Packages and Scheduled date')
 
   const issue = event('delivery.issue', { type: 'trip', id: 'TRIP-004' }, { kind: 'refused', stopNumber: 2, packageInstanceId: 'PKG-003-11' })
-  expect(describe(issue).details).toBe('Loại sự cố: Khách từ chối nhận · Điểm giao: 2 · Kiện: PKG-003-11')
+  // Nhãn loại sự cố dùng chung với màn tài xế (`common.deliveryIssueKinds`, LM-100)
+  expect(describe(issue).details).toBe('Loại sự cố: Khách từ chối · Điểm giao: 2 · Kiện: PKG-003-11')
 
   const created = event('user.created', { type: 'user', id: 'US-0010' }, { fullName: 'Trương Văn Lộc', role: 'driver' }, 'US-0005')
   expect(describe(created)).toMatchObject({

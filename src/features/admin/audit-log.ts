@@ -94,7 +94,7 @@ function paramValue(event: AuditEvent, key: string, value: string | number, t: T
     case 'fields':
       return format.list(value.split(',').map((field) => (isOneOf(FIELD_NAMES, field) ? t(`audit.log.fieldNames.${field}`) : field)))
     case 'kind':
-      return isOneOf(DELIVERY_ISSUE_KINDS, value) ? t(`audit.log.issueKinds.${value}`) : value
+      return isOneOf(DELIVERY_ISSUE_KINDS, value) ? t(`common.deliveryIssueKinds.${value}`) : value
     case 'role':
       return isOneOf(ROLES, value) ? t(`roles.${value}`) : value
     case 'reason':

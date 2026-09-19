@@ -90,7 +90,7 @@ export function DeliveryStopView({ trip, plan }: { trip: Trip; plan: Revision })
                   key={item.id}
                   item={item}
                   done={unloaded}
-                  issueLabel={issue ? t(`driver.issue.kinds.${issue.kind}`) : undefined}
+                  issueLabel={issue ? t(`common.deliveryIssueKinds.${issue.kind}`) : undefined}
                   readOnly={view.mode !== 'delivering'}
                   onToggle={actions.toggle}
                 />

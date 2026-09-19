@@ -1,13 +1,13 @@
 import type { ColumnSort, SortingState } from '@tanstack/react-table'
-import { useMemo } from 'react'
-import { useSearchParams } from 'react-router'
+import { useEffect, useMemo, useRef } from 'react'
+import { useLocation, useSearchParams } from 'react-router'
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from './DataTablePagination'
 
 /**
  * Tham số URL chung của màn danh sách, tiếng Việt không dấu (D-52). Tên bộ lọc của màn không được trùng các tên này.
  * Ví dụ: `?q=bien+hoa&trang-thai=da_duyet&sap-xep=-scheduledDate&trang=2&so-dong=50`.
  * - `sap-xep`: mã cột, thêm `-` phía trước là giảm dần; vắng là `defaultSort`.
- * - `trang`: đếm từ 1; vắng là trang 1. `so-dong`: 25/50/100; vắng là 25.
+ * - `trang`: đếm từ 1; vắng là trang 1. `so-dong`: 25/50/100; vắng là cỡ mặc định của màn (`defaultPageSize`, thường 25).
  */
 export const LIST_URL_PARAMS = { query: 'q', sort: 'sap-xep', page: 'trang', pageSize: 'so-dong' } as const
 
@@ -16,6 +16,8 @@ export type ListUrlStateOptions<TFilter extends string> = {
   filters?: readonly TFilter[]
   /** Thứ tự khi URL chưa có `sap-xep`, ví dụ mới nhất trước `{ id: 'scheduledDate', desc: true }`. */
   defaultSort?: ColumnSort
+  /** Cỡ trang khi URL chưa có `so-dong` — một trong `PAGE_SIZES`; vắng là 25. Nhật ký dày dùng 50 (LM-100). */
+  defaultPageSize?: number
 }
 
 export type ListUrlState<TFilter extends string> = {
@@ -44,12 +46,22 @@ const { query: Q, sort: SORT, page: PAGE, pageSize: PAGE_SIZE } = LIST_URL_PARAM
  * Trạng thái tìm, lọc, sắp xếp, trang của màn danh sách, giữ trên URL (D-52): tải lại hoặc quay lại từ trang chi tiết
  * vẫn đúng chỗ cũ. Mọi thay đổi ghi đè mục lịch sử hiện tại (`replace`) để nút Quay lại không phải lùi qua từng chữ gõ.
  * Đổi tìm, lọc, sắp xếp hay cỡ trang thì về trang 1.
+ *
+ * Router đổi URL trong transition: hai thay đổi liền nhau trước khi màn render lại (ví dụ đặt "từ" rồi "đến" trong một lần bấm)
+ * mà cùng đọc tham số của lần render trước thì lần sau xoá mất lần trước. Vì vậy mỗi thay đổi tính trên bản nháp URL mới nhất
+ * đã gửi (`draft`); URL đổi thật thì bỏ bản nháp.
  */
 export function useListUrlState<const TFilter extends string = never>({
   filters: filterNames = [],
   defaultSort,
+  defaultPageSize = DEFAULT_PAGE_SIZE,
 }: ListUrlStateOptions<TFilter> = {}): ListUrlState<TFilter> {
   const [params, setParams] = useSearchParams()
+  const { search } = useLocation()
+  const draft = useRef<{ readonly from: string; readonly next: URLSearchParams } | null>(null)
+  useEffect(() => {
+    draft.current = null
+  }, [search])
 
   const rawSort = params.get(SORT)
   const defaultId = defaultSort?.id
@@ -69,11 +81,11 @@ export function useListUrlState<const TFilter extends string = never>({
   }, [params, filterKey])
 
   function update(change: (next: URLSearchParams) => void) {
-    setParams((current) => {
-      const next = new URLSearchParams(current)
-      change(next)
-      return next
-    }, { replace: true })
+    const pending = draft.current
+    const next = new URLSearchParams(pending !== null && pending.from === search ? pending.next : params)
+    change(next)
+    draft.current = { from: search, next }
+    setParams(next, { replace: true })
   }
 
   return {
@@ -96,10 +108,10 @@ export function useListUrlState<const TFilter extends string = never>({
       next.delete(PAGE)
     }),
     pageIndex: parsePageIndex(params.get(PAGE)),
-    pageSize: parsePageSize(params.get(PAGE_SIZE)),
+    pageSize: parsePageSize(params.get(PAGE_SIZE), defaultPageSize),
     setPage: (pageIndex) => update((next) => setOrDelete(next, PAGE, pageIndex > 0 ? String(pageIndex + 1) : '')),
     setPageSize: (pageSize) => update((next) => {
-      setOrDelete(next, PAGE_SIZE, pageSize === DEFAULT_PAGE_SIZE ? '' : String(pageSize))
+      setOrDelete(next, PAGE_SIZE, pageSize === defaultPageSize ? '' : String(pageSize))
       next.delete(PAGE)
     }),
     isFiltering: query.trim() !== '' || filterNames.some((name) => filters[name] !== ''),
@@ -131,7 +143,7 @@ function parsePageIndex(raw: string | null): number {
   return Number.isInteger(page) && page >= 1 ? page - 1 : 0
 }
 
-function parsePageSize(raw: string | null): number {
+function parsePageSize(raw: string | null, fallback: number): number {
   const size = Number(raw)
-  return PAGE_SIZES.some((allowed) => allowed === size) ? size : DEFAULT_PAGE_SIZE
+  return PAGE_SIZES.some((allowed) => allowed === size) ? size : fallback
 }

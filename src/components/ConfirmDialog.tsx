@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/Button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/Dialog'
 
 /**
- * Hỏi xác nhận trước một thao tác không hoàn tác được: rời trang khi form đang sửa, xoá xe (LM-041).
- * Dùng Dialog của repo, không dùng `confirm()` của trình duyệt.
+ * Hỏi xác nhận trước một thao tác không hoàn tác được: rời form xe/chuyến khi chưa lưu, xoá xe, thao tác trên tài khoản
+ * (LM-041, LM-088, LM-092). Dùng Dialog của repo, không dùng `confirm()` của trình duyệt.
+ * `pending`: nút xác nhận hiện đang xử lý và nút huỷ bị khoá — không huỷ giữa chừng một thao tác đã gửi (LM-100).
  */
 export function ConfirmDialog({
   open,
@@ -35,7 +36,7 @@ export function ConfirmDialog({
           <DialogDescription className="text-body text-text-2">{description}</DialogDescription>
         </div>
         <DialogFooter>
-          <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
             {cancelLabel}
           </Button>
           <Button

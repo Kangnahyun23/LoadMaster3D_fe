@@ -89,8 +89,6 @@ export const audit = {
       role: 'Vai trò',
       depot: 'Kho / chi nhánh',
     },
-    /** Giá trị của tham số `kind` (sự cố giao hàng, D-47). */
-    issueKinds: { damaged: 'Hàng hỏng', missing: 'Thiếu hàng', refused: 'Khách từ chối nhận', other: 'Khác' },
     /** Mã lý do đăng nhập không thành công. */
     reasons: { suspended: 'Tài khoản đã bị khoá' },
   },

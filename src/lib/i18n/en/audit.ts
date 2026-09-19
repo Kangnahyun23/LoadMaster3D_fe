@@ -80,7 +80,6 @@ export const audit = {
       role: 'Role',
       depot: 'Depot / branch',
     },
-    issueKinds: { damaged: 'Damaged', missing: 'Missing', refused: 'Refused by customer', other: 'Other' },
     reasons: { suspended: 'Account locked' },
   },
 } satisfies Dictionary<typeof source>
