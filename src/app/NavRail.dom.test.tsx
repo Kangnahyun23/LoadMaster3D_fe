@@ -70,6 +70,18 @@ test.each<[Role, boolean]>([
   expect(screen.queryByRole('button', { name: /^Thông báo/ }) !== null).toBe(shown)
 })
 
+/** LM-099: nút Tìm nhanh chỉ có khi vai trò được xem ít nhất một nhóm (chuyến, xe, người dùng). */
+test.each<[Role, boolean]>([
+  ['dispatcher', true],
+  ['manager', true],
+  ['admin', true],
+  ['warehouse', false],
+  ['driver', false],
+])('nút Tìm nhanh của %s: %s', (role, shown) => {
+  renderRail(role)
+  expect(screen.queryByRole('button', { name: 'Tìm nhanh' }) !== null).toBe(shown)
+})
+
 /** LM-096: menu tài khoản mở hồ sơ cá nhân trước mục đăng xuất. */
 test('menu tài khoản có mục Hồ sơ cá nhân mở /ho-so', async () => {
   const user = userEvent.setup()
