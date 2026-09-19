@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { VehicleConfig } from '@/domain/models'
-import { deleteVehicle, fetchVehicle, fetchVehicles, saveVehicle } from './vehicles-api'
+import type { VehicleState } from '@/lib/mock-db'
+import { deleteVehicle, fetchVehicle, fetchVehicles, fetchVehicleStates, saveVehicle, saveVehicleMaintenance } from './vehicles-api'
 
 /**
  * Hook Query của Đội xe (D-06): component chỉ gọi vào đây, không gọi `vehicles-api.ts`.
@@ -8,6 +9,8 @@ import { deleteVehicle, fetchVehicle, fetchVehicles, saveVehicle } from './vehic
  */
 
 const VEHICLES_KEY = ['vehicles'] as const
+/** Nằm dưới `['vehicles']`: ghi xe hay bảo dưỡng đều làm mới trạng thái. */
+const VEHICLE_STATES_KEY = [...VEHICLES_KEY, 'states'] as const
 
 function vehicleKey(id: string) {
   return [...VEHICLES_KEY, id] as const
@@ -23,6 +26,25 @@ export function useVehicleQuery(id: string) {
     queryKey: vehicleKey(id),
     queryFn: () => fetchVehicle(id),
     enabled: id !== '',
+  })
+}
+
+/**
+ * Trạng thái mọi xe (D-53). "Đang chạy" đổi theo pha chuyến do kho và tài xế ghi ở màn khác, nên luôn đọc lại khi mở màn
+ * (`staleTime: 0`) thay vì chờ các màn đó vô hiệu hoá cache của đội xe.
+ */
+export function useVehicleStatesQuery() {
+  return useQuery({ queryKey: VEHICLE_STATES_KEY, queryFn: fetchVehicleStates, staleTime: 0 })
+}
+
+/** Trạng thái một xe, lọc từ danh sách trạng thái; `id` rỗng (xe mới) thì không gọi kho. */
+export function useVehicleStateQuery(id: string) {
+  return useQuery({
+    queryKey: VEHICLE_STATES_KEY,
+    queryFn: fetchVehicleStates,
+    staleTime: 0,
+    enabled: id !== '',
+    select: (states: VehicleState[]) => states.find((state) => state.vehicleId === id) ?? null,
   })
 }
 
@@ -45,6 +67,20 @@ export function useDeleteVehicleMutation() {
     onSuccess: async (_result, id) => {
       queryClient.removeQueries({ queryKey: vehicleKey(id) })
       // Số xe trên bảng điều khiển (LM-052) cũng đổi.
+      await Promise.all([queryClient.invalidateQueries({ queryKey: VEHICLES_KEY }), queryClient.invalidateQueries({ queryKey: ['dashboard'] })])
+    },
+  })
+}
+
+/**
+ * Bật (`note`) hoặc tắt (`null`) bảo dưỡng. Làm mới mọi query dưới `['vehicles']` — kể cả danh sách xe để chọn ở form chuyến —
+ * và bảng điều khiển.
+ */
+export function useVehicleMaintenanceMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note: string | null }) => saveVehicleMaintenance(id, note),
+    onSuccess: async () => {
       await Promise.all([queryClient.invalidateQueries({ queryKey: VEHICLES_KEY }), queryClient.invalidateQueries({ queryKey: ['dashboard'] })])
     },
   })

@@ -33,7 +33,8 @@ for (const device of ['desktop', 'tablet'] as const) {
     await expect(page.getByRole('spinbutton', { name: 'Dài OBS-001', exact: true }).locator('xpath=..')).toContainText('cm')
     await page.getByRole('button', { name: 'Lưu', exact: true }).click()
     await page.waitForURL(/\/doi-xe$/)
-    await expect(page.getByRole('row', { name: /Truck 6m VEHICLE-005 600 × 240 × 250 cm 5\.000 kg/ })).toBeVisible()
+    // Seed có 8 xe (LM-083) nên xe mới là VEHICLE-009; cột trạng thái đứng sau tên (LM-089)
+    await expect(page.getByRole('row', { name: /Truck 6m VEHICLE-009 Sẵn sàng 600 × 240 × 250 cm 5\.000 kg/ })).toBeVisible()
 
     // Dashboard → Tạo kế hoạch xếp → form chuyến
     await page.getByRole('link', { name: 'Bảng điều khiển', exact: true }).click()

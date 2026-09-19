@@ -1,5 +1,5 @@
 import type { VehicleConfig } from '@/domain/models'
-import { getMockDb } from '@/lib/mock-db'
+import { getMockDb, type VehicleState } from '@/lib/mock-db'
 
 /**
  * Lớp gọi API cho Đội xe (D-06). Backend Spring Boot chưa có nên mọi lượt đọc/ghi đi qua kho mock
@@ -25,4 +25,14 @@ export function saveVehicle(vehicle: VehicleConfig): Promise<VehicleConfig> {
 
 export function deleteVehicle(id: string): Promise<void> {
   return getMockDb().deleteVehicle(id)
+}
+
+/** Trạng thái mọi xe (D-53): đang chạy suy từ chuyến `loading`…`delivering`, bảo dưỡng do người đặt. */
+export function fetchVehicleStates(): Promise<VehicleState[]> {
+  return getMockDb().listVehicleStates()
+}
+
+/** Bật bảo dưỡng kèm ghi chú, hoặc tắt khi `note` là `null`. Xe đang chạy chuyến: `VEHICLE_LOCKED`. */
+export function saveVehicleMaintenance(id: string, note: string | null): Promise<VehicleState> {
+  return getMockDb().setVehicleMaintenance(id, note)
 }
