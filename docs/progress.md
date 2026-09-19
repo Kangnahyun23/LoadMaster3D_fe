@@ -21,8 +21,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
 | 5 | i18n phần còn lại, nghiệm thu | 3 / 3 | ~3,5 ngày | ✅ Xong 16/09/2026 — 520 unit/DOM, 55 E2E, cổng chuỗi cứng |
-| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 5 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
-| **Tổng** | | **61 / 80 issue** | **~83,5 ngày công** | |
+| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 6 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
+| **Tổng** | | **62 / 80 issue** | **~83,5 ngày công** | |
 
 **Phase 5 xong (16/09/2026) — MVP nghiệm thu.** 56/57 issue; LM-002 chờ backend. Nợ sau nghiệm thu: [acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend), LM-073.
 
@@ -529,7 +529,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-098](issues/LM-098-chuong-thong-bao.md) | Thông báo | ⬜ | | | |
 | [LM-099](issues/LM-099-tim-kiem-toan-cuc.md) | Ctrl+K | ⬜ | | | |
 | [LM-100](issues/LM-100-hoan-thien-nho.md) | Hoàn thiện nhỏ | ⬜ | | | |
-| [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) | E2E kéo kiện vào vật cản | ⬜ | | | |
+| [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) | E2E kéo kiện vào vật cản | ✅ | 19/09/2026 | 19/09/2026 | Spec §15 dòng 12 đủ E2E |
 | [LM-101](issues/LM-101-nghiem-thu-dot-6.md) | Nghiệm thu đợt 6 | ⬜ | | | |
 
 ---

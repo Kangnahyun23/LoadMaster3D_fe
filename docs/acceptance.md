@@ -20,7 +20,7 @@ Ký hiệu: ✅ đạt, có test · 🟨 đạt một phần, ghi rõ phần thi
 | 9 | Rotate, zoom, pan, reset camera | ✅ | `spec-flow` (desktop); `e2e/viewer-reduced-motion-camera.spec.ts` |
 | 10 | Click kiện hiện đúng cm/kg | ✅ | `spec-flow`; `e2e/i18n-en.spec.ts` (bản en) |
 | 11 | Hai kiện chạm mặt không báo overlap | ✅ | `spec-flow` ("Không có lỗi hay cảnh báo"); `src/domain/geometry/intersection.test.ts` (ca cộng dồn số thực) |
-| 12 | Kiện vượt biên / overlap vật cản bị cảnh báo | 🟨 | Vượt biên và chồng kiện: `e2e/viewer-editor-ui.spec.ts` ("Không thể đặt"). Chồng vật cản: chỉ ở seam engine — `tests/viewer-editor-engine.test.ts` (thả lên hốc bánh không chịu tải bị chặn), `src/domain/constraints/obstacles.test.ts`. **Thiếu E2E kéo kiện vào vật cản** → nợ N-1, [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md). |
+| 12 | Kiện vượt biên / overlap vật cản bị cảnh báo | ✅ | Vượt biên và chồng kiện: `e2e/viewer-editor-ui.spec.ts` ("Không thể đặt"). Chồng vật cản: `e2e/viewer-editor-obstacles.spec.ts` (LM-073, 19/09/2026) + seam engine `tests/viewer-editor-engine.test.ts`, `src/domain/constraints/obstacles.test.ts`. |
 | 13 | Hiện kiện chưa xếp và lý do | ✅ | `spec-flow` kịch bản kết quả một phần |
 | 14 | Hiện volume/payload utilization | ✅ | `spec-flow` (26,7% / 32,0%); `e2e/plan-approval.spec.ts` (tab Chỉ số) |
 | 15 | Mock result có nhãn rõ ràng | ✅ | `spec-flow`, `plan-approval`, `e2e/warehouse.spec.ts` (badge MOCK RESULT) |
@@ -48,7 +48,7 @@ Chromium headless + SwiftShader, không phải thiết bị thật.
 
 | ID | Nợ | Ghi chú |
 |---|---|---|
-| N-1 | Thiếu E2E kéo kiện vào vật cản trong editor | Spec 15 dòng 12; logic đã có test ở seam engine — [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) |
+| N-1 | ~~Thiếu E2E kéo kiện vào vật cản trong editor~~ | Đóng 19/09/2026 — [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) |
 | N-2 | Màn điều phối chỉ hỗ trợ desktop (nút 40 px trên tablet) | Quyết định 16/09/2026, AGENTS mục 5 |
 | N-3 | Chi tiết chuyến chật ở 1.440 px (tên điểm giao bị cắt, bảng kiện cuộn ngang) | Vừa ở 1.600 px; phát hiện ở LM-070 |
 | N-4 | Kho bỏ fixture `?debug&packages=N`; hiệu năng 3D kho chỉ đo trên 132 kiện seed | LM-060 |
