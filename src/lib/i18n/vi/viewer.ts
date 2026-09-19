@@ -5,10 +5,13 @@ export const viewer = {
     volume: 'Thể tích',
     payload: 'Tải trọng',
     placed: 'Đã xếp',
-    runtime: 'Thời gian chạy',
     manuallyEdited: 'Đã chỉnh tay',
-    approved: 'Đã duyệt',
     approve: 'Duyệt phương án',
+    /** Nút Duyệt khi draft có dời hoặc xoay kiện (LM-094). */
+    approveDraft: 'Duyệt bản chỉnh',
+    /** Thay nút Duyệt khi revision đã duyệt và không có chỉnh sửa: nhãn trên, giờ + ngày dưới. */
+    approvedAt: 'Đã duyệt lúc',
+    approvedAtValue: '{time} {date}',
     compare: 'So sánh phương án',
     staleBanner: 'Kết quả đã lỗi thời — xe hoặc kiện đã thay đổi sau lần tối ưu này.',
     rerun: 'Tới Thiết lập tối ưu',
@@ -66,6 +69,15 @@ export const viewer = {
       issues: 'Ràng buộc',
       noIssues: 'Không có lỗi hay cảnh báo',
     },
+  },
+  /** Planner chỉ xem (LM-094): lý do không có Chỉnh sửa và Duyệt, nói một lần. Key trùng pha chuyến (D-45), hoặc `readOnly`. */
+  lock: {
+    loading: 'Chuyến đang xếp hàng — phương án đã chốt.',
+    loaded: 'Chuyến đã xếp xong — phương án đã chốt.',
+    delivering: 'Chuyến đang giao — phương án đã chốt.',
+    completed: 'Chuyến đã hoàn thành — phương án đã chốt.',
+    cancelled: 'Chuyến đã huỷ — phương án chỉ để xem.',
+    readOnly: 'Chỉ xem: tài khoản của bạn không chỉnh sửa hay duyệt phương án.',
   },
   axles: {
     title: 'Tải trục',
@@ -183,12 +195,9 @@ export const viewer = {
   toolbar: {
     simulation: 'Mô phỏng vận hành',
     focusStop: 'Tập trung điểm giao',
-    allStops: 'Tất cả điểm giao',
+    allStops: 'Mọi điểm giao',
     camera: 'Góc nhìn',
-    packageList: 'Danh sách kiện',
-    operations: 'Vận hành',
     edit: 'Chỉnh sửa',
-    display: 'Hiển thị',
   },
   inspector: {
     title: 'Thông tin phương án',
@@ -306,7 +315,6 @@ export const viewer = {
     selectPackage: 'Chọn kiện',
     focus: 'Tập trung vào kiện',
     edit: 'Chỉnh sửa kiện',
-    details: 'Chi tiết',
     detailsLabel: 'Chi tiết / Hiển thị',
   },
   /** Chỉnh sửa thủ công (LM-034, LM-035). */

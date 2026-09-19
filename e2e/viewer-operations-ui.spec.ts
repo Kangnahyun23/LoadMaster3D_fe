@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 import { attachJson, attachScreenshot, expect, PLANNER_ROUTE, test } from './fixtures'
 import {
-  cameraPreset, closeInspector, hasSceneObject, instancePoint, metrics, openInspector, sceneSnapshot, selectedPlacementId,
+  cameraPreset, closeInspector, focusStop, hasSceneObject, instancePoint, metrics, openInspector, sceneSnapshot, selectedPlacementId,
   settle as settleFor, SOURCE_MODULES, visibleCargo, waitCameraSettled, type ViewerMetrics,
 } from './viewer-helpers'
 
@@ -57,7 +57,7 @@ test('loading, unloading advisories, blockers and approval wording on 1,000 pack
   await button(page, 'Tiến một bước').click(); await settle(page)
   let cargo = await visibleCargo(page)
   expect(cargo['cargo-opaque'] + cargo['cargo-dim']).toBe(999)
-  await page.getByRole('combobox', { name: 'Tập trung điểm giao', exact: true }).selectOption('2'); await settle(page)
+  await focusStop(page, 2); await settle(page)
   cargo = await visibleCargo(page)
   expect(cargo['cargo-opaque'] + cargo['cargo-dim'], 'prior stop is removed from the simulation').toBe(750)
   // Kiện điểm 2 đầu tiên trong thứ tự dỡ của kết quả mà kiện giao sau còn trên xe che kín lối dỡ (kiểm LIFO của domain)
@@ -169,7 +169,9 @@ test.describe('touch', () => {
     expect(await page.locator('canvas').count()).toBe(0)
     await button(page, 'Hoàn tất điểm giao').waitFor()
 
-    await page.goto(OPERATIONS_ROUTE); await settle(page)
+    // Tài xế không mở được Planner (403 từ LM-084): đăng xuất rồi vào lại bằng tài khoản điều phối
+    await page.evaluate(() => sessionStorage.clear())
+    await login(OPERATIONS_ROUTE); await settle(page)
     await button(page, 'Dỡ hàng').tap()
     await button(page, 'Chi tiết / Hiển thị').tap()
     const drawer = page.getByRole('dialog')
