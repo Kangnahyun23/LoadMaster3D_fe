@@ -1,34 +1,34 @@
-import { Check, ChevronLeft, Columns2 } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import type { OptimizationResult } from '@/domain/models'
 import { useFormat, useT } from '@/lib/i18n'
 
 /**
- * Thanh trên của Planner (LM-049). Cao 56px — bản mỏng dành riêng cho màn 3D (AGENTS mục 5). Số lấy thẳng từ
- * `result.metrics` của revision; không có revision (fixture benchmark) thì chỉ hiện số kiện của scene.
+ * Thanh trên của Planner (LM-049, LM-094). Cao 56px — bản mỏng dành riêng cho màn 3D (AGENTS mục 5). Từ 1.366 px đây là
+ * **hàng điều khiển duy nhất** (D-51): mã chuyến, MOCK RESULT, chỉ số, điều khiển mô phỏng (`controls`), rồi trạng thái duyệt và
+ * hành động (`children`); hẹp hơn thì điều khiển mô phỏng xuống thanh công cụ riêng. Số lấy thẳng từ `result.metrics` của
+ * revision; thời gian chạy nằm ở tab Chỉ số của hộp thông tin để hàng này vừa 1.366 px.
  */
-export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockResult, approved, manuallyEdited, blockedReason, onApprove }: {
+export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockResult, manuallyEdited, controls, children }: {
   tripId: string
   metrics: OptimizationResult['metrics'] | null
   placedCount: number
   totalCount: number
   /** Spec: mọi kết quả từ mock mang nhãn MOCK RESULT, không dịch. */
   isMockResult: boolean
-  approved: boolean
-  /** Có draft chỉnh tay trong phiên, hoặc revision đã mang chỉnh tay. */
+  /** Revision đang xem đã mang chỉnh tay (khi đã có chỉnh sửa mới, nút "Duyệt bản chỉnh" nói thay). */
   manuallyEdited: boolean
-  /** Lý do chặn Duyệt (LM-050) — hiện cạnh nút; `null` là duyệt được. */
-  blockedReason: string | null
-  /** Vắng khi người xem không có quyền Duyệt (D-41): ẩn nút và lý do chặn. */
-  onApprove?: () => void
+  /** Điều khiển mô phỏng gộp vào hàng này từ 1.366 px; vắng ở chế độ Chỉnh sửa. */
+  controls?: ReactNode
+  /** Trạng thái duyệt và hành động, bên phải. */
+  children: ReactNode
 }) {
   const t = useT()
   const format = useFormat()
   return (
-    <header className="flex h-14 flex-none items-center gap-2 border-b border-border bg-bg px-2 xl:gap-4 xl:px-5">
+    <header className="flex h-14 flex-none items-center gap-2 border-b border-border bg-bg px-2 xl:px-4">
       <Link
         to={`/chuyen/${tripId}`}
         aria-label={t('viewer.header.back')}
@@ -37,14 +37,16 @@ export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockR
         <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
       </Link>
 
-      <h1 className="hidden font-mono text-[18px] leading-6 font-semibold tracking-[-0.02em] xl:block">{tripId}</h1>
-      {isMockResult ? <Badge tone="warning">MOCK RESULT</Badge> : null}
-      {approved ? <Badge tone="success">{t('viewer.plan.approved')}</Badge> : null}
-      {manuallyEdited ? <Badge tone="info">{t('viewer.plan.manuallyEdited')}</Badge> : null}
+      <h1 className="hidden shrink-0 font-mono text-[18px] leading-6 font-semibold tracking-[-0.02em] whitespace-nowrap xl:block">{tripId}</h1>
+      {/* Hai nhãn của kết quả xếp chồng (22 + 4 + 22 px vừa hàng 56 px): hàng gộp vừa 1.366 px cả khi bản đã duyệt có chỉnh tay */}
+      {isMockResult || manuallyEdited ? (
+        <div className="flex shrink-0 flex-col items-start gap-1">
+          {isMockResult ? <Badge tone="warning">MOCK RESULT</Badge> : null}
+          {manuallyEdited ? <Badge tone="info">{t('viewer.plan.manuallyEdited')}</Badge> : null}
+        </div>
+      ) : null}
 
-      <span aria-hidden className="hidden h-6 w-px bg-border xl:block" />
-
-      <dl className="hidden items-center gap-5 xl:flex">
+      <dl className="hidden shrink-0 items-center gap-3 pl-1 xl:flex">
         {metrics ? <>
           <Stat label={t('viewer.plan.volume')}><span className="font-semibold text-primary">{format.percent(metrics.volumeUtilizationPercent)}</span></Stat>
           <Stat label={t('viewer.plan.payload')}>{format.percent(metrics.payloadUtilizationPercent)}</Stat>
@@ -52,26 +54,16 @@ export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockR
         <Stat label={t('viewer.plan.placed')}>
           {format.integer(placedCount)} <span className="font-normal text-text-3">/ {format.integer(totalCount)}</span>
         </Stat>
-        {metrics ? <Stat label={t('viewer.plan.runtime')}>{t('viewer.plan.metrics.runtimeValue', { ms: format.integer(metrics.runtimeMs) })}</Stat> : null}
       </dl>
 
-      <div className="flex-1" />
+      {controls ? (
+        <div className="ml-1 hidden min-w-0 items-center gap-2 border-l border-border pl-3 min-[1366px]:flex" data-planner-controls>
+          {controls}
+        </div>
+      ) : null}
 
-      {blockedReason && onApprove ? <span role="status" className="hidden max-w-72 text-caption text-badge-danger-fg xl:block">{blockedReason}</span> : null}
-      <div className="flex gap-2">
-        <Button variant="secondary" className="hidden h-10 px-3.5 xl:flex" asChild>
-          <Link to={`/chuyen/${tripId}/so-sanh`}>
-            <Columns2 strokeWidth={1.5} />
-            {t('viewer.plan.compare')}
-          </Link>
-        </Button>
-        {onApprove ? (
-          <Button variant="primary" className="h-14 px-4 text-body-lg xl:h-10 xl:text-body" onClick={onApprove}>
-            <Check strokeWidth={1.5} />
-            {t('viewer.plan.approve')}
-          </Button>
-        ) : null}
-      </div>
+      <div className="flex-1" />
+      {children}
     </header>
   )
 }
@@ -80,7 +72,7 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col">
       <dt className="text-[11px] leading-3.5 text-text-3">{label}</dt>
-      <dd className="font-mono text-body leading-4.5 font-medium">{children}</dd>
+      <dd className="font-mono text-body leading-4.5 font-medium whitespace-nowrap">{children}</dd>
     </div>
   )
 }
