@@ -1,13 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, Save } from 'lucide-react'
-import { useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useBlocker, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { SelectField, type SelectOption } from '@/components/ui/SelectField'
+import { ConfirmDialog } from '@/features/fleet/ConfirmDialog'
 import type { Trip, TripPhase } from '@/lib/mock-db'
 import { dataErrorMessage, useFormat, useT, type TFunction } from '@/lib/i18n'
 import { compareText } from '@/lib/list-filter'
@@ -22,6 +23,7 @@ const EDITABLE_PHASES: readonly TripPhase[] = ['planning', 'loading', 'loaded']
 /**
  * Tạo mới hoặc sửa khung chuyến (LM-053, LM-088): ghi thật vào kho qua mutation, không báo thành công giả.
  * Tên, ngày chạy, tài xế, xe và điểm giao; xe bảo dưỡng không chọn được (D-53). Kiện thêm ở Chi tiết chuyến.
+ * Còn thay đổi chưa lưu mà rời sang trang khác thì hỏi lại trước (LM-100, như form xe).
  */
 export function TripFormPage() {
   const { tripId = '' } = useParams()
@@ -84,16 +86,24 @@ function TripForm({ existing }: { existing?: Trip }) {
   const selected = options.data?.vehicles.find((option) => option.vehicle.id === vehicleId)
   // Kho đã bắt đầu xếp: xe và điểm giao khoá, còn tên, ngày chạy, tài xế (D-45)
   const locked = existing !== undefined && existing.phase !== 'planning'
-  const { errors } = form.formState
+  const { errors, isDirty } = form.formState
   const backTo = existing ? `/chuyen/${existing.id}` : '/chuyen'
   const pending = create.isPending || update.isPending
+  // Lưu xong: rời trang trong effect ở lần render sau, để hộp hỏi "rời trang?" không chặn chính mình (như form xe, LM-041)
+  const [savedPath, setSavedPath] = useState<string | null>(null)
+  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+    isDirty && savedPath === null && currentLocation.pathname !== nextLocation.pathname)
+
+  useEffect(() => {
+    if (savedPath !== null) void navigate(savedPath)
+  }, [savedPath, navigate])
 
   function handleSubmit(values: TripFormValues) {
     const onError = (error: unknown) => toast.error(t('trips.create.failed'), { description: dataErrorMessage(error, t) })
     const driverId = driverIdOf(values.driverId)
     const onSuccess = (trip: Trip, message: string) => {
       toast.success(message)
-      void navigate(`/chuyen/${trip.id}`)
+      setSavedPath(`/chuyen/${trip.id}`)
     }
     if (existing) {
       const frame = { name: values.name, scheduledDate: values.scheduledDate, driverId }
@@ -163,6 +173,19 @@ function TripForm({ existing }: { existing?: Trip }) {
           </Button>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={blocker.state === 'blocked'}
+        onOpenChange={(open) => {
+          if (!open) blocker.reset?.()
+        }}
+        title={t('trips.leave.title')}
+        description={t('trips.leave.description')}
+        cancelLabel={t('trips.leave.stay')}
+        confirmLabel={t('trips.leave.confirm')}
+        danger
+        onConfirm={() => blocker.proceed?.()}
+      />
     </FormShell>
   )
 }

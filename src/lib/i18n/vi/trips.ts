@@ -65,6 +65,13 @@ export const trips = {
     stopsRequired: 'Cần ít nhất một điểm giao',
     tooLong: 'Quá dài',
   },
+  /** Hỏi lại khi rời form chuyến còn thay đổi chưa lưu (LM-100). */
+  leave: {
+    title: 'Rời trang khi chưa lưu?',
+    description: 'Thay đổi trên form chuyến sẽ mất nếu rời trang bây giờ.',
+    stay: 'Ở lại',
+    confirm: 'Rời trang',
+  },
   vehicle: 'Phương tiện',
   changeVehicle: 'Đổi xe',
   /** Thẻ xe ở Chi tiết chuyến: xe và tài xế đi cùng (LM-088). */
