@@ -15,6 +15,9 @@ export type SeedEvent = {
 
 const addSeconds = (iso: string, seconds: number) => new Date(Date.parse(iso) + seconds * 1000).toISOString()
 
+/** Thời gian xếp một kiện trong seed. */
+const STEP_SECONDS = 30
+
 /** Kiện của phương án theo `loadingOrder` — thứ tự kho làm. */
 function loadingSequence(revision: Revision): string[] {
   return revision.result.placements.toSorted((a, b) => a.loadingOrder - b.loadingOrder).map((p) => p.packageInstanceId)
@@ -30,7 +33,7 @@ function unloadSequence(revision: Revision, stopNumber: number, missing: Readonl
 }
 
 /**
- * Tiến độ xếp: kho bắt đầu 05:30 ngày chạy (chuyến hôm nay 04:45), mỗi kiện 45 giây. `loading` chỉ ghi `loadedSteps` bước đầu;
+ * Tiến độ xếp: kho bắt đầu 05:30 ngày chạy (chuyến hôm nay 04:45), mỗi kiện 30 giây. `loading` chỉ ghi `loadedSteps` bước đầu;
  * `missingAtStep` là kiện báo thiếu.
  */
 export function seedLoading(spec: TripSpec, today: string, approved: Revision, events: SeedEvent[]): LoadingProgress {
@@ -41,7 +44,7 @@ export function seedLoading(spec: TripSpec, today: string, approved: Revision, e
   const steps = sequence.slice(0, count).map((packageInstanceId, index) => ({
     packageInstanceId,
     outcome: index + 1 === spec.missingAtStep ? ('missing' as const) : ('loaded' as const),
-    at: addSeconds(startedAt, (index + 1) * 45),
+    at: addSeconds(startedAt, (index + 1) * STEP_SECONDS),
   }))
   const target = { type: 'trip' as const, id: spec.id }
   events.push({ at: startedAt, actorId: spec.warehouseId, action: 'loading.started', target, params: { revisionId: approved.id } })
@@ -49,19 +52,21 @@ export function seedLoading(spec: TripSpec, today: string, approved: Revision, e
     events.push({ at: step.at, actorId: spec.warehouseId, action: 'loading.missing', target, params: { packageInstanceId: step.packageInstanceId } })
   }
   if (spec.outcome === 'loading') return { revisionId: approved.id, startedAt, startedBy: spec.warehouseId, steps }
-  const completedAt = addSeconds(startedAt, (steps.length + 1) * 45)
+  const completedAt = addSeconds(startedAt, (steps.length + 1) * STEP_SECONDS)
   const missing = steps.filter((step) => step.outcome === 'missing').length
   events.push({ at: completedAt, actorId: spec.warehouseId, action: 'loading.completed', target, params: { loaded: steps.length - missing, missing } })
   return { revisionId: approved.id, startedAt, startedBy: spec.warehouseId, completedAt, steps }
 }
 
 /**
- * Tiến độ giao: xuất phát 07:30 (chuyến hôm nay 06:30), mỗi điểm hoàn tất sau 70 phút. Điểm đang giao dỡ được nửa số kiện.
+ * Tiến độ giao: xuất phát 20 phút sau khi kho xếp xong (nhật ký giữ đúng thứ tự xếp xong → xuất phát), mỗi điểm hoàn tất sau 70 phút.
+ * Điểm đang giao dỡ được nửa số kiện.
  * Hàng hỏng vẫn tính đã dỡ; khách từ chối thì không dỡ.
  */
-export function seedDelivery(spec: TripSpec, trip: Trip, today: string, approved: Revision, events: SeedEvent[]): DeliveryProgress {
-  const day = addDays(today, spec.day)
-  const startedAt = vnTime(day, spec.day === 0 ? '06:30' : '07:30')
+export function seedDelivery(spec: TripSpec, trip: Trip, approved: Revision, events: SeedEvent[]): DeliveryProgress {
+  const loadedAt = trip.loading?.completedAt
+  if (loadedAt === undefined) throw new Error(`Chuyến seed ${spec.id} giao hàng khi kho chưa xếp xong`)
+  const startedAt = addSeconds(loadedAt, 20 * 60)
   const missing = new Set(trip.loading?.steps.filter((step) => step.outcome === 'missing').map((step) => step.packageInstanceId))
   const done = spec.outcome === 'delivering' ? (spec.stopsDone ?? 0) : trip.stops.length
   const actor = spec.driverId

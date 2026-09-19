@@ -67,8 +67,10 @@ tailwindcss v4           — cấu hình bằng @theme trong CSS, không có tai
 @tanstack/react-table v9 — mọi bảng dữ liệu
 react-hook-form + zod v4 — mọi form
 react-router v7          — routing
-recharts                 — biểu đồ dashboard (LM-052: dashboard hiện KHÔNG có biểu đồ nào,
-                           xem mục 6 "Không bịa số"; giữ thư viện cho biểu đồ có nguồn thật sau)
+recharts                 — 3 biểu đồ bảng điều khiển (LM-090, D-48), chỉ import trong
+                           features/manager/DashboardCharts (tải lười); xem mục 6 "Không bịa số"
+write-excel-file         — xuất báo cáo .xlsx: import('write-excel-file/browser') khi bấm (LM-090)
+read-excel-file          — nhập kiện .xlsx: import('read-excel-file/browser') khi mở file (LM-093)
 dnd-kit                  — kéo thả thứ tự điểm giao, ghim kiện
 lucide-react             — icon, KHÔNG dùng bộ khác
 sonner                   — toast
@@ -272,8 +274,19 @@ trong `src/`; muốn dùng class từ nơi khác thì thêm `@source` tường m
 - Nút phụ: nền trắng, viền 1px `--border`. Nút ghost: trong suốt. Nút nguy hiểm: nền đặc `--danger`.
 - Nút chỉ có icon: 36×36 desktop, 48×48 di động.
 - Nút dùng `asChild` bọc `<Link>` thì **không kèm spinner** — Radix `Slot` chỉ nhận đúng một phần tử con.
+- *(bổ sung 19/09/2026, LM-092)* Hành động bị chặn vì luật (tự khoá mình, quản trị viên cuối…) hiện mờ kèm lý do ngay tại chỗ, không để
+  bấm rồi mới báo lỗi; luật cần dữ liệu khác thì để kho trả mã và hiện bằng `dataErrorMessage`.
+- Lớp nổi mở từ trong hộp thoại (Select) phải cao hơn lớp phủ Dialog (`z-300`): `SelectContent` dùng `z-400`.
+- *(LM-090)* Biểu đồ 2D dùng token qua `var()`: một chuỗi một màu `--primary`, không chú giải; tám màu điểm giao chỉ cho điểm giao;
+  lưới `--border` 1 px; nhãn trục micro 11 px, số mono; cột ≤ 24 px bo 4 px đầu dữ liệu; tắt animation; tooltip là lớp nổi (`--e2`).
+  Hình `aria-hidden`, có bảng số `sr-only` cùng giá trị (`ChartCard`/`ChartTable`).
 
 ### Thanh tiêu đề màn *(bổ sung)*
+
+*(bổ sung 19/09/2026, LM-094)* Planner từ 1.366 px: thanh trên 56 px là hàng điều khiển duy nhất (mã chuyến, MOCK RESULT, chỉ số,
+Xếp/Dỡ, điểm giao, góc nhìn, trạng thái duyệt, Chỉnh sửa, So sánh, Duyệt); hẹp hơn thì điều khiển mô phỏng và Chỉnh sửa xuống thanh
+công cụ riêng (tablet hai hàng 56 px). Thêm gì vào hàng này phải đo lại ở 1.366 px (`e2e/planner-compact.spec.ts`). Thanh công cụ
+Planner dùng `PlannerSelect` (Select Radix); ô chọn kiện (tới 1.000 dòng) giữ `<select>` gốc.
 
 Cao **72px** cho mọi màn có nav rail. Chỉ **56px** cho màn xem phương án 3D, vì ở đó
 chiều cao nhường cho khung 3D. Không tự chọn chiều cao khác — lệch là nội dung nhảy
@@ -358,6 +371,8 @@ Ngày             14/09/2026                 (theo LM-027)
 Giờ              14:30                      (theo LM-027)
 ```
 
+`format.dayMonth` ("14/09" · "Sep 14") cắt năm khỏi mẫu ngày đầy đủ — CLDR tiếng Việt cho mẫu ngày + tháng là "dd-MM" (LM-090, LM-094).
+
 Đặt các hàm format trong `src/lib/format.ts` và dùng lại, không viết rải rác. Từ LM-027 hàm
 format nhận locale đang chọn.
 
@@ -376,6 +391,8 @@ format nhận locale đang chọn.
 - `src/domain` **không chứa câu chữ hiển thị**: validation và constraint trả **mã lỗi + tham số**
   (`{ code, severity, params }`, D-28); zod schema dùng mã làm message. UI dịch mã và format số
   theo locale. Test so mã, không so câu.
+- *(LM-091)* Tham số sự kiện nhật ký là dữ liệu: số format theo locale, mã (tên trường, loại sự cố, vai trò) dịch qua `audit.log.*`; chữ
+  người dùng nhập (lý do huỷ, ghi chú) giữ nguyên. Thêm tham số mới vào `ctx.log` của kho thì thêm nhãn `audit.log.params.<tên>`.
 - Câu số nhiều tiếng Việt: hai dạng `one`/`other` phải giống hệt nhau (tiếng Việt luôn dùng dạng `other`, LM-087).
 - Câu cho mã ràng buộc nằm ở nhánh `issues` của từ điển, key trùng tên mã, và chỉ gọi qua
   `formatIssue(issue, t, format)` của `@/lib/i18n` (LM-028). Thêm mã vào `CONSTRAINT_CODES` mà
@@ -414,9 +431,11 @@ Cùng lý do với nút giả: số bịa còn nguy hơn nút bịa vì người
 tiến độ và biểu đồ trên màn vận hành phải truy được về dữ liệu kho (`src/lib/mock-db`) hoặc về
 kết quả tối ưu; không có nguồn thì **bỏ hẳn phần đó**, không giữ lại bản mẫu cho đẹp.
 
-- Bảng điều khiển của quản lý (LM-052) vì vậy không còn `FillRateChart`, `AlgorithmChart`,
-  `PlanVsActualTable` và `dashboard.mock.ts`: kho không có chuỗi theo tuần, không có so sánh
-  thuật toán và không có số **thực tế** để đặt cạnh kế hoạch. Không dựng lại chúng bằng dữ liệu mẫu.
+- *(đã điều chỉnh 19/09/2026, LM-090, D-48)* Biểu đồ được phép khi kho có chuỗi thật: bảng điều khiển có 3 biểu đồ (lấp đầy theo ngày,
+  chuyến theo trạng thái, khối lượng đã giao theo xe) tính bằng hàm thuần `summarizeDashboard` từ chuyến, revision đã duyệt, tiến độ
+  giao và trạng thái xe của kho. Ngày không có số để trống, không nối, không điền 0; kỳ không có dữ liệu hiện câu rỗng thay trục trống;
+  tỷ lệ chưa tính được hiện "—" kèm lý do. Mỗi KPI một dòng nói nguồn; số lấy từ kết quả mock mang MOCK RESULT. Vẫn không có "so với
+  kỳ trước", so sánh thuật toán, hay "kế hoạch vs thực tế" (LM-052 đã gỡ `FillRateChart`, `AlgorithmChart`, `PlanVsActualTable`).
 - "So với kỳ trước" cũng là số bịa khi chưa có kỳ trước: `KpiTile` chỉ còn nhãn, số và một dòng
   ghi chú nói số đến từ đâu.
 - Trang tài liệu `/thanh-phan` được dùng số mẫu để trình bày component, nhưng lấy từ dữ liệu seed
@@ -464,6 +483,9 @@ kết quả tối ưu; không có nguồn thì **bỏ hẳn phần đó**, khôn
 - CoM là **tâm khối lượng hàng** đã xếp/còn lại, không phải toàn xe. *(đã điều chỉnh, LM-037)* Tải trục không hiện số nào: panel giữ chỗ với nhãn "Sẽ có sau" và chỉ liệt kê cấu hình `vehicle.axles` nếu có (Spec 7.10); Duyệt không kiểm tải trục. Cabin, bánh và khung gầm là mô hình minh họa, không phải axle geometry. *(bổ sung 17/09/2026)* Vị trí trục lấy `vehicle.axles[].positionXCm` khi xe có khai báo (`scene/truck-layout.ts`: trục đầu là cầu dẫn hướng bánh đơn, các trục sau bánh đôi), không có thì dùng vị trí minh hoạ; vẫn không tính tải trục.
 - Chi tiết xe gộp geometry theo vật liệu; mọi bánh (bánh đôi cầu sau) dùng một InstancedMesh, một draw. *(bổ sung 17/09/2026)* Khung gầm chi tiết (`scene/truck-chassis.ts`: khung sườn chữ C, dầm ngang, trục, vi sai, nhíp, giảm chấn, các-đăng, bình nhiên liệu/hơi, ắc quy, ống xả, lốp dự phòng, chắn bùn, gầm thùng) gộp vào cùng hình học màu theo đỉnh của `vehicle-details` — không thêm draw call. Camera xoay được xuống dưới gầm (`maxPolarAngle` gần π) và có góc nhìn "Gầm xe" (`gam-xe`, tâm nhìn hạ xuống khung sườn); đèn yếu từ dưới giữ khung gầm không đen. Màn kho không có góc gầm xe. Cargo dùng atlas trung tính chung cho carton/pallet/crate qua thuộc tính instance, không phải nhãn hướng đặt. Low tắt chi tiết phụ; không tắt cues nghiệp vụ. Khi gặp `LIFO_BLOCKED`, playback dỡ tạm dừng và giữ target. Kiện còn vật trên hành lang thẳng (người dùng bỏ qua bước, hoặc bị che một phần) mờ tại chỗ; không dịch chuyển xuyên kiện khác. Reduced motion không dịch chuyển lớn; hoàn tất phải trở lại idle.
 - Timeline dùng ô cao bằng nhau, 8–64 bins theo chiều rộng, slider giữ toàn bộ bước. Bản đồ điểm giao mặc định tắt; geometry nằm hoàn toàn trong mép sàn thùng (helper `operations/stop-map.ts`), depth test bình thường. Tính từ phân bố thể tích thực, giữ nhiều màu khi stop xen kẽ. Không đặt ribbon trên thân/gầm hoặc bên ngoài xe. Màu phải có số/tên điểm trong panel hoặc nhãn.
+- *(bổ sung 19/09/2026, LM-094)* Bản đã duyệt chưa có dời/xoay: không có nút Duyệt, hiện "Đã duyệt lúc HH:mm dd/MM"; có thì "Duyệt bản chỉnh".
+  Lý do chặn Duyệt ở tooltip + `aria-describedby` của nút, không in ở thanh. Pha chuyến khác `planning` hoặc thiếu `plans.approve`: không
+  Chỉnh sửa, không Duyệt, một dòng lý do (`viewer.lock`). Hộp thông tin chỉ mở từ nút "Chi tiết / Hiển thị" ở góc khung 3D và thẻ kiện.
 - Planner mặc định ưu tiên scene với HUD gọn; thông tin kiện, tải trục, màu/slice và lớp phân tích nằm trong inspector mở theo nhu cầu. Double-click focus giữ góc nhìn; Esc hoặc “Xem toàn xe” thoát focus. Theo bước là tùy chọn, tạm dừng khi người dùng tự điều khiển camera. Chọn blocker không đổi target dỡ; có đường quay lại target.
 - Viền/nhãn selected/current/next/hover là tập nhỏ cố định; `SceneCallout` giữ nhãn trong khung và đường chỉ dẫn neo đúng vị trí 3D. Editor có ba hướng đo, mặt phẳng kéo, tối đa ba mặt snap và bốn vùng overlap bằng hai InstancedMesh phụ cố định. Geometry/nhãn của preview cập nhật imperative, không đưa pointer frames qua React. Phone giữ trạng thái/snap/invalid, lược nhãn đo phụ để dành chỗ cho kiện.
 - *(bổ sung, LM-042)* Xem trước 3D ở form xe: `fleet/VehiclePreview.tsx` lo `useWatch` + debounce 250 ms + `previewVehicle` (chỉ phần hình học hợp lệ, không thì giữ hình cũ), rồi lazy-load `viewer3d/VehiclePreviewViewer` (`SceneCanvas` không kiện, tier `low`, không cabin). Camera chỉ canh lại qua `frameVehicle` khi kích thước lòng thùng đổi. Làm nổi vật cản từ ngoài canvas đi qua `highlightedObstacleId`/`onObstacleSelect` của `SceneCanvas`: `setColorAt` màu `--highlight`, không thêm draw call, không callout. Không có `WebGLRenderingContext` (jsdom) thì chỉ vẽ phác thảo SVG, không tải chunk 3D.
@@ -527,6 +549,7 @@ Commit theo Conventional Commits: `feat(viewer3d): add cross-section slider`.
 
 - TypeScript strict. Không `any`. Không `@ts-ignore`. Khi thư viện bắt buộc phải có kiểu lỏng, lấy kiểu từ chính thư viện (`TableOptions<...>['columns']`) thay vì tự viết `any`.
 - Không gọi API trực tiếp trong component.
+- Hộp thoại có `<form>` riêng không đặt trong `<form>` khác của cây React — portal không chặn sự kiện submit lan theo cây React (LM-089).
 - Mọi form dùng react-hook-form + zod schema, không tự quản state form. Đọc giá trị đang nhập bằng `useWatch`, **không** dùng `form.watch()` trong thân render — React Compiler không memo được và sẽ cảnh báo.
 - Không dùng `localStorage`. Phiên đăng nhập tạm giữ trong `sessionStorage`; khi nối backend thật sẽ đổi sang cookie HttpOnly do server đặt.
 
@@ -539,9 +562,9 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
 2. Bọc bằng hook Query trong cùng feature (`useTripsQuery`).
 3. Component chỉ gọi hook, không bao giờ gọi `-api.ts` trực tiếp.
 
-Màn nào còn giữ dữ liệu ở `useState` (Người dùng) thì phải chuyển sang đường
-đi này khi nối backend — đừng thêm màn mới theo lối cũ. *(đã điều chỉnh 16/09/2026)* Đội xe đã chuyển xong
-ở LM-040: `vehicles-api.ts` → `useVehiclesQuery` và các mutation, dữ liệu nằm ở kho mock dùng chung.
+*(đã điều chỉnh 19/09/2026)* Không còn màn nào giữ dữ liệu nghiệp vụ ở `useState`: Đội xe (LM-040), Người dùng (LM-092, `users-api.ts` →
+`useUsersQuery` + mutation), Nhật ký (`audit-api.ts`), kho và tài xế (LM-086/087) đều đọc/ghi kho mock qua Query. Trạng thái xe đọc
+`useVehicleStatesQuery` (`['vehicles', 'states']`, `staleTime: 0` vì pha chuyến đổi ở màn khác); ghi bảo dưỡng vô hiệu hoá `['vehicles']`.
 
 ### Dữ liệu dùng chung và tối ưu *(bổ sung 15/09/2026, D-06, D-30, D-31)*
 
@@ -588,6 +611,8 @@ Màn nào còn giữ dữ liệu ở `useState` (Người dùng) thì phải chu
   Đổi engine hoặc lưới không gian thì chạy lại cổng này.
 - File `*.bench.ts` được kiểm kiểu bằng `tsconfig.bench.json` (có kiểu Node để ghi file); `tsconfig.app.json` loại chúng
   ra để code app không thấy kiểu Node.
+- Màn tính theo "hôm nay" (kỳ của bảng điều khiển) giả đồng hồ bằng `vi.useFakeTimers({ toFake: ['Date'] })` về ngày neo seed; chỉ
+  giả `Date` để `setTimeout` (độ trễ kho, `findBy…`) vẫn chạy thật (LM-090).
 - Project `dom` chờ tối đa 15 giây mỗi test (màn đi cả luồng người dùng chạy song song cả bộ, LM-085).
 - E2E: `pnpm test:e2e` (Playwright, `e2e/*.spec.ts`, project `desktop`/`tablet`/`phone` theo tag
   `@tablet`/`@phone`). Tự bật Vite ở `127.0.0.1:5175`; cổng đang do checkout khác giữ thì đặt

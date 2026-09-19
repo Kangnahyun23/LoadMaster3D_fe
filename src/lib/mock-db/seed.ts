@@ -142,7 +142,7 @@ function seedTripFrom(spec: TripSpec, index: number, today: string, plan: Plan, 
   trip = { ...trip, loading: seedLoading(spec, today, approved, events) }
   if (spec.outcome === 'loading') return { ...trip, phase: 'loading' }
   if (spec.outcome === 'loaded') return { ...trip, phase: 'loaded' }
-  const delivery = seedDelivery(spec, trip, today, approved, events)
+  const delivery = seedDelivery(spec, trip, approved, events)
   return { ...trip, delivery, phase: spec.outcome === 'delivering' ? 'delivering' : 'completed' }
 }
 
