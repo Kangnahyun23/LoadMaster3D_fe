@@ -265,7 +265,8 @@ trong `src/`; muốn dùng class từ nơi khác thì thêm `@source` tường m
 - *(quyết định 16/09/2026)* Màn **điều phối** (danh sách/chi tiết/form chuyến, kiện, thiết lập tối ưu, so sánh, đội xe, dashboard) tạm thời
   **chỉ hỗ trợ desktop**: nút giữ 40px, không bắt buộc 56px. Luật 56px áp cho màn cảm ứng: kho, tài xế, Planner 3D.
 - Hover chỉ đổi nền sang `--primary-hover`. **Không** phóng to, **không** nhấc lên.
-- Focus: vòng 2px `--primary` cách 2px.
+- Focus: vòng 2px `--primary` cách 2px. *(bổ sung 19/09/2026, LM-085)* Tailwind v4: `outline-none` tắt biến `--tw-outline-style`,
+  nên `index.css` đặt lại `solid` cho `:focus-visible` ngoài `@layer` để `focus-visible:outline-2` vẽ được vòng — không bỏ rule đó.
 - Loading: giữ nguyên chiều rộng, thêm spinner 16px bên trái chữ.
 - Nút phụ: nền trắng, viền 1px `--border`. Nút ghost: trong suốt. Nút nguy hiểm: nền đặc `--danger`.
 - Nút chỉ có icon: 36×36 desktop, 48×48 di động.
@@ -309,6 +310,12 @@ Không phải thứ gì cũng cần card. Nhóm nội dung bằng khoảng trắ
 ### Bảng dữ liệu
 
 Chiều cao dòng cố định (48px thoáng, 36px gọn, 56px cảm ứng). Cột số căn phải, JetBrains Mono. Tiêu đề cột 12px weight 500 màu `--text-3`, không viết hoa, dính khi cuộn. Bảng hẹp (cột phụ ≤ 360px) dùng padding ngang 10px thay vì 12px để tiêu đề không xuống dòng.
+
+*(bổ sung 19/09/2026, LM-085, D-52)* Danh sách có tìm/lọc/sắp xếp/phân trang ghép `FilterBar` + `@/lib/list-filter` (tìm bỏ dấu:
+"bien hoa" khớp "Biên Hoà") + `DataTable` + `useListUrlState`. Cột chỉ sắp xếp được khi khai `enableSorting: true`; tiêu đề là nút có
+`aria-sort`. Phân trang 25/50/100 qua prop `pagination`. Bảng rỗng vì lọc truyền `isFiltering` để nói "không có kết quả khớp", khác
+"chưa có dữ liệu". Tham số URL tiếng Việt không dấu: `q`, `sap-xep`, `trang`, `so-dong` + tên bộ lọc của màn. Ô nhập nối vào URL giữ
+bản nháp tại chỗ (router đổi URL trong `startTransition`) — dùng `FilterBar`, không nối thẳng `value` vào `useSearchParams`.
 
 ## 6. Ngôn ngữ giao diện
 
@@ -579,6 +586,7 @@ Màn nào còn giữ dữ liệu ở `useState` (Người dùng) thì phải chu
   Đổi engine hoặc lưới không gian thì chạy lại cổng này.
 - File `*.bench.ts` được kiểm kiểu bằng `tsconfig.bench.json` (có kiểu Node để ghi file); `tsconfig.app.json` loại chúng
   ra để code app không thấy kiểu Node.
+- Project `dom` chờ tối đa 15 giây mỗi test (màn đi cả luồng người dùng chạy song song cả bộ, LM-085).
 - E2E: `pnpm test:e2e` (Playwright, `e2e/*.spec.ts`, project `desktop`/`tablet`/`phone` theo tag
   `@tablet`/`@phone`). Tự bật Vite ở `127.0.0.1:5175`; cổng đang do checkout khác giữ thì đặt
   `E2E_PORT`. Trước khi so tư thế camera phải chờ camera đã vẽ xong (`waitCameraSettled`) —
