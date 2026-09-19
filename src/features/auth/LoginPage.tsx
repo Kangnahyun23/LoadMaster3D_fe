@@ -46,7 +46,7 @@ type ServerErrorKey = (typeof AUTH_ERRORS)[AuthErrorCode] | 'auth.login.serverUn
 const HIGHLIGHTS = [
   { icon: Gauge, textKey: 'auth.showcase.fillRate' },
   { icon: Layers, textKey: 'auth.showcase.reverseOrder' },
-  { icon: Boxes, textKey: 'auth.showcase.axleLoad' },
+  { icon: Boxes, textKey: 'auth.showcase.sharedPlan' },
 ] as const
 
 /**

@@ -1,13 +1,14 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, type RouteObject } from 'react-router'
 import { Spinner } from '@/components/ui/Spinner'
-import { useT } from '@/lib/i18n'
+import { useT, type TFunction } from '@/lib/i18n'
 import type { Permission } from '@/features/auth/permissions'
 import { RequireAuth } from '@/features/auth/RequireAuth'
 import { RequirePermission } from '@/features/auth/RequirePermission'
 import { AppShell } from './AppShell'
 import { NotFoundPage } from './NotFoundPage'
 import { Providers } from './providers'
+import { useRouteTitle, type RouteHandle, type TitleSource } from './route-title'
 
 /**
  * Mỗi màn là một chunk riêng: dispatcher không tải code tài xế, tablet kho
@@ -31,8 +32,10 @@ const AuditLogPage = lazy(() => import('@/features/admin/AuditLogPage').then((m)
 const StyleSheetPage = lazy(() => import('./design-system/StyleSheetPage').then((m) => ({ default: m.StyleSheetPage })))
 const ComponentSheetPage = lazy(() => import('./design-system/ComponentSheetPage').then((m) => ({ default: m.ComponentSheetPage })))
 
-function SuspenseOutlet() {
+/** Layout của mỗi nhóm route: chờ chunk của màn và đặt tiêu đề tab theo `handle` của route (LM-100). */
+function RouteOutlet() {
   const t = useT()
+  useRouteTitle()
   return (
     <Suspense
       fallback={
@@ -46,16 +49,35 @@ function SuspenseOutlet() {
   )
 }
 
-/** Nhóm route cần một quyền (D-41): thiếu quyền thì màn 403 thay cho màn đích. */
+/** Nhóm route cần một quyền (D-41): thiếu quyền thì màn 403 thay cho màn đích, tab mang tên màn 403. */
 function guarded(permission: Permission, children: RouteObject[]): RouteObject {
-  return { element: <RequirePermission permission={permission} />, children }
+  return { element: <RequirePermission permission={permission} />, handle: { permission } satisfies RouteHandle, children }
 }
 
-const router = createBrowserRouter([
+/** Tên màn trên tab (nhánh `titles` của từ điển); màn có mã thì hàm đọc mã từ đường dẫn hoặc truy vấn. */
+function titled(title: (t: TFunction, source: TitleSource) => string): RouteHandle {
+  return { title }
+}
+
+/** Mã trên đường dẫn (`:tripId`, `:vehicleId`): route khai đúng tên tham số nên khớp route là có mã. */
+const idParam = ({ params }: TitleSource, name: string) => ({ id: params[name] ?? '' })
+
+/** Màn có mã trên truy vấn (`?chuyen=`): có mã thì kèm mã, chưa chọn thì tên chung. */
+function withSearchId(source: TitleSource, name: string, withId: (id: string) => string, plain: string): string {
+  const id = source.search.get(name)
+  return id ? withId(id) : plain
+}
+
+/** Bảng route của ứng dụng; test dựng lại bằng `createMemoryRouter(routes)` để kiểm `handle` (tiêu đề tab). */
+export const routes: RouteObject[] = [
   {
     errorElement: <NotFoundPage />,
     children: [
-      { path: '/dang-nhap', element: <SuspenseOutlet />, children: [{ index: true, element: <LoginPage /> }] },
+      {
+        path: '/dang-nhap',
+        element: <RouteOutlet />,
+        children: [{ index: true, element: <LoginPage />, handle: titled((t) => t('titles.login')) }],
+      },
 
       {
         element: <RequireAuth />,
@@ -65,26 +87,30 @@ const router = createBrowserRouter([
             element: <AppShell />,
             children: [
               {
-                element: <SuspenseOutlet />,
+                element: <RouteOutlet />,
                 children: [
-                  guarded('dashboard.view', [{ path: '/', element: <DashboardPage /> }]),
+                  guarded('dashboard.view', [{ path: '/', element: <DashboardPage />, handle: titled((t) => t('titles.dashboard')) }]),
                   guarded('trips.view', [
-                    { path: '/chuyen', element: <TripListPage /> },
-                    { path: '/chuyen/:tripId', element: <TripDetailPage /> },
+                    { path: '/chuyen', element: <TripListPage />, handle: titled((t) => t('titles.trips')) },
+                    { path: '/chuyen/:tripId', element: <TripDetailPage />, handle: titled((t, s) => t('titles.trip', idParam(s, 'tripId'))) },
                   ]),
                   guarded('trips.edit', [
-                    { path: '/chuyen/moi', element: <TripFormPage /> },
-                    { path: '/chuyen/:tripId/sua', element: <TripFormPage /> },
+                    { path: '/chuyen/moi', element: <TripFormPage />, handle: titled((t) => t('titles.newTrip')) },
+                    { path: '/chuyen/:tripId/sua', element: <TripFormPage />, handle: titled((t, s) => t('titles.editTrip', idParam(s, 'tripId'))) },
                   ]),
-                  guarded('optimization.run', [{ path: '/chuyen/:tripId/toi-uu', element: <OptimizationSetupPage /> }]),
-                  guarded('plans.view', [{ path: '/chuyen/:tripId/so-sanh', element: <PlanComparisonPage /> }]),
+                  guarded('optimization.run', [
+                    { path: '/chuyen/:tripId/toi-uu', element: <OptimizationSetupPage />, handle: titled((t, s) => t('titles.optimize', idParam(s, 'tripId'))) },
+                  ]),
+                  guarded('plans.view', [
+                    { path: '/chuyen/:tripId/so-sanh', element: <PlanComparisonPage />, handle: titled((t, s) => t('titles.compare', idParam(s, 'tripId'))) },
+                  ]),
                   guarded('fleet.view', [
-                    { path: '/doi-xe', element: <FleetPage /> },
-                    { path: '/doi-xe/:vehicleId', element: <VehicleDetailPage /> },
+                    { path: '/doi-xe', element: <FleetPage />, handle: titled((t) => t('titles.fleet')) },
+                    { path: '/doi-xe/:vehicleId', element: <VehicleDetailPage />, handle: titled((t, s) => t('titles.vehicle', idParam(s, 'vehicleId'))) },
                   ]),
-                  guarded('fleet.edit', [{ path: '/doi-xe/moi', element: <VehicleDetailPage /> }]),
-                  guarded('users.manage', [{ path: '/nguoi-dung', element: <UsersPage /> }]),
-                  guarded('audit.view', [{ path: '/nhat-ky', element: <AuditLogPage /> }]),
+                  guarded('fleet.edit', [{ path: '/doi-xe/moi', element: <VehicleDetailPage />, handle: titled((t) => t('titles.newVehicle')) }]),
+                  guarded('users.manage', [{ path: '/nguoi-dung', element: <UsersPage />, handle: titled((t) => t('titles.users')) }]),
+                  guarded('audit.view', [{ path: '/nhat-ky', element: <AuditLogPage />, handle: titled((t) => t('titles.audit')) }]),
                 ],
               },
             ],
@@ -92,15 +118,25 @@ const router = createBrowserRouter([
 
           // Màn toàn màn hình, không nav rail (theo bản design).
           {
-            element: <SuspenseOutlet />,
+            element: <RouteOutlet />,
             children: [
-              guarded('plans.view', [{ path: '/chuyen/:tripId/phuong-an', element: <ViewerPage /> }]),
+              guarded('plans.view', [
+                { path: '/chuyen/:tripId/phuong-an', element: <ViewerPage />, handle: titled((t, s) => t('titles.plan', idParam(s, 'tripId'))) },
+              ]),
               // `/kho` là danh sách chuyến cần xếp; `/kho?chuyen=<mã>` là phiên xếp của chuyến đó (LM-086).
-              guarded('warehouse.operate', [{ path: '/kho', element: <WarehousePage /> }]),
+              guarded('warehouse.operate', [{
+                path: '/kho',
+                element: <WarehousePage />,
+                handle: titled((t, s) => withSearchId(s, 'chuyen', (id) => t('titles.loading', { id }), t('titles.warehouse'))),
+              }]),
               // `/tai-xe` là "Chuyến của tôi"; `/tai-xe/diem-giao?chuyen=<mã>` là một chuyến; đường dẫn lạ về danh sách (LM-087).
               guarded('driver.operate', [
-                { path: '/tai-xe', element: <MyTripsPage /> },
-                { path: '/tai-xe/diem-giao', element: <DriverStopPage /> },
+                { path: '/tai-xe', element: <MyTripsPage />, handle: titled((t) => t('titles.driverTrips')) },
+                {
+                  path: '/tai-xe/diem-giao',
+                  element: <DriverStopPage />,
+                  handle: titled((t, s) => withSearchId(s, 'chuyen', (id) => t('titles.delivery', { id }), t('titles.driverTrips'))),
+                },
                 { path: '/tai-xe/*', element: <Navigate to="/tai-xe" replace /> },
               ]),
             ],
@@ -110,17 +146,20 @@ const router = createBrowserRouter([
 
       // Tài liệu bàn giao cho đội dev/design, dựng từ chính component thật.
       {
-        element: <SuspenseOutlet />,
+        element: <RouteOutlet />,
         children: [
-          { path: '/kieu-dang', element: <StyleSheetPage /> },
-          { path: '/thanh-phan', element: <ComponentSheetPage /> },
+          { path: '/kieu-dang', element: <StyleSheetPage />, handle: titled((t) => t('titles.styleSheet')) },
+          { path: '/thanh-phan', element: <ComponentSheetPage />, handle: titled((t) => t('titles.componentSheet')) },
         ],
       },
 
+      // Màn 404 và màn lỗi của router tự đặt tiêu đề tab (`useDocumentTitle`): không nằm dưới `RouteOutlet`.
       { path: '*', element: <NotFoundPage /> },
     ],
   },
-])
+]
+
+const router = createBrowserRouter(routes)
 
 export function App() {
   return (
