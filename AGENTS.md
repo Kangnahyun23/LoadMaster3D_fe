@@ -593,6 +593,8 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
 - Seed neo theo ngày (D-44): `getMockDb()` neo hôm nay giờ Việt Nam, dưới Vitest và `createMockDb()` mặc định neo `SEED_ANCHOR_DATE`
   (14/09/2026) để test tất định. Chuyến chính `TRIP-2026-0914` luôn đứng đầu `listTrips` và giữ `REV-001`/`REV-002`; test so số
   của seed (tổng kiện, số xe…) phải cập nhật khi đổi `seed-trips.ts`. Dựng seed ≈ 0,3 s một lần mỗi ngày neo.
+  Mở app sớm hơn việc "hôm nay" muộn nhất của seed thì mọi mốc giờ seed lùi cùng một khoảng (`seed-shift.ts`): lịch sử không có sự kiện
+  ở tương lai, sự kiện mới luôn nằm trên sự kiện seed; ngày chạy không đổi.
 - Trạng thái demo lỗi service bật bằng tham số URL (`?mo-phong=loi`), đọc ở `-api.ts`, không đưa
   công tắc kỹ thuật lên UI vận hành. `-api.ts` lấy service qua `createOptimizationService({ simulateFailure })`:
   Web Worker trong trình duyệt, chạy trên luồng gọi khi không có Worker (jsdom), mọi đường kết thúc đều `terminate` (LM-025).

@@ -164,3 +164,19 @@ test('seeded history keeps the operation order: loading finishes before the deli
     expect(completed.every((at) => at > trip.delivery!.startedAt), trip.id).toBe(true)
   }
 })
+
+test('opened before the seeded day has played out, no seeded time lies in the future; order and run dates stay', async () => {
+  const early = new Date('2026-09-19T00:30:00+07:00')
+  const db = createMockDb({ today: '2026-09-19', now: () => early })
+  const late = createMockDb({ today: '2026-09-19', now: () => new Date('2026-09-19T23:00:00+07:00') })
+  const events = await db.listEvents()
+  expect(events.every((event) => Date.parse(event.at) < early.getTime())).toBe(true)
+  // same actions in the same order, all moved by one offset
+  const lateEvents = await late.listEvents()
+  expect(events.map((event) => [event.id, event.action])).toStrictEqual(lateEvents.map((event) => [event.id, event.action]))
+  const offset = Date.parse(lateEvents[0]!.at) - Date.parse(events[0]!.at)
+  expect(events.every((event, index) => Date.parse(lateEvents[index]!.at) - Date.parse(event.at) === offset)).toBe(true)
+  expect((await db.getTrip('TRIP-2026-0914')).scheduledDate).toBe('2026-09-19')
+  const [, approved] = await db.listRevisions('TRIP-2026-0914')
+  expect(Date.parse(approved!.approvedAt!)).toBeLessThan(early.getTime())
+})

@@ -7,11 +7,13 @@ import { tripMethods } from './db-trips'
 import { userMethods } from './db-users'
 import { vehicleMethods } from './db-vehicles'
 import { buildSeed } from './seed'
+import { shiftSeedTimes } from './seed-shift'
 import type { MockDb, MockDbOptions } from './types'
 
 /** Tạo một kho mới đã nạp seed neo theo `today` (D-44). Mỗi kho giữ dữ liệu và phiên riêng. */
 export function createMockDb({ latencyMs = 0, today = SEED_ANCHOR_DATE, now = () => new Date() }: MockDbOptions = {}): MockDb {
-  const seed = buildSeed(today)
+  // Mở app trước giờ của các việc "hôm nay" trong seed thì lùi mốc giờ seed, không để lịch sử có sự kiện ở tương lai
+  const seed = shiftSeedTimes(buildSeed(today), now())
   const state: DbState = {
     vehicles: new Map(seed.vehicles.map((vehicle) => [vehicle.id, vehicle])),
     maintenance: new Map(seed.maintenance),

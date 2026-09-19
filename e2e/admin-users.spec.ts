@@ -40,8 +40,8 @@ test('a driver account the admin creates signs in with its one-time password; lo
 
   await signOutFromMenu(page, 'Võ Minh Khoa')
   await signIn(page, NEW_DRIVER.email, password)
-  await page.waitForURL(/\/tai-xe\/diem-giao$/)
-  // Màn tài xế là màn chính của vai trò: nút thoát là đăng xuất
+  // Tài xế đăng nhập mở "Chuyến của tôi" (LM-087) — màn chính của vai trò: nút thoát là đăng xuất
+  await page.waitForURL(/\/tai-xe$/)
   await page.getByRole('button', { name: 'Đăng xuất', exact: true }).first().click()
   await page.waitForURL(/\/dang-nhap$/)
 
