@@ -111,7 +111,7 @@ test('explicit quality tiers are honoured, including under reduced motion', asyn
 })
 
 test('benchmark fixture requires debug; warehouse camera, next step and driver 2D route still work', async ({ page, login, browserErrors }, testInfo) => {
-  await login(`${PLANNER_ROUTE}?packages=1000`)
+  await login(`${PLANNER_ROUTE}?packages=1000`, 'admin')
   await page.locator('canvas').waitFor()
   expect(await page.locator('[data-viewer-performance]').count()).toBe(0)
   expect(await page.locator('header').innerText()).toMatch(/132/)

@@ -1,9 +1,17 @@
 import { test as base, type Page, type PageScreenshotOptions, type TestInfo } from '@playwright/test'
+import type { Role } from '@/types/user'
 
 export { expect } from '@playwright/test'
 
-/** Tài khoản demo công khai, khai báo trong `src/features/auth/auth.mock.ts`. */
-export const DEMO_ACCOUNT = { email: 'dieuphoi@loadmaster.vn', password: 'loadmaster' } as const
+/** Tài khoản demo công khai theo vai trò (seed kho, `src/lib/mock-db/seed-users.ts`), chung mật khẩu. */
+export const DEMO_EMAILS: Readonly<Record<Role, string>> = {
+  dispatcher: 'dieuphoi@loadmaster.vn',
+  manager: 'quanly@loadmaster.vn',
+  warehouse: 'kho@loadmaster.vn',
+  driver: 'taixe@loadmaster.vn',
+  admin: 'quantri@loadmaster.vn',
+}
+export const DEMO_PASSWORD = 'loadmaster'
 
 export const PLANNER_ROUTE = '/chuyen/TRIP-2026-0914/phuong-an'
 
@@ -13,11 +21,11 @@ type ViewerFixtures = {
   /** Lỗi trình duyệt của `page`. Test tự khẳng định mảng rỗng ở cuối kịch bản, như bản `.mjs`. */
   browserErrors: string[]
   /**
-   * Mở route cần đăng nhập rồi đăng nhập bằng tài khoản demo qua form thật. `RequireAuth`
-   * ghi nhớ route kèm query nên app quay lại đúng route. Phiên nằm trong sessionStorage của
-   * tab, vì vậy mọi `page.goto` sau đó trong cùng test vẫn giữ đăng nhập.
+   * Mở route cần đăng nhập rồi đăng nhập bằng tài khoản demo của `role` (mặc định điều phối) qua form thật. `RequireAuth`
+   * ghi nhớ route kèm query nên app quay lại đúng route. Phiên nằm trong sessionStorage của tab, vì vậy mọi `page.goto`
+   * sau đó trong cùng test vẫn giữ đăng nhập. Kịch bản đi qua màn của nhiều vai trò dùng `admin` (toàn quyền, D-41).
    */
-  login: (route: string) => Promise<void>
+  login: (route: string, role?: Role) => Promise<void>
 }
 
 export const test = base.extend<ViewerFixtures>({
@@ -37,10 +45,10 @@ export const test = base.extend<ViewerFixtures>({
     await provide(page)
   },
   login: async ({ page, hasTouch }, provide) => {
-    await provide(async (route) => {
+    await provide(async (route, role = 'dispatcher') => {
       await page.goto(route)
-      await page.getByLabel('Email', { exact: true }).fill(DEMO_ACCOUNT.email)
-      await page.getByLabel('Mật khẩu', { exact: true }).fill(DEMO_ACCOUNT.password)
+      await page.getByLabel('Email', { exact: true }).fill(DEMO_EMAILS[role])
+      await page.getByLabel('Mật khẩu', { exact: true }).fill(DEMO_PASSWORD)
       const submit = page.getByRole('button', { name: 'Đăng nhập', exact: true })
       await (hasTouch ? submit.tap() : submit.click())
       await page.waitForURL((url) => url.pathname !== '/dang-nhap')

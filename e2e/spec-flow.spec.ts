@@ -19,7 +19,7 @@ for (const device of ['desktop', 'tablet'] as const) {
     const heights: Record<string, number> = {}
 
     // Xe "Truck 6m" có hốc bánh xe, tạo ở Đội xe
-    await login('/doi-xe')
+    await login('/doi-xe', 'admin')
     await page.getByRole('link', { name: 'Thêm xe', exact: true }).click()
     await page.getByRole('textbox', { name: 'Tên xe *' }).fill('Truck 6m')
     // §15 "Tạo xe bằng cm/kg" + "Mọi field hiển thị đơn vị": ô lòng thùng là cm, tải trọng là kg
@@ -47,8 +47,8 @@ for (const device of ['desktop', 'tablet'] as const) {
     const createTrip = page.getByRole('button', { name: 'Tạo chuyến', exact: true })
     if (tablet) heights.createTrip = await heightOf(createTrip)
     await createTrip.click()
-    await page.waitForURL(/\/chuyen\/TRIP-001$/)
-    await expect(page.getByText('Đã tạo chuyến TRIP-001')).toBeVisible()
+    await page.waitForURL(/\/chuyen\/TRIP-015$/)
+    await expect(page.getByText('Đã tạo chuyến TRIP-015')).toBeVisible()
 
     // Kiện PKG-001 × 4, rồi nhân bản
     const panel = await addPackage(page, { name: 'Thùng sơn', lengthCm: 120, widthCm: 100, heightCm: 100, weightKg: 200, quantity: 4 })
@@ -152,9 +152,9 @@ for (const device of ['desktop', 'tablet'] as const) {
       const { getMockDb } = (await import(db)) as typeof import('@/lib/mock-db')
       const revision = (await getMockDb().listRevisions(tripId)).findLast((item) => item.approvedAt !== undefined)
       return { id: revision?.id, first: revision?.result.placements.find((placement) => placement.loadingOrder === 1)?.packageInstanceId, total: revision?.result.placements.length }
-    }, { db: MOCK_DB, tripId: 'TRIP-001' })
+    }, { db: MOCK_DB, tripId: 'TRIP-015' })
     expect(page.url()).toContain(`revision=${approved.id}`)
-    await navigateInApp(page, '/kho?chuyen=TRIP-001')
+    await navigateInApp(page, '/kho?chuyen=TRIP-015')
     await expect(page.getByText(`Bước 1 / ${approved.total}`)).toBeVisible()
     await expect(page.getByRole('heading', { level: 1, name: approved.first, exact: true })).toBeVisible()
     await expect(page.getByText('MOCK RESULT', { exact: true })).toBeVisible()
@@ -296,7 +296,7 @@ test('switching to English mid-flow keeps form input and formats numbers the Eng
   await expect(page.getByText('720 × 235 × 240 cm', { exact: true })).toBeVisible()
 
   await page.getByRole('button', { name: 'Create trip', exact: true }).click()
-  await expect(page.getByText('Created trip TRIP-001')).toBeVisible()
+  await expect(page.getByText('Created trip TRIP-015')).toBeVisible()
   await addPackageEn(page)
   await expect(page.getByText(/1\.2 m³/)).toBeVisible()
   await expect(page.getByText(/1,234\.5 kg/).first()).toBeVisible()

@@ -19,6 +19,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 import { useAuth } from '@/features/auth/AuthProvider'
+import type { Permission } from '@/features/auth/permissions'
+import { useCan } from '@/features/auth/useCan'
 import { useT, type MessageKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { initialsOf } from '@/types/user'
@@ -27,16 +29,18 @@ type NavItem = {
   to: string
   labelKey: MessageKey
   icon: LucideIcon
+  /** Mục chỉ hiện khi người đăng nhập có quyền mở màn đích (D-41). */
+  permission: Permission
 }
 
 /** Thứ tự và nhãn lấy từ nav rail trong bản design. */
 const NAV_ITEMS = [
-  { to: '/', labelKey: 'nav.dashboard', icon: LayoutDashboard },
-  { to: '/chuyen', labelKey: 'nav.trips', icon: Truck },
-  { to: '/kho', labelKey: 'nav.warehouse', icon: Tablet },
-  { to: '/tai-xe/diem-giao', labelKey: 'nav.driver', icon: Box },
-  { to: '/doi-xe', labelKey: 'nav.fleet', icon: Warehouse },
-  { to: '/nguoi-dung', labelKey: 'nav.users', icon: Users },
+  { to: '/', labelKey: 'nav.dashboard', icon: LayoutDashboard, permission: 'dashboard.view' },
+  { to: '/chuyen', labelKey: 'nav.trips', icon: Truck, permission: 'trips.view' },
+  { to: '/kho', labelKey: 'nav.warehouse', icon: Tablet, permission: 'warehouse.operate' },
+  { to: '/tai-xe/diem-giao', labelKey: 'nav.driver', icon: Box, permission: 'driver.operate' },
+  { to: '/doi-xe', labelKey: 'nav.fleet', icon: Warehouse, permission: 'fleet.view' },
+  { to: '/nguoi-dung', labelKey: 'nav.users', icon: Users, permission: 'users.manage' },
 ] as const satisfies readonly NavItem[]
 
 /**
@@ -46,6 +50,7 @@ const NAV_ITEMS = [
 export function NavRail() {
   const t = useT()
   const { user, signOut } = useAuth()
+  const can = useCan()
   const navigate = useNavigate()
 
   async function handleSignOut() {
@@ -62,7 +67,7 @@ export function NavRail() {
         <div className="h-3 w-4.5 rounded-xs border-2 border-t-4 border-white" />
       </div>
 
-      {NAV_ITEMS.map(({ to, labelKey, icon: Icon }) => (
+      {NAV_ITEMS.filter((item) => can(item.permission)).map(({ to, labelKey, icon: Icon }) => (
         <NavLink
           key={to}
           to={to}

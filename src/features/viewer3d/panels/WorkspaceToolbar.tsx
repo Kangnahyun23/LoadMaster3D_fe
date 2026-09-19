@@ -9,7 +9,7 @@ export type InspectorTab = 'operations' | 'package' | 'display' | 'packages' | '
 /** One workspace bar. Less-used controls live in a labelled inspector. */
 export function WorkspaceToolbar({ operations, stops, preset, onPreset, onInspect, onEdit }: {
   operations: OperationsState; stops: readonly SceneStop[]; preset: CameraPreset
-  onPreset: (p: CameraPreset) => void; onInspect: (tab: InspectorTab) => void; onEdit: () => void
+  onPreset: (p: CameraPreset) => void; onInspect: (tab: InspectorTab) => void; onEdit?: () => void
 }) {
   const t = useT()
   const control = 'h-14 rounded-md border border-border bg-bg px-2 text-body-lg focus-visible:outline-2 focus-visible:outline-primary xl:h-11 xl:text-body'
@@ -29,7 +29,7 @@ export function WorkspaceToolbar({ operations, stops, preset, onPreset, onInspec
     <div className="ml-auto hidden gap-2 lg:flex">
       <Button variant="ghost" className={control} onClick={() => onInspect('packages')}>{t('viewer.toolbar.packageList')}</Button>
       <Button variant="ghost" className={control} onClick={() => onInspect('operations')}>{t('viewer.toolbar.operations')}</Button>
-      <Button variant="secondary" className={control} onClick={onEdit}>{t('viewer.toolbar.edit')}</Button>
+      {onEdit ? <Button variant="secondary" className={control} onClick={onEdit}>{t('viewer.toolbar.edit')}</Button> : null}
     </div>
     <Button variant="secondary" className={`${control} shrink-0`} onClick={() => onInspect('display')}>{t('viewer.toolbar.display')}</Button>
   </div>

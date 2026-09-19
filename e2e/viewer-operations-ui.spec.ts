@@ -123,7 +123,7 @@ test('camera orbit keeps draw calls and cargo instances bounded; balanced/high a
 
 test('warehouse isolates the current package and advances after confirmation', async ({ page, login, browserErrors }, testInfo) => {
   // Kho đọc revision đã duyệt của chuyến seed (LM-060), bắt đầu ở bước 1: kiện hiện tại đậm, kiện kế tiếp mờ.
-  await login('/kho?debug&quality=low'); await settle(page)
+  await login('/kho?debug&quality=low', 'warehouse'); await settle(page)
   expect(await page.locator('[data-experience="warehouse"]').count()).toBe(1)
   expect(await visibleCargo(page)).toStrictEqual({ 'cargo-opaque': 1, 'cargo-dim': 1 })
   await page.getByRole('combobox', { name: 'Góc nhìn thùng xe', exact: true }).selectOption('cua-sau')
@@ -150,7 +150,7 @@ test.describe('touch', () => {
     const viewport = page.viewportSize()!
     const requests: string[] = []
     page.on('request', (request) => requests.push(request.url()))
-    await login('/tai-xe/diem-giao?debug&packages=1000&quality=low')
+    await login('/tai-xe/diem-giao?debug&packages=1000&quality=low', 'driver')
     await button(page, 'Xem vị trí hàng').waitFor()
     expect(await page.locator('canvas').count()).toBe(0)
     expect(requests.some((url) => /@react-three|three\.module|three\.core/.test(url)), 'driver 2D must not fetch Three.js').toBe(false)

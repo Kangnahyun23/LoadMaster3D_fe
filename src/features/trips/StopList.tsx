@@ -25,10 +25,12 @@ import type { StopRow } from './trip-summary'
  * mutation, kiện được đánh số lại trong kho. Điểm cuối trong danh sách được xếp sâu nhất trong thùng.
  * Kéo bằng bàn phím vẫn dùng được (dnd-kit KeyboardSensor).
  */
-export function StopList({ stops, onReorder, onRemove }: {
+export function StopList({ stops, onReorder, onRemove, readOnly = false }: {
   stops: readonly StopRow[]
   onReorder: (stops: readonly DeliveryStop[]) => void
   onRemove: (stop: StopRow) => void
+  /** Chỉ xem: không kéo, không xoá, không hiện gợi ý kéo (D-41, D-45). */
+  readOnly?: boolean
 }) {
   const t = useT()
   const sensors = useSensors(
@@ -55,7 +57,7 @@ export function StopList({ stops, onReorder, onRemove }: {
             {t('trips.stops.count', { count: stops.length })}
           </span>
         </div>
-        <span className="text-caption text-text-3">{t('trips.stops.hint')}</span>
+        {readOnly ? null : <span className="text-caption text-text-3">{t('trips.stops.hint')}</span>}
       </div>
 
       <DndContext
@@ -66,7 +68,7 @@ export function StopList({ stops, onReorder, onRemove }: {
       >
         <SortableContext items={stops.map((stop) => stop.id)} strategy={verticalListSortingStrategy}>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
-            {stops.map((stop) => <StopCard key={stop.id} stop={stop} onRemove={() => onRemove(stop)} />)}
+            {stops.map((stop) => <StopCard key={stop.id} stop={stop} readOnly={readOnly} onRemove={() => onRemove(stop)} />)}
           </ul>
         </SortableContext>
       </DndContext>

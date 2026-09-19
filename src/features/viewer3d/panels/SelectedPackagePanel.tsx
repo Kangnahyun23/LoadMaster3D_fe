@@ -34,7 +34,7 @@ export function SelectedPackagePanel({
   /** Lỗi/cảnh báo ràng buộc của phương án; panel lọc theo kiện đang chọn (LM-049) */
   issues?: readonly ConstraintIssue[]
   onClose: () => void
-  onEdit: () => void
+  onEdit?: () => void
   onFocus: () => void
 }) {
   const t = useT()
@@ -97,7 +97,7 @@ function PackageDetails({
   stops: readonly SceneStop[]
   tripId: string
   issues: readonly ConstraintIssue[]
-  onEdit: () => void
+  onEdit?: () => void
   onFocus: () => void
 }) {
   const format = useFormat()
@@ -210,7 +210,7 @@ function PackageDetails({
 
       <div className="flex flex-col gap-2 border-t border-border px-4 pt-3 pb-4">
         <span className="text-body">{t(placement.pinned ? 'viewer.selected.pinned' : 'viewer.selected.notPinned')}</span>
-        <Button variant="secondary" className="h-14 text-body-lg xl:h-11 xl:text-body" block onClick={onEdit}><Pencil strokeWidth={1.5} />{t('viewer.hud.edit')}</Button>
+        {onEdit ? <Button variant="secondary" className="h-14 text-body-lg xl:h-11 xl:text-body" block onClick={onEdit}><Pencil strokeWidth={1.5} />{t('viewer.hud.edit')}</Button> : null}
         <Button variant="ghost" className="h-14 text-body-lg xl:h-11 xl:text-body" block onClick={onFocus}><Focus strokeWidth={1.5} />{t('viewer.hud.focus')}</Button>
       </div>
     </>

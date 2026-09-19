@@ -2,6 +2,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { useCan } from '@/features/auth/useCan'
 import { useT } from '@/lib/i18n'
 import { useVehicleQuery } from './useVehiclesQuery'
 import { VehicleForm } from './VehicleForm'
@@ -14,6 +15,7 @@ import { VehicleForm } from './VehicleForm'
 export function VehicleDetailPage() {
   const t = useT()
   const { vehicleId } = useParams()
+  const can = useCan()
   const query = useVehicleQuery(vehicleId ?? '')
 
   if (vehicleId === undefined) return <VehicleForm />
@@ -41,5 +43,5 @@ export function VehicleDetailPage() {
   }
 
   // `key` để form nạp lại giá trị mặc định khi chuyển sang xe khác
-  return <VehicleForm key={query.data.id} vehicle={query.data} />
+  return <VehicleForm key={query.data.id} vehicle={query.data} readOnly={!can('fleet.edit')} />
 }

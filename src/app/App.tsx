@@ -1,8 +1,10 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, type RouteObject } from 'react-router'
 import { Spinner } from '@/components/ui/Spinner'
 import { useT } from '@/lib/i18n'
+import type { Permission } from '@/features/auth/permissions'
 import { RequireAuth } from '@/features/auth/RequireAuth'
+import { RequirePermission } from '@/features/auth/RequirePermission'
 import { AppShell } from './AppShell'
 import { NotFoundPage } from './NotFoundPage'
 import { Providers } from './providers'
@@ -42,6 +44,11 @@ function SuspenseOutlet() {
   )
 }
 
+/** Nhóm route cần một quyền (D-41): thiếu quyền thì màn 403 thay cho màn đích. */
+function guarded(permission: Permission, children: RouteObject[]): RouteObject {
+  return { element: <RequirePermission permission={permission} />, children }
+}
+
 const router = createBrowserRouter([
   {
     errorElement: <NotFoundPage />,
@@ -58,17 +65,23 @@ const router = createBrowserRouter([
               {
                 element: <SuspenseOutlet />,
                 children: [
-                  { path: '/', element: <DashboardPage /> },
-                  { path: '/chuyen', element: <TripListPage /> },
-                  { path: '/chuyen/moi', element: <TripFormPage /> },
-                  { path: '/chuyen/:tripId', element: <TripDetailPage /> },
-                  { path: '/chuyen/:tripId/sua', element: <TripFormPage /> },
-                  { path: '/chuyen/:tripId/toi-uu', element: <OptimizationSetupPage /> },
-                  { path: '/chuyen/:tripId/so-sanh', element: <PlanComparisonPage /> },
-                  { path: '/doi-xe', element: <FleetPage /> },
-                  { path: '/doi-xe/moi', element: <VehicleDetailPage /> },
-                  { path: '/doi-xe/:vehicleId', element: <VehicleDetailPage /> },
-                  { path: '/nguoi-dung', element: <UsersPage /> },
+                  guarded('dashboard.view', [{ path: '/', element: <DashboardPage /> }]),
+                  guarded('trips.view', [
+                    { path: '/chuyen', element: <TripListPage /> },
+                    { path: '/chuyen/:tripId', element: <TripDetailPage /> },
+                  ]),
+                  guarded('trips.edit', [
+                    { path: '/chuyen/moi', element: <TripFormPage /> },
+                    { path: '/chuyen/:tripId/sua', element: <TripFormPage /> },
+                  ]),
+                  guarded('optimization.run', [{ path: '/chuyen/:tripId/toi-uu', element: <OptimizationSetupPage /> }]),
+                  guarded('plans.view', [{ path: '/chuyen/:tripId/so-sanh', element: <PlanComparisonPage /> }]),
+                  guarded('fleet.view', [
+                    { path: '/doi-xe', element: <FleetPage /> },
+                    { path: '/doi-xe/:vehicleId', element: <VehicleDetailPage /> },
+                  ]),
+                  guarded('fleet.edit', [{ path: '/doi-xe/moi', element: <VehicleDetailPage /> }]),
+                  guarded('users.manage', [{ path: '/nguoi-dung', element: <UsersPage /> }]),
                 ],
               },
             ],
@@ -78,11 +91,13 @@ const router = createBrowserRouter([
           {
             element: <SuspenseOutlet />,
             children: [
-              { path: '/chuyen/:tripId/phuong-an', element: <ViewerPage /> },
-              { path: '/kho', element: <LoadingStepPage /> },
-              { path: '/tai-xe', element: <Navigate to="/tai-xe/diem-giao" replace /> },
-              { path: '/tai-xe/diem-giao', element: <DriverStopPage /> },
-              { path: '/tai-xe/*', element: <Navigate to="/tai-xe/diem-giao" replace /> },
+              guarded('plans.view', [{ path: '/chuyen/:tripId/phuong-an', element: <ViewerPage /> }]),
+              guarded('warehouse.operate', [{ path: '/kho', element: <LoadingStepPage /> }]),
+              guarded('driver.operate', [
+                { path: '/tai-xe', element: <Navigate to="/tai-xe/diem-giao" replace /> },
+                { path: '/tai-xe/diem-giao', element: <DriverStopPage /> },
+                { path: '/tai-xe/*', element: <Navigate to="/tai-xe/diem-giao" replace /> },
+              ]),
             ],
           },
         ],

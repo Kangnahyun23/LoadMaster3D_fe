@@ -30,7 +30,7 @@ function rowIds(page: Page) {
 test('phone: unload order equals the approved revision; Three.js loads only on "Xem vị trí hàng"', { tag: '@phone' }, async ({ page, login, browserErrors }) => {
   const requests: string[] = []
   page.on('request', (request) => requests.push(request.url()))
-  await login(DRIVER)
+  await login(DRIVER, 'driver')
   await expect(page.getByRole('heading', { name: 'Điểm 1 / 4', exact: true })).toBeVisible()
 
   const expected = await approvedUnloadOrder(page, 1)
@@ -56,7 +56,7 @@ test('phone: unload order equals the approved revision; Three.js loads only on "
  * đổi ngôn ngữ giữa phiên giữ điểm giao hiện tại và kiện đã đánh dấu. Không ghi kho nên được tải trang để đặt `?lang`.
  */
 test('phone: the driver screen runs in English and switching language mid-session keeps the stop', { tag: '@phone' }, async ({ page, login, browserErrors }, testInfo) => {
-  await login('/chuyen')
+  await login(DRIVER, 'driver')
   await page.goto(`${DRIVER}?lang=en`)
   await expect(page.getByRole('heading', { name: 'Stop 1 / 4', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'View cargo positions', exact: true })).toBeVisible()
@@ -87,7 +87,7 @@ test('phone: the driver screen runs in English and switching language mid-sessio
 })
 
 test('a newly approved revision reaches the driver screen without reload', async ({ page, login, browserErrors }) => {
-  await login(`/chuyen/${SEED_TRIP}/phuong-an`)
+  await login(`/chuyen/${SEED_TRIP}/phuong-an`, 'admin')
   await page.locator('canvas').waitFor()
   await page.getByRole('button', { name: 'Duyệt phương án', exact: true }).click()
   await page.getByRole('dialog', { name: 'Duyệt phương án này?' }).getByRole('button', { name: 'Duyệt', exact: true }).click()

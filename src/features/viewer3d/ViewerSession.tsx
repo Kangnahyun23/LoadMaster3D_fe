@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
+import { useCan } from '@/features/auth/useCan'
 import { useT } from '@/lib/i18n'
 import { ApprovePlanDialog } from './ApprovePlanDialog'
 import { useViewerApproval } from './approval/useViewerApproval'
@@ -35,6 +36,10 @@ export function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
   const tripId = params.tripId ?? plan.tripId
   const showPerf = searchParams.has('debug')
   const t = useT()
+  const can = useCan()
+  // Quản lý xem phương án chỉ đọc: không Duyệt, không Chỉnh sửa, không tới Thiết lập tối ưu (D-41)
+  const canApprove = can('plans.approve')
+  const handleEdit = canApprove ? () => handleModeChange('edit') : undefined
 
   const flags = usePerformanceFlags(debugQualityTier(searchParams))
   const state = useLoadPlanViewer(plan, { initialSelectedId: plan.placements[0]?.id })
@@ -84,17 +89,17 @@ export function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
         approved={plan.revision?.approved ?? false}
         manuallyEdited={state.draft.patches.size > 0 || (plan.revision?.manuallyEdited ?? false)}
         blockedReason={approval.blockedReason}
-        onApprove={() => setApproveOpen(true)}
+        onApprove={canApprove ? () => setApproveOpen(true) : undefined}
       />
       {plan.revision?.stale ? (
         <div role="alert" className="flex flex-none flex-wrap items-center gap-3 border-b border-badge-warning-border bg-badge-warning-bg px-4 py-2 text-body text-badge-warning-fg">
           <span>{t('viewer.plan.staleBanner')}</span>
-          <Link to={`/chuyen/${tripId}/toi-uu`} className="font-medium text-primary">{t('viewer.plan.rerun')}</Link>
+          {can('optimization.run') ? <Link to={`/chuyen/${tripId}/toi-uu`} className="font-medium text-primary">{t('viewer.plan.rerun')}</Link> : null}
         </div>
       ) : null}
       {editor.mode === 'edit' ? <EditorToolbar state={state} editor={editor} onModeChange={handleModeChange} /> :
         <WorkspaceToolbar operations={operations} stops={plan.stops} preset={state.cameraPreset} onPreset={state.setCameraPreset}
-          onInspect={setInspectorTab} onEdit={() => handleModeChange('edit')} />}
+          onInspect={setInspectorTab} onEdit={handleEdit} />}
       <div className={`relative flex min-h-0 flex-1 ${editor.mode === 'edit' ? 'flex-col xl:flex-row' : ''}`}>
         <div className="relative min-h-48 min-w-0 flex-1 overflow-hidden bg-canvas-1">
           <Suspense fallback={<ViewerSkeleton packageCount={plan.placements.length} stopCount={plan.stops.length} />}>
@@ -103,14 +108,14 @@ export function ViewerSession({ model: plan }: { model: ViewerSceneModel }) {
 
           {editor.mode === 'view' ? <SceneHud state={state} operations={operations} onInspect={setInspectorTab}
             onResetFocus={editor.focus ? () => { operations.setFollow('off'); editor.resetFocus() } : undefined}
-            onFocus={(p) => { operations.pauseFollow(); if (p) editor.focusPlacement(p); else editor.focusSelected() }} onEdit={() => handleModeChange('edit')} /> : null}
+            onFocus={(p) => { operations.pauseFollow(); if (p) editor.focusPlacement(p); else editor.focusSelected() }} onEdit={handleEdit} /> : null}
           {showPerf ? <DebugOverlay store={perfStore} /> : null}
           {editor.mode === 'edit' && state.selected ? <EditorGestureHud placement={state.selected} editor={editor} /> : null}
         </div>
 
         {editor.mode === 'edit' ? <EditorPanel state={state} editor={editor} /> :
           <SceneInspector state={state} operations={operations} tripId={tripId} colorContext={colorContext} issues={planIssues}
-            onEdit={() => handleModeChange('edit')} onFocus={editor.focusSelected}
+            onEdit={handleEdit} onFocus={editor.focusSelected}
             onSelect={(p) => { state.select(p.id); operations.pauseFollow(); editor.focusPlacement(p) }}
             tab={inspectorTab} onTab={setInspectorTab} onClose={() => setInspectorTab(null)} />}
       </div>

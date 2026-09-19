@@ -7,7 +7,7 @@ import { useAuth } from './AuthProvider'
  *
  * Chỉ ghi nhớ khi người **chưa đăng nhập** mở một trang (liên kết sâu, tab mới). Khi người đang đăng nhập bấm
  * Đăng xuất, trang họ đang đứng không phải lựa chọn của người đăng nhập kế tiếp: không ghi nhớ, để lần đăng nhập sau
- * mở màn của vai trò (`landingPath`). Chưa phân quyền theo vai trò — mọi tài khoản đã đăng nhập đều vào được tất cả màn.
+ * mở màn của vai trò (`landingPath`). Quyền theo vai trò kiểm ở từng nhóm route bằng `RequirePermission` (D-41).
  */
 export function RequireAuth() {
   const { user } = useAuth()

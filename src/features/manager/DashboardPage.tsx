@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { useCan } from '@/features/auth/useCan'
 import { useFormat, useT } from '@/lib/i18n'
 import { KpiTile } from './KpiTile'
 import { LatestJobCard } from './LatestJobCard'
@@ -17,15 +18,18 @@ import { useDashboardQuery } from './useDashboardQuery'
 export function DashboardPage() {
   const t = useT()
   const query = useDashboardQuery()
+  const canCreate = useCan()('trips.edit')
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <header className="flex h-18 flex-none items-center gap-3 border-b border-border bg-bg px-8">
         <h1 className="text-h2 font-semibold tracking-[-0.01em]">{t('manager.title')}</h1>
         <div className="flex-1" />
-        <Button asChild>
-          <Link to="/chuyen/moi">{t('manager.createPlan')}</Link>
-        </Button>
+        {canCreate ? (
+          <Button asChild>
+            <Link to="/chuyen/moi">{t('manager.createPlan')}</Link>
+          </Button>
+        ) : null}
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto p-6 px-8">

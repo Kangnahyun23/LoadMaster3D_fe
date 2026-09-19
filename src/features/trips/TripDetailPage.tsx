@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { useCan } from '@/features/auth/useCan'
 import type { CargoPackage } from '@/domain/models'
 import { useT } from '@/lib/i18n'
 import { CargoSummaryCard } from './CargoSummaryCard'
@@ -29,6 +30,9 @@ import { VehicleCard } from './VehicleCard'
 export function TripDetailPage() {
   const { tripId = '' } = useParams()
   const t = useT()
+  const can = useCan()
+  // Quản lý xem chuyến chỉ đọc (D-41)
+  const editable = can('trips.edit')
   const query = useTripDetailQuery(tripId)
   const stopsMutation = useTripStopsMutation(tripId)
   const removeStop = useRemoveStopMutation(tripId)
@@ -92,12 +96,14 @@ export function TripDetailPage() {
 
         <div className="flex-1" />
 
-        <Button variant="primary" asChild>
-          <Link to={`/chuyen/${tripId}/toi-uu${searchParams.get('mo-phong') === 'loi' ? '?mo-phong=loi' : ''}`}>
-            <Play strokeWidth={1.5} />
-            {t('trips.detail.runOptimization')}
-          </Link>
-        </Button>
+        {can('optimization.run') ? (
+          <Button variant="primary" asChild>
+            <Link to={`/chuyen/${tripId}/toi-uu${searchParams.get('mo-phong') === 'loi' ? '?mo-phong=loi' : ''}`}>
+              <Play strokeWidth={1.5} />
+              {t('trips.detail.runOptimization')}
+            </Link>
+          </Button>
+        ) : null}
       </header>
 
       {query.isPending ? (
@@ -110,12 +116,13 @@ export function TripDetailPage() {
       ) : (
         <div className="flex min-h-0 flex-1 flex-wrap items-start gap-6 overflow-auto px-8 pt-6 pb-8">
           <div className="flex w-80 flex-col gap-4">
-            <VehicleCard vehicle={vehicle} tripId={tripId} />
+            <VehicleCard vehicle={vehicle} tripId={tripId} canChange={editable} />
             <CargoSummaryCard summary={summary} />
           </div>
 
           <div className="w-80"><StopList
             stops={stops}
+            readOnly={!editable}
             onReorder={(next) => stopsMutation.mutate(next)}
             onRemove={handleRemoveStop}
           /></div>
@@ -133,7 +140,7 @@ export function TripDetailPage() {
               stops={stops}
               selectedId={editing?.id ?? null}
               onSelect={(pkg) => setEditing(editing?.id === pkg.id ? null : pkg)}
-              onAdd={() => setEditing(emptyPackage(trip.packages, stops[0]?.number ?? 1))}
+              onAdd={editable ? () => setEditing(emptyPackage(trip.packages, stops[0]?.number ?? 1)) : undefined}
             />
           </div>
 
@@ -143,6 +150,7 @@ export function TripDetailPage() {
               value={editing}
               vehicle={vehicle}
               stops={stops}
+              readOnly={!editable}
               onSave={handleSave}
               onDelete={trip.packages.some((pkg) => pkg.id === editing.id)
                 ? (pkg) => deletePackage.mutate(pkg.id, { onSuccess: () => setEditing(null) })

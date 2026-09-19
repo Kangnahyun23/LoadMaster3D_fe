@@ -13,7 +13,12 @@ import type { StopRow } from './trip-summary'
  * Luật cấm bóng áp cho thẻ ở trạng thái nghỉ; thẻ đang kéo là lớp đang
  * nhấc khỏi mặt phẳng nên xử lý như lớp nổi, đúng như bản design.
  */
-export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => void }) {
+export function StopCard({ stop, onRemove, readOnly = false }: {
+  stop: StopRow
+  onRemove: () => void
+  /** Không kéo, không xoá: người chỉ xem hoặc chuyến đã khoá (D-41, D-45). */
+  readOnly?: boolean
+}) {
   const t = useT()
   const format = useFormat()
   const {
@@ -24,7 +29,7 @@ export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => vo
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: stop.id })
+  } = useSortable({ id: stop.id, disabled: readOnly })
 
   const stopNumber = stop.number
 
@@ -42,7 +47,7 @@ export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => vo
           : 'z-1 border-border shadow-none',
       )}
     >
-      <button
+      {readOnly ? null : <button
         ref={setActivatorNodeRef}
         type="button"
         aria-label={t('trips.stops.dragHandle', { name: stop.name })}
@@ -55,7 +60,7 @@ export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => vo
         {...listeners}
       >
         <GripVertical className="size-4" aria-hidden />
-      </button>
+      </button>}
 
       <span
         aria-hidden
@@ -91,7 +96,7 @@ export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => vo
         </span>
       </div>
 
-      <button
+      {readOnly ? null : <button
         type="button"
         aria-label={t('trips.stops.remove', { name: stop.name })}
         onClick={onRemove}
@@ -102,7 +107,7 @@ export function StopCard({ stop, onRemove }: { stop: StopRow; onRemove: () => vo
         )}
       >
         <Trash2 className="size-4" aria-hidden />
-      </button>
+      </button>}
     </li>
   )
 }
