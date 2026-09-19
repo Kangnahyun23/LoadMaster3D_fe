@@ -33,7 +33,7 @@ export function AxleTable({
 
   return (
     <div className="flex flex-col gap-3">
-      <Badge tone="neutral">{t('fleet.axles.comingLater')}</Badge>
+      <Badge tone="neutral" className="self-start">{t('fleet.axles.comingLater')}</Badge>
 
       {fields.length === 0 ? (
         <p className="text-body text-text-3">{t('fleet.axles.empty')}</p>

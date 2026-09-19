@@ -35,7 +35,7 @@ test('opening an approved trip starts loading it at loadingOrder 1 of the latest
   expect(await screen.findByRole('heading', { level: 1, name: first }, LOAD)).toBeInTheDocument()
   expect(screen.getByText(/^Bước/)).toHaveTextContent('Bước 1 / 132')
   expect(screen.getByText('MOCK RESULT')).toBeInTheDocument()
-  expect(screen.getByText('Thứ tự tính lại ở FE')).toBeInTheDocument()
+  expect(screen.getByText('Thứ tự xếp tính lại khi duyệt')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Thoát phiên xếp hàng' })).toHaveAttribute('href', '/kho')
   const trip = await getMockDb().getTrip(SEED_TRIP)
   expect([trip.phase, trip.loading?.revisionId, trip.loading?.startedBy, trip.loading?.steps]).toStrictEqual(['loading', 'REV-002', 'US-0003', []])

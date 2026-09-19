@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import type { BaseTableFeatures, ColumnMeta } from '@/components/DataTable'
 import { StatusBadge } from '@/components/StatusBadge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
+import { VehicleName } from '@/components/VehicleName'
 import type { Formatter } from '@/lib/format'
 import type { TFunction } from '@/lib/i18n'
 import { dateOnly } from './trip-dates'
@@ -28,7 +29,8 @@ export function createTripColumns(t: TFunction, format: Formatter) {
     helper.accessor('id', {
       header: t('trips.list.id'),
       enableSorting: true,
-      meta: { width: '156px' } satisfies ColumnMeta,
+      // "TRIP-2026-0914" mono 12 px cùng mũi tên sắp xếp; phần dư nhường cột tên chuyến (LM-095)
+      meta: { width: '136px' } satisfies ColumnMeta,
       cell: (info) => (
         <Link
           to={`/chuyen/${info.getValue()}`}
@@ -54,12 +56,13 @@ export function createTripColumns(t: TFunction, format: Formatter) {
       header: t('trips.list.vehicle'),
       enableSorting: true,
       meta: { width: '180px' } satisfies ColumnMeta,
-      cell: (info) => <span className="block truncate">{info.getValue()}</span>,
+      // Tên xe xuống tối đa hai dòng: không cắt mất biển số ở 1.366 px (LM-095)
+      cell: (info) => <VehicleName name={info.getValue()} className="line-clamp-2 whitespace-normal" />,
     }),
     helper.accessor('driverName', {
       header: t('trips.list.driver'),
       enableSorting: true,
-      meta: { width: '160px' } satisfies ColumnMeta,
+      meta: { width: '148px' } satisfies ColumnMeta,
       cell: (info) => {
         const name = info.getValue()
         return name === null

@@ -23,7 +23,7 @@ export function auditColumns(t: TFunction, format: Formatter) {
     }),
     helper.accessor('actor', {
       header: t('audit.log.columns.actor'),
-      meta: { width: '196px' } satisfies ColumnMeta,
+      meta: { width: '176px' } satisfies ColumnMeta,
       cell: (info) => <span className="block truncate">{info.getValue()}</span>,
     }),
     helper.accessor('action', {
@@ -33,12 +33,13 @@ export function auditColumns(t: TFunction, format: Formatter) {
     }),
     helper.accessor('target', {
       header: t('audit.log.columns.target'),
-      meta: { width: '300px' } satisfies ColumnMeta,
+      // Đủ một dòng cho tên tuyến dài nhất của seed ở 1.366 px (LM-095); chi tiết nhận phần còn lại, tối đa hai dòng
+      meta: { width: '340px' } satisfies ColumnMeta,
       cell: (info) => <TargetCell target={info.getValue()} />,
     }),
     helper.accessor('details', {
       header: t('audit.log.columns.details'),
-      cell: (info) => <span className="block truncate text-text-2" title={info.getValue()}>{info.getValue()}</span>,
+      cell: (info) => <span className="line-clamp-2 whitespace-normal text-text-2" title={info.getValue()}>{info.getValue()}</span>,
     }),
   ])
 }

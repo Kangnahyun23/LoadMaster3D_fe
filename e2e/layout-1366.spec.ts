@@ -4,7 +4,7 @@ import { attachScreenshot, expect, PLANNER_ROUTE, test } from './fixtures'
 /**
  * LM-095 (D-54): màn điều phối ở 1.366 × 768 và 1.600 × 1.000 — trang không cuộn ngang, không vùng nào cuộn ngang, không ô
  * hay nhãn nào bị cắt ngang (kể cả cắt bằng dấu ba chấm), nhãn giới hạn số dòng không bị cắt ở dòng cuối.
- * `E2E_SCREENSHOT_DIR=docs/screenshots/lm-095` ghi lại bộ ảnh của issue.
+ * `E2E_SCREENSHOT_DIR=docs/screenshots/lm-095/after` ghi lại bộ ảnh của issue. Kiểm mềm (`expect.soft`) để một lần chạy báo đủ mọi màn.
  */
 test.use({ collectConsoleErrors: true })
 
@@ -80,6 +80,8 @@ for (const size of SIZES) {
     for (const screen of SCREENS) {
       await page.goto(screen.route)
       await screen.ready(page)
+      // Chuột còn đứng chỗ nút đăng nhập thì biểu đồ hiện tooltip trong ảnh: đưa ra góc trống
+      await page.mouse.move(0, 0)
       await attachScreenshot(page, testInfo, `${screen.name}-${size.width}`)
       expect.soft(await layoutProblems(page), `${screen.name} at ${size.width} px`).toStrictEqual([])
     }

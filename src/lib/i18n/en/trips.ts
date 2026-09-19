@@ -318,7 +318,7 @@ export const trips = {
       weight: 'Weight',
       quantity: 'Quantity',
       stop: 'Stop',
-      orientations: 'Orientations',
+      orientations: 'Orient.',
       issues: 'Issues',
     },
     filterStop: 'Filter by stop',

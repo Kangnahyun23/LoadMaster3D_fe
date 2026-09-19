@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Card } from '@/components/ui/Card'
+import { VehicleName } from '@/components/VehicleName'
 import type { Formatter } from '@/lib/format'
 import { useFormat, useT, type TFunction } from '@/lib/i18n'
 import { plannerPath } from '@/lib/planner-path'
@@ -37,7 +38,7 @@ function createColumns(t: TFunction, format: Formatter) {
     helper.accessor('vehicleName', {
       header: t('manager.recent.vehicle'),
       meta: { width: '220px' } satisfies ColumnMeta,
-      cell: (info) => <span className="line-clamp-2 whitespace-normal">{info.getValue()}</span>,
+      cell: (info) => <VehicleName name={info.getValue()} className="line-clamp-2 whitespace-normal" />,
     }),
     helper.accessor('status', {
       header: t('manager.recent.status'),

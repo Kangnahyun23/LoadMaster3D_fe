@@ -50,7 +50,7 @@ Chromium headless + SwiftShader, không phải thiết bị thật.
 |---|---|---|
 | N-1 | ~~Thiếu E2E kéo kiện vào vật cản trong editor~~ | Đóng 19/09/2026 — [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) |
 | N-2 | Màn điều phối chỉ hỗ trợ desktop (nút 40 px trên tablet) | Quyết định 16/09/2026, AGENTS mục 5 |
-| N-3 | Chi tiết chuyến chật ở 1.440 px (tên điểm giao bị cắt, bảng kiện cuộn ngang) | Vừa ở 1.600 px; phát hiện ở LM-070 |
+| N-3 | ~~Chi tiết chuyến chật ở 1.440 px (tên điểm giao bị cắt, bảng kiện cuộn ngang)~~ | Đóng 20/09/2026 — [LM-095](issues/LM-095-bo-cuc-1366-het-cat-chu.md): vừa 1.366–1.600 px, E2E `layout-1366.spec.ts` |
 | N-4 | Kho bỏ fixture `?debug&packages=N`; hiệu năng 3D kho chỉ đo trên 132 kiện seed | LM-060 |
 | N-5 | JS tăng 6,9 kB ở phase 4 (màn kho/tài xế mới) | LM-062 |
 | N-6 | Draft chỉnh tay không lưu qua trang; kho/tài xế giữ tiến độ chỉ trong phiên | Chờ backend |

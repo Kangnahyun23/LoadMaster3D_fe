@@ -1,6 +1,7 @@
 import { Truck } from 'lucide-react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/Card'
+import { VehicleName } from '@/components/VehicleName'
 import type { VehicleConfig } from '@/domain/models'
 import { useFormat, useT } from '@/lib/i18n'
 import type { User } from '@/types/user'
@@ -37,7 +38,7 @@ export function VehicleCard({ vehicle, tripId, driverId = null, driver = null, c
           <Truck className="size-5" strokeWidth={1.5} aria-hidden />
         </div>
         <div className="flex min-w-0 flex-col gap-0.5">
-          <VehicleName name={vehicle.name} />
+          <VehicleName name={vehicle.name} className="text-body-lg font-medium" />
           <span className="font-mono text-caption text-text-3">
             {t('fields.maxPayloadKg')}: {format.weight(vehicle.maxPayloadKg)}
           </span>
@@ -79,17 +80,5 @@ export function VehicleCard({ vehicle, tripId, driverId = null, driver = null, c
         </div>
       </dl>
     </Card>
-  )
-}
-
-/**
- * Tên xe dạng "Hyundai HD210 · 60C-446.32": ở cột hẹp chỉ xuống dòng trước biển số, không bẻ biển số tại dấu gạch (LM-095).
- */
-function VehicleName({ name }: { name: string }) {
-  const cut = name.lastIndexOf(' · ')
-  return (
-    <span className="text-body-lg font-medium">
-      {cut === -1 ? name : <>{name.slice(0, cut + 2)} <span className="whitespace-nowrap">{name.slice(cut + 3)}</span></>}
-    </span>
   )
 }
