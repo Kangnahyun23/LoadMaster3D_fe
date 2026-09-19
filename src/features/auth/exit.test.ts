@@ -2,7 +2,13 @@ import { expect, test } from 'vitest'
 import { exitAction } from './exit'
 
 test('a warehouse worker leaving the warehouse screen signs out instead of landing on dispatcher pages', () => {
-  expect(exitAction('warehouse', '/kho', '/chuyen/TRIP-2026-0914')).toStrictEqual({ kind: 'signOut' })
+  expect(exitAction('warehouse', '/kho')).toStrictEqual({ kind: 'signOut' })
+})
+
+test('a warehouse worker leaving a loading session goes back to the trip list; dispatchers and admins go to the trip (LM-086)', () => {
+  const session = '/kho?chuyen=TRIP-2026-0914'
+  expect(exitAction('warehouse', session, '/chuyen/TRIP-2026-0914')).toStrictEqual({ kind: 'link', to: '/kho' })
+  expect(exitAction('admin', session, '/chuyen/TRIP-2026-0914')).toStrictEqual({ kind: 'link', to: '/chuyen/TRIP-2026-0914' })
 })
 
 test('a driver leaving the driver screen signs out', () => {

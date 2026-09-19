@@ -122,8 +122,8 @@ test('camera orbit keeps draw calls and cargo instances bounded; balanced/high a
 })
 
 test('warehouse isolates the current package and advances after confirmation', async ({ page, login, browserErrors }, testInfo) => {
-  // Kho đọc revision đã duyệt của chuyến seed (LM-060), bắt đầu ở bước 1: kiện hiện tại đậm, kiện kế tiếp mờ.
-  await login('/kho?debug&quality=low', 'warehouse'); await settle(page)
+  // Phiên kho của chuyến seed (LM-060, LM-086) bắt đầu ở bước 1 của bản đã duyệt: kiện hiện tại đậm, kiện kế tiếp mờ.
+  await login('/kho?chuyen=TRIP-2026-0914&debug&quality=low', 'warehouse'); await settle(page)
   expect(await page.locator('[data-experience="warehouse"]').count()).toBe(1)
   expect(await visibleCargo(page)).toStrictEqual({ 'cargo-opaque': 1, 'cargo-dim': 1 })
   await page.getByRole('combobox', { name: 'Góc nhìn thùng xe', exact: true }).selectOption('cua-sau')

@@ -1,123 +1,89 @@
-import { Check, PackageX } from 'lucide-react'
-import { lazy, Suspense, useMemo } from 'react'
-import { useSearchParams } from 'react-router'
+import { useEffect, useRef } from 'react'
+import { Link } from 'react-router'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
-import { ExitActionButton } from '@/features/auth/ExitControl'
-import { adaptResult } from '@/features/viewer3d/scene-input'
-import { useT } from '@/lib/i18n'
-import { ConfirmedOverlay } from './ConfirmedOverlay'
-import { PackageInstructionCard } from './PackageInstructionCard'
-import { PlanNotices } from './PlanNotices'
-import { StepHeader } from './StepHeader'
-import { useLoadingSession } from './useLoadingSession'
-import { useWarehousePlanQuery } from './useWarehousePlanQuery'
-import type { WarehousePlan } from './warehouse-api'
+import { dataErrorMessage, useT } from '@/lib/i18n'
+import { LoadingFinished } from './LoadingFinished'
+import { LoadingSessionView } from './LoadingSessionView'
+import { warehouseSession } from './loading-session'
+import { useStartLoadingMutation, useWarehouseTripQuery } from './useWarehouseQueries'
 import { WarehouseEmpty } from './WarehouseEmpty'
 
-/** Three.js nặng — chỉ tải khi màn kho thực sự hiển thị ô vị trí 3D. */
-const PositionViewer = lazy(() =>
-  import('@/features/viewer3d/PositionViewer').then((m) => ({ default: m.PositionViewer })),
-)
-
 /**
- * Máy tính bảng kho — một thao tác mỗi màn: xác nhận đã xếp kiện hiện tại.
- * Toàn màn, không nav rail. Vùng chạm ≥56px, chữ ≥16px (mục 10).
- *
- * Dữ liệu (LM-060): revision **đã duyệt** mới nhất của chuyến `?chuyen=<mã>`, không có tham số thì chuyến đầu tiên có bản duyệt.
- * Bước đi theo `loadingOrder` của kết quả, bắt đầu từ 1.
- *
- * Lệch có chủ ý khỏi design: nút xác nhận trong design màu xanh lá và viết
- * hoa toàn bộ; mục 5 chỉ định nghĩa nút chính nền `--primary` và cấm viết hoa,
- * nên ở đây là nút primary "Xác nhận đã xếp".
+ * Phiên xếp chuyến `/kho?chuyen=<mã>` (LM-086). Theo pha và revision của chuyến trong kho: vào lần đầu là bắt đầu xếp theo bản duyệt
+ * mới nhất; đang xếp thì tiếp tục ở kiện chưa ghi đầu tiên; đã xếp xong thì ra màn Xếp xong. Bản duyệt lỗi thời không bắt đầu được —
+ * chờ điều phối viên duyệt lại (D-31); chưa có bản duyệt hoặc chuyến đã huỷ thì nói rõ, có lối về danh sách.
  */
-export function LoadingStepPage() {
+export function LoadingStepPage({ tripId }: { tripId: string }) {
   const t = useT()
-  const [search] = useSearchParams()
-  const tripId = search.get('chuyen') ?? undefined
-  const query = useWarehousePlanQuery(tripId)
+  const query = useWarehouseTripQuery(tripId)
 
-  if (query.isPending) {
-    return (
-      <div role="status" aria-label={t('warehouse.loading')} className="grid h-dvh place-items-center bg-bg">
-        <Spinner />
-      </div>
-    )
+  if (query.isPending) return <FullScreenStatus label={t('warehouse.loading')} />
+  if (query.isError) {
+    return <WarehouseEmpty tripId={tripId} title={t('warehouse.loadErrorTitle')} description={dataErrorMessage(query.error, t)} />
   }
-  if (query.isError || !query.data) return <WarehouseEmpty tripId={tripId} failed={query.isError} />
-  return <LoadingSessionPage key={query.data.revision.id} plan={query.data} />
+  const { trip, revisions } = query.data
+  const session = warehouseSession(trip, revisions)
+  switch (session.kind) {
+    case 'no-plan':
+      return <WarehouseEmpty tripId={tripId} title={t('warehouse.emptyTitle')} description={t('warehouse.emptyTripDescription', { tripId })} />
+    case 'cancelled':
+      return (
+        <WarehouseEmpty
+          tripId={tripId}
+          title={t('warehouse.cancelledTitle')}
+          description={t('warehouse.cancelledDescription', { tripId, reason: trip.cancellation?.reason ?? '' })}
+        />
+      )
+    case 'stale':
+      return <WarehouseEmpty tripId={tripId} title={t('warehouse.staleTitle')} description={t('warehouse.staleDescription', { tripId })} />
+    case 'start':
+      return <StartingSession tripId={tripId} />
+    case 'loading':
+      return <LoadingSessionView trip={trip} plan={session.plan} />
+    case 'finished':
+      return <LoadingFinished trip={trip} plan={session.plan} />
+  }
 }
 
-function LoadingSessionPage({ plan }: { plan: WarehousePlan }) {
-  const t = useT()
-  const model = useMemo(() => adaptResult(plan), [plan])
-  const session = useLoadingSession(model.placements)
-
+function FullScreenStatus({ label }: { label: string }) {
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-bg text-body-lg">
-      <StepHeader
-        step={session.step}
-        totalSteps={session.totalSteps}
-        tripId={plan.trip.id}
-      />
-      <PlanNotices model={model} stale={plan.stale} />
-
-      <div className="relative grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto p-3 lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)]">
-        {session.current ? (
-          <>
-            <PackageInstructionCard
-              placement={session.current}
-              placements={model.placements}
-              vehicle={model.vehicle}
-              stops={model.stops}
-            />
-            <Suspense
-              fallback={
-                <div
-                  role="status"
-                  aria-label={t('warehouse.viewerLoading')}
-                  className="grid min-h-80 place-items-center rounded-md bg-canvas-1"
-                >
-                  <Spinner tone="light" />
-                </div>
-              }
-            >
-              <div className="order-first min-h-96 lg:order-last lg:min-h-0"><PositionViewer model={model} current={session.current} /></div>
-            </Suspense>
-          </>
-        ) : (
-          <div className="col-span-2 flex flex-col items-start justify-center gap-3 rounded-md border border-border p-8">
-            <span className="text-h1 font-semibold">{t('warehouse.finished.title', { count: session.totalSteps })}</span>
-            <span className="text-text-2">{t('warehouse.finished.description')}</span>
-            <ExitActionButton screenHome="/kho" contextual={`/chuyen/${plan.trip.id}`} label={t('warehouse.finished.backToTrip')} variant="secondary" />
-          </div>
-        )}
-
-        {session.confirmedId ? (
-          <ConfirmedOverlay confirmedId={session.confirmedId} nextStep={session.step + 1} />
-        ) : null}
-      </div>
-
-      {session.current ? (
-        <div className="flex flex-none flex-col gap-2 px-3 pb-3">
-          <Button
-            variant="primary"
-            block
-            className="h-14 gap-3 text-body-lg [&_svg]:size-6"
-            onClick={session.confirm}
-            disabled={Boolean(session.confirmedId)}
-          >
-            <Check strokeWidth={2.5} />
-            {t('warehouse.confirm')}
-          </Button>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button variant="ghost" size="touch" className="font-medium text-text-2 hover:text-text" onClick={session.reportMissing}>
-              <PackageX className="size-4.5" strokeWidth={2} />
-              {t('warehouse.missing')}
-            </Button>
-          </div>
-        </div>
-      ) : null}
+    <div role="status" aria-label={label} className="grid h-dvh place-items-center bg-bg">
+      <Spinner />
     </div>
   )
+}
+
+/**
+ * Vào phiên của chuyến đã duyệt là bắt đầu xếp (D-45: `planning` → `loading`). Ghi xong, kho được đọc lại và màn chuyển sang phiên
+ * đang xếp. Bị từ chối vì máy khác vừa bắt đầu trước thì lần đọc lại đó cũng đưa vào phiên; lỗi khác thì nói lỗi và cho thử lại.
+ */
+function StartingSession({ tripId }: { tripId: string }) {
+  const t = useT()
+  const { mutate, isError, error } = useStartLoadingMutation(tripId)
+  const requested = useRef(false)
+
+  useEffect(() => {
+    // StrictMode chạy effect hai lần: ref giữ để chỉ gửi một lần bắt đầu
+    if (requested.current) return
+    requested.current = true
+    mutate()
+  }, [mutate])
+
+  if (isError) {
+    return (
+      <WarehouseEmpty
+        tripId={tripId}
+        title={t('warehouse.startErrorTitle')}
+        description={dataErrorMessage(error, t)}
+        action={
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button variant="primary" size="touch" onClick={() => mutate()}>{t('warehouse.retry')}</Button>
+            <Button asChild variant="secondary" size="touch"><Link to="/kho">{t('warehouse.backToList')}</Link></Button>
+          </div>
+        }
+      />
+    )
+  }
+  return <FullScreenStatus label={t('warehouse.starting')} />
 }

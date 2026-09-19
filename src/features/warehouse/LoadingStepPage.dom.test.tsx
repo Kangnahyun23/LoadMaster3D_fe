@@ -1,48 +1,24 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router'
-import { expect, test } from 'vitest'
-import { AuthProvider } from '@/features/auth/AuthProvider'
-import { signedInAs } from '@/test/signed-in'
-import type { Role } from '@/types/user'
-import { I18nProvider } from '@/lib/i18n'
+import { toast } from 'sonner'
+import { expect, test, vi } from 'vitest'
 import { getMockDb } from '@/lib/mock-db'
 import { optimizedTwoCartonTrip } from '@/test/mock-db-samples'
-import { LoadingStepPage } from './LoadingStepPage'
+import { LOAD, renderWarehouse } from './warehouse-test-utils'
+
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), warning: vi.fn(), success: vi.fn(), info: vi.fn() } }))
 
 /**
- * Seam: kho dùng chung (`@/lib/mock-db`) → `warehouse-api.ts` → hook → màn kho, không giả lập module nào (LM-060).
- * Kỳ vọng lấy từ revision trong kho, không từ mock mm cũ.
+ * Phiên xếp `/kho?chuyen=` (LM-086): kho dùng chung → `warehouse-api.ts` → hook → màn, không giả lập module nào. Kỳ vọng đọc thẳng
+ * từ kho. Test theo thứ tự trên cùng một kho: chuyến chính được bắt đầu, ghi dần, rồi mở lại.
  */
 const SEED_TRIP = 'TRIP-2026-0914'
-const LOAD = { timeout: 3000 }
+/** Lớp phủ "Đã xếp" 1,2 s + ghi + đọc lại. */
+const NEXT = { timeout: 5000 }
 
-/**
- * Ô 3D lazy-load thật trong jsdom: `usePerformanceFlags` đọc `prefers-reduced-motion` qua `matchMedia`, jsdom chưa có.
- * Canvas không có kích thước nên không dựng WebGL; test chỉ đọc phần DOM của màn.
- */
-window.matchMedia ??= (query: string) => ({
-  matches: false, media: query, onchange: null,
-  addEventListener: () => {}, removeEventListener: () => {}, addListener: () => {}, removeListener: () => {}, dispatchEvent: () => false,
-})
-
-function renderWarehouse(route = '/kho', role: Role = 'dispatcher') {
-  signedInAs(role)
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
-    <QueryClientProvider client={client}>
-      <I18nProvider>
-        <AuthProvider>
-          <MemoryRouter initialEntries={[route]}>
-            <Routes>
-              <Route path="/kho" element={<LoadingStepPage />} />
-            </Routes>
-          </MemoryRouter>
-        </AuthProvider>
-      </I18nProvider>
-    </QueryClientProvider>,
-  )
+async function seedPlanOrder() {
+  const plan = await getMockDb().getRevision('REV-002')
+  return plan.result.placements.toSorted((a, b) => a.loadingOrder - b.loadingOrder).map((p) => p.packageInstanceId)
 }
 
 async function approvedTwoCartonTrip() {
@@ -52,95 +28,124 @@ async function approvedTwoCartonTrip() {
   return { db, trip, approved }
 }
 
-test('không tham số: chuyến seed, bước 1 là kiện loadingOrder = 1 của bản đã duyệt mới nhất, có MOCK RESULT và nhãn tính lại ở FE', async () => {
-  const approved = (await getMockDb().listRevisions(SEED_TRIP)).findLast((revision) => revision.approvedAt !== undefined)
-  const first = approved?.result.placements.find((placement) => placement.loadingOrder === 1)
-  if (!approved || !first) throw new Error('Seed phải có bản duyệt với loadingOrder = 1')
-  renderWarehouse()
+test('opening an approved trip starts loading it at loadingOrder 1 of the latest approved plan; exit goes back to the list', async () => {
+  const [first] = await seedPlanOrder()
+  renderWarehouse(`/kho?chuyen=${SEED_TRIP}`)
 
-  expect(await screen.findByRole('heading', { level: 1, name: first.packageInstanceId }, LOAD)).toBeInTheDocument()
-  expect(screen.getByText(/^Bước/)).toHaveTextContent(`Bước 1 / ${approved.result.placements.length}`)
-  expect(screen.getByText(SEED_TRIP)).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { level: 1, name: first }, LOAD)).toBeInTheDocument()
+  expect(screen.getByText(/^Bước/)).toHaveTextContent('Bước 1 / 132')
   expect(screen.getByText('MOCK RESULT')).toBeInTheDocument()
   expect(screen.getByText('Thứ tự tính lại ở FE')).toBeInTheDocument()
-  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Kiện này không có ở kho' })).toBeInTheDocument()
-})
+  expect(screen.getByRole('link', { name: 'Thoát phiên xếp hàng' })).toHaveAttribute('href', '/kho')
+  const trip = await getMockDb().getTrip(SEED_TRIP)
+  expect([trip.phase, trip.loading?.revisionId, trip.loading?.startedBy, trip.loading?.steps]).toStrictEqual(['loading', 'REV-002', 'US-0003', []])
+}, 15_000)
 
-test('chuyến chỉ định chưa có bản duyệt: trạng thái rỗng dẫn về danh sách chuyến, không lấy chuyến khác thay', async () => {
-  const { trip } = await optimizedTwoCartonTrip(getMockDb())
-  renderWarehouse(`/kho?chuyen=${trip.id}`)
+test('confirming records the package as loaded and moves on; reopening resumes at the first package without a result', async () => {
+  const [first, second] = await seedPlanOrder()
+  const view = renderWarehouse(`/kho?chuyen=${SEED_TRIP}`)
+  await screen.findByRole('heading', { level: 1, name: first }, LOAD)
 
-  expect(await screen.findByText('Chưa có phương án đã duyệt', {}, LOAD)).toBeInTheDocument()
-  expect(screen.getByText(`Chuyến ${trip.id} chưa có phương án đã duyệt. Mở chuyến trong Planner và bấm Duyệt phương án trước.`)).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Tới danh sách chuyến' })).toHaveAttribute('href', '/chuyen')
-  expect(screen.getByRole('link', { name: 'Thoát màn kho' })).toHaveAttribute('href', '/chuyen')
-  expect(screen.queryByRole('button', { name: 'Xác nhận đã xếp' })).not.toBeInTheDocument()
-})
+  await userEvent.click(screen.getByRole('button', { name: 'Xác nhận đã xếp' }))
+  expect(screen.getByText(`Đã xếp ${first}`)).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Xác nhận đã xếp' })).toBeDisabled()
+  expect(await screen.findByRole('heading', { level: 1, name: second }, NEXT)).toBeInTheDocument()
+  expect(screen.getByText(/^Bước/)).toHaveTextContent('Bước 2 / 132')
+  expect((await getMockDb().getTrip(SEED_TRIP)).loading?.steps.map((step) => [step.packageInstanceId, step.outcome])).toStrictEqual([[first, 'loaded']])
 
-test('nhân viên kho: nút thoát và nút ở trạng thái rỗng là Đăng xuất, không dẫn sang trang chuyến của điều phối viên', async () => {
-  const { trip } = await optimizedTwoCartonTrip(getMockDb())
-  renderWarehouse(`/kho?chuyen=${trip.id}`, 'warehouse')
+  view.unmount()
+  renderWarehouse(`/kho?chuyen=${SEED_TRIP}`)
+  expect(await screen.findByRole('heading', { level: 1, name: second }, LOAD)).toBeInTheDocument()
+  expect(screen.getByText(/^Bước/)).toHaveTextContent('Bước 2 / 132')
+}, 15_000)
 
-  expect(await screen.findByText('Chưa có phương án đã duyệt', {}, LOAD)).toBeInTheDocument()
-  expect(screen.queryByRole('link', { name: 'Thoát màn kho' })).not.toBeInTheDocument()
-  expect(screen.queryByRole('link', { name: 'Tới danh sách chuyến' })).not.toBeInTheDocument()
-  expect(screen.getAllByRole('button', { name: 'Đăng xuất' })).toHaveLength(2)
-})
+test('"Kiện này không có ở kho" asks first, then records the package as missing and moves to the next one', async () => {
+  const [, second, third] = await seedPlanOrder()
+  renderWarehouse(`/kho?chuyen=${SEED_TRIP}`)
+  await screen.findByRole('heading', { level: 1, name: second }, LOAD)
 
-test('nhân viên kho đang xếp: nút thoát ở thanh trên là Đăng xuất', async () => {
-  renderWarehouse('/kho', 'warehouse')
-  expect(await screen.findByRole('button', { name: 'Xác nhận đã xếp' }, LOAD)).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument()
-  expect(screen.queryByRole('link', { name: 'Thoát phiên xếp hàng' })).not.toBeInTheDocument()
-})
+  await userEvent.click(screen.getByRole('button', { name: 'Kiện này không có ở kho' }))
+  const dialog = screen.getByRole('dialog', { name: `Ghi thiếu ${second}?` })
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Quay lại' }))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(screen.getByRole('heading', { level: 1, name: second })).toBeInTheDocument()
 
-test('quản lý mở màn kho: thoát về màn chính của quản lý', async () => {
-  renderWarehouse('/kho', 'manager')
-  expect(await screen.findByRole('link', { name: 'Thoát phiên xếp hàng' }, LOAD)).toHaveAttribute('href', '/')
-})
+  await userEvent.click(screen.getByRole('button', { name: 'Kiện này không có ở kho' }))
+  await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ghi thiếu' }))
+  expect(await screen.findByRole('heading', { level: 1, name: third }, NEXT)).toBeInTheDocument()
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(toast.warning).toHaveBeenCalledWith(`Đã ghi thiếu ${second}`, { description: 'Chuyển sang kiện kế tiếp.' })
+  const steps = (await getMockDb().getTrip(SEED_TRIP)).loading?.steps.map((step) => [step.packageInstanceId, step.outcome])
+  expect(steps?.at(-1)).toStrictEqual([second, 'missing'])
+}, 15_000)
 
-test('chuyến chỉ định đã duyệt: khoảng cách cm theo locale, hướng đặt theo mã, vật cản sát kiện', async () => {
-  const { trip, approved } = await approvedTwoCartonTrip()
+test('two-carton trip: cm measures of step 1, then missing, then the last confirmation completes the loading', async () => {
+  const { db, trip, approved } = await approvedTwoCartonTrip()
   const first = approved.result.placements.find((placement) => placement.loadingOrder === 1)
-  if (!first) throw new Error('Bản duyệt phải có loadingOrder = 1')
   renderWarehouse(`/kho?chuyen=${trip.id}`)
 
-  const heading = await screen.findByRole('heading', { level: 1, name: first.packageInstanceId }, LOAD)
+  const heading = await screen.findByRole('heading', { level: 1, name: 'PKG-001-01' }, LOAD)
   const card = within(heading.closest('div.overflow-y-auto') as HTMLElement)
   expect(screen.getByText(/^Bước/)).toHaveTextContent('Bước 1 / 2')
-  // Truck 6m dài 600 cm, Carton A 120 × 60 × 45 cm, 30 kg, hướng LWH, đặt trên sàn tại y = 0
-  const rear = 600 - first.xCm - 120
-  expect(card.getByText('Cách cửa sau').nextSibling).toHaveTextContent(`${rear} cm`)
-  expect(card.getByText('Cách vách trước').nextSibling).toHaveTextContent(`${first.xCm} cm`)
+  // Truck 6m dài 600 cm, Carton A 120 × 60 × 45 cm, 30 kg, hướng LWH, đặt trên sàn tại y = 0, x = 120 — chạm hốc bánh xe OBS-001 (x 0–120)
+  expect(first).toMatchObject({ packageInstanceId: 'PKG-001-01', xCm: 120 })
+  expect(card.getByText('Cách cửa sau').nextSibling).toHaveTextContent('360 cm')
+  expect(card.getByText('Cách vách trước').nextSibling).toHaveTextContent('120 cm')
   expect(card.getByText('Cách vách phải').nextSibling).toHaveTextContent('180 cm')
-  expect(card.getByText(`Lớp 1 · Cách cửa ${rear} cm`)).toBeInTheDocument()
+  expect(card.getByText('Lớp 1 · Cách cửa 360 cm')).toBeInTheDocument()
   expect(card.getByText('Hướng đặt').nextSibling).toHaveTextContent('LWH · Đứng thẳng · cạnh dài dọc thùng')
   expect(card.getByText('30 kg')).toBeInTheDocument()
   expect(card.getByText('120 × 60 × 45 cm')).toBeInTheDocument()
   expect(card.getByRole('img', { name: /^Minh hoạ hướng đặt LWH/ })).toBeInTheDocument()
-  // Bước 1 là PKG-001-01 (điểm 3, trong cùng, x = 120) — chạm hốc bánh xe OBS-001 chiếm x 0–120
-  expect(first).toMatchObject({ packageInstanceId: 'PKG-001-01', xCm: 120 })
   expect(card.getByText('Hốc bánh xe OBS-001 · khe 0 cm')).toBeInTheDocument()
-})
 
-test('kiện cách xa mọi vật cản: không nhắc vật cản', async () => {
-  const { trip, approved } = await approvedTwoCartonTrip()
-  renderWarehouse(`/kho?chuyen=${trip.id}`)
-  await screen.findByRole('heading', { level: 1, name: 'PKG-001-01' }, LOAD)
-  expect(screen.getByText('Vật cản gần nhất')).toBeInTheDocument()
-  // Bước 2 (PKG-002-01, x = 240) cách hốc bánh xe 120 cm
-  expect(approved.result.placements.find((placement) => placement.loadingOrder === 2)?.xCm).toBe(240)
   await userEvent.click(screen.getByRole('button', { name: 'Kiện này không có ở kho' }))
-  await screen.findByRole('heading', { level: 1, name: 'PKG-002-01' })
+  await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Ghi thiếu' }))
+  // Bước 2 (PKG-002-01, x = 240) cách hốc bánh xe 120 cm: không nhắc vật cản
+  await screen.findByRole('heading', { level: 1, name: 'PKG-002-01' }, NEXT)
   expect(screen.queryByText('Vật cản gần nhất')).not.toBeInTheDocument()
+
+  await userEvent.click(screen.getByRole('button', { name: 'Xác nhận đã xếp' }))
+  expect(screen.getByText('Đang hoàn tất xếp hàng…')).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { level: 1, name: `Đã xếp xong chuyến ${trip.id}` }, NEXT)).toBeInTheDocument()
+  expect(screen.getByText('Đã xếp 1 / 2 kiện')).toBeInTheDocument()
+  const missing = screen.getByRole('region', { name: 'Kiện thiếu ở kho (1)' })
+  expect(within(missing).getByText('PKG-001-01')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Về danh sách chuyến' })).toHaveAttribute('href', '/kho')
+  expect((await db.getTrip(trip.id)).phase).toBe('loaded')
+}, 20_000)
+
+test('a stale approved plan does not start: the worker waits for the dispatcher to approve again', async () => {
+  renderWarehouse('/kho?chuyen=TRIP-013')
+  expect(await screen.findByText('Chờ điều phối viên duyệt lại', {}, LOAD)).toBeInTheDocument()
+  expect(screen.getByText(/^Phương án đã duyệt của chuyến TRIP-013 lỗi thời/)).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Xác nhận đã xếp' })).not.toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Về danh sách chuyến' })).toHaveAttribute('href', '/kho')
+  expect((await getMockDb().getTrip('TRIP-013')).phase).toBe('planning')
 })
 
-test('bản duyệt lỗi thời vẫn hiện, kèm cảnh báo', async () => {
-  const { db, trip } = await approvedTwoCartonTrip()
-  await db.updateTrip(trip.id, { packages: trip.packages.map((pkg) => ({ ...pkg, weightKg: pkg.weightKg + 1 })) })
-  renderWarehouse(`/kho?chuyen=${trip.id}`)
+test('no approved plan, a cancelled trip or an unknown trip: say why, with the way back to the list', async () => {
+  const db = getMockDb()
+  const { trip } = await optimizedTwoCartonTrip(db)
+  const view = renderWarehouse(`/kho?chuyen=${trip.id}`)
+  expect(await screen.findByText('Chưa có phương án đã duyệt', {}, LOAD)).toBeInTheDocument()
+  expect(screen.getByText(`Chuyến ${trip.id} chưa có phương án đã duyệt. Điều phối viên cần duyệt phương án trước khi kho xếp.`)).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Về danh sách chuyến' })).toHaveAttribute('href', '/kho')
+  view.unmount()
 
-  expect(await screen.findByRole('alert', {}, LOAD)).toHaveTextContent('Phương án đã duyệt này lỗi thời')
-  expect(screen.getByRole('button', { name: 'Xác nhận đã xếp' })).toBeInTheDocument()
+  await db.cancelTrip(trip.id, 'Khách hoãn nhận hàng')
+  const cancelled = renderWarehouse(`/kho?chuyen=${trip.id}`)
+  expect(await screen.findByText('Chuyến đã huỷ', {}, LOAD)).toBeInTheDocument()
+  expect(screen.getByText(`Chuyến ${trip.id} đã huỷ: Khách hoãn nhận hàng`)).toBeInTheDocument()
+  cancelled.unmount()
+
+  renderWarehouse('/kho?chuyen=TRIP-KHONG-CO')
+  expect(await screen.findByText('Không tải được chuyến', {}, LOAD)).toBeInTheDocument()
+  expect(screen.getByText('Không tìm thấy TRIP-KHONG-CO.')).toBeInTheDocument()
+}, 15_000)
+
+test('an admin continuing a trip resumes at its first package without a result; exit goes to the trip detail', async () => {
+  renderWarehouse('/kho?chuyen=TRIP-011', 'admin')
+  expect(await screen.findByText(/^Bước/, {}, LOAD)).toHaveTextContent('Bước 111 / 280')
+  expect(screen.getByRole('link', { name: 'Thoát phiên xếp hàng' })).toHaveAttribute('href', '/chuyen/TRIP-011')
 })
