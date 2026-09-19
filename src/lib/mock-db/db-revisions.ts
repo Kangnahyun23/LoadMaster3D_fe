@@ -1,0 +1,72 @@
+import { found, nextId, put, type DbContext } from './db-context'
+import { MockDbError } from './errors'
+import { approvedResult, isStale } from './revisions'
+import type { MockDb, Trip } from './types'
+
+type RevisionMethods = Pick<MockDb, 'listRevisions' | 'getRevision' | 'addRevision' | 'approveRevision'>
+
+/** Tối ưu và Duyệt chỉ ở pha lập kế hoạch: kho đã bắt đầu xếp thì phương án đã chốt (D-45). */
+function assertPlanning(trip: Trip) {
+  if (trip.phase !== 'planning') throw new MockDbError('TRIP_LOCKED', { tripId: trip.id, phase: trip.phase })
+}
+
+export function revisionMethods(ctx: DbContext): RevisionMethods {
+  const { trips, revisions } = ctx.state
+  return {
+    listRevisions: (tripId) =>
+      ctx.respond(() => {
+        found(trips, 'trips', tripId)
+        return [...revisions.values()].filter((revision) => revision.tripId === tripId)
+      }),
+    getRevision: (id) => ctx.respond(() => found(revisions, 'revisions', id)),
+    addRevision: ({ tripId, request, result }) =>
+      ctx.respond(() => {
+        const trip = found(trips, 'trips', tripId)
+        assertPlanning(trip)
+        const revision = put(revisions, {
+          id: nextId('REV', revisions.keys()),
+          jobId: result.jobId,
+          tripId,
+          request,
+          result,
+          inputVersion: trip.inputVersion,
+          createdAt: ctx.nowIso(),
+          manuallyEdited: false,
+          ordersRecomputed: false,
+        })
+        ctx.log('optimization.saved', { type: 'trip', id: tripId }, {
+          revisionId: revision.id,
+          placed: result.metrics.placedCount,
+          unplaced: result.metrics.unplacedCount,
+        })
+        return revision
+      }),
+    approveRevision: (revisionId, patches) =>
+      ctx.respond(() => {
+        const source = found(revisions, 'revisions', revisionId)
+        const trip = found(trips, 'trips', source.tripId)
+        assertPlanning(trip)
+        if (isStale(source, trip)) throw new MockDbError('REVISION_STALE', { revisionId })
+        if (source.result.status !== 'COMPLETED') throw new MockDbError('REVISION_NOT_COMPLETED', { revisionId })
+        const approvedAt = ctx.nowIso()
+        const approved = put(revisions, {
+          ...source,
+          id: nextId('REV', revisions.keys()),
+          result: approvedResult(source.request, source.result, patches),
+          createdAt: approvedAt,
+          draftPatches: [...patches],
+          approvedAt,
+          sourceRevisionId: source.id,
+          // Duyệt lại một bản đã chỉnh tay mà không có draft mới vẫn là kết quả đã chỉnh tay
+          manuallyEdited: source.manuallyEdited || patches.length > 0,
+          ordersRecomputed: true,
+        })
+        ctx.log('revision.approved', { type: 'trip', id: trip.id }, {
+          revisionId: approved.id,
+          sourceRevisionId: source.id,
+          edits: patches.length,
+        })
+        return approved
+      }),
+  }
+}

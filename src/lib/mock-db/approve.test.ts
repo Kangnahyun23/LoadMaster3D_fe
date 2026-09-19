@@ -23,8 +23,8 @@ test('approving with a draft creates a new approved revision and leaves the sour
   expect(await db.getRevision(source.id)).toStrictEqual(source)
   expect(await db.listRevisions(trip.id)).toStrictEqual([source, approved])
   expect(approved).toMatchObject({
-    // REV-001/002 are the seeded sample trip, REV-003 the source added above
-    id: 'REV-004',
+    // REV-001 … REV-027 are seeded, REV-028 the source added above
+    id: 'REV-029',
     jobId: source.jobId,
     tripId: trip.id,
     request: source.request,
@@ -89,7 +89,7 @@ test('approving an approved revision again without a new draft gives the same re
   const { revision: source } = await optimizedTwoCartonTrip(db)
   const edited = await db.approveRevision(source.id, [LIFT_ONTO_PKG_002])
   const again = await db.approveRevision(edited.id, [])
-  expect(again).toMatchObject({ id: 'REV-005', sourceRevisionId: edited.id, draftPatches: [], manuallyEdited: true })
+  expect(again).toMatchObject({ id: 'REV-030', sourceRevisionId: edited.id, draftPatches: [], manuallyEdited: true })
   expect(again.result).toStrictEqual(edited.result)
 })
 

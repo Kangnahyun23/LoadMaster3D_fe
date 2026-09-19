@@ -10,6 +10,7 @@ export function twoCartonTrip(): NewTrip {
   return {
     name: 'Tuyến Thủ Đức – Dĩ An – Biên Hoà',
     vehicleId: 'VEHICLE-001',
+    scheduledDate: '2026-09-15',
     stops: [
       { id: 'STOP-01', name: 'Cửa hàng Bách Hoá Xanh Thủ Đức', address: '96 Võ Văn Ngân, P. Bình Thọ, Thủ Đức' },
       { id: 'STOP-02', name: 'Kho Bách Hoá Xanh Dĩ An', address: '215 Quốc lộ 1K, P. Đông Hoà, Dĩ An' },
@@ -61,6 +62,11 @@ export function twoCartonRequest(): OptimizationRequest {
     packages: twoCartonTrip().packages,
     settings: { method: 'MOCK', timeLimitSeconds: 10, randomSeed: 42, enforceLifo: true, prioritizeLowCenterOfGravity: false },
   }
+}
+
+/** Bản ghi chuyến đủ trường cho test hàm thuần (không qua kho): pha lập kế hoạch, chưa gán tài xế. */
+export function tripRecord(id: string, trip: NewTrip = twoCartonTrip(), inputVersion = 1): Trip {
+  return { ...trip, id, inputVersion, driverId: trip.driverId ?? null, phase: 'planning', createdAt: '2026-09-13T08:00:00.000Z' }
 }
 
 /** Tạo `twoCartonTrip` trong `db` rồi lưu `twoCartonRequest` và `result` (mặc định `twoCartonResult`) thành revision. */

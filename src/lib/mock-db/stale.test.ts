@@ -11,8 +11,8 @@ test('a result is added as a revision stamped with the input version of the trip
   const db = createMockDb()
   const { trip, revision } = await optimizedTwoCartonTrip(db)
   expect(revision).toStrictEqual({
-    // the seed already holds REV-001 and REV-002 for the sample trip
-    id: 'REV-003',
+    // the seed already holds REV-001 … REV-027 for its 14 optimized trips
+    id: 'REV-028',
     jobId: 'MOCK-JOB-001',
     tripId: trip.id,
     request: twoCartonRequest(),

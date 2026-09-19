@@ -18,6 +18,8 @@ import { viewer } from './en/viewer'
 import { fields } from './en/fields'
 import { admin } from './en/admin'
 import { designSystem } from './en/designSystem'
+import { dataErrors } from './en/dataErrors'
+import { audit } from './en/audit'
 
 /** Bản tiếng Anh: mỗi nhánh một file trong `en/`, kiểm thiếu/thừa key theo nhánh nguồn `vi/`. */
 export const en = {
@@ -39,4 +41,6 @@ export const en = {
   fields,
   admin,
   designSystem,
+  dataErrors,
+  audit,
 } satisfies Dictionary<typeof vi>

@@ -32,10 +32,10 @@ async function kpi(label: string) {
 test('KPI, job gần nhất và kế hoạch gần đây lấy số từ kho dữ liệu', async () => {
   renderDashboard()
 
-  // Chuyến seed TRIP-2026-0914: 132 instance, 5.844 kg; kho seed có 4 xe.
-  expect((await kpi('Tổng số kiện')).getByText('132')).toBeInTheDocument()
-  expect((await kpi('Tổng khối lượng hàng')).getByText('5.844 kg')).toBeInTheDocument()
-  expect((await kpi('Xe trong đội')).getByText('4')).toBeInTheDocument()
+  // Seed neo 14/09 (LM-083): 15 chuyến, 2.863 instance, 55.305 kg; 8 xe.
+  expect((await kpi('Tổng số kiện')).getByText('2.863')).toBeInTheDocument()
+  expect((await kpi('Tổng khối lượng hàng')).getByText('55.305 kg')).toBeInTheDocument()
+  expect((await kpi('Xe trong đội')).getByText('8')).toBeInTheDocument()
 
   // Revision seed là kết quả mock đã duyệt của chuyến seed.
   expect(screen.getByText('MOCK RESULT')).toBeInTheDocument()
@@ -61,7 +61,7 @@ test('thêm một kiện vào chuyến rồi mở lại: tổng số kiện và 
 
   renderDashboard()
 
-  // 132 + 2 instance, 5.844 + 20 kg.
-  expect((await kpi('Tổng số kiện')).getByText('134')).toBeInTheDocument()
-  expect((await kpi('Tổng khối lượng hàng')).getByText('5.864 kg')).toBeInTheDocument()
+  // 2.863 + 2 instance, 55.305 + 20 kg.
+  expect((await kpi('Tổng số kiện')).getByText('2.865')).toBeInTheDocument()
+  expect((await kpi('Tổng khối lượng hàng')).getByText('55.325 kg')).toBeInTheDocument()
 })

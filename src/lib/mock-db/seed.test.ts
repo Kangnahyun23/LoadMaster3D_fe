@@ -3,15 +3,19 @@ import { expandPackages } from '@/domain/cargo'
 import { approvalBlockers, createConstraintEngine } from '@/domain/constraints'
 import { SPEC_TRUCK_6M } from '@/domain/fixtures/spec-samples'
 import { cargoPackageSchema, vehicleConfigSchema } from '@/domain/models'
-import { createMockDb, isStale } from '@/lib/mock-db'
+import { createMockDb, isStale, tripStatus } from '@/lib/mock-db'
 
-test('a new database starts with the Spec Truck 6m followed by three Vietnamese trucks, all valid vehicle configs', async () => {
+test('a new database starts with the Spec Truck 6m followed by seven Vietnamese trucks, all valid vehicle configs', async () => {
   const vehicles = await createMockDb().listVehicles()
   expect(vehicles.map(({ id, name }) => [id, name])).toStrictEqual([
     ['VEHICLE-001', 'Truck 6m'],
     ['VEHICLE-002', 'Hyundai HD210 · 60C-446.32'],
     ['VEHICLE-003', 'Isuzu NQR 550 · 51C-284.19'],
     ['VEHICLE-004', 'Hino FC9J đông lạnh · 51C-190.07'],
+    ['VEHICLE-005', 'Hino XZU720 · 51D-457.88'],
+    ['VEHICLE-006', 'Thaco Ollin 720 · 61C-339.05'],
+    ['VEHICLE-007', 'Isuzu FVR 900 · 51D-622.14'],
+    ['VEHICLE-008', 'Hyundai Mighty EX8 · 50H-118.29'],
   ])
   expect(vehicles[0]).toStrictEqual(SPEC_TRUCK_6M)
   for (const vehicle of vehicles) expect(vehicleConfigSchema.parse(vehicle)).toStrictEqual(vehicle)
@@ -22,15 +26,17 @@ test('every new database starts from the same seed, with the same ids and data, 
   const second = createMockDb()
   expect(await first.listVehicles()).toStrictEqual(await second.listVehicles())
   expect(await first.listTrips()).toStrictEqual(await second.listTrips())
-  await first.deleteVehicle('VEHICLE-004')
-  expect((await second.listVehicles()).map(({ id }) => id)).toContain('VEHICLE-004')
+  await first.deleteVehicle('VEHICLE-008')
+  expect((await second.listVehicles()).map(({ id }) => id)).toContain('VEHICLE-008')
 })
 
 test('the sample trip carries 132 valid package instances to four real stops on the Hyundai HD210', async () => {
   const db = createMockDb()
-  expect((await db.listTrips()).map(({ id }) => id)).toStrictEqual(['TRIP-2026-0914'])
+  expect((await db.listTrips())[0]?.id).toBe('TRIP-2026-0914')
   const trip = await db.getTrip('TRIP-2026-0914')
   expect(trip.vehicleId).toBe('VEHICLE-002')
+  // the main trip of the anchor day: assigned to the demo driver, approved and waiting for the warehouse (D-44)
+  expect([trip.scheduledDate, trip.driverId, trip.phase]).toStrictEqual(['2026-09-14', 'US-0004', 'planning'])
   expect(trip.inputVersion).toBe(1)
   expect(trip.stops.map(({ name, address }) => [name, address])).toStrictEqual([
     ['Công ty TNHH Thực phẩm Sài Gòn', '12 Nguyễn Văn Linh, Q.7, TP. Hồ Chí Minh'],
@@ -88,4 +94,62 @@ test('the seeded approved plan passes the approval check: no engine error and no
     issues: [],
     stale: false,
   })
+})
+
+test('the seed spreads 15 trips over 30 days around the anchor day with every status (D-44, D-45)', async () => {
+  const db = createMockDb({ today: '2026-09-19' })
+  const trips = await db.listTrips()
+  const statuses = await Promise.all(trips.map(async (trip) => tripStatus(trip, await db.listRevisions(trip.id))))
+  const count = (status: string) => statuses.filter((item) => item === status).length
+  expect(trips).toHaveLength(15)
+  expect({
+    hoan_thanh: count('hoan_thanh'), da_huy: count('da_huy'), dang_giao: count('dang_giao'), da_xep_xong: count('da_xep_xong'),
+    dang_xep_hang: count('dang_xep_hang'), da_duyet: count('da_duyet'), da_toi_uu: count('da_toi_uu'), can_xem_lai: count('can_xem_lai'), nhap: count('nhap'),
+  }).toStrictEqual({ hoan_thanh: 7, da_huy: 1, dang_giao: 1, da_xep_xong: 1, dang_xep_hang: 1, da_duyet: 1, da_toi_uu: 1, can_xem_lai: 1, nhap: 1 })
+  const dates = trips.map((trip) => trip.scheduledDate).toSorted()
+  expect([dates[0], dates.at(-1)]).toStrictEqual(['2026-08-23', '2026-09-21'])
+  // the main trip moves with the anchor day
+  expect((await db.getTrip('TRIP-2026-0914')).scheduledDate).toBe('2026-09-19')
+})
+
+test('every seeded plan passes the constraint engine and places every package', async () => {
+  const db = createMockDb()
+  for (const trip of await db.listTrips()) {
+    for (const { request, result } of await db.listRevisions(trip.id)) {
+      const { issues } = createConstraintEngine({ ...request, placements: result.placements }).evaluateAll()
+      expect(issues.filter((issue) => issue.severity === 'error'), trip.id).toStrictEqual([])
+      expect(result.unplacedPackages, trip.id).toStrictEqual([])
+    }
+  }
+})
+
+test('seeded operations match their trips: warehouse progress, deliveries, issues and one vehicle in maintenance', async () => {
+  const db = createMockDb()
+  const trips = new Map((await db.listTrips()).map((trip) => [trip.id, trip]))
+  expect(trips.get('TRIP-003')?.loading?.steps.filter((step) => step.outcome === 'missing')).toHaveLength(1)
+  expect(trips.get('TRIP-005')?.delivery?.issues.map((issue) => issue.kind)).toStrictEqual(['damaged'])
+  expect(trips.get('TRIP-007')?.delivery?.issues.map((issue) => issue.kind)).toStrictEqual(['refused'])
+  expect(trips.get('TRIP-009')?.delivery?.stops.map((stop) => stop.completedAt !== undefined)).toStrictEqual([true, false, false])
+  expect(trips.get('TRIP-011')?.loading?.steps).toHaveLength(110)
+  expect(trips.get('TRIP-004')?.cancellation?.reason).not.toBe('')
+  const states = await db.listVehicleStates()
+  expect(states.filter((state) => state.status === 'maintenance').map((state) => state.vehicleId)).toStrictEqual(['VEHICLE-008'])
+  expect(states.filter((state) => state.status === 'in_use').map((state) => [state.vehicleId, state.tripId])).toStrictEqual([
+    ['VEHICLE-003', 'TRIP-010'],
+    ['VEHICLE-006', 'TRIP-009'],
+    ['VEHICLE-007', 'TRIP-011'],
+  ])
+})
+
+test('twelve seeded users cover the five roles; the history names only real users, newest first', async () => {
+  const db = createMockDb()
+  const users = await db.listUsers()
+  expect(users).toHaveLength(12)
+  expect(new Set(users.map((user) => user.role))).toStrictEqual(new Set(['dispatcher', 'manager', 'warehouse', 'driver', 'admin']))
+  expect(users.filter((user) => user.status === 'suspended').map((user) => user.id)).toStrictEqual(['US-0008'])
+  const events = await db.listEvents()
+  const ids = new Set(users.map((user) => user.id))
+  expect(events.length).toBeGreaterThan(100)
+  expect(events.filter((event) => event.actorId !== null && !ids.has(event.actorId))).toStrictEqual([])
+  expect(events.map((event) => event.at)).toStrictEqual(events.map((event) => event.at).toSorted().toReversed())
 })

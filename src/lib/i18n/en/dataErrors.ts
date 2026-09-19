@@ -1,0 +1,32 @@
+import type { Dictionary } from '../types'
+import type { dataErrors as source } from '../vi/dataErrors'
+
+export const dataErrors = {
+  NOT_FOUND: '{id} was not found.',
+  VEHICLE_IN_USE: 'Vehicle {vehicleId} is still linked to trips {tripIds} and cannot be deleted.',
+  VEHICLE_LOCKED: 'Vehicle {vehicleId} is running trip {tripId} and cannot be edited yet.',
+  VEHICLE_IN_MAINTENANCE: 'Vehicle {vehicleId} is in maintenance. Choose another vehicle.',
+  REVISION_STALE: 'Plan {revisionId} is out of date: the vehicle or packages changed after it was optimized.',
+  REVISION_NOT_COMPLETED: 'Plan {revisionId} did not complete and cannot be approved.',
+  PATCH_UNKNOWN_INSTANCE: 'Package {packageInstanceId} is not in the plan.',
+  TRIP_LOCKED: 'Trip {tripId} is already in operation and cannot be edited.',
+  TRIP_PHASE_INVALID: 'This action is not available in the current state of trip {tripId}.',
+  NO_APPROVED_REVISION: 'Trip {tripId} has no approved plan.',
+  INSTANCE_NOT_IN_PLAN: 'Package {packageInstanceId} is not in this plan or stop.',
+  INSTANCE_NOT_LOADED: 'Package {packageInstanceId} was reported missing at the warehouse and is not on the truck.',
+  LOADING_INCOMPLETE: '{remaining} packages have no loading result yet.',
+  STOP_INCOMPLETE: 'Stop {stopNumber} still has {remaining} packages not unloaded or reported.',
+  STOP_NOT_CURRENT: 'Stop {stopNumber} is not the current stop.',
+  REASON_REQUIRED: 'Enter a reason.',
+  DRIVER_INVALID: 'The selected person is not an active driver.',
+  INVALID_CREDENTIALS: 'Incorrect email or password.',
+  ACCOUNT_SUSPENDED: 'This account is locked.',
+  NOT_SIGNED_IN: 'Your session has ended. Sign in again.',
+  EMAIL_TAKEN: 'The email {email} is already in use.',
+  SELF_CHANGE_FORBIDDEN: 'You cannot lock, delete or change the role of your own account.',
+  LAST_ADMIN: 'The system needs at least one active administrator.',
+  USER_IN_USE: 'This driver is assigned to trips {tripIds}.',
+  PASSWORD_INCORRECT: 'The current password is incorrect.',
+  PASSWORD_TOO_SHORT: 'The new password needs at least {min} characters.',
+  UNKNOWN: 'Something went wrong. Try again later.',
+} satisfies Dictionary<typeof source>

@@ -2,11 +2,11 @@ import { expect, test } from 'vitest'
 import type { PackagePlacement } from '@/domain/models'
 import { adaptResult } from '@/features/viewer3d/scene-input'
 import type { Revision, Trip } from '@/lib/mock-db'
-import { twoCartonRequest, twoCartonResult, twoCartonTrip } from '@/test/mock-db-samples'
+import { tripRecord, twoCartonRequest, twoCartonResult, twoCartonTrip } from '@/test/mock-db-samples'
 import { pickDriverPlan, stopDeliveries } from './driver-plan'
 
 function trip(id: string): Trip {
-  return { ...twoCartonTrip(), id, inputVersion: 1 }
+  return tripRecord(id)
 }
 
 function revision(id: string, tripId: string, approvedAt?: string): Revision {

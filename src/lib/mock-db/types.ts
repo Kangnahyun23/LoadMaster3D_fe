@@ -1,5 +1,6 @@
 import type { PlacementPatch } from '@/domain/constraints'
-import type { CargoPackage, OptimizationRequest, OptimizationResult, VehicleConfig } from '@/domain/models'
+import type { CargoPackage, OptimizationRequest, OptimizationResult } from '@/domain/models'
+import type { User } from '@/types/user'
 
 /** Điểm giao của chuyến. Vị trí trong `Trip.stops` là số điểm giao: phần tử đầu là điểm 1, khớp `CargoPackage.deliveryStop`. */
 export type DeliveryStop = {
@@ -7,6 +8,69 @@ export type DeliveryStop = {
   id: string
   name: string
   address: string
+  /** Số điện thoại người nhận, dạng hiển thị (`0901 234 567`); tài xế gọi qua `tel:` (D-46). */
+  phone?: string
+  contactName?: string
+}
+
+/**
+ * Pha vận hành của chuyến (D-45), do kho lưu. `planning` là mọi thứ trước khi kho bắt đầu xếp — trạng thái hiển thị của pha này
+ * (Nháp / Đã tối ưu / Đã duyệt / Cần xem lại) suy từ revision (`tripStatus`). Từ `loading` trở đi xe, điểm giao và kiện bị khoá.
+ */
+export const TRIP_PHASES = ['planning', 'loading', 'loaded', 'delivering', 'completed', 'cancelled'] as const
+export type TripPhase = (typeof TRIP_PHASES)[number]
+
+export type LoadingOutcome = 'loaded' | 'missing'
+
+/** Tiến độ xếp ở kho (D-47): làm theo bản đã duyệt mới nhất lúc bắt đầu. */
+export type LoadingProgress = {
+  revisionId: string
+  /** ISO 8601 */
+  startedAt: string
+  /** Người bấm bắt đầu; `null` khi không có phiên (seed, test). */
+  startedBy: string | null
+  completedAt?: string
+  /** Mỗi kiện một dòng, theo thứ tự ghi. Kiện chưa có dòng là chưa xử lý. */
+  steps: { packageInstanceId: string; outcome: LoadingOutcome; at: string }[]
+}
+
+export const DELIVERY_ISSUE_KINDS = ['damaged', 'missing', 'refused', 'other'] as const
+export type DeliveryIssueKind = (typeof DELIVERY_ISSUE_KINDS)[number]
+
+export type DeliveryIssue = {
+  /** `ISS-NNN`, duy nhất trong chuyến. */
+  id: string
+  stopNumber: number
+  /** Vắng khi sự cố của cả điểm giao, không gắn kiện nào. */
+  packageInstanceId?: string
+  kind: DeliveryIssueKind
+  note: string
+  at: string
+  reportedBy: string | null
+}
+
+export type StopProgress = {
+  /** Số điểm giao, khớp vị trí trong `Trip.stops` + 1. */
+  number: number
+  unloadedIds: string[]
+  completedAt?: string
+}
+
+/** Tiến độ giao hàng của tài xế (D-47). */
+export type DeliveryProgress = {
+  startedAt: string
+  startedBy: string | null
+  completedAt?: string
+  /** Mỗi điểm giao của chuyến một phần tử, theo thứ tự giao. */
+  stops: StopProgress[]
+  issues: DeliveryIssue[]
+}
+
+export type Cancellation = {
+  at: string
+  by: string | null
+  reason: string
+  fromPhase: TripPhase
 }
 
 export type Trip = {
@@ -17,13 +81,26 @@ export type Trip = {
   packages: CargoPackage[]
   /** Phiên bản dữ liệu đầu vào tối ưu (xe + kiện) của chuyến; revision mang số lúc tạo để biết lỗi thời (D-31). */
   inputVersion: number
+  /** Ngày chạy `YYYY-MM-DD` (D-46). */
+  scheduledDate: string
+  /** Người dùng vai trò tài xế; `null` khi chưa gán. */
+  driverId: string | null
+  phase: TripPhase
+  /** Thời điểm tạo, ISO 8601. */
+  createdAt: string
+  loading?: LoadingProgress
+  delivery?: DeliveryProgress
+  cancellation?: Cancellation
 }
 
-/** Dữ liệu tạo chuyến: kho cấp `id` và `inputVersion`. */
-export type NewTrip = Omit<Trip, 'id' | 'inputVersion'>
+/** Dữ liệu tạo chuyến: kho cấp `id`, `inputVersion`, `phase`, `createdAt`; tiến độ vận hành chỉ do hàm vận hành ghi. */
+export type NewTrip = Pick<Trip, 'name' | 'vehicleId' | 'stops' | 'packages' | 'scheduledDate'> & { driverId?: string | null }
 
-/** Trường sửa được của chuyến; trường vắng giữ nguyên. `id` và `inputVersion` do kho quản lý, có trong đầu vào cũng bị bỏ. */
-export type TripChanges = Partial<NewTrip>
+/**
+ * Trường sửa được của chuyến; trường vắng giữ nguyên. Trường do kho quản lý (`id`, `inputVersion`, `phase`, tiến độ…) có trong
+ * đầu vào cũng bị bỏ.
+ */
+export type TripChanges = Partial<Pick<Trip, 'name' | 'vehicleId' | 'stops' | 'packages' | 'scheduledDate' | 'driverId'>>
 
 /**
  * Một kết quả tối ưu của chuyến, **bất biến** (D-31): kho không có hàm sửa revision. Duyệt tạo revision mới.
@@ -55,42 +132,43 @@ export type Revision = {
 /** Kết quả tối ưu cần lưu: `request` đã gửi service và `result` nhận về. `jobId` lấy từ `result`. */
 export type NewRevision = Pick<Revision, 'tripId' | 'request' | 'result'>
 
+/** Trạng thái xe (D-53): suy từ chuyến đang chạy, riêng bảo dưỡng đặt tay. */
+export type VehicleStatus = 'available' | 'in_use' | 'maintenance'
+
+export type VehicleState = {
+  vehicleId: string
+  status: VehicleStatus
+  /** Chuyến đang xếp / đã xếp xong / đang giao dùng xe (khi `in_use`). */
+  tripId?: string
+  /** Khi `maintenance`: ghi chú và thời điểm bật. */
+  maintenance?: { note: string; since: string }
+}
+
+/** Dữ liệu tạo người dùng: kho cấp mã, trạng thái hoạt động và mật khẩu tạm. */
+export type NewUser = Pick<User, 'fullName' | 'email' | 'phone' | 'role' | 'depot'>
+
+export type UserChanges = Partial<Pick<User, 'fullName' | 'email' | 'phone' | 'role' | 'depot'>>
+
+export type ProfileChanges = Partial<Pick<User, 'fullName' | 'phone'>>
+
+/** Bộ lọc nhật ký; trường vắng là không lọc. Ngày dạng `YYYY-MM-DD` theo giờ Việt Nam, tính cả hai đầu. */
+export type AuditFilter = {
+  from?: string
+  to?: string
+  actorId?: string
+  targetId?: string
+}
+
 export type MockDbOptions = {
   /** Độ trễ giả của mỗi lượt đọc/ghi, ms. Test dùng 0. */
   latencyMs?: number
-}
-
-/**
- * Kho dữ liệu in-memory thay backend (D-06). Mọi hàm bất đồng bộ như gọi mạng thật, trả bản sao, và từ chối bằng
- * `MockDbError` (mã `NOT_FOUND` khi không có bản ghi).
- */
-export type MockDb = {
-  /** Theo thứ tự tạo: xe seed trước. */
-  listVehicles(): Promise<VehicleConfig[]>
-  getVehicle(id: string): Promise<VehicleConfig>
-  /** Kho cấp mã `VEHICLE-NNN` kế tiếp; `id` trong đầu vào (nếu có) bị bỏ. */
-  createVehicle(input: Omit<VehicleConfig, 'id'>): Promise<VehicleConfig>
-  /** Thay toàn bộ cấu hình xe theo `vehicle.id`. */
-  updateVehicle(vehicle: VehicleConfig): Promise<VehicleConfig>
-  deleteVehicle(id: string): Promise<void>
-
-  /** Theo thứ tự tạo: chuyến seed trước. */
-  listTrips(): Promise<Trip[]>
-  getTrip(id: string): Promise<Trip>
-  /** Kho cấp mã `TRIP-NNN` kế tiếp, `inputVersion` bắt đầu từ 1. Xe phải tồn tại. */
-  createTrip(input: NewTrip): Promise<Trip>
-  /** Xe mới (nếu đổi) phải tồn tại. */
-  updateTrip(id: string, changes: TripChanges): Promise<Trip>
-
-  /** Revision của chuyến theo thứ tự tạo, cũ trước. */
-  listRevisions(tripId: string): Promise<Revision[]>
-  getRevision(id: string): Promise<Revision>
-  /** Lưu một kết quả tối ưu thành revision mới, mang `inputVersion` hiện tại của chuyến. Không có hàm sửa revision. */
-  addRevision(input: NewRevision): Promise<Revision>
   /**
-   * Duyệt (D-31, D-32): tạo revision approved **mới** — áp draft `patches`, tính lại thứ tự xếp/dỡ và metrics — revision nguồn giữ
-   * nguyên. Duyệt lại một revision đã duyệt được. Từ chối: `REVISION_STALE` (chuyến đổi xe/kiện sau khi tối ưu),
-   * `REVISION_NOT_COMPLETED`, `PATCH_UNKNOWN_INSTANCE` (patch cho kiện không có placement); không lưu gì khi từ chối.
+   * Ngày neo của seed `YYYY-MM-DD` (D-44): ngày chạy, thời điểm revision, tiến độ và nhật ký seed tính tương đối từ ngày này.
+   * Mặc định `SEED_ANCHOR_DATE` để test tất định; app truyền ngày hôm nay theo giờ Việt Nam.
    */
-  approveRevision(revisionId: string, patches: readonly PlacementPatch[]): Promise<Revision>
+  today?: string
+  /** Đồng hồ cho dữ liệu ghi mới (thời điểm tạo, sự kiện). Mặc định giờ máy. */
+  now?: () => Date
 }
+
+export type { DeliveryIssueInput, LoadingStepInput, MockDb, TemporaryPassword } from './db-api'

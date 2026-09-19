@@ -5,6 +5,7 @@
  * Ngoài React (hàm thuần, test): `createTranslator(locale)` và `formatIssue` (LM-028).
  */
 export { I18nProvider, useFormat, useLocale, useT } from './I18nProvider'
+export { dataErrorMessage } from './data-error'
 export { formatIssue } from './issue-message'
 export { LOCALE_NAMES, LOCALES, type Locale } from './locale'
 export { createTranslator } from './translate'

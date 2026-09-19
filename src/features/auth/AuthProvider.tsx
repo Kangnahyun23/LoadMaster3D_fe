@@ -17,6 +17,8 @@ type AuthValue = {
   user: User | null
   signIn: (email: string, password: string) => Promise<User>
   signOut: () => Promise<void>
+  /** Đọc lại người dùng của phiên từ kho, ví dụ sau khi sửa hồ sơ (LM-096). */
+  refreshUser: () => void
 }
 
 const AuthContext = createContext<AuthValue | null>(null)
@@ -31,6 +33,13 @@ function readStoredUser(): User | null {
   }
 }
 
+/** Phiên lưu ở tab được kho xác nhận lại: tài khoản đã bị khoá hoặc xoá thì coi như chưa đăng nhập. */
+function restoreUser(): User | null {
+  const restored = authApi.restoreSession(readStoredUser()?.id ?? null)
+  writeStoredUser(restored)
+  return restored
+}
+
 function writeStoredUser(user: User | null) {
   try {
     if (user) sessionStorage.setItem(SESSION_KEY, JSON.stringify(user))
@@ -41,7 +50,7 @@ function writeStoredUser(user: User | null) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(readStoredUser)
+  const [user, setUser] = useState<User | null>(restoreUser)
 
   const signIn = useCallback(async (email: string, password: string) => {
     const signedIn = await authApi.login(email, password)
@@ -56,7 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }, [])
 
-  const value = useMemo<AuthValue>(() => ({ user, signIn, signOut }), [user, signIn, signOut])
+  const refreshUser = useCallback(() => {
+    const current = authApi.currentSessionUser()
+    writeStoredUser(current)
+    setUser(current)
+  }, [])
+
+  const value = useMemo<AuthValue>(() => ({ user, signIn, signOut, refreshUser }), [user, signIn, signOut, refreshUser])
 
   return <AuthContext value={value}>{children}</AuthContext>
 }

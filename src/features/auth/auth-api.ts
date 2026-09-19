@@ -1,13 +1,10 @@
+import { getMockDb, isMockDbError } from '@/lib/mock-db'
 import type { User } from '@/types/user'
-import { DEMO_PASSWORD, findDemoUser } from './auth.mock'
 
 /**
- * Lớp gọi API xác thực. Backend Spring Boot chưa có nên ở đây đối chiếu với
- * danh sách tài khoản mẫu; khi nối thật chỉ thay thân hàm, phần còn lại của
- * app không đổi.
+ * Lớp gọi API xác thực (D-42): đăng nhập, đăng xuất và phiên đi qua kho mock như qua server — kho giữ phiên để ghi người làm
+ * vào nhật ký. Nối backend thật chỉ thay thân hàm; phần còn lại của app không đổi.
  */
-
-const NETWORK_DELAY_MS = 600
 
 /** Lỗi trả về dạng mã; màn đăng nhập dịch mã sang câu theo ngôn ngữ đang chọn. */
 export type AuthErrorCode = 'invalid-credentials' | 'account-suspended'
@@ -23,19 +20,29 @@ export class AuthError extends Error {
 }
 
 export async function login(email: string, password: string): Promise<User> {
-  await new Promise((resolve) => setTimeout(resolve, NETWORK_DELAY_MS))
-
-  const user = findDemoUser(email)
-  // Một mã chung cho cả hai trường hợp, không tiết lộ email nào có thật.
-  if (!user || password !== DEMO_PASSWORD) {
-    throw new AuthError('invalid-credentials')
+  try {
+    return await getMockDb().authenticate(email, password)
+  } catch (error) {
+    // Một mã chung cho sai email và sai mật khẩu, không tiết lộ email nào có thật
+    if (isMockDbError(error) && error.code === 'INVALID_CREDENTIALS') throw new AuthError('invalid-credentials')
+    if (isMockDbError(error) && error.code === 'ACCOUNT_SUSPENDED') throw new AuthError('account-suspended')
+    throw error
   }
-  if (user.status === 'suspended') {
-    throw new AuthError('account-suspended')
-  }
-  return user
 }
 
 export async function logout(): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 150))
+  await getMockDb().signOut()
+}
+
+/**
+ * Phiên có sẵn khi mở trang (như cookie): trả người dùng hiện tại của kho, `null` khi tài khoản không còn hoặc đã bị khoá.
+ * Đồng bộ vì chạy lúc khởi tạo `AuthProvider`.
+ */
+export function restoreSession(userId: string | null): User | null {
+  return getMockDb().restoreSession(userId)
+}
+
+/** Người dùng của phiên, đọc lại sau khi sửa hồ sơ. */
+export function currentSessionUser(): User | null {
+  return getMockDb().sessionUser()
 }
