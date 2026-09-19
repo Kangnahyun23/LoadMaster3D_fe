@@ -1,29 +1,55 @@
 import type { CargoPackage, VehicleConfig } from '@/domain/models'
-import { getMockDb, vnDate, type DeliveryStop, type Revision, type Trip } from '@/lib/mock-db'
+import {
+  getMockDb,
+  isMockDbError,
+  latestApproved,
+  tripStatus,
+  vnDate,
+  type AuditEvent,
+  type DeliveryStop,
+  type Revision,
+  type Trip,
+  type VehicleStatus,
+} from '@/lib/mock-db'
+import type { TripStatus } from '@/types/trip'
+import type { User } from '@/types/user'
 import { tripRow, type TripRow } from './trip-list'
 import { duplicatePackage, renumberDeliveryStops, stopRemoval, type StopRemoval } from './trip-packages'
 
 /**
- * Lớp gọi API cho chuyến hàng và kiện (LM-043). Chi tiết chuyến, điểm giao và kiện đọc/ghi qua mock repository
+ * Lớp gọi API cho chuyến hàng và kiện (LM-043, LM-088). Chi tiết chuyến, điểm giao và kiện đọc/ghi qua mock repository
  * (`@/lib/mock-db`, D-06); nối backend thật chỉ thay thân hàm, hook và component giữ nguyên.
  */
 
-/** Danh sách chuyến (LM-053): mỗi dòng dựng từ chuyến, xe và revision trong kho. */
+/** Danh sách chuyến (LM-088): mỗi dòng dựng từ chuyến, xe, tài xế và revision trong kho. */
 export async function fetchTrips(): Promise<TripRow[]> {
   const db = getMockDb()
-  const [trips, vehicles] = await Promise.all([db.listTrips(), db.listVehicles()])
+  const [trips, vehicles, users] = await Promise.all([db.listTrips(), db.listVehicles(), db.listUsers()])
   const vehicleById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]))
+  const userById = new Map(users.map((user) => [user.id, user]))
   const revisions = await Promise.all(trips.map((trip) => db.listRevisions(trip.id)))
-  return trips.map((trip, index) => tripRow(trip, vehicleById.get(trip.vehicleId), revisions[index] ?? []))
+  return trips.map((trip, index) => tripRow(
+    trip,
+    vehicleById.get(trip.vehicleId),
+    revisions[index] ?? [],
+    trip.driverId === null ? undefined : userById.get(trip.driverId),
+  ))
 }
+
+export type TripStopInput = Pick<DeliveryStop, 'name' | 'address' | 'phone' | 'contactName'>
 
 export type TripFrame = {
   readonly name: string
   readonly vehicleId: string
-  readonly stops: readonly Pick<DeliveryStop, 'name' | 'address' | 'phone' | 'contactName'>[]
+  readonly stops: readonly TripStopInput[]
   /** Ngày chạy `YYYY-MM-DD`; vắng thì hôm nay (giờ Việt Nam). */
   readonly scheduledDate?: string
   readonly driverId?: string | null
+}
+
+/** Điểm giao ghi vào kho: số điện thoại và người liên hệ để trống thì bỏ hẳn trường, không lưu chuỗi rỗng. */
+function stopFields({ name, address, phone, contactName }: TripStopInput) {
+  return { name, address, ...(phone ? { phone } : {}), ...(contactName ? { contactName } : {}) }
 }
 
 /** Tạo chuyến: kho cấp mã chuyến; điểm giao nhận mã `STOP-NN` theo thứ tự nhập, chưa có kiện. */
@@ -31,27 +57,97 @@ export async function createTrip({ name, vehicleId, stops, scheduledDate, driver
   return getMockDb().createTrip({
     name, vehicleId, packages: [], driverId,
     scheduledDate: scheduledDate ?? vnDate(new Date()),
-    stops: stops.map((stop, index) => ({ ...stop, id: `STOP-${String(index + 1).padStart(2, '0')}` })),
+    stops: stops.map((stop, index) => ({ id: `STOP-${String(index + 1).padStart(2, '0')}`, ...stopFields(stop) })),
   })
 }
 
-/** Sửa khung chuyến: tên và xe. Đổi xe làm revision cũ lỗi thời (D-31). */
-export async function updateTripFrame(tripId: string, { name, vehicleId }: Pick<TripFrame, 'name' | 'vehicleId'>): Promise<Trip> {
-  return getMockDb().updateTrip(tripId, { name, vehicleId })
+export type TripFrameChanges = {
+  readonly name: string
+  readonly scheduledDate: string
+  readonly driverId: string | null
+  /** Vắng khi chuyến đã khoá xe (kho đã bắt đầu xếp, D-45). */
+  readonly vehicleId?: string
+  /** Sửa chữ của điểm giao hiện có theo thứ tự; mã và thứ tự giữ nguyên. Vắng khi chuyến đã khoá. */
+  readonly stops?: readonly TripStopInput[]
 }
 
-/** Xe chọn được khi tạo/sửa chuyến. */
-export async function fetchVehicleOptions(): Promise<VehicleConfig[]> {
-  return getMockDb().listVehicles()
+/** Sửa khung chuyến: tên, ngày chạy, tài xế, xe và chữ của điểm giao. Đổi xe làm revision cũ lỗi thời (D-31). */
+export async function updateTripFrame(tripId: string, changes: TripFrameChanges): Promise<Trip> {
+  const db = getMockDb()
+  const { stops: edited, ...frame } = changes
+  const current = edited ? await db.getTrip(tripId) : undefined
+  const stops = current && edited
+    ? current.stops.map((stop, index) => ({ id: stop.id, ...stopFields(edited[index] ?? stop) }))
+    : undefined
+  return db.updateTrip(tripId, { ...frame, ...(stops ? { stops } : {}) })
 }
 
-export type TripDetail = { readonly trip: Trip; readonly vehicle: VehicleConfig }
+export type VehicleOption = { readonly vehicle: VehicleConfig; readonly status: VehicleStatus }
 
-/** Chuyến kèm cấu hình xe đang gán — hai thứ luôn đi cùng nhau ở màn chi tiết và màn thiết lập tối ưu. */
+/** Xe và tài xế chọn được ở form chuyến (D-46, D-53): xe kèm trạng thái để khoá xe bảo dưỡng; mọi người dùng vai trò tài xế. */
+export type TripFormOptions = { readonly vehicles: readonly VehicleOption[]; readonly drivers: readonly User[] }
+
+export async function fetchTripFormOptions(): Promise<TripFormOptions> {
+  const db = getMockDb()
+  const [vehicles, states, users] = await Promise.all([db.listVehicles(), db.listVehicleStates(), db.listUsers()])
+  const statusById = new Map(states.map((state) => [state.vehicleId, state.status]))
+  return {
+    vehicles: vehicles.map((vehicle) => ({ vehicle, status: statusById.get(vehicle.id) ?? 'available' })),
+    drivers: users.filter((user) => user.role === 'driver'),
+  }
+}
+
+export type TripDetail = {
+  readonly trip: Trip
+  readonly vehicle: VehicleConfig
+  /** `null` khi chưa gán, hoặc tài khoản đã bị xoá khỏi kho. */
+  readonly driver: User | null
+  readonly status: TripStatus
+  /** Revision Planner mở mặc định (bản đã duyệt mới nhất, không có thì bản mới nhất); `null` khi chưa tối ưu. */
+  readonly plan: { readonly jobId: string; readonly revisionId: string } | null
+}
+
+/** Chuyến kèm xe, tài xế và trạng thái hiển thị — màn chi tiết, form sửa và màn thiết lập tối ưu cùng cần. */
 export async function fetchTripDetail(tripId: string): Promise<TripDetail> {
   const db = getMockDb()
   const trip = await db.getTrip(tripId)
-  return { trip, vehicle: await db.getVehicle(trip.vehicleId) }
+  const [vehicle, revisions, driver] = await Promise.all([
+    db.getVehicle(trip.vehicleId),
+    db.listRevisions(tripId),
+    trip.driverId === null ? null : db.getUser(trip.driverId).catch(notFoundAsNull),
+  ])
+  const shown = latestApproved(revisions) ?? revisions.at(-1)
+  return {
+    trip, vehicle, driver,
+    status: tripStatus(trip, revisions),
+    plan: shown ? { jobId: shown.jobId, revisionId: shown.id } : null,
+  }
+}
+
+function notFoundAsNull(error: unknown): null {
+  if (isMockDbError(error) && error.code === 'NOT_FOUND') return null
+  throw error
+}
+
+export type TripActivity = {
+  readonly revisions: readonly Revision[]
+  /** Nhật ký của chuyến, mới nhất trước. */
+  readonly events: readonly AuditEvent[]
+  /** Người dùng để đổi mã người làm thành tên. */
+  readonly users: readonly User[]
+}
+
+/** Revision, nhật ký và người dùng cho thẻ Tiến trình (LM-088). */
+export async function fetchTripActivity(tripId: string): Promise<TripActivity> {
+  const db = getMockDb()
+  const [revisions, events, users] = await Promise.all([db.listRevisions(tripId), db.listEvents({ targetId: tripId }), db.listUsers()])
+  // `targetId` của kho khớp theo chuỗi con: giữ đúng sự kiện của chuyến này
+  return { revisions, events: events.filter((event) => event.target.type === 'trip' && event.target.id === tripId), users }
+}
+
+/** Huỷ chuyến trước khi giao (D-45): kho bắt buộc lý do và ghi nhật ký. */
+export async function cancelTrip(tripId: string, reason: string): Promise<Trip> {
+  return getMockDb().cancelTrip(tripId, reason)
 }
 
 export async function fetchPackages(tripId: string): Promise<CargoPackage[]> {
@@ -74,10 +170,6 @@ export async function removeTripStop(tripId: string, stopId: string): Promise<St
   if (!removal.allowed) return removal
   await db.updateTrip(tripId, { stops: [...removal.stops], packages: [...removal.packages] })
   return removal
-}
-
-export async function setTripVehicle(tripId: string, vehicleId: string): Promise<Trip> {
-  return getMockDb().updateTrip(tripId, { vehicleId })
 }
 
 /** Thêm kiện mới hoặc thay kiện cùng mã; kiện đổi thì `inputVersion` tăng và revision cũ thành lỗi thời (D-31). */

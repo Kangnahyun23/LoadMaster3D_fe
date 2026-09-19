@@ -111,11 +111,12 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
   }, [t, format])
 
   if (packages.length === 0) {
+    // Nút phụ: hành động chính của màn là "Chạy tối ưu" ở header (AGENTS mục 5, mỗi màn một nút primary)
     return <EmptyState
       illustration={<EmptyTripsIllustration />}
       title={t('trips.packages.emptyTitle')}
       description={t('trips.packages.emptyDescription')}
-      action={onAdd ? <Button variant="primary" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button> : undefined}
+      action={onAdd ? <Button variant="secondary" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button> : undefined}
     />
   }
 

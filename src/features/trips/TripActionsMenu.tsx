@@ -1,0 +1,57 @@
+import { CircleX, Ellipsis, Pencil } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Link } from 'react-router'
+import { Button } from '@/components/ui/Button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/DropdownMenu'
+import { isCancellablePhase, type Trip, type TripPhase } from '@/lib/mock-db'
+import { useT } from '@/lib/i18n'
+import { CancelTripDialog } from './CancelTripDialog'
+
+/** Kho còn cho sửa tên, ngày chạy, tài xế ở các pha này (D-45); xe, điểm giao, kiện chỉ sửa được ở `planning`. */
+const FRAME_EDITABLE: readonly TripPhase[] = ['planning', 'loading', 'loaded']
+
+/**
+ * Menu thao tác phụ ở header Chi tiết chuyến (LM-088): sửa thông tin chuyến, huỷ chuyến. Chỉ hiện với người được sửa chuyến; mục nào
+ * pha hiện tại không cho làm thì không hiện (không nút giả, D-20). Hộp thoại huỷ luôn gắn ở đây để còn sống tới khi huỷ xong,
+ * kể cả khi menu vừa ẩn vì chuyến đã sang "Đã huỷ".
+ */
+export function TripActionsMenu({ trip }: { trip: Pick<Trip, 'id' | 'phase'> }) {
+  const t = useT()
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const canEditFrame = FRAME_EDITABLE.includes(trip.phase)
+  const canCancel = isCancellablePhase(trip.phase)
+
+  return (
+    <>
+      {canEditFrame || canCancel ? (
+        // Không modal: hộp thoại huỷ mở ngay từ một mục menu, menu modal sẽ để lại `pointer-events: none` trên body
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button ref={triggerRef} variant="secondary">
+              <Ellipsis strokeWidth={1.5} />
+              {t('trips.detail.actions')}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {canEditFrame ? (
+              <DropdownMenuItem asChild>
+                <Link to={`/chuyen/${trip.id}/sua`}>
+                  <Pencil strokeWidth={1.5} />
+                  {t('trips.detail.edit')}
+                </Link>
+              </DropdownMenuItem>
+            ) : null}
+            {canCancel ? (
+              <DropdownMenuItem className="text-danger [&_svg]:text-danger" onSelect={() => setCancelOpen(true)}>
+                <CircleX strokeWidth={1.5} />
+                {t('trips.detail.cancel')}
+              </DropdownMenuItem>
+            ) : null}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : null}
+      <CancelTripDialog tripId={trip.id} open={cancelOpen} onOpenChange={setCancelOpen} returnFocusTo={triggerRef} />
+    </>
+  )
+}

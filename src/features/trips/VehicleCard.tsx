@@ -3,14 +3,22 @@ import { Link } from 'react-router'
 import { Card } from '@/components/ui/Card'
 import type { VehicleConfig } from '@/domain/models'
 import { useFormat, useT } from '@/lib/i18n'
+import type { User } from '@/types/user'
 
 /**
- * Thẻ phương tiện ở cột trái.
+ * Thẻ phương tiện ở cột trái, kèm tài xế chạy chuyến (LM-088).
  *
  * Lệch có chủ ý khỏi design: nhãn mục trong bản design viết hoa toàn bộ
  * kèm letter-spacing, CLAUDE.md mục 5 cấm cả hai — ở đây viết thường.
  */
-export function VehicleCard({ vehicle, tripId, canChange = true }: { vehicle: VehicleConfig; tripId: string; canChange?: boolean }) {
+export function VehicleCard({ vehicle, tripId, driverId = null, driver = null, canChange = true }: {
+  vehicle: VehicleConfig
+  tripId: string
+  driverId?: string | null
+  /** Tài khoản của `driverId`; `null` khi chưa gán hoặc tài khoản không còn trong kho (khi đó hiện mã). */
+  driver?: Pick<User, 'fullName' | 'phone'> | null
+  canChange?: boolean
+}) {
   const t = useT()
   const format = useFormat()
   return (
@@ -37,6 +45,20 @@ export function VehicleCard({ vehicle, tripId, canChange = true }: { vehicle: Ve
       </div>
 
       <dl className="border-t border-border">
+        <div className="flex items-baseline justify-between gap-3 border-b border-border py-2.5">
+          <dt className="text-body text-text-2">{t('trips.vehicleCard.driver')}</dt>
+          <dd className="flex min-w-0 flex-col items-end text-right">
+            {driverId === null ? (
+              <span className="text-body text-text-3">{t('trips.vehicleCard.unassigned')}</span>
+            ) : (
+              <>
+                <span className="text-body font-medium">{driver?.fullName ?? driverId}</span>
+                {driver?.phone ? <span className="font-mono text-caption text-text-3">{driver.phone}</span> : null}
+              </>
+            )}
+          </dd>
+        </div>
+
         <div className="flex flex-col gap-0.5 border-b border-border py-2.5">
           <dt className="text-body text-text-2">{t('trips.vehicleCard.cargoSpace')}</dt>
           <dd className="font-mono text-body font-medium whitespace-nowrap">
