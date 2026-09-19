@@ -82,7 +82,7 @@ export function UsersPage() {
       {dialog?.kind === 'reset' ? (
         <ConfirmDialog
           open
-          onOpenChange={(open) => (open ? undefined : actions.close())}
+          onOpenChange={(open) => (open || actions.resetPending ? undefined : actions.close())}
           title={t('admin.users.reset.title', { name: dialog.user.fullName })}
           description={t('admin.users.reset.description')}
           cancelLabel={t('admin.users.reset.cancel')}
@@ -95,7 +95,7 @@ export function UsersPage() {
         <ConfirmDialog
           open
           danger
-          onOpenChange={(open) => (open ? undefined : actions.close())}
+          onOpenChange={(open) => (open || actions.deletePending ? undefined : actions.close())}
           title={t('admin.users.remove.title', { name: dialog.user.fullName })}
           description={t('admin.users.remove.description')}
           cancelLabel={t('admin.users.remove.cancel')}

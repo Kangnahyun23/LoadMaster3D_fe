@@ -79,7 +79,7 @@ export function UserFormDialog({
   }
 
   return (
-    <Dialog open onOpenChange={(open) => (open ? undefined : onClose())}>
+    <Dialog open onOpenChange={(open) => (open || form.formState.isSubmitting ? undefined : onClose())}>
       <DialogContent className="w-140">
         <form noValidate onSubmit={form.handleSubmit(handleValid)}>
           <div className="flex flex-col gap-5 px-6 pt-6">
@@ -125,7 +125,8 @@ export function UserFormDialog({
 
           <DialogFooter className="justify-end px-6">
             <DialogClose asChild>
-              <Button type="button" variant="secondary">{t('admin.users.form.cancel')}</Button>
+              {/* Đang lưu thì không huỷ được: thao tác không dừng giữa chừng, huỷ chỉ làm người dùng tưởng chưa lưu */}
+              <Button type="button" variant="secondary" disabled={form.formState.isSubmitting}>{t('admin.users.form.cancel')}</Button>
             </DialogClose>
             <Button type="submit" variant="primary" loading={form.formState.isSubmitting}>
               {isEdit ? t('admin.users.form.save') : t('admin.users.form.create')}

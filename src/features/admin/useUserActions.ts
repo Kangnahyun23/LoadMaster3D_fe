@@ -25,6 +25,8 @@ export type UserDialog =
 /**
  * Thao tác trên tài khoản (LM-092): ghi qua mutation của kho, toast chỉ báo việc đã xảy ra, lỗi kho hiện bằng `dataErrorMessage`.
  * Tạo và đặt lại mật khẩu mở hộp thoại mật khẩu tạm (hiện một lần). Sửa chính mình thì đọc lại người dùng của phiên để nav rail đổi tên.
+ * Hộp thoại không đóng được khi thao tác đang chạy (`pending`); khi xong, sửa/xoá chỉ đóng đúng hộp thoại đã gửi thao tác đó, không đóng
+ * nhầm hộp thoại khác đã mở sau.
  */
 export function useUserActions() {
   const t = useT()
@@ -62,7 +64,7 @@ export function useUserActions() {
       await updateUser.mutateAsync({ id: user.id, changes: values })
       if (user.id === currentUser?.id) refreshUser()
       toast.success(t('admin.users.updated', { name: values.fullName }))
-      setDialog(null)
+      setDialog((current) => (current?.kind === 'edit' && current.user.id === user.id ? null : current))
     },
     resetPending: resetPassword.isPending,
     confirmReset(user: User) {
@@ -70,7 +72,7 @@ export function useUserActions() {
         onSuccess: (result) => setDialog({ kind: 'password', result, reason: 'reset' }),
         onError: (error) => {
           toast.error(dataErrorMessage(error, t))
-          setDialog(null)
+          setDialog((current) => (current?.kind === 'reset' && current.user.id === user.id ? null : current))
         },
       })
     },
@@ -79,7 +81,7 @@ export function useUserActions() {
       deleteUser.mutate(user.id, {
         onSuccess: () => toast.success(t('admin.users.deleted', { name: user.fullName })),
         onError: (error) => toast.error(dataErrorMessage(error, t)),
-        onSettled: () => setDialog(null),
+        onSettled: () => setDialog((current) => (current?.kind === 'delete' && current.user.id === user.id ? null : current)),
       })
     },
   }
