@@ -121,10 +121,11 @@ API v9 khác hẳn v8: dùng `useTable` + `tableFeatures({})` + `createColumnHel
 
 ```
 src/
-  app/                  router, providers, app shell, nav rail
+  app/                  router, providers, app shell, nav rail, route-title.ts (tiêu đề tab)
     design-system/      2 trang tài liệu bàn giao (/kieu-dang, /thanh-phan)
   components/ui/        primitive tự viết trên Radix
-  components/           component dùng chung: StatusBadge, DataTable, FilterBar, EmptyState, TripLockBanner...
+  components/           component dùng chung: StatusBadge, DataTable, FilterBar, EmptyState, TripLockBanner, ConfirmDialog,
+                        VehicleName (tên xe không bẻ biển số)...
   features/
     auth/               đăng nhập, phiên, RequireAuth
     trips/              danh sách, chi tiết, form chuyến, so sánh phương án
@@ -301,6 +302,8 @@ khi chuyển màn.
 - Không dùng chữ gạch chân làm nút hành động. Gạch chân chỉ cho link trong đoạn văn.
 - Không gradient trên nút, card, header hay nền trang.
 - Không glassmorphism, không blur nền, không viền phát sáng — **ngoại trừ** panel điều khiển nổi đè lên khung 3D nền tối.
+- Toast nằm dưới thanh tiêu đề (`offset` trên 80 px): không che nút hành động ở góc phải header — rê chuột lên toast làm nó dừng đếm giờ
+  (LM-101 phát hiện toast che nút Duyệt của Planner).
 - Không đổ bóng lên card. Card phân tách bằng viền 1px `--border`. Bóng chỉ dùng cho dropdown, modal, toast, popover, và **thẻ đang được kéo** (lúc đó nó là lớp đang nhấc khỏi mặt phẳng).
 - Không emoji trong giao diện. Icon dùng Lucide, nét 1,5px, cỡ 16/20/24.
 - Không viết hoa toàn bộ, không giãn chữ trang trí.
@@ -333,7 +336,14 @@ Chiều cao dòng cố định (48px thoáng, 36px gọn, 56px cảm ứng). C�
 "bien hoa" khớp "Biên Hoà") + `DataTable` + `useListUrlState`. Cột chỉ sắp xếp được khi khai `enableSorting: true`; tiêu đề là nút có
 `aria-sort`. Phân trang 25/50/100 qua prop `pagination`. Bảng rỗng vì lọc truyền `isFiltering` để nói "không có kết quả khớp", khác
 "chưa có dữ liệu". Tham số URL tiếng Việt không dấu: `q`, `sap-xep`, `trang`, `so-dong` + tên bộ lọc của màn. Ô nhập nối vào URL giữ
-bản nháp tại chỗ (router đổi URL trong `startTransition`) — dùng `FilterBar`, không nối thẳng `value` vào `useSearchParams`.
+bản nháp tại chỗ (router đổi URL trong `startTransition`) — dùng `FilterBar`, không nối thẳng `value` vào `useSearchParams`. Setter của
+`useListUrlState` dựng URL từ bản nháp mới nhất (hai lần lọc liên tiếp không ghi đè nhau); cỡ trang mặc định khác 25 thì truyền
+`defaultPageSize`, màn không tự giữ `so-dong`.
+
+*(LM-095)* Ô chữ dài (tên kiện, điểm giao, xe) xuống tối đa hai dòng (`line-clamp-2`) trong hàng 48 px thay vì cắt bằng dấu ba chấm; cột chữ
+quan trọng nhận bề rộng theo tỷ lệ (%) thay vì px cố định; bảng có thể hẹp hơn tổng cột cố định thì đặt `min-w` cho bảng trong khung
+cuộn. Khung `overflow-x-auto` chứa Select/Switch/Checkbox Radix phải `relative` — ô ẩn định vị tuyệt đối của Radix thoát khung cuộn và
+làm cả trang cuộn ngang.
 
 ## 6. Ngôn ngữ giao diện
 
@@ -397,6 +407,10 @@ format nhận locale đang chọn.
   theo locale. Test so mã, không so câu.
 - *(LM-091)* Tham số sự kiện nhật ký là dữ liệu: số format theo locale, mã (tên trường, loại sự cố, vai trò) dịch qua `audit.log.*`; chữ
   người dùng nhập (lý do huỷ, ghi chú) giữ nguyên. Thêm tham số mới vào `ctx.log` của kho thì thêm nhãn `audit.log.params.<tên>`.
+- Nhãn một mã nghiệp vụ dùng ở nhiều màn (loại sự cố giao: `common.deliveryIssueKinds`) khai một lần, không chép vào nhánh của từng màn.
+- Tiêu đề tab (LM-100): mỗi route trong `App.tsx` khai `handle: titled(...)` bằng chữ của nhánh `titles` (màn có mã thì kèm mã);
+  `useRouteTitle` chạy trong `RouteOutlet` của mọi nhóm route — trang không tự đặt `document.title`; 404/lỗi router dùng `useDocumentTitle`.
+  Thêm màn mới thì thêm tiêu đề.
 - Câu số nhiều tiếng Việt: hai dạng `one`/`other` phải giống hệt nhau (tiếng Việt luôn dùng dạng `other`, LM-087).
 - Câu cho mã ràng buộc nằm ở nhánh `issues` của từ điển, key trùng tên mã, và chỉ gọi qua
   `formatIssue(issue, t, format)` của `@/lib/i18n` (LM-028). Thêm mã vào `CONSTRAINT_CODES` mà
@@ -462,7 +476,8 @@ kết quả tối ưu; không có nguồn thì **bỏ hẳn phần đó**, khôn
 
 ### Foundation engine *(bổ sung)*
 
-- *(đã điều chỉnh, LM-030)* Planner đọc revision của chuyến qua `viewer-api.ts` → `usePlanSourceQuery` → `adaptResult → ViewerSceneModel` (cm, snapshot bất biến): revision đã duyệt mới nhất, hoặc `?revision=<jobId>`. `ScenePlacement` ghép `PackagePlacement` với kiện gốc (`packageId`, tên, điểm giao, `fragilityLevel`); `step = loadingOrder`. *(đã điều chỉnh 19/09/2026, LM-086)* `/kho` là danh sách chuyến đã duyệt chờ xếp / đang xếp; `/kho?chuyen=<mã>` là phiên xếp theo bản duyệt chốt lúc `startLoading`, tiến độ và kiện thiếu ghi vào kho (`recordLoadingStep`), mở lại tiếp tục ở kiện chưa ghi đầu tiên; bản duyệt lỗi thời **không** vào phiên (chờ điều phối duyệt lại). Scene cm đưa cho `PositionViewer`; kho không còn fixture benchmark (khung 3D kho chưa làm mờ kiện báo thiếu). *(LM-087)* Tài xế: `/tai-xe` "Chuyến của tôi" (chỉ chuyến có `driverId` là mình, quản trị thấy tất cả); `/tai-xe/diem-giao?chuyen=` đọc qua `driver-api.ts` → `adaptResult`, phương án là bản kho đã xếp (chưa xếp thì bản duyệt mới nhất, chỉ xem); kiện kho báo thiếu không nằm trong danh sách dỡ và mô phỏng; dỡ, sự cố, hoàn tất điểm ghi vào kho. Kết hợp `ViewerDraft` theo ID để sinh effective placements; chỉ commit `{ position?, orientation?, pinned? }`, vị trí draft là cm. Header hiện **MOCK RESULT** khi `isMockResult`. Chế độ màu thứ hai là **theo kiện gốc** (`packageId`) vì contract không có đơn hàng; `packaging` của kết quả là một kiểu trung tính.
+- *(đã điều chỉnh, LM-030)* Planner đọc revision của chuyến qua `viewer-api.ts` → `usePlanSourceQuery` → `adaptResult → ViewerSceneModel` (cm, snapshot bất biến): revision đã duyệt mới nhất, hoặc `?revision=<jobId>`. `ScenePlacement` ghép `PackagePlacement` với kiện gốc (`packageId`, tên, điểm giao, `fragilityLevel`); `step = loadingOrder`. *(đã điều chỉnh 19/09/2026, LM-086)* `/kho` là danh sách chuyến đã duyệt chờ xếp / đang xếp; `/kho?chuyen=<mã>` là phiên xếp theo bản duyệt chốt lúc `startLoading`, tiến độ và kiện thiếu ghi vào kho (`recordLoadingStep`), mở lại tiếp tục ở kiện chưa ghi đầu tiên; bản duyệt lỗi thời **không** vào phiên (chờ điều phối duyệt lại). Scene cm đưa cho `PositionViewer`; kho không còn fixture benchmark; kiện báo thiếu (`missingIds`) vẽ như kiện đã gỡ (`unloadedIds` của
+`deriveSceneSemantics`), như khung 3D tài xế. *(LM-087)* Tài xế: `/tai-xe` "Chuyến của tôi" (chỉ chuyến có `driverId` là mình, quản trị thấy tất cả); `/tai-xe/diem-giao?chuyen=` đọc qua `driver-api.ts` → `adaptResult`, phương án là bản kho đã xếp (chưa xếp thì bản duyệt mới nhất, chỉ xem); kiện kho báo thiếu không nằm trong danh sách dỡ và mô phỏng; dỡ, sự cố, hoàn tất điểm ghi vào kho. Kết hợp `ViewerDraft` theo ID để sinh effective placements; chỉ commit `{ position?, orientation?, pinned? }`, vị trí draft là cm. Header hiện **MOCK RESULT** khi `isMockResult`. Chế độ màu thứ hai là **theo kiện gốc** (`packageId`) vì contract không có đơn hàng; `packaging` của kết quả là một kiểu trung tính.
 - Kích thước placement **đã áp orientation**. Xoay luôn áp mã đích lên kích thước danh nghĩa `baseDimensionsById` (lấy từ `CargoPackage`), không đảo ngược kích thước đã xoay (`orientedSize` trong `scene-input.ts`). Xoay giữ nguyên góc vị trí của kiện.
 - Cả ba vai trò dùng chung `SceneCanvas` với `frameloop="demand"`. CameraControls tự invalidate khi chuyển động; mọi thay đổi buffer imperative phải gọi invalidate. Spring chỉ ghi ma trận/proxy kiện đang chạy, không đưa state từng frame qua React.
 - `frustumCulled={false}` không loại bỏ nhu cầu bounds của **raycast**. Cargo dùng sphere bao toàn bộ effective geometry và quãng animation, cập nhật khi geometry đổi. Không tính lại `computeBoundingSphere()` trong animation/step/slice path; cập nhật màu không ghi lại ma trận.
