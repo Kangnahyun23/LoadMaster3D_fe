@@ -233,6 +233,17 @@ export const designSystem = {
       rearAxle: 'Rear axle',
       overload: 'Overloaded',
       barsCaption: '{count} packages · axis 0–100%',
+      table: {
+        note:
+          'Accent-insensitive search, single-value and date-range filters; headers with an arrow are sort buttons; 25/50/100 rows per page. State lives in the URL, so reloading or going back keeps it. Data: every package of the trips in the store.',
+        search: 'Search by package ID, goods, trip',
+        trip: 'Trip',
+        date: 'Trip date',
+        packageId: 'Package ID',
+        goods: 'Goods',
+        stop: 'Stop',
+        weight: 'Weight',
+      },
     },
     feedback: {
       toastNote:

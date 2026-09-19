@@ -12,6 +12,7 @@ import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { SAMPLE_DRIVER_ITEM, SAMPLE_STOP, SAMPLE_STOP_NAME } from '../design-system.mock'
 import { SheetRow, SheetSection } from '../SheetLayout'
+import { DataTableSample } from './DataTableSample'
 
 export function DataSection() {
   const t = useT()
@@ -53,6 +54,10 @@ export function DataSection() {
           <span className="grid size-9 flex-none place-items-center rounded-sm font-mono text-caption font-semibold" style={{ background: stopColor(3), color: stopForeground(3) }}>3</span>
           <div className="flex flex-col gap-0.5"><span className="font-mono text-body font-medium">PKG-00233</span><span className="font-mono text-caption text-text-3">{format.dimensions(60, 40, 40)} · {format.weight(28)}</span><span className="text-caption text-badge-warning-fg">{t('designSystem.components.data.exceedsHeight')}</span></div>
         </div>
+      </SheetRow>
+
+      <SheetRow name="DataTable · FilterBar · useListUrlState" note={t('designSystem.components.data.table.note')} className="flex-col items-stretch">
+        <DataTableSample />
       </SheetRow>
 
       <SheetRow name="UtilizationBar · ProgressBar · StepProgress · Sparkline" note={t('designSystem.components.data.barsNote')} className="flex-col items-stretch gap-6">
