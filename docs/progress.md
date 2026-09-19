@@ -21,18 +21,52 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
 | 5 | i18n phần còn lại, nghiệm thu | 3 / 3 | ~3,5 ngày | ✅ Xong 16/09/2026 — 520 unit/DOM, 55 E2E, cổng chuỗi cứng |
-| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 22 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
-| **Tổng** | | **78 / 80 issue** | **~83,5 ngày công** | |
+| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 23 / 23 | ~27,5 ngày | ✅ Xong 20/09/2026 — 773 unit/DOM, 80 E2E, nhánh `feat/ui-complete` |
+| **Tổng** | | **79 / 80 issue** | **~83,5 ngày công** | |
 
 **Phase 5 xong (16/09/2026) — MVP nghiệm thu.** 56/57 issue; LM-002 chờ backend. Nợ sau nghiệm thu: [acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend), LM-073.
 
-**Đợt 6 (19/09/2026):** [rà soát giao diện](ui-audit-2026-09-19.md), [PRD mục 15](prd.md#15-đợt-6--hoàn-thiện-5-vai-trò-1909-2026), issue LM-080 → LM-101 (+ LM-073).
+**Đợt 6 xong (20/09/2026) — 5 vai trò có luồng đầu-cuối.** [Rà soát giao diện](ui-audit-2026-09-19.md), [PRD mục 15](prd.md#15-đợt-6--hoàn-thiện-5-vai-trò-1909-2026), issue LM-080 → LM-101 (+ LM-073), nghiệm thu [acceptance.md mục 5](acceptance.md#5-đợt-6--5-vai-trò-lm-080--lm-101-1920092026). Còn: thử màn tài xế trên điện thoại thật (D-57, người dùng tự làm).
 
 **Đang chặn:** không. LM-002 (contract backend) chờ nhóm backend nhưng không chặn phase 1–3.
 
 ---
 
 ## 2. Nhật ký
+
+### 20/09/2026 — Xong đợt 6: nhóm E, F và nghiệm thu (LM-095, LM-096, LM-098 → LM-101)
+
+**Đã làm**
+- Chạy lại hai agent bị dừng vì giới hạn phiên: E — LM-096 hồ sơ + đổi mật khẩu (`abd7620`), LM-098 chuông thông báo (`56f51a0`),
+  LM-099 Ctrl+K (`b214642`); F — LM-095 bố cục 1.366–1.600 px (`75a7811`), phần còn lại LM-100: tiêu đề tab, E2E so sánh/404,
+  ConfirmDialog dùng chung, kho 3D ẩn kiện thiếu (`f48c5e4`, `cf17880`, `d71bfca`). Gộp, giải xung đột `App.tsx` và `vi/en.ts`
+  (route `/ho-so` + `titles.profile`), áp đề xuất luật vào AGENTS (`7f6fec4`, `f498c2f`).
+- Sửa khi gộp: mở app lúc sáng sớm thì việc "hôm nay" của seed nằm ở tương lai → `seed-shift.ts` lùi mọi mốc giờ seed (`8885b21`).
+- LM-101 (`e798428`): E2E `workday.spec.ts` đi một ngày làm việc của 5 vai trò trên một kho. Kịch bản bắt được lỗi thật — toast
+  "Đã duyệt" đè nút Duyệt ở header Planner, rê chuột lên thì toast không tắt → `Toaster` đặt dưới header (top 80 px).
+- Ảnh bàn giao viết lại: 24 màn × vi/en = 48 ảnh, mỗi màn đăng nhập đúng vai trò, đồng hồ trang 16:00 giờ Việt Nam, trình duyệt
+  `--lang` theo ngôn ngữ ảnh. `acceptance.md` mục 5, `handoff.md` viết lại cho đợt 6.
+
+**Kiểm tra**
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · `pnpm test:e2e` **80/80** ✅ (15,6 phút) · CI ✅.
+- `pnpm test:bench` ✅ — dựng + `evaluateAll` 1.000 kiện p95 33,8 ms (ngân sách 50), `evaluateMove` 1,7 ms, `commitMove` 1,5 ms (ngân sách 8). Lượt đầu chạy ngay sau khi chụp 48 ảnh 3D đo 55,2 ms và đỏ; máy nghỉ chạy lại xanh — engine không đổi từ
+  `main` (`git diff main -- src/domain src/services` rỗng), nên đây là nhiễu tải máy, không phải hồi quy.
+- Lượt CI đầu (`e798428`) đỏ 4 + 1 flaky dù máy dev xanh 80/80 — CI chậm hơn nên lộ ba lỗi: khoá dòng bảng theo vị trí (menu thao tác
+  nhảy sang người khác), overlay debug báo "nghỉ" khi máy dưới 4 FPS (kéo theo `quality-policy` không hạ tier), và hai giả định sai
+  trong `i18n-en.spec.ts`. Sửa ở `fc271d3`; hai lỗi đầu có từ trước đợt 6 (CI của `main` cũng đỏ vì lỗi thứ hai).
+- Lượt CI thứ ba xanh (79 test, 26,3 phút); `admin-users` còn flaky vì cú bấm mở menu thỉnh thoảng không ăn trên runner — E2E bấm lại,
+  ghi nợ N-17.
+- Lượt CI thứ hai còn ba chỗ test tự cho rằng máy nhanh (bấm khi bộ lọc chưa đáp, cửa sổ lấy mẫu animation tính từ lúc bấm, root
+  R3F của canvas cũ) — sửa test ở `342d965`, không đụng mã sản phẩm.
+- Lượt E2E đầy đủ đầu tiên 70/72: `admin-users` chờ màn cũ của tài xế (từ LM-087 là `/tai-xe`), `admin-audit` phụ thuộc giờ máy — sửa test.
+
+**Vướng mắc / quyết định mới**
+- Ô ngày gốc của trình duyệt hiện định dạng theo ngôn ngữ **trình duyệt**, không theo `?lang` — giữ, ghi ở N-12.
+- Thử màn tài xế trên điện thoại thật (D-57) chưa làm — người dùng tự thử.
+
+**Việc tiếp theo**
+- Người dùng thử màn tài xế trên điện thoại thật; gộp `feat/ui-complete` vào `main` khi người dùng đồng ý.
+- LM-002: contract backend.
 
 ### 19–20/09/2026 — Đợt 6: nền dữ liệu, phân quyền và 5 nhóm màn (LM-080 → LM-094, LM-097, LM-073)
 
@@ -554,7 +588,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-099](issues/LM-099-tim-kiem-toan-cuc.md) | Ctrl+K | ✅ | 20/09/2026 | 20/09/2026 | Agent, `b214642`; tìm chuyến/kiện/xe/người dùng |
 | [LM-100](issues/LM-100-hoan-thien-nho.md) | Hoàn thiện nhỏ | ✅ | 19/09/2026 | 20/09/2026 | Agent, `f48c5e4` `cf17880` `d71bfca`; tiêu đề tab, E2E so sánh/404, tồn đọng |
 | [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) | E2E kéo kiện vào vật cản | ✅ | 19/09/2026 | 19/09/2026 | Spec §15 dòng 12 đủ E2E |
-| [LM-101](issues/LM-101-nghiem-thu-dot-6.md) | Nghiệm thu đợt 6 | ⬜ | | | |
+| [LM-101](issues/LM-101-nghiem-thu-dot-6.md) | Nghiệm thu đợt 6 | ✅ | 20/09/2026 | 20/09/2026 | `e798428`; E2E một ngày 5 vai trò, 80/80 E2E, 48 ảnh vi/en; điện thoại thật chờ người dùng |
 
 ---
 

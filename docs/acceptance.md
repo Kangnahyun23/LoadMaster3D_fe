@@ -54,7 +54,38 @@ Chromium headless + SwiftShader, không phải thiết bị thật.
 | N-4 | Kho bỏ fixture `?debug&packages=N`; hiệu năng 3D kho chỉ đo trên 132 kiện seed | LM-060 |
 | N-5 | JS tăng 6,9 kB ở phase 4 (màn kho/tài xế mới) | LM-062 |
 | N-6 | Draft chỉnh tay không lưu qua trang; kho/tài xế giữ tiến độ chỉ trong phiên | Chờ backend |
-| N-7 | Chưa phân quyền theo vai trò; phiên ở `sessionStorage` | Chờ backend/auth |
+| N-7 | Phân quyền mới là giả lập ở FE (LM-084); phiên ở `sessionStorage`; kho mock không kiểm người ghi dỡ hàng có đúng tài xế | Chờ backend/auth — server phải kiểm lại |
 | N-8 | Contract `OptimizationRequest/Result`, revision, trạng thái duyệt, `constraintWarnings` có cấu trúc | LM-002, PRD mục 14 |
 | N-9 | Tải trục, trọng tâm toàn xe, kiểm tra đường đưa hàng vào | Spec mục 17; "Sẽ có sau" |
 | N-10 | Chưa đo FPS trên thiết bị thật (tablet kho, điện thoại tài xế) | Số đo hiện là SwiftShader |
+
+## 5. Đợt 6 — 5 vai trò (LM-080 → LM-101, 19–20/09/2026)
+
+Thước đo: bảng 5 vai trò ở AGENTS mục 1 (D-40). Bằng chứng là test tự động trừ chỗ ghi "chạy tay". Kịch bản đầu-cuối
+`e2e/workday.spec.ts` đi hết một ngày làm việc trên cùng một kho: điều phối tạo chuyến, thêm kiện, tối ưu, duyệt → kho xếp (báo thiếu 1)
+→ tài xế giao (1 sự cố) → quản lý thấy chuyến trong kỳ và xuất .xlsx → quản trị đọc đủ 10 sự kiện của chuyến, đúng người làm.
+
+| Vai trò | Có trong đợt 6 | Bằng chứng |
+|---|---|---|
+| Điều phối | Chuyến có ngày chạy, tài xế, 10 trạng thái, lọc/tìm bỏ dấu/sắp xếp/phân trang; tiến trình + kiện thiếu + sự cố ở chi tiết; khoá sửa từ pha xếp; huỷ có lý do; nhập kiện CSV/.xlsx có xem trước; sơ đồ tuyến; đội xe có trạng thái và bảo dưỡng; Planner một hàng điều khiển, không Duyệt lại bản đã duyệt | `trip-lifecycle`, `package-import`, `fleet-status`, `planner-compact`, `plan-compare-404`, `layout-1366` (1.366 và 1.600 px), `workday`; DOM `TripDetailPage`, `RouteDiagram`, `OptimizationSetupPage` |
+| Kho (tablet) | Danh sách chuyến chờ xếp/đang xếp; phiên xếp ghi tiến độ và kiện thiếu vào kho, mở lại làm tiếp; bản lỗi thời không vào phiên; 3D ẩn kiện thiếu; màn xếp xong | `warehouse-progress` (@tablet), `warehouse`, `workday`; DOM `WarehouseTripsPage`, `LoadingStepPage` |
+| Tài xế (điện thoại) | "Chuyến của tôi"; bắt đầu giao; đánh dấu dỡ; gọi khách (`tel:`); báo sự cố (hỏng/thiếu/từ chối/khác); hoàn tất điểm; tổng kết chuyến | `driver-delivery` (@phone), `driver-approved-plan`, `workday`. **Thử trên điện thoại thật: chờ người dùng (D-57)** |
+| Quản lý | Bảng điều khiển lọc kỳ, 5 KPI có nguồn, 3 biểu đồ từ kho, bảng chuyến trong kỳ, xuất .xlsx 3 sheet; xem chuyến/phương án/đội xe chỉ đọc | `manager-dashboard`, `rbac`, `workday`; unit `dashboard-summary` (số tính tay) |
+| Quản trị | Người dùng: tạo (mật khẩu tạm hiện một lần), sửa, khoá/mở, xoá, đặt lại mật khẩu, ma trận quyền; nhật ký `/nhat-ky` lọc ngày/người/nhóm/mã | `admin-users`, `admin-audit`, `rbac`, `workday` |
+| Chung | Phân quyền giả lập + 403; hồ sơ + đổi mật khẩu; chuông thông báo theo vai trò; tìm nhanh Ctrl+K; tiêu đề tab theo màn; 404 về đúng màn chính; toast không che nút header | `rbac`, `profile`, `notifications`, `quick-search`, `plan-compare-404`, `i18n-en` |
+
+Kiểm tra cuối đợt (20/09/2026): `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · `pnpm test:e2e` **80/80** ✅ (15,6 phút)
+· `pnpm test:bench` ✅ (chạy tay, 1.000 kiện p95 33,8 ms / 1,7 ms) · CI ✅ (79 xanh, 1 flaky — xem N-17). Ảnh bàn giao vi/en (48 ảnh) chụp lại bằng `node tests/handoff-screenshots.mjs` (chạy tay, cần
+dev server). Chưa làm: thử màn tài xế trên điện thoại thật (D-57) — người dùng tự thử.
+
+### Nợ còn lại sau đợt 6
+
+| ID | Nợ | Ghi chú |
+|---|---|---|
+| N-11 | Dữ liệu vẫn in-memory: tải lại trang mất mọi thay đổi (D-41 chọn không giả lập lưu bền) | Chờ backend |
+| N-12 | Danh sách chuyến ở 1.366 px vẫn cắt tuyến dài (chủ ý, bảng dày); ô ngày hiện định dạng theo trình duyệt | LM-095 |
+| N-13 | Nav rail của quản trị cao ~880 px: màn thấp hơn thì rail cuộn | LM-099 |
+| N-14 | "Đã đọc" của thông báo chỉ giữ trong tab | Chờ backend |
+| N-17 | Trên CI, cú bấm đầu mở menu thao tác ở màn Người dùng đôi khi không ăn (không dựng lại được ở máy dev, kể cả bóp CPU 20×); E2E bấm lại cho tới khi menu mở | LM-101 |
+| N-16 | Test hiệu năng 3D ở CI chạy dưới 4 FPS (SwiftShader, 2 nhân): chỉ khẳng định "loop dừng hay chưa", không khẳng định FPS | LM-101 |
+| N-15 | CI chưa chạy `pnpm test:bench` (cổng ngân sách constraint engine chạy tay) | Gói bàn giao 17/09 |

@@ -1,20 +1,18 @@
 # LoadMaster Frontend — Bàn giao hiện trạng
 
-Ngày cập nhật: 16/09/2026. Repo `E:\SEP490\LoadMaster`, nhánh `feat/spec-mvp` (tích hợp Build Spec, 5 phase, 56/57 issue;
-LM-002 chờ backend). Luật code: [AGENTS.md](AGENTS.md). Phạm vi và quyết định: [docs/prd.md](docs/prd.md).
-Tiến độ theo ngày: [docs/progress.md](docs/progress.md). Nghiệm thu từng dòng: [docs/acceptance.md](docs/acceptance.md).
-
-Bản bàn giao 14/09/2026 (đợt scene-first, dữ liệu mm) đã lỗi thời; các báo cáo `docs/viewer-*-report.md` là lịch sử.
+Ngày cập nhật: 20/09/2026. Repo `E:\SEP490\LoadMaster`. `main` = MVP theo Build Spec (nghiệm thu 16/09); nhánh `feat/ui-complete` = đợt 6
+hoàn thiện 5 vai trò (bảo vệ SEP490). Luật code: [AGENTS.md](AGENTS.md). Phạm vi và quyết định: [docs/prd.md](docs/prd.md) (D-01 → D-57).
+Tiến độ: [docs/progress.md](docs/progress.md). Nghiệm thu: [docs/acceptance.md](docs/acceptance.md) (mục 5 là đợt 6).
+Rà soát giao diện trước đợt 6: [docs/ui-audit-2026-09-19.md](docs/ui-audit-2026-09-19.md).
 
 ## 1. Kết luận
 
-- MVP theo [Build Spec](LoadMaster_FE_MVP_Build_Spec.md) chạy đủ luồng: đội xe (cm/kg, vật cản, xem trước 3D) → chuyến và kiện
-  → thiết lập tối ưu → chạy mock trong Web Worker → Planner 3D (chỉ số, kiện chưa xếp, editor có constraint engine) → Duyệt
-  → kho làm theo `loadingOrder`, tài xế theo `unloadingOrder`. So sánh revision và bảng điều khiển đọc cùng kho dữ liệu.
-- Toàn app dùng **cm/kg**; không còn dữ liệu mm. Giao diện chuyển **vi / en**, không chuỗi tiếng Việt cứng ngoài từ điển (có test chặn).
-- **Chưa nối backend.** Dữ liệu nằm trong kho in-memory (`src/lib/mock-db`), mất khi tải lại trang. Đăng nhập là mock,
-  chưa phân quyền theo vai trò. Mọi kết quả tối ưu mang badge **MOCK RESULT**.
-- Kiểm tra lúc chốt: lint, build xanh; Vitest 520 test; Playwright 55 test (desktop, tablet, phone); CI GitHub xanh.
+- Cả 5 vai trò có luồng đầu-cuối trên cùng một kho dữ liệu: điều phối lập kế hoạch → kho xếp theo `loadingOrder` → tài xế giao theo
+  `unloadingOrder` → quản lý xem số liệu và xuất báo cáo → quản trị quản lý tài khoản và đọc nhật ký. Kịch bản một ngày làm việc có E2E
+  (`e2e/workday.spec.ts`).
+- **Chưa nối backend.** Kho in-memory (`src/lib/mock-db`), mất khi tải lại trang (D-41: giả lập phân quyền, không giả lập lưu bền).
+  Đăng nhập, phân quyền, nhật ký đều là giả lập ở FE — server thật phải kiểm lại. Mọi kết quả tối ưu mang badge **MOCK RESULT**.
+- Toàn app cm/kg, giao diện vi/en, không chuỗi tiếng Việt cứng ngoài từ điển (có test chặn).
 
 ## 2. Chạy và xem thử
 
@@ -24,87 +22,83 @@ pnpm install --frozen-lockfile
 pnpm dev --host 127.0.0.1 --port 5175
 ```
 
-Tài khoản demo: `dieuphoi@loadmaster.vn` / `loadmaster` (`features/auth/auth.mock.ts`). Thêm `?lang=en` để mở bằng tiếng Anh.
+Tài khoản demo (mật khẩu chung `loadmaster`; màn đăng nhập có nút chọn nhanh):
+
+| Vai trò | Email | Mở ra sau đăng nhập |
+|---|---|---|
+| Điều phối | `dieuphoi@loadmaster.vn` | `/chuyen` |
+| Quản lý | `quanly@loadmaster.vn` | `/` (bảng điều khiển) |
+| Kho | `kho@loadmaster.vn` | `/kho` (chuyến cần xếp) |
+| Tài xế | `taixe@loadmaster.vn` | `/tai-xe` (chuyến của tôi) |
+| Quản trị | `quantri@loadmaster.vn` | `/nguoi-dung` |
+
+Seed neo theo **hôm nay** (giờ Việt Nam): 8 xe (VEHICLE-008 bảo dưỡng), 12 người dùng, 15 chuyến trải 27 ngày trước tới 2 ngày sau.
+Chuyến chính `TRIP-2026-0914` đã duyệt, chờ kho xếp, gán tài xế demo; `TRIP-010` đã xếp xong cho tài xế demo; `TRIP-011` đang xếp;
+`TRIP-009` đang giao; `TRIP-012` đã tối ưu; `TRIP-013` cần xem lại; `TRIP-014` nháp; 7 chuyến hoàn thành, 1 huỷ. Thêm `?lang=en` để mở
+bằng tiếng Anh.
 
 | Màn | Đường dẫn |
 |---|---|
-| Bảng điều khiển | `/` |
-| Đội xe / chi tiết xe | `/doi-xe`, `/doi-xe/VEHICLE-002` |
-| Chuyến / chi tiết + kiện | `/chuyen`, `/chuyen/TRIP-2026-0914` |
-| Thiết lập tối ưu | `/chuyen/TRIP-2026-0914/toi-uu` (thêm `?mo-phong=loi` để giả lập lỗi service) |
-| Planner 3D | `/chuyen/TRIP-2026-0914/phuong-an` (`?revision=<mã revision hoặc jobId>`) |
-| So sánh revision | `/chuyen/TRIP-2026-0914/so-sanh` |
-| Kho (tablet) | `/kho` (`?chuyen=<mã chuyến>`) |
-| Tài xế (điện thoại) | `/tai-xe/diem-giao` (`?chuyen=<mã chuyến>`) |
-| Đo hiệu năng | `/chuyen/TRIP-2026-0914/phuong-an?debug&packages=1000&quality=low` |
+| Bảng điều khiển (lọc kỳ, 3 biểu đồ, xuất .xlsx) | `/` (`?ky=7-ngay\|30-ngay\|thang-nay\|tuy-chon`) |
+| Chuyến / chi tiết / tạo | `/chuyen`, `/chuyen/TRIP-009`, `/chuyen/moi` |
+| Thiết lập tối ưu | `/chuyen/TRIP-012/toi-uu` (`?mo-phong=loi` giả lập lỗi service) |
+| Planner 3D / so sánh | `/chuyen/TRIP-2026-0914/phuong-an`, `/chuyen/TRIP-2026-0914/so-sanh` |
+| Đội xe / chi tiết xe | `/doi-xe`, `/doi-xe/VEHICLE-008` |
+| Kho (tablet) | `/kho`, `/kho?chuyen=TRIP-011` |
+| Tài xế (điện thoại) | `/tai-xe`, `/tai-xe/diem-giao?chuyen=TRIP-010` |
+| Người dùng / nhật ký | `/nguoi-dung`, `/nhat-ky` |
+| Hồ sơ cá nhân | `/ho-so` |
+| Tìm nhanh | Ctrl+K / ⌘K ở màn có nav rail |
+| Đo hiệu năng 3D | `/chuyen/TRIP-2026-0914/phuong-an?debug&packages=1000&quality=low` |
 | Tài liệu UI | `/kieu-dang`, `/thanh-phan` |
 
-Seed kho: 3 xe, chuyến `TRIP-2026-0914` (4 điểm giao, 132 kiện), revision `REV-001` (kết quả) và `REV-002` (đã duyệt).
-
-Ảnh bàn giao vi/en ở [docs/screenshots/handoff/](docs/screenshots/handoff/) — chụp lại bằng `node tests/handoff-screenshots.mjs`
-(cần dev server). Ví dụ: [Planner](docs/screenshots/handoff/vi-planner-success.png) ·
-[kết quả một phần](docs/screenshots/handoff/en-planner-partial.png) · [lỗi thời](docs/screenshots/handoff/vi-planner-stale.png) ·
-[kho](docs/screenshots/handoff/en-warehouse-tablet.png) · [tài xế](docs/screenshots/handoff/vi-driver-phone.png).
+Ảnh bàn giao vi/en: [docs/screenshots/handoff/](docs/screenshots/handoff/) — chụp lại bằng `node tests/handoff-screenshots.mjs` (cần dev server).
 
 ## 3. Kiến trúc
 
 ```text
-src/domain            logic thuần theo Spec: hình học cm (EPSILON), 6 hướng đặt, constraint engine (mã lỗi + tham số),
-                      metrics, mở quantity → instance. Không React, không Three.
-src/services/optimization   interface OptimizationService; mock tất định, chạy trong Web Worker; bản giả lập sự cố
-src/lib/mock-db       kho in-memory: xe, chuyến, revision bất biến, Duyệt tạo revision mới, lỗi thời theo inputVersion
-src/lib/i18n          từ điển vi (nguồn) / en, formatIssue cho mã ràng buộc, cổng chặn chuỗi cứng
-features/<màn>        <màn>-api.ts (nơi duy nhất biết kho/mạng) → hook TanStack Query → component
-features/viewer3d     toàn bộ Three.js: adaptResult → ViewerSceneModel (cm) → SceneCanvas dùng chung cho
-                      Planner (ViewerSession), kho (PositionViewer), tài xế (DriverCargoViewer)
+src/domain            logic thuần theo Spec: hình học cm (EPSILON), 6 hướng đặt, constraint engine (mã lỗi + tham số), metrics
+src/services/optimization   interface OptimizationService; mock tất định trong Web Worker; bản giả lập sự cố
+src/lib/mock-db       kho in-memory thay backend: xe (+ bảo dưỡng), chuyến (pha planning → loading → loaded → delivering → completed,
+                      cancelled), revision bất biến, người dùng + mật khẩu + phiên, nhật ký sự kiện; seed neo theo ngày
+src/features/auth     đăng nhập qua kho, ma trận quyền (permissions.ts), RequirePermission + màn 403, hồ sơ
+src/lib/i18n          từ điển vi/en mỗi nhánh một file (vi/, en/), formatIssue, dataErrorMessage (lỗi kho), cổng chuỗi cứng
+features/<màn>        <màn>-api.ts (nơi duy nhất biết kho) → hook TanStack Query → component
+features/viewer3d     toàn bộ Three.js; SceneCanvas dùng chung cho Planner, kho (PositionViewer), tài xế (DriverCargoViewer)
 ```
 
-Nối backend thật: thay thân hàm trong các `features/*/*-api.ts` và `createOptimizationService`; hook và component giữ nguyên.
-Chi tiết luật 3D (instancing, draw call cố định, render-on-demand, editor, operations): AGENTS mục 7.
+Nối backend thật: thay thân hàm trong `features/*/*-api.ts`, `features/auth/auth-api.ts` và `createOptimizationService`; hook và component
+giữ nguyên. Pha chuyến, khoá sửa, luật người dùng và nhật ký hiện nằm trong `src/lib/mock-db/db-*.ts` — backend phải làm lại ở server.
 
-## 4. Kiểm thử và số đo
+## 4. Kiểm thử
 
 ```powershell
 pnpm lint
 pnpm build
 pnpm test            # Vitest: unit (node) + dom (jsdom)
-pnpm test:bench      # cổng constraint engine D-29 (p95 1.000 kiện ≤ 50 ms, một lần thả ≤ 8 ms)
-pnpm test:e2e        # Playwright, tự bật Vite ở 127.0.0.1:5175 (E2E_PORT để đổi)
-# Chạy tay, cần dev server riêng:
-node tests/viewer-benchmark.mjs          # draw call / FPS theo tier
-node tests/handoff-screenshots.mjs       # bộ ảnh bàn giao vi/en
+pnpm test:bench      # cổng constraint engine D-29 (chạy tay; CI chưa gọi — nợ N-15)
+pnpm test:e2e        # Playwright desktop/tablet/phone, tự bật Vite ở 127.0.0.1:5175 (E2E_PORT để đổi)
+node tests/viewer-benchmark.mjs          # draw call / FPS theo tier (cần dev server)
+node tests/handoff-screenshots.mjs       # bộ ảnh bàn giao vi/en (cần dev server)
 ```
 
-Số đo 16/09/2026 (Ryzen 7 5800H; Chromium headless + SwiftShader — **không phải thiết bị thật**):
+E2E nên đọc trước: `workday.spec.ts` (5 vai trò đầu-cuối), `spec-flow.spec.ts` (luồng Spec §15), `rbac.spec.ts`,
+`warehouse-progress.spec.ts`, `driver-delivery.spec.ts`, `manager-dashboard.spec.ts`, `admin-audit.spec.ts`. Kho in-memory: E2E đổi
+người dùng bằng đăng xuất/đăng nhập trong app và đổi route phía client (`navigateInApp`), **không** tải lại trang giữa kịch bản.
 
-| Đo | Kết quả | Dữ liệu |
-|---|---|---|
-| Constraint engine `evaluateAll` 1.000 kiện | p95 30,8 ms (ngân sách 50) | [constraint-engine-2026-09-16.json](docs/benchmarks/constraint-engine-2026-09-16.json) |
-| `evaluateMove` / `commitMove` 1.000 kiện | p95 1,8 / 1,5 ms (ngân sách 8) | như trên |
-| Viewer low, 132 / 300 / 500 / 1.000 kiện | 16 draw call; 60 / 60 / 60 / 42 FPS khi kéo | [viewer-2026-09-16.json](docs/benchmarks/viewer-2026-09-16.json) |
-| Viewer 1.000 kiện balanced / high | 25 / 33 draw call; 14 / 8 FPS | như trên |
+Số đo hiệu năng (16/09/2026, Ryzen 7 5800H, Chromium SwiftShader — không phải thiết bị thật): constraint engine 1.000 kiện p95 30,8 ms
+(ngân sách 50), một lần thả p95 1,8 ms (ngân sách 8); viewer low 16 draw call ở 132 → 1.000 kiện. Chi tiết: `docs/benchmarks/`.
 
-E2E đáng đọc trước: `spec-flow.spec.ts` (luồng Spec đầu cuối, gắn từng dòng Spec §15), `plan-approval.spec.ts`,
-`warehouse.spec.ts`, `driver-approved-plan.spec.ts`, `i18n-en.spec.ts`. Kho in-memory: E2E sửa dữ liệu qua
-`import('/src/lib/mock-db/index.ts')` trong trang rồi đổi route phía client, **không** tải lại trang.
+## 5. Làm việc song song
 
-Hai lỗi E2E ngẫu nhiên đã gặp khi chạy cả bộ trên máy Windows (không tái hiện khi chạy riêng, CI xanh):
-`warehouse.spec.ts` desktop báo "Cannot read properties of null (reading 'addEventListener')" và
-`net::ERR_NO_BUFFER_SPACE` (hết socket cục bộ). Nếu lặp lại trên CI, bắt stack bằng `page.on('pageerror')`.
+Đợt 6 làm bằng agent theo nhóm màn, mỗi nhóm một git worktree (`.claude/worktrees/`, đã bỏ qua trong git); người điều phối gộp nhánh,
+giải xung đột, áp đề xuất luật vào AGENTS và cập nhật tiến độ (AGENTS mục 12). Từ điển tách theo nhánh để các nhóm ít đụng nhau.
 
-## 5. Nguồn dữ liệu trên màn
+## 6. Nợ và phần chờ backend
 
-| Loại | Nội dung |
-|---|---|
-| Từ kho / kết quả | Xe, chuyến, kiện, điểm giao; placements, `loadingOrder`, `unloadingOrder`, `metrics`, kiện chưa xếp và mã lý do |
-| FE tính | Tổng thể tích/khối lượng, lỗi ràng buộc (domain), lỗi thời, tỷ lệ đỡ, LIFO, tâm khối lượng hàng; thứ tự tính lại khi Duyệt (nhãn "tính lại ở FE") |
-| Không hiện số | Tải trục ("Sẽ có sau"), trọng tâm toàn xe, so sánh với kỳ trước, số thực tế |
+Danh sách có ID: [docs/acceptance.md mục 4 và 5](docs/acceptance.md). Quan trọng nhất:
 
-## 6. Nợ kỹ thuật và phần chờ backend
-
-Danh sách đầy đủ có ID: [docs/acceptance.md mục 4](docs/acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend). Quan trọng nhất:
-
-1. **Backend (LM-002):** chốt contract `OptimizationRequest/Result`, revision và trạng thái duyệt, lưu draft, RBAC, phiên thật.
-2. **Thiết bị thật:** đo FPS và thao tác chạm trên tablet kho, điện thoại tài xế; số hiện tại chỉ là SwiftShader.
-3. **Màn điều phối chỉ desktop** (quyết định 16/09/2026); chi tiết chuyến chật ở 1.440 px.
-4. **E2E kéo kiện vào vật cản** chưa có (logic có test ở engine) — [LM-073](docs/issues/LM-073-e2e-keo-kien-vao-vat-can.md).
+1. **Backend (LM-002):** contract `OptimizationRequest/Result`, revision và duyệt, pha chuyến, người dùng/phiên thật (cookie HttpOnly),
+   phân quyền ở server, nhật ký, lưu bền.
+2. **Thiết bị thật:** thử màn tài xế trên điện thoại thật (D-57, chờ người dùng); màn kho chỉ thử bằng giả lập.
+3. **CI chưa chạy cổng benchmark** `pnpm test:bench`.

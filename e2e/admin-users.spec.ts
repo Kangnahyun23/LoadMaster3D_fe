@@ -50,8 +50,14 @@ test('a driver account the admin creates signs in with its one-time password; lo
   await page.getByRole('searchbox', { name: 'Tìm theo tên, email, số điện thoại, mã', exact: true }).fill('phuc.mai')
   // Lọc có debounce: chờ bảng còn đúng dòng cần rồi mới bấm, nếu không cú bấm rơi vào chỗ dòng vừa rời đi (máy chậm)
   await expect(page.getByRole('row')).toHaveCount(2)
-  await page.getByRole('button', { name: `Thao tác cho ${NEW_DRIVER.name}`, exact: true }).click()
-  await page.getByRole('menuitem', { name: 'Khoá tài khoản', exact: true }).click()
+  // Trên runner CI (chậm hơn máy dev nhiều) đôi khi cú bấm đầu không mở được menu Radix; không dựng lại được tại chỗ kể cả khi
+  // bóp CPU 20×, và người dùng thật chỉ việc bấm lại — nên bấm lại cho tới khi menu mở, đừng đứng chờ một menu không bao giờ tới.
+  const lock = page.getByRole('menuitem', { name: 'Khoá tài khoản', exact: true })
+  await expect(async () => {
+    await page.getByRole('button', { name: `Thao tác cho ${NEW_DRIVER.name}`, exact: true }).click()
+    await expect(lock).toBeVisible({ timeout: 3_000 })
+  }).toPass({ timeout: 30_000 })
+  await lock.click()
   await expect(page.getByText(`Đã khoá tài khoản ${NEW_DRIVER.name}`, { exact: true })).toBeVisible()
   await expect(page.getByRole('row', { name: new RegExp(NEW_DRIVER.name) })).toContainText('Đã khoá')
 

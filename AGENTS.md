@@ -658,6 +658,9 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
     tên tài xế, tên xe vào DOM ngay khi truy vấn về. Cổng `i18n-en.spec.ts` lấy danh sách tên từ kho (`seedNames`), không liệt kê tay.
   - Đo hiệu năng 3D ở CI (SwiftShader, 2 nhân) chạy dưới 4 FPS là bình thường; test phải hỏi "loop còn chạy không", không hỏi
     "có frame nào trong 250 ms vừa rồi không". Dựng lại máy chậm tại chỗ bằng CDP `Emulation.setCPUThrottlingRate` (40×).
+  - Cửa sổ lấy mẫu animation tính từ lúc animation **hiện ra**, không từ lúc bấm: máy chậm tiêu hết cửa sổ cho quãng bấm → React
+    render → spring chạy.
+  - Root R3F lấy theo canvas **đang có mặt** và chờ nó xuất hiện (`_roots.get(canvas)`), vì canvas có thể vừa được dựng lại.
 
 ### Chia chunk theo route
 

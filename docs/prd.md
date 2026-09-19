@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Ngày | 14/09/2026 |
-| Trạng thái | MVP đã hiện thực trên `feat/spec-mvp` (16/09/2026) — nghiệm thu: [acceptance.md](acceptance.md); còn chờ backend: mục 14. Đợt 6 (hoàn thiện 5 vai trò): mục 15 |
+| Trạng thái | MVP đã hiện thực trên `feat/spec-mvp` (16/09/2026) — nghiệm thu: [acceptance.md](acceptance.md); còn chờ backend: mục 14. Đợt 6 (hoàn thiện 5 vai trò): mục 15 — đã hiện thực trên `feat/ui-complete` (20/09/2026), nghiệm thu: [acceptance.md mục 5](acceptance.md#5-đợt-6--5-vai-trò-lm-080--lm-101-1920092026) |
 | Nguồn | [LoadMaster_FE_MVP_Build_Spec.md](../LoadMaster_FE_MVP_Build_Spec.md) (gọi tắt **Spec**), [AGENTS.md](../AGENTS.md), buổi chốt quyết định 14/09/2026 |
 | Phạm vi repo | Frontend `E:\SEP490\LoadMaster` |
 
