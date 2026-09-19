@@ -1,6 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, MapPin, Trash2 } from 'lucide-react'
+import { GripVertical, Trash2 } from 'lucide-react'
 import { useFormat, useT } from '@/lib/i18n'
 import { stopColor, stopForeground } from '@/lib/stops'
 import { cn } from '@/lib/utils'
@@ -41,7 +41,7 @@ export function StopCard({ stop, onRemove, readOnly = false }: {
         transition: transition ?? undefined,
       }}
       className={cn(
-        'relative flex items-center gap-4 rounded-md border bg-bg py-3.5 pr-4 pl-3',
+        'relative flex items-start gap-3 rounded-md border bg-bg py-3 pr-2 pl-3',
         isDragging
           ? 'z-2 border-primary shadow-e3'
           : 'z-1 border-border shadow-none',
@@ -52,7 +52,7 @@ export function StopCard({ stop, onRemove, readOnly = false }: {
         type="button"
         aria-label={t('trips.stops.dragHandle', { name: stop.name })}
         className={cn(
-          'grid size-5 flex-none place-items-center text-text-disabled',
+          'mt-1.5 grid size-5 flex-none place-items-center text-text-disabled',
           'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
           isDragging ? 'cursor-grabbing' : 'cursor-grab',
         )}
@@ -73,26 +73,16 @@ export function StopCard({ stop, onRemove, readOnly = false }: {
         {stopNumber}
       </span>
 
+      {/* Tên và địa chỉ xuống tối đa hai dòng, không cắt ngang ở cột thông tin hẹp (LM-095) */}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-body font-medium">
+        <span className="line-clamp-2 text-body font-medium">
           <span className="sr-only">{t('trips.stops.numberLabel', { number: stopNumber })} </span>
           {stop.name}
         </span>
-        <span className="inline-flex items-center gap-1.5 truncate text-caption text-text-3">
-          <MapPin className="size-3.5 flex-none" strokeWidth={1.5} aria-hidden />
-          {stop.address}
-        </span>
-      </div>
-
-      <div className="flex flex-none flex-col items-end gap-0.5">
-        <span className="font-mono text-body font-medium">
-          {format.integer(stop.packageCount)}{' '}
-          <span className="font-sans text-caption font-normal text-text-3">
-            {t('trips.stops.packagesUnit')}
-          </span>
-        </span>
-        <span className="font-mono text-caption text-text-3">
-          {format.weight(stop.weightKg)}
+        <span className="line-clamp-2 text-caption text-text-3">{stop.address}</span>
+        <span className="font-mono text-caption text-text-2">
+          <span className="font-medium text-text">{format.integer(stop.packageCount)}</span>{' '}
+          <span className="font-sans">{t('trips.stops.packagesUnit')}</span> · {format.weight(stop.weightKg)}
         </span>
       </div>
 

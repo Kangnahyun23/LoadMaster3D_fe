@@ -11,7 +11,8 @@ export function CargoSummaryCard({ summary }: { summary: CargoSummary }) {
     <Card className="flex flex-col gap-4 p-5">
       <span className="text-caption font-medium text-text-3">{t('trips.cargoSummary')}</span>
 
-      <div className="grid grid-cols-3 gap-3">
+      {/* Ba cột khi đủ chỗ, không thì hai: số và đơn vị không bị bẻ dòng ở cột thông tin hẹp (LM-095) */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(108px,1fr))] gap-3">
         <Metric label={t('trips.instances')} value={format.integer(summary.instances)} />
         <Metric label={t('trips.volume')} value={format.volumeM3(summary.volumeCm3)} />
         <Metric label={t('trips.weight')} value={format.weight(summary.weightKg)} />
@@ -36,7 +37,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
       <span className="text-caption text-text-3">{label}</span>
-      <span className="font-mono text-[22px] leading-7 font-semibold tracking-[-0.01em]">{value}</span>
+      <span className="font-mono text-[22px] leading-7 font-semibold tracking-[-0.01em] whitespace-nowrap">{value}</span>
     </div>
   )
 }

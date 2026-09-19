@@ -120,11 +120,11 @@ test('clicking an obstacle in 3D highlights its row, and clicking a row highligh
   // OBS-002 sát vách phải, phía gần camera ở góc chéo
   const point = await instancePoint(page, 1, 'obstacle-body')
   await page.mouse.click(point.x, point.y)
-  await expect(page.locator('tr[aria-current="true"]')).toContainText('OBS-002')
+  await expect(page.locator('tbody[aria-current="true"]')).toContainText('OBS-002')
   await expect.poll(() => obstacleColor(page, 1)).toBe('facc15')
 
   await page.getByRole('cell', { name: 'OBS-001', exact: true }).click()
-  await expect(page.locator('tr[aria-current="true"]')).toContainText('OBS-001')
+  await expect(page.locator('tbody[aria-current="true"]')).toContainText('OBS-001')
   await expect.poll(() => obstacleColor(page, 0)).toBe('facc15')
   expect(await obstacleColor(page, 1)).toBe(normal)
   expect(browserErrors).toEqual([])
