@@ -21,8 +21,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
 | 5 | i18n phần còn lại, nghiệm thu | 3 / 3 | ~3,5 ngày | ✅ Xong 16/09/2026 — 520 unit/DOM, 55 E2E, cổng chuỗi cứng |
-| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 17 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
-| **Tổng** | | **73 / 80 issue** | **~83,5 ngày công** | |
+| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 20 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
+| **Tổng** | | **76 / 80 issue** | **~83,5 ngày công** | |
 
 **Phase 5 xong (16/09/2026) — MVP nghiệm thu.** 56/57 issue; LM-002 chờ backend. Nợ sau nghiệm thu: [acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend), LM-073.
 
@@ -548,10 +548,10 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-093](issues/LM-093-nhap-kien-csv-xlsx.md) | Nhập kiện CSV/.xlsx | ✅ | 19/09/2026 | 20/09/2026 | Agent, `763ef2d`; mẫu, xem trước, lỗi theo dòng |
 | [LM-094](issues/LM-094-planner-gon.md) | Planner gọn | ✅ | 19/09/2026 | 19/09/2026 | Agent, `46282cc`; một hàng 56 px từ 1.366 px, không Duyệt khi đã duyệt |
 | [LM-095](issues/LM-095-bo-cuc-1366-het-cat-chu.md) | Bố cục 1.366 px | 🟦 | 20/09/2026 | | Agent đang làm |
-| [LM-096](issues/LM-096-ho-so-doi-mat-khau.md) | Hồ sơ | 🟦 | 20/09/2026 | | Agent đang làm |
+| [LM-096](issues/LM-096-ho-so-doi-mat-khau.md) | Hồ sơ | ✅ | 20/09/2026 | 20/09/2026 | Agent, `abd7620`; /ho-so, đổi mật khẩu |
 | [LM-097](issues/LM-097-so-do-tuyen-svg.md) | Sơ đồ tuyến | ✅ | 19/09/2026 | 20/09/2026 | Agent, `78fc602`; SVG, trạng thái từng điểm |
-| [LM-098](issues/LM-098-chuong-thong-bao.md) | Thông báo | 🟦 | 20/09/2026 | | Agent đang làm |
-| [LM-099](issues/LM-099-tim-kiem-toan-cuc.md) | Ctrl+K | 🟦 | 20/09/2026 | | Agent đang làm |
+| [LM-098](issues/LM-098-chuong-thong-bao.md) | Thông báo | ✅ | 20/09/2026 | 20/09/2026 | Agent, `56f51a0`; chuông theo vai trò |
+| [LM-099](issues/LM-099-tim-kiem-toan-cuc.md) | Ctrl+K | ✅ | 20/09/2026 | 20/09/2026 | Agent, `b214642`; tìm chuyến/kiện/xe/người dùng |
 | [LM-100](issues/LM-100-hoan-thien-nho.md) | Hoàn thiện nhỏ | 🟦 | 19/09/2026 | | Cảnh báo rời form chuyến xong (`001ef6c`); phần còn lại đang làm |
 | [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md) | E2E kéo kiện vào vật cản | ✅ | 19/09/2026 | 19/09/2026 | Spec §15 dòng 12 đủ E2E |
 | [LM-101](issues/LM-101-nghiem-thu-dot-6.md) | Nghiệm thu đợt 6 | ⬜ | | | |

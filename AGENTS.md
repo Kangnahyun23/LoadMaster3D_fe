@@ -32,7 +32,11 @@ quản trị `/nguoi-dung`); liên kết sâu mở trước khi đăng nhập đ
 (`RequireAuth` chỉ nhớ trang khi người **chưa** đăng nhập mở nó). Nút thoát ở màn kho/tài xế theo vai trò (`features/auth/exit.ts`):
 nhân viên kho và tài xế **ở màn danh sách** thì **đăng xuất** (màn chính của họ), **trong phiên xếp / trong chuyến** thì về danh sách
 (`/kho`, `/tai-xe`, LM-086/087); điều phối viên và quản trị viên về trang chuyến, vai trò khác về màn chính. Nav rail 96px có nhãn chữ,
-mục đang mở có nền, chữ đậm và vạch mép trái (`app/NavRail.tsx`).
+mục đang mở có nền, chữ đậm và vạch mép trái (`app/NavRail.tsx`). *(bổ sung 20/09/2026)* Rail còn có nút Tìm nhanh (Ctrl+K / ⌘K, LM-099 —
+chỉ nhóm có quyền xem; màn toàn màn hình không có), chuông thông báo (LM-098 — sự kiện nhật ký liên quan vai trò, không gồm việc chính
+mình làm; "đã đọc" là state giao diện trong tab, `read-state.ts`) và mục "Hồ sơ cá nhân" trong menu tài khoản (`/ho-so`, LM-096 — mọi
+người đã đăng nhập; kho/tài xế mở từ nút tài khoản 56 px ở màn chính). Nút hành động trên rail dùng `components/NavRailButton.tsx`.
+Rail của quản trị cao ~880 px: màn thấp hơn thì rail cuộn (`overflow-y-auto`).
 
 ### MVP theo Build Spec *(bổ sung 15/09/2026)*
 
@@ -549,6 +553,8 @@ Commit theo Conventional Commits: `feat(viewer3d): add cross-section slider`.
 
 - TypeScript strict. Không `any`. Không `@ts-ignore`. Khi thư viện bắt buộc phải có kiểu lỏng, lấy kiểu từ chính thư viện (`TableOptions<...>['columns']`) thay vì tự viết `any`.
 - Không gọi API trực tiếp trong component.
+- Màn trong `AppShell` mà kho/tài xế cũng mở (hồ sơ) dùng `pointer-coarse:h-14 pointer-coarse:text-body-lg` cho ô nhập và nút, không ép
+  56 px trên desktop (LM-096).
 - Hộp thoại có `<form>` riêng không đặt trong `<form>` khác của cây React — portal không chặn sự kiện submit lan theo cây React (LM-089).
 - Mọi form dùng react-hook-form + zod schema, không tự quản state form. Đọc giá trị đang nhập bằng `useWatch`, **không** dùng `form.watch()` trong thân render — React Compiler không memo được và sẽ cảnh báo.
 - Không dùng `localStorage`. Phiên đăng nhập tạm giữ trong `sessionStorage`; khi nối backend thật sẽ đổi sang cookie HttpOnly do server đặt.
@@ -634,6 +640,8 @@ Thêm màn mới thì thêm theo đúng lối này.
 
 - Tương phản chữ tối thiểu 4,5:1. Không dùng chữ mảnh hoặc xám nhạt cho nội dung quan trọng.
 - Vùng chạm tối thiểu 44px desktop, **56px trên tablet và điện thoại**.
+- Hộp thoại chọn kết quả (tìm nhanh) theo mẫu combobox + listbox (`aria-activedescendant`), con trỏ ở ô nhập; mở bằng phím tắt thì đóng
+  xong trả con trỏ về chỗ cũ (LM-099).
 - Màn hình dispatcher phải dùng được hoàn toàn bằng bàn phím. Màn 3D có phím tắt: Space phát/dừng, ←/→ lùi/tiến một bước, Home về đầu. Kéo thả điểm giao làm được bằng bàn phím qua dnd-kit (Space nhấc, mũi tên di chuyển, Space thả).
 - Màu điểm giao luôn đi kèm nhãn hoặc số, không bao giờ chỉ dựa vào màu. Trong 3D, chèn nhãn ẩn `sr-only` cho khối màu.
 - Chữ tối thiểu 16px trên tablet và điện thoại.
