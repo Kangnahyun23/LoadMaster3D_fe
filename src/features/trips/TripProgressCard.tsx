@@ -58,7 +58,7 @@ export function TripProgressCard({ trip }: { trip: Trip }) {
             {issues.map((issue) => (
               <li key={issue.id} className="flex flex-col gap-0.5 text-caption">
                 <span className="font-medium text-text">
-                  {t(`trips.progress.issueKinds.${issue.kind}`)} · <StopLabel number={issue.stopNumber} />
+                  {t(`common.deliveryIssueKinds.${issue.kind}`)} · <StopLabel number={issue.stopNumber} />
                 </span>
                 <span className="font-mono text-text-2">{issue.packageInstanceId ?? t('trips.progress.wholeStop')}</span>
                 {issue.note ? <span className="text-text-2">{issue.note}</span> : null}

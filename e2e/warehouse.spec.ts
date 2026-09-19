@@ -33,7 +33,7 @@ for (const device of ['desktop', 'tablet'] as const) {
     await expect(heading).toBeVisible()
     await expect(page.getByText(`Bước 1 / ${approved.total}`)).toBeVisible()
     await expect(page.getByText('MOCK RESULT', { exact: true })).toBeVisible()
-    await expect(page.getByText('Thứ tự tính lại ở FE', { exact: true })).toBeVisible()
+    await expect(page.getByText('Thứ tự xếp tính lại khi duyệt', { exact: true })).toBeVisible()
     await expect(page.getByText(/^Cách cửa sau$/)).toBeVisible()
     await expect(page.getByRole('img', { name: /^Minh hoạ hướng đặt (LWH|WLH|LHW|WHL|HLW|HWL)/ })).toBeVisible()
 

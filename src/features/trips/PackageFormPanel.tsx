@@ -60,7 +60,7 @@ export function PackageFormPanel({ value, vehicle, stops, onSave, onDelete, onDu
   return (
     <aside
       aria-label={isNew ? t('trips.form.titleNew') : t('trips.form.title', { id: value.id })}
-      className="flex w-full flex-col overflow-hidden border-border bg-bg max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-20 max-md:max-h-[70dvh] max-md:rounded-t-lg max-md:border-t max-md:shadow-e3 md:w-90 md:border-l"
+      className="flex w-full flex-col overflow-hidden border-border bg-bg max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-20 max-md:max-h-[70dvh] max-md:rounded-t-lg max-md:border-t max-md:shadow-e3 md:w-90 md:rounded-md md:border xl:sticky xl:top-0 xl:max-h-[calc(100dvh-8rem)]"
     >
       <div className="flex h-14 flex-none items-center justify-between gap-2 border-b border-border pr-2 pl-4">
         <h2 className="font-mono text-body-lg font-semibold">

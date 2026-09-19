@@ -72,7 +72,6 @@ export const driver = {
     description: 'Ghi sự cố cho một kiện của điểm giao này. Sự cố đã ghi không xoá được.',
     package: 'Kiện',
     kind: 'Loại sự cố',
-    kinds: { damaged: 'Hàng hỏng', missing: 'Thiếu hàng', refused: 'Khách từ chối', other: 'Khác' },
     note: 'Ghi chú',
     noteHint: 'Bắt buộc khi chọn Khác.',
     submit: 'Ghi sự cố',

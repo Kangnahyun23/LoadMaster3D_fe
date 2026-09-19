@@ -20,7 +20,7 @@ export const auth = {
     tagline: 'Every truck carries more, and unloads in the right order.',
     fillRate: 'Fill each vehicle better and run fewer trips',
     reverseOrder: 'Load in reverse delivery order — each stop unloads only its own cargo',
-    axleLoad: 'Check the load on every axle before the truck leaves',
+    sharedPlan: 'The warehouse loads and drivers unload from the same approved 3D plan',
     artworkLabel: 'Animation of a truck body being loaded in unloading order',
   },
   demo: {

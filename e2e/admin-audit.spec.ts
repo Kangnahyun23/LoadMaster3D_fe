@@ -25,7 +25,15 @@ async function signIn(page: Page, email: string, password: string) {
   await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click()
 }
 
+/** Hôm nay theo giờ Việt Nam (UTC+7), `YYYY-MM-DD` — cùng mốc với seed. */
+function vnToday(): string {
+  return new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10)
+}
+
 test('a trip the dispatcher cancels tops the admin log, and filtering by who did it keeps it', async ({ page, login, browserErrors }) => {
+  // Seed ghi sự kiện của hôm nay tới 16:00 giờ Việt Nam: chạy buổi sáng thì chúng "mới" hơn lần đăng nhập vừa làm. Đặt đồng hồ trang
+  // về cuối ngày (vẫn trôi) để thứ tự không phụ thuộc giờ chạy test.
+  await page.clock.install({ time: new Date(`${vnToday()}T23:30:00+07:00`) })
   await login('/chuyen', 'dispatcher')
   await page.evaluate(async ({ db }) => {
     const { getMockDb } = (await import(db)) as typeof import('@/lib/mock-db')

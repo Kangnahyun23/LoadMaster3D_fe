@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Card } from '@/components/ui/Card'
+import { VehicleName } from '@/components/VehicleName'
 import type { Formatter } from '@/lib/format'
 import { useFormat, useT, type TFunction } from '@/lib/i18n'
 import { plannerPath } from '@/lib/planner-path'
@@ -19,11 +20,13 @@ const mono = 'font-mono text-caption'
 /** Tiêu đề, nhãn trạng thái và số theo ngôn ngữ đang chọn, nên dựng trong component. */
 function createColumns(t: TFunction, format: Formatter) {
   return helper.columns([
+    // Tên tuyến và tên xe xuống dòng trong hàng 48 px thay vì cắt bằng dấu ba chấm ở 1.366 px (LM-095); mã chuyến ở dòng dưới
     helper.accessor('name', {
       header: t('manager.recent.trip'),
       cell: (info) => (
-        <Link to={`/chuyen/${encodeURIComponent(info.row.original.id)}`} className="block truncate font-medium text-primary">
-          {info.getValue()} <span className={cn(mono, 'font-normal text-text-3')}>{info.row.original.id}</span>
+        <Link to={`/chuyen/${encodeURIComponent(info.row.original.id)}`} className="flex flex-col font-medium whitespace-normal text-primary">
+          <span className="line-clamp-1">{info.getValue()}</span>{' '}
+          <span className={cn(mono, 'font-normal text-text-3')}>{info.row.original.id}</span>
         </Link>
       ),
     }),
@@ -35,7 +38,7 @@ function createColumns(t: TFunction, format: Formatter) {
     helper.accessor('vehicleName', {
       header: t('manager.recent.vehicle'),
       meta: { width: '220px' } satisfies ColumnMeta,
-      cell: (info) => <span className="block truncate">{info.getValue()}</span>,
+      cell: (info) => <VehicleName name={info.getValue()} className="line-clamp-2 whitespace-normal" />,
     }),
     helper.accessor('status', {
       header: t('manager.recent.status'),

@@ -20,6 +20,7 @@ export type SceneSemantics = {
 export type OperationsInput = {
   kind: 'loading' | 'unloading'
   step: number
+  /** Kiện không còn trên xe — đã dỡ, hoặc kho báo thiếu (kho và tài xế, LM-100): vẽ như đã gỡ, không tính trọng tâm. */
   unloadedIds?: ReadonlySet<string>
   currentId?: string | null
   nextId?: string | null

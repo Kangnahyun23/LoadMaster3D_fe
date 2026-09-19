@@ -138,6 +138,13 @@ test('warehouse isolates the current package and advances after confirmation', a
   await expect(page.getByRole('heading', { level: 1, name: second, exact: true })).toBeVisible()
   await settle(page)
   expect(await visibleCargo(page)).toStrictEqual({ 'cargo-opaque': 2, 'cargo-dim': 1 })
+
+  // LM-100: kiện báo thiếu không lên xe — sang bước 3, khung 3D chỉ còn kiện bước 1 và kiện hiện tại, không vẽ kiện thiếu như đã xếp
+  await button(page, 'Kiện này không có ở kho').click()
+  await page.getByRole('dialog', { name: `Ghi thiếu ${second}?` }).getByRole('button', { name: 'Ghi thiếu', exact: true }).click()
+  await expect(page.getByText('Bước 3 / 132', { exact: true })).toBeVisible()
+  await settle(page)
+  expect(await visibleCargo(page)).toStrictEqual({ 'cargo-opaque': 2, 'cargo-dim': 1 })
   await attachJson(testInfo, 'report', { scene: await sceneSnapshot(page), metrics: await metrics(page) })
   await attachScreenshot(page, testInfo, 'warehouse')
   expect(browserErrors).toStrictEqual([])

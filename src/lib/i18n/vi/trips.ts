@@ -135,7 +135,6 @@ export const trips = {
     reason: 'Lý do: {reason}',
     missingTitle: { one: '{count} kiện thiếu ở kho', other: '{count} kiện thiếu ở kho' },
     issuesTitle: { one: '{count} sự cố giao hàng', other: '{count} sự cố giao hàng' },
-    issueKinds: { damaged: 'Hàng hỏng', missing: 'Thiếu hàng', refused: 'Khách từ chối', other: 'Khác' },
     wholeStop: 'Cả điểm giao',
   },
   /** Sơ đồ tuyến ở Chi tiết chuyến (LM-097, D-50): kho → các điểm giao theo thứ tự, không bản đồ địa lý. */

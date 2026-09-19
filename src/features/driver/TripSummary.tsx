@@ -61,7 +61,7 @@ export function TripSummary({ trip, plan }: { trip: Trip; plan: Revision }) {
                 <li key={issue.id} className="flex flex-col gap-0.5 border-b border-border bg-badge-warning-bg px-4 py-3 last:border-b-0">
                   <span className="inline-flex items-center gap-1.5 font-medium text-badge-warning-fg">
                     <TriangleAlert className="size-4 flex-none" strokeWidth={2} aria-hidden />
-                    {t(`driver.issue.kinds.${issue.kind}`)}
+                    {t(`common.deliveryIssueKinds.${issue.kind}`)}
                   </span>
                   <span className="font-mono">
                     {issue.packageInstanceId

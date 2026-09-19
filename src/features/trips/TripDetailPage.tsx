@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { useCan } from '@/features/auth/useCan'
 import type { CargoPackage } from '@/domain/models'
 import { useT } from '@/lib/i18n'
+import { cn } from '@/lib/utils'
 import { CargoSummaryCard } from './CargoSummaryCard'
 import { PackageFormPanel } from './PackageFormPanel'
 import { PackageImportDialog } from './PackageImportDialog'
@@ -28,8 +29,8 @@ import {
 import { VehicleCard } from './VehicleCard'
 
 /**
- * Chi tiết chuyến hàng (LM-043 → LM-046, LM-088, LM-093, LM-097): sơ đồ tuyến, xe và tài xế, tóm tắt hàng, tiến trình, thứ tự điểm
- * giao kéo thả, bảng kiện và nhập kiện từ file.
+ * Chi tiết chuyến hàng (LM-043 → LM-046, LM-088, LM-093, LM-095, LM-097): sơ đồ tuyến, xe và tài xế, thứ tự điểm giao kéo thả, tóm
+ * tắt hàng, tiến trình, bảng kiện và nhập kiện từ file.
  * Dữ liệu đọc từ mock repository qua Query. Chỉ sửa được khi có quyền và chuyến còn lập kế hoạch (D-41, D-45); từ lúc kho bắt đầu
  * xếp, banner nói lý do và mọi thao tác sửa ẩn đi.
  */
@@ -102,21 +103,26 @@ export function TripDetailPage() {
           {/* Dấu đã giao chỉ khi chuyến đang giao hoặc đã hoàn thành (LM-097) */}
           <RouteDiagram stops={stops} delivery={trip.phase === 'delivering' || trip.phase === 'completed' ? trip.delivery : undefined} />
 
-          <div className="flex flex-wrap items-start gap-6">
-            <div className="flex w-80 flex-col gap-4">
+          {/*
+            Từ 1.280 px (LM-095): cột thông tin co giãn (xe, thứ tự điểm giao, tóm tắt hàng, tiến trình) cạnh bảng kiện chiếm phần
+            còn lại; panel kiện là cột thứ ba khi mở. Hẹp hơn thì mọi phần xếp chồng một cột.
+          */}
+          <div className={cn('grid items-start gap-5', editing
+            ? 'xl:grid-cols-[minmax(272px,1fr)_minmax(0,3.2fr)_360px]'
+            : 'xl:grid-cols-[minmax(272px,1fr)_minmax(0,3.2fr)]')}>
+            <div className="flex min-w-0 flex-col gap-4">
               <VehicleCard vehicle={vehicle} tripId={tripId} driverId={trip.driverId} driver={query.data?.driver} canChange={editable} />
+              <StopList
+                stops={stops}
+                readOnly={!editable}
+                onReorder={(next) => stopsMutation.mutate(next)}
+                onRemove={handleRemoveStop}
+              />
               <CargoSummaryCard summary={summary} />
               <TripProgressCard trip={trip} />
             </div>
 
-            <div className="w-80"><StopList
-              stops={stops}
-              readOnly={!editable}
-              onReorder={(next) => stopsMutation.mutate(next)}
-              onRemove={handleRemoveStop}
-            /></div>
-
-            <div className="flex min-w-80 flex-1 flex-col gap-3">
+            <div className="flex min-w-0 flex-col gap-3">
               <div className="flex items-baseline gap-2 px-1">
                 <h2 className="text-h3 font-semibold">{t('trips.packages.title')}</h2>
                 <span className="font-mono text-caption text-text-3">

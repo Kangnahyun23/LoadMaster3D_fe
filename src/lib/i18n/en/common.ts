@@ -13,6 +13,7 @@ export const common = {
   backToTrips: 'Back to trips',
   on: 'On',
   off: 'Off',
+  deliveryIssueKinds: { damaged: 'Damaged', missing: 'Missing', refused: 'Refused by customer', other: 'Other' },
   table: {
     rowsPerPage: 'Rows per page',
     range: '{from}–{to} of {total}',

@@ -129,7 +129,6 @@ export const trips = {
     reason: 'Reason: {reason}',
     missingTitle: { one: '{count} package missing at the warehouse', other: '{count} packages missing at the warehouse' },
     issuesTitle: { one: '{count} delivery issue', other: '{count} delivery issues' },
-    issueKinds: { damaged: 'Damaged', missing: 'Missing', refused: 'Refused by customer', other: 'Other' },
     wholeStop: 'Whole stop',
   },
   route: {
@@ -319,7 +318,7 @@ export const trips = {
       weight: 'Weight',
       quantity: 'Quantity',
       stop: 'Stop',
-      orientations: 'Orientations',
+      orientations: 'Orient.',
       issues: 'Issues',
     },
     filterStop: 'Filter by stop',

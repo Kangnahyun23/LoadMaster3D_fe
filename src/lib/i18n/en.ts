@@ -23,6 +23,7 @@ import { audit } from './en/audit'
 import { profile } from './en/profile'
 import { notifications } from './en/notifications'
 import { search } from './en/search'
+import { titles } from './en/titles'
 
 /** Bản tiếng Anh: mỗi nhánh một file trong `en/`, kiểm thiếu/thừa key theo nhánh nguồn `vi/`. */
 export const en = {
@@ -49,4 +50,5 @@ export const en = {
   profile,
   notifications,
   search,
+  titles,
 } satisfies Dictionary<typeof vi>

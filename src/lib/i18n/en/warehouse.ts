@@ -15,7 +15,7 @@ export const warehouse = {
   staleDescription: 'The approved plan of trip {tripId} is outdated: the vehicle or cargo changed after optimization. The warehouse can load only after the dispatcher approves it again.',
   cancelledTitle: 'Trip cancelled',
   cancelledDescription: 'Trip {tripId} was cancelled: {reason}',
-  ordersRecomputed: 'Order recomputed in FE',
+  ordersRecomputed: 'Loading order recalculated at approval',
   list: {
     title: 'Trips to load',
     date: 'Run date',

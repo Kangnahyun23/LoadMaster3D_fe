@@ -69,7 +69,6 @@ export const driver = {
     description: 'Record an issue for one package of this stop. A recorded issue cannot be deleted.',
     package: 'Package',
     kind: 'Issue type',
-    kinds: { damaged: 'Damaged', missing: 'Missing', refused: 'Refused by customer', other: 'Other' },
     note: 'Note',
     noteHint: 'Required for Other.',
     submit: 'Record issue',

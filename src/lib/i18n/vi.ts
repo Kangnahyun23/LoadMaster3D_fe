@@ -21,6 +21,7 @@ import { audit } from './vi/audit'
 import { profile } from './vi/profile'
 import { notifications } from './vi/notifications'
 import { search } from './vi/search'
+import { titles } from './vi/titles'
 
 /**
  * Từ điển nguồn. Mọi ngôn ngữ khác khai báo `satisfies Dictionary<typeof vi>`,
@@ -55,4 +56,5 @@ export const vi = {
   profile,
   notifications,
   search,
+  titles,
 } as const

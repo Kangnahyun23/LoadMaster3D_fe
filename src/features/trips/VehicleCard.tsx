@@ -1,6 +1,7 @@
 import { Truck } from 'lucide-react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/Card'
+import { VehicleName } from '@/components/VehicleName'
 import type { VehicleConfig } from '@/domain/models'
 import { useFormat, useT } from '@/lib/i18n'
 import type { User } from '@/types/user'
@@ -37,7 +38,7 @@ export function VehicleCard({ vehicle, tripId, driverId = null, driver = null, c
           <Truck className="size-5" strokeWidth={1.5} aria-hidden />
         </div>
         <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-body-lg font-medium">{vehicle.name}</span>
+          <VehicleName name={vehicle.name} className="text-body-lg font-medium" />
           <span className="font-mono text-caption text-text-3">
             {t('fields.maxPayloadKg')}: {format.weight(vehicle.maxPayloadKg)}
           </span>

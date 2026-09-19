@@ -20,6 +20,11 @@ import type { StopRow } from './trip-summary'
  */
 const PAGE_SIZE = 50
 const mono = 'font-mono text-caption'
+/**
+ * Tên kiện và tên điểm giao xuống tối đa hai dòng trong hàng 48 px thay vì cắt bằng dấu ba chấm (LM-095). Cột cố định chừa cho
+ * cột Tên ít nhất ~140 px: bảng hẹp hơn `min-w-218` (khi panel kiện mở) thì khung bảng cuộn ngang, cột không co về 0.
+ */
+const WRAP_2 = 'line-clamp-2 whitespace-normal'
 
 type Row = CargoPackage & { readonly errorCount: number; readonly warningCount: number; readonly stopName: string }
 
@@ -62,22 +67,22 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
     return helper.columns([
       helper.accessor('id', {
         header: t('trips.packages.columns.id'),
-        meta: { width: '110px' } satisfies ColumnMeta,
+        meta: { width: '76px' } satisfies ColumnMeta,
         cell: (info) => <span className={mono}>{info.getValue()}</span>,
       }),
       helper.accessor('name', {
         header: t('trips.packages.columns.name'),
-        cell: (info) => <span className="block truncate">{info.getValue()}</span>,
+        cell: (info) => <span className={WRAP_2}>{info.getValue()}</span>,
       }),
       helper.display({
         id: 'size',
         header: t('trips.packages.columns.size'),
-        meta: { align: 'right', width: '170px' } satisfies ColumnMeta,
+        meta: { align: 'right', width: '144px' } satisfies ColumnMeta,
         cell: ({ row }) => <span className={mono}>{format.dimensions(row.original.lengthCm, row.original.widthCm, row.original.heightCm)}</span>,
       }),
       helper.accessor('weightKg', {
         header: t('trips.packages.columns.weight'),
-        meta: { align: 'right', width: '92px' } satisfies ColumnMeta,
+        meta: { align: 'right', width: '84px' } satisfies ColumnMeta,
         cell: (info) => <span className={mono}>{format.weight(info.getValue())}</span>,
       }),
       helper.accessor('quantity', {
@@ -88,25 +93,26 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
       helper.display({
         id: 'stop',
         header: t('trips.packages.columns.stop'),
-        meta: { width: '150px' } satisfies ColumnMeta,
+        // Theo tỷ lệ bảng: ~198 px ở 1.366 px (tên điểm giao tối đa hai dòng), rộng dần theo màn; cột Tên nhận phần còn lại
+        meta: { width: '22%' } satisfies ColumnMeta,
         cell: ({ row }) => <span className="flex min-w-0 items-center gap-2">
           <span aria-hidden className="grid size-5 flex-none place-items-center rounded-sm font-mono text-[11px] leading-none font-semibold"
             style={{ background: stopColor(row.original.deliveryStop), color: stopForeground(row.original.deliveryStop) }}>
             {row.original.deliveryStop}
           </span>
-          <span className="truncate"><span className="sr-only">{t('trips.packages.columns.stop')} {row.original.deliveryStop}: </span>{row.original.stopName}</span>
+          <span className={WRAP_2}><span className="sr-only">{t('trips.packages.columns.stop')} {row.original.deliveryStop}: </span>{row.original.stopName}</span>
         </span>,
       }),
       helper.display({
         id: 'orientations',
         header: t('trips.packages.columns.orientations'),
-        meta: { align: 'right', width: '72px' } satisfies ColumnMeta,
+        meta: { align: 'right', width: '64px' } satisfies ColumnMeta,
         cell: ({ row }) => <span className={mono}>{format.integer(effectiveOrientations(row.original).length)}</span>,
       }),
       helper.display({
         id: 'issues',
         header: t('trips.packages.columns.issues'),
-        meta: { width: '120px' } satisfies ColumnMeta,
+        meta: { width: '100px' } satisfies ColumnMeta,
         cell: ({ row }) => <PackageIssueCell errorCount={row.original.errorCount} warningCount={row.original.warningCount} />,
       }),
     ])
@@ -148,8 +154,11 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
           onClick={() => { setOnlyIssues(!onlyIssues); setPage(0) }}>{t('trips.packages.onlyIssues')}</Button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto rounded-md border border-border">
-        <DataTable data={visible} columns={columns} onRowClick={onSelect} isRowSelected={(row) => row.id === selectedId} />
+      <div className="relative min-h-0 flex-1 overflow-auto rounded-md border border-border">
+        <div className="min-w-218">
+          <DataTable data={visible} columns={columns} density="comfortable" cellPadding="tight" onRowClick={onSelect}
+            isRowSelected={(row) => row.id === selectedId} />
+        </div>
       </div>
 
       {pages > 1 ? (

@@ -1,7 +1,9 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { expect, test } from 'vitest'
 import { renderTripList } from '@/test/trip-list-harness'
+import { useListUrlState } from './useListUrlState'
 
 /**
  * Seam LM-085: màn danh sách ghép `FilterBar` + `DataTable` + `useListUrlState` (harness trong `src/test`), kiểm qua
@@ -160,4 +162,56 @@ test('the whole list works from the keyboard', async () => {
   expect(screen.getByRole('button', { name: 'Trang trước' })).toHaveFocus()
   await user.keyboard(' ')
   expect(screen.getByText('1–25 / 30')).toBeInTheDocument()
+})
+
+/** Màn tối giản quanh hook: một lần bấm đổi hai bộ lọc (như chọn cả kỳ), đổi cỡ trang, và địa chỉ hiện tại. */
+function PeriodHarness({ defaultPageSize }: { defaultPageSize?: number }) {
+  const list = useListUrlState({ filters: ['tu', 'den'], defaultPageSize })
+  const location = useLocation()
+  return (
+    <>
+      <button type="button" onClick={() => { list.setFilter('tu', '2026-09-01'); list.setFilter('den', '2026-09-30') }}>Cả tháng 9</button>
+      <button type="button" onClick={() => list.setPageSize(25)}>25 dòng</button>
+      <button type="button" onClick={() => list.setPageSize(50)}>50 dòng</button>
+      <output aria-label="Cỡ trang">{list.pageSize}</output>
+      <output data-testid="url">{location.pathname + location.search}</output>
+    </>
+  )
+}
+
+function renderPeriod(path: string, defaultPageSize?: number) {
+  render(
+    <MemoryRouter initialEntries={[path]}>
+      <Routes>
+        <Route path="/nhat-ky" element={<PeriodHarness defaultPageSize={defaultPageSize} />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+test('two filter changes before the list renders again both reach the URL (LM-100)', async () => {
+  const user = userEvent.setup()
+  renderPeriod('/nhat-ky?trang=3')
+  // Hai lần ghi trong cùng một lần bấm: lần sau đọc bản nháp của lần trước, không đọc tham số cũ lúc render
+  await user.click(screen.getByRole('button', { name: 'Cả tháng 9' }))
+  expect(url()).toBe('/nhat-ky?tu=2026-09-01&den=2026-09-30')
+})
+
+test('a screen can default to 50 rows: the URL stays clean at 50 and says so-dong=25 when asked (LM-100)', async () => {
+  const user = userEvent.setup()
+  renderPeriod('/nhat-ky', 50)
+  expect(screen.getByRole('status', { name: 'Cỡ trang' })).toHaveTextContent('50')
+
+  await user.click(screen.getByRole('button', { name: '25 dòng' }))
+  expect(url()).toBe('/nhat-ky?so-dong=25')
+  expect(screen.getByRole('status', { name: 'Cỡ trang' })).toHaveTextContent('25')
+
+  await user.click(screen.getByRole('button', { name: '50 dòng' }))
+  expect(url()).toBe('/nhat-ky')
+  expect(screen.getByRole('status', { name: 'Cỡ trang' })).toHaveTextContent('50')
+})
+
+test('without an option the default page size stays 25', () => {
+  renderPeriod('/nhat-ky')
+  expect(screen.getByRole('status', { name: 'Cỡ trang' })).toHaveTextContent('25')
 })

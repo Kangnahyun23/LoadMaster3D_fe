@@ -83,7 +83,7 @@ function IssueForm({ stopNumber, items, pending, onSubmit }: IssueFormProps) {
                 className="flex min-h-14 cursor-pointer items-center gap-3 rounded-md border border-border px-3 has-checked:border-primary has-checked:bg-primary-bg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary"
               >
                 <input type="radio" value={kind} className="size-5 flex-none accent-primary outline-none" {...form.register('kind')} />
-                {t(`driver.issue.kinds.${kind}`)}
+                {t(`common.deliveryIssueKinds.${kind}`)}
               </label>
             ))}
           </div>

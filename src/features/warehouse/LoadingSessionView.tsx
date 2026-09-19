@@ -1,5 +1,5 @@
 import { Check, PackageX } from 'lucide-react'
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
@@ -33,6 +33,8 @@ export function LoadingSessionView({ trip, plan }: { trip: Trip; plan: Revision 
   const session = useLoadingSession(trip.id, model.placements, trip.loading)
   const [missingTarget, setMissingTarget] = useState<ScenePlacement | null>(null)
   const current = session.current
+  // Kiện báo thiếu không lên xe: khung 3D không vẽ chúng như đã xếp
+  const missingIds = useMemo(() => new Set(session.missing.map((placement) => placement.id)), [session.missing])
 
   async function handleMissing(id: string) {
     if (await session.reportMissing(id)) setMissingTarget(null)
@@ -56,7 +58,7 @@ export function LoadingSessionView({ trip, plan }: { trip: Trip; plan: Revision 
                   </div>
                 }
               >
-                <PositionViewer model={model} current={current} />
+                <PositionViewer model={model} current={current} missingIds={missingIds} />
               </Suspense>
             </div>
           </>

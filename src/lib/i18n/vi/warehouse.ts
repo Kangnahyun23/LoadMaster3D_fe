@@ -16,7 +16,7 @@ export const warehouse = {
   staleDescription: 'Phương án đã duyệt của chuyến {tripId} lỗi thời: xe hoặc kiện đã đổi sau lần tối ưu. Kho chỉ xếp được khi điều phối viên duyệt lại.',
   cancelledTitle: 'Chuyến đã huỷ',
   cancelledDescription: 'Chuyến {tripId} đã huỷ: {reason}',
-  ordersRecomputed: 'Thứ tự tính lại ở FE',
+  ordersRecomputed: 'Thứ tự xếp tính lại khi duyệt',
   /** Danh sách chuyến `/kho` (D-46). */
   list: {
     title: 'Chuyến cần xếp',
