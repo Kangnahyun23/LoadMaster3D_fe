@@ -1,4 +1,4 @@
-/** Đội xe: danh sách và trang cấu hình xe (LM-040, LM-041). */
+/** Đội xe: danh sách và trang cấu hình xe (LM-040, LM-041), trạng thái và bảo dưỡng (LM-089). */
 export const fleet = {
   title: 'Đội xe',
   count: { one: '{count} xe', other: '{count} xe' },
@@ -6,11 +6,19 @@ export const fleet = {
   rowHint: 'Bấm vào một dòng để mở cấu hình xe.',
   columns: {
     name: 'Xe',
+    status: 'Trạng thái',
     inner: 'Lòng thùng (D × R × C)',
     payload: 'Tải trọng',
     door: 'Cửa (R × C)',
     obstacles: 'Vật cản',
   },
+  /** Trạng thái xe (D-53), key trùng `VehicleStatus`. */
+  status: {
+    available: 'Sẵn sàng',
+    in_use: 'Đang chạy',
+    maintenance: 'Bảo dưỡng',
+  },
+  search: 'Tìm theo tên xe, biển số, mã xe',
   loading: 'Đang tải đội xe',
   empty: {
     title: 'Chưa có xe nào trong đội',
@@ -105,5 +113,27 @@ export const fleet = {
     description: 'Xe bị xoá khỏi đội. Không hoàn tác được.',
     cancel: 'Huỷ',
     confirm: 'Xoá xe',
+  },
+  /** Thông báo trạng thái ở trang cấu hình xe (LM-089). */
+  banner: {
+    inUse: 'Xe đang chạy chuyến {tripId}: cấu hình bị khoá tới khi chuyến kết thúc, không đưa vào bảo dưỡng được.',
+    openTrip: 'Xem chuyến {tripId}',
+    maintenance: 'Xe đang bảo dưỡng từ {time} {date}: chưa gán được cho chuyến nào.',
+    maintenanceNote: 'Ghi chú: {note}',
+  },
+  /** Bật/tắt bảo dưỡng (LM-089, D-53). */
+  maintenance: {
+    start: 'Đưa vào bảo dưỡng',
+    end: 'Kết thúc bảo dưỡng',
+    title: 'Đưa xe {name} vào bảo dưỡng?',
+    description: 'Xe bảo dưỡng không gán được cho chuyến cho tới khi kết thúc bảo dưỡng.',
+    note: 'Ghi chú bảo dưỡng',
+    notePlaceholder: 'Thay dầu, kiểm tra phanh',
+    noteRequired: 'Ghi lý do bảo dưỡng.',
+    noteTooLong: 'Ghi chú tối đa {max} ký tự.',
+    cancel: 'Huỷ',
+    confirm: 'Đưa vào bảo dưỡng',
+    started: 'Đã đưa xe {name} vào bảo dưỡng',
+    ended: 'Xe {name} đã sẵn sàng trở lại',
   },
 } as const
