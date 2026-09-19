@@ -27,6 +27,7 @@ const DriverStopPage = lazy(() => import('@/features/driver/DriverStopPage').the
 const FleetPage = lazy(() => import('@/features/fleet/FleetPage').then((m) => ({ default: m.FleetPage })))
 const VehicleDetailPage = lazy(() => import('@/features/fleet/VehicleDetailPage').then((m) => ({ default: m.VehicleDetailPage })))
 const UsersPage = lazy(() => import('@/features/admin/UsersPage').then((m) => ({ default: m.UsersPage })))
+const AuditLogPage = lazy(() => import('@/features/admin/AuditLogPage').then((m) => ({ default: m.AuditLogPage })))
 const StyleSheetPage = lazy(() => import('./design-system/StyleSheetPage').then((m) => ({ default: m.StyleSheetPage })))
 const ComponentSheetPage = lazy(() => import('./design-system/ComponentSheetPage').then((m) => ({ default: m.ComponentSheetPage })))
 
@@ -83,6 +84,7 @@ const router = createBrowserRouter([
                   ]),
                   guarded('fleet.edit', [{ path: '/doi-xe/moi', element: <VehicleDetailPage /> }]),
                   guarded('users.manage', [{ path: '/nguoi-dung', element: <UsersPage /> }]),
+                  guarded('audit.view', [{ path: '/nhat-ky', element: <AuditLogPage /> }]),
                 ],
               },
             ],

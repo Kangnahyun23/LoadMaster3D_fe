@@ -47,7 +47,8 @@ export function SelectContent({
       <SelectPrimitive.Content
         position={position}
         className={cn(
-          'z-50 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden',
+          // Trên lớp phủ hộp thoại (z-300): Select trong Dialog (form người dùng) phải bấm được
+          'z-400 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden',
           'rounded-md border border-border bg-bg shadow-e2',
           position === 'popper' && 'translate-y-1',
           className,

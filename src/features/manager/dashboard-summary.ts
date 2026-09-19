@@ -1,114 +1,129 @@
-import { expandPackages } from '@/domain/cargo'
 import { roundKg } from '@/domain/geometry'
 import type { VehicleConfig } from '@/domain/models'
-import type { Revision, Trip } from '@/lib/mock-db'
+import type { VehicleState } from '@/lib/mock-db'
+import { compareText } from '@/lib/list-filter'
+import type { TripStatus } from '@/types/trip'
+import type { User } from '@/types/user'
+import { daysOf, isWithinPeriod, type DateRange } from './dashboard-period'
+import { tripFacts, type TripFacts, type TripWithRevisions } from './trip-facts'
 
-/** Số kế hoạch gần đây hiện trên bảng điều khiển (LM-052). */
-export const RECENT_PLAN_LIMIT = 5
+export type { TripWithRevisions } from './trip-facts'
 
-/**
- * Một lần tối ưu đã lưu, rút gọn cho bảng điều khiển. Mọi trường lấy thẳng từ revision của kho —
- * không có số nào do màn tự nghĩ ra (tiêu chí nghiệm thu LM-052).
- */
-export type DashboardPlan = {
-  revisionId: string
-  jobId: string
-  tripId: string
-  /** Tên chuyến trong kho; rỗng nếu chuyến đã bị xoá khỏi kho. */
-  tripName: string
-  method: string
-  status: 'COMPLETED' | 'FAILED'
-  isMockResult: boolean
-  approved: boolean
-  /** ISO 8601, thời điểm tạo revision đang hiển thị. */
-  createdAt: string
-  volumeUtilizationPercent: number
-  payloadUtilizationPercent: number
-  placedCount: number
-  unplacedCount: number
-  runtimeMs: number
+/** Dữ liệu kho bảng điều khiển đọc một lần; kỳ lọc lại trên máy, đổi kỳ không phải đọc lại kho. */
+export type DashboardData = {
+  /** Hôm nay theo giờ Việt Nam lúc đọc kho — mốc của kỳ 7 ngày, 30 ngày, tháng này. */
+  readonly today: string
+  readonly trips: readonly TripWithRevisions[]
+  readonly vehicles: readonly Pick<VehicleConfig, 'id' | 'name'>[]
+  readonly vehicleStates: readonly VehicleState[]
+  readonly users: readonly Pick<User, 'id' | 'fullName'>[]
+}
+
+export type DashboardTripRow = TripFacts & { readonly vehicleName: string; readonly driverName: string | null }
+
+export type VehicleSummary = {
+  readonly vehicleId: string
+  readonly vehicleName: string
+  /** Chuyến của xe trong kỳ, gồm cả chuyến huỷ. */
+  readonly tripCount: number
+  readonly deliveredWeightKg: number
+  /** Lấp đầy trung bình các bản đã duyệt của xe (không tính chuyến huỷ); `null` khi không có. */
+  readonly averageFillPercent: number | null
 }
 
 export type DashboardSummary = {
-  vehicleCount: number
-  tripCount: number
-  /** Số kiện vật lý: đã mở rộng `quantity` thành instance (`expandPackages`). */
-  packageCount: number
-  /** Tổng khối lượng hàng của mọi chuyến, kg đã làm tròn bội 0,01. */
-  totalWeightKg: number
-  /** Job mới nhất trong kho, không có revision nào thì vắng. */
-  latestPlan?: DashboardPlan
-  /** Tối đa `RECENT_PLAN_LIMIT` job, mới nhất trước. */
-  recentPlans: DashboardPlan[]
+  readonly period: DateRange
+  /** Chuyến có ngày chạy trong kỳ, gồm cả chuyến huỷ. */
+  readonly tripCount: number
+  readonly completedCount: number
+  /** Trung bình lấp đầy thể tích của bản đã duyệt mới nhất, chuyến không huỷ. */
+  readonly fill: { readonly averagePercent: number | null; readonly planCount: number; readonly isMockResult: boolean }
+  readonly deliveredWeightKg: number
+  /** Kiện giao không sự cố trên kiện của các điểm giao đã hoàn tất. */
+  readonly delivery: { readonly cleanPercent: number | null; readonly cleanItems: number; readonly finishedItems: number }
+  /** Xe đang chạy chuyến lúc đọc kho — không theo kỳ. */
+  readonly vehicles: { readonly inUse: number; readonly total: number }
+  /** Mỗi ngày của kỳ một phần tử; ngày không có bản đã duyệt thì `null`. */
+  readonly fillByDay: readonly { readonly date: string; readonly averagePercent: number | null; readonly planCount: number }[]
+  /** Theo vòng đời chuyến, chỉ trạng thái có chuyến. */
+  readonly tripsByStatus: readonly { readonly status: TripStatus; readonly count: number }[]
+  /** Xe có chuyến trong kỳ, khối lượng đã giao giảm dần. */
+  readonly byVehicle: readonly VehicleSummary[]
+  /** Chuyến trong kỳ, ngày chạy mới nhất trước. */
+  readonly trips: readonly DashboardTripRow[]
 }
 
-export type DashboardInput = {
-  vehicles: readonly VehicleConfig[]
-  trips: readonly Trip[]
-  /** Revision của mọi chuyến, thứ tự nào cũng được. */
-  revisions: readonly Revision[]
+/** Thứ tự vòng đời (D-45) cho biểu đồ chuyến theo trạng thái. `dang_toi_uu` là trạng thái tạm của màn, kho không lưu. */
+const STATUS_ORDER: readonly TripStatus[] = [
+  'nhap', 'da_toi_uu', 'da_duyet', 'can_xem_lai', 'dang_xep_hang', 'da_xep_xong', 'dang_giao', 'hoan_thanh', 'da_huy',
+]
+
+function average(values: readonly number[]): number | null {
+  return values.length === 0 ? null : values.reduce((sum, value) => sum + value, 0) / values.length
+}
+
+/** Tỷ lệ lấp đầy của các chuyến được tính trung bình: đã duyệt và không huỷ. */
+function fillValues(rows: readonly TripFacts[]): number[] {
+  return rows.flatMap((row) => (row.cancelled || row.volumePercent === null ? [] : [row.volumePercent]))
 }
 
 /**
- * Gộp số liệu bảng điều khiển từ dữ liệu kho (D-06). Hàm thuần, không đọc kho: `dashboard-api.ts` lấy dữ liệu,
- * hàm này chỉ tính.
- *
- * Một job có thể có hai revision (bản tối ưu và bản đã duyệt dùng chung `jobId`, D-31) nên danh sách gộp theo
- * `jobId` và giữ revision mới nhất của job, để "5 kế hoạch gần đây" là 5 lần tối ưu chứ không phải 5 bản ghi.
+ * Gộp số liệu bảng điều khiển của một kỳ (LM-090, D-48). Hàm thuần: `dashboard-api.ts` đọc kho, hàm này chỉ tính. Mọi số truy
+ * về chuyến, revision, trạng thái xe của kho (AGENTS mục 6 "Không bịa số").
  */
-export function deriveDashboardSummary({ vehicles, trips, revisions }: DashboardInput): DashboardSummary {
-  const tripNameById = new Map(trips.map((trip) => [trip.id, trip.name]))
-  let packageCount = 0
-  let totalWeightKg = 0
-  for (const trip of trips) {
-    for (const instance of expandPackages(trip.packages).instances) {
-      packageCount += 1
-      totalWeightKg += instance.weightKg
-    }
-  }
+export function summarizeDashboard(data: DashboardData, period: DateRange): DashboardSummary {
+  const vehicleName = new Map(data.vehicles.map((vehicle) => [vehicle.id, vehicle.name]))
+  const userName = new Map(data.users.map((user) => [user.id, user.fullName]))
+  const rows: DashboardTripRow[] = data.trips
+    .filter(({ trip }) => isWithinPeriod(trip.scheduledDate, period))
+    .map((entry) => {
+      const facts = tripFacts(entry)
+      return {
+        ...facts,
+        vehicleName: vehicleName.get(facts.vehicleId) ?? facts.vehicleId,
+        driverName: facts.driverId === null ? null : (userName.get(facts.driverId) ?? facts.driverId),
+      }
+    })
+    .toSorted((a, b) => (a.scheduledDate === b.scheduledDate ? compareText(a.id, b.id) : a.scheduledDate < b.scheduledDate ? 1 : -1))
 
-  const newestByJobId = new Map<string, Revision>()
-  for (const revision of revisions) {
-    const kept = newestByJobId.get(revision.jobId)
-    if (kept === undefined || isNewer(revision, kept)) newestByJobId.set(revision.jobId, revision)
-  }
-  const plans = [...newestByJobId.values()]
-    .sort((a, b) => (isNewer(a, b) ? -1 : 1))
-    .map((revision) => toPlan(revision, tripNameById))
+  const fills = fillValues(rows)
+  const finishedItems = rows.reduce((sum, row) => sum + row.finishedItems, 0)
+  const cleanItems = rows.reduce((sum, row) => sum + row.cleanItems, 0)
 
   return {
-    vehicleCount: vehicles.length,
-    tripCount: trips.length,
-    packageCount,
-    totalWeightKg: roundKg(totalWeightKg),
-    latestPlan: plans[0],
-    recentPlans: plans.slice(0, RECENT_PLAN_LIMIT),
+    period,
+    tripCount: rows.length,
+    completedCount: rows.filter((row) => row.status === 'hoan_thanh').length,
+    fill: {
+      averagePercent: average(fills),
+      planCount: fills.length,
+      isMockResult: rows.some((row) => !row.cancelled && row.volumePercent !== null && row.isMockResult),
+    },
+    deliveredWeightKg: roundKg(rows.reduce((sum, row) => sum + row.deliveredWeightKg, 0)),
+    delivery: { cleanPercent: finishedItems === 0 ? null : (cleanItems / finishedItems) * 100, cleanItems, finishedItems },
+    vehicles: { inUse: data.vehicleStates.filter((state) => state.status === 'in_use').length, total: data.vehicles.length },
+    fillByDay: daysOf(period).map((date) => {
+      const values = fillValues(rows.filter((row) => row.scheduledDate === date))
+      return { date, averagePercent: average(values), planCount: values.length }
+    }),
+    tripsByStatus: STATUS_ORDER
+      .map((status) => ({ status, count: rows.filter((row) => row.status === status).length }))
+      .filter((entry) => entry.count > 0),
+    byVehicle: summarizeVehicles(rows),
+    trips: rows,
   }
 }
 
-/** Mới hơn theo `createdAt`; cùng thời điểm thì mã revision lớn hơn là mới hơn (kho cấp mã tăng dần). */
-function isNewer(revision: Revision, other: Revision): boolean {
-  return revision.createdAt === other.createdAt
-    ? revision.id > other.id
-    : revision.createdAt > other.createdAt
-}
-
-function toPlan(revision: Revision, tripNameById: ReadonlyMap<string, string>): DashboardPlan {
-  const { result } = revision
-  return {
-    revisionId: revision.id,
-    jobId: revision.jobId,
-    tripId: revision.tripId,
-    tripName: tripNameById.get(revision.tripId) ?? '',
-    method: result.method,
-    status: result.status,
-    isMockResult: result.isMockResult,
-    approved: revision.approvedAt !== undefined,
-    createdAt: revision.createdAt,
-    volumeUtilizationPercent: result.metrics.volumeUtilizationPercent,
-    payloadUtilizationPercent: result.metrics.payloadUtilizationPercent,
-    placedCount: result.metrics.placedCount,
-    unplacedCount: result.metrics.unplacedCount,
-    runtimeMs: result.metrics.runtimeMs,
-  }
+function summarizeVehicles(rows: readonly DashboardTripRow[]): VehicleSummary[] {
+  const byVehicle = new Map<string, DashboardTripRow[]>()
+  for (const row of rows) byVehicle.set(row.vehicleId, [...(byVehicle.get(row.vehicleId) ?? []), row])
+  return [...byVehicle]
+    .map(([vehicleId, trips]) => ({
+      vehicleId,
+      vehicleName: trips[0]?.vehicleName ?? vehicleId,
+      tripCount: trips.length,
+      deliveredWeightKg: roundKg(trips.reduce((sum, trip) => sum + trip.deliveredWeightKg, 0)),
+      averageFillPercent: average(fillValues(trips)),
+    }))
+    .toSorted((a, b) => b.deliveredWeightKg - a.deliveredWeightKg || compareText(a.vehicleName, b.vehicleName))
 }
