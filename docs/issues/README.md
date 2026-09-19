@@ -2,7 +2,7 @@
 
 Nguồn: [docs/prd.md](../prd.md) (quyết định D-01 → D-39) và [LoadMaster_FE_MVP_Build_Spec.md](../../LoadMaster_FE_MVP_Build_Spec.md).
 Tiến độ và nhật ký theo ngày: [docs/progress.md](../progress.md).
-Cập nhật 14/09/2026. 55 issue, ước lượng tổng **~55 ngày công** cho một người; làm song song theo các luồng ở mục 3 thì rút ngắn được đáng kể.
+Cập nhật 19/09/2026: thêm phase 6 (LM-080 → LM-101). Phase 0–5: 55 issue, ước lượng tổng **~55 ngày công** cho một người; làm song song theo các luồng ở mục 3 thì rút ngắn được đáng kể.
 
 ## 1. Quy ước
 
@@ -114,6 +114,36 @@ Mỗi issue là một file `LM-0xx-ten-ngan.md` với frontmatter:
 | [LM-071](LM-071-i18n-dot-2.md) | i18n đợt 2 | 1,5d | 060, 061, 070 |
 | [LM-072](LM-072-nghiem-thu-tai-lieu.md) | Nghiệm thu và bàn giao | 0,5d | 062, 071 |
 | [LM-073](LM-073-e2e-keo-kien-vao-vat-can.md) | E2E kéo kiện vào vật cản (nợ sau nghiệm thu) | 0,5d | 035, 072 |
+
+### Phase 6 — Hoàn thiện 5 vai trò
+
+Nguồn: [rà soát giao diện 19/09](../ui-audit-2026-09-19.md), [PRD mục 15](../prd.md#15-đợt-6--hoàn-thiện-5-vai-trò-1909-2026) (D-40 → D-57).
+Nhánh `feat/ui-complete`. Đợt nền làm tuần tự; đợt màn song song, mỗi issue một worktree. LM-073 thuộc đợt này.
+
+| ID | Việc | Ước lượng | Phụ thuộc |
+|---|---|---|---|
+| [LM-080](LM-080-tach-tu-dien-theo-nhanh.md) | Tách từ điển i18n theo nhánh | 0,5d | — |
+| [LM-081](LM-081-vong-doi-chuyen-kho-mock.md) | Kho mock: vòng đời chuyến, tiến độ, huỷ, khoá sửa, bảo dưỡng | 2d | 080 |
+| [LM-082](LM-082-nguoi-dung-phien-nhat-ky.md) | Kho mock: người dùng, phiên, nhật ký | 1,5d | 081 |
+| [LM-083](LM-083-seed-mo-rong-theo-ngay.md) | Seed mở rộng neo theo ngày | 1,5d | 082 |
+| [LM-084](LM-084-phan-quyen-mock-403.md) | Phân quyền mock, 403, nav theo quyền | 1,5d | 082 |
+| [LM-085](LM-085-bang-du-lieu-loc-sap-xep-phan-trang.md) | Bảng dùng chung: tìm, lọc, sắp xếp, phân trang | 1d | 080 |
+| [LM-086](LM-086-kho-chon-chuyen-tien-do.md) | Kho: chọn chuyến, tiến độ, kiện thiếu | 1,5d | 083, 084 |
+| [LM-087](LM-087-tai-xe-chuyen-cua-toi-tong-ket.md) | Tài xế: chuyến của tôi, sự cố, tổng kết | 1,5d | 083, 084 |
+| [LM-088](LM-088-chuyen-trang-thai-loc-tien-trinh.md) | Chuyến: ngày, tài xế, trạng thái, lọc, tiến trình, huỷ | 2d | 083, 084, 085 |
+| [LM-089](LM-089-doi-xe-trang-thai-bao-duong.md) | Đội xe: trạng thái, bảo dưỡng, lọc | 1d | 083, 084, 085 |
+| [LM-090](LM-090-dashboard-bieu-do-xuat-xlsx.md) | Dashboard: lọc kỳ, 3 biểu đồ, xuất .xlsx | 2d | 083, 084 |
+| [LM-091](LM-091-nhat-ky-he-thong.md) | Nhật ký hệ thống | 1d | 083, 084, 085 |
+| [LM-092](LM-092-nguoi-dung-quan-tri-day-du.md) | Người dùng: khoá, xoá, đặt lại mật khẩu, ma trận quyền | 1,5d | 083, 084, 085 |
+| [LM-093](LM-093-nhap-kien-csv-xlsx.md) | Nhập kiện CSV/.xlsx | 1,5d | 088 |
+| [LM-094](LM-094-planner-gon.md) | Planner gọn | 1,5d | 084, 088 |
+| [LM-095](LM-095-bo-cuc-1366-het-cat-chu.md) | Bố cục 1.366–1.600 px | 1d | 088, 089 |
+| [LM-096](LM-096-ho-so-doi-mat-khau.md) | Hồ sơ, đổi mật khẩu | 0,5d | 082, 084 |
+| [LM-097](LM-097-so-do-tuyen-svg.md) | Sơ đồ tuyến SVG | 0,5d | 088 |
+| [LM-098](LM-098-chuong-thong-bao.md) | Chuông thông báo | 1d | 082, 084 |
+| [LM-099](LM-099-tim-kiem-toan-cuc.md) | Tìm kiếm Ctrl+K | 1d | 083, 084 |
+| [LM-100](LM-100-hoan-thien-nho.md) | Hoàn thiện nhỏ | 1d | 088 |
+| [LM-101](LM-101-nghiem-thu-dot-6.md) | Nghiệm thu đợt 6 | 1d | 086 → 100, 073 |
 
 ## 3. Đường găng và luồng song song
 
