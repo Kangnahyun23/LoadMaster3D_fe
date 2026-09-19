@@ -46,6 +46,7 @@ test('a trip being loaded is locked: the banner says why, edit actions are gone,
   expect(screen.getByText('Đang xếp hàng')).toBeInTheDocument()
   expect(screen.queryByRole('link', { name: 'Chạy tối ưu' })).not.toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Thêm kiện' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Nhập từ file' })).not.toBeInTheDocument()
   expect(screen.queryByRole('link', { name: 'Đổi xe' })).not.toBeInTheDocument()
   expect(screen.queryByRole('button', { name: /Kéo để đổi thứ tự/ })).not.toBeInTheDocument()
   // Hành động chính còn lại: mở phương án đã duyệt trong 3D
@@ -106,6 +107,7 @@ test('the manager reads a trip without the actions menu, with one primary action
   expect(await screen.findByRole('heading', { name: 'Kiện hàng' }, SLOW)).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Thao tác' })).not.toBeInTheDocument()
   expect(screen.queryByRole('link', { name: 'Chạy tối ưu' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Nhập từ file' })).not.toBeInTheDocument()
   expect(await screen.findByRole('link', { name: 'Xem phương án 3D' })).toBeInTheDocument()
   expect(primaryActions(container)).toHaveLength(1)
 })

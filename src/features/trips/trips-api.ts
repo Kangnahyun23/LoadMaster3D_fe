@@ -181,6 +181,16 @@ export async function savePackage(tripId: string, pkg: CargoPackage): Promise<Tr
   return db.updateTrip(tripId, { packages: next })
 }
 
+/**
+ * Nhập kiện từ file (LM-093, D-49): thêm sau các kiện đang có trong **một** lần ghi — `inputVersion` tăng một lần, kho ghi một sự kiện
+ * nhật ký. Dòng lỗi đã bị bỏ ở bước xem trước; nơi gọi chỉ đưa kiện hợp lệ.
+ */
+export async function importPackages(tripId: string, imported: readonly CargoPackage[]): Promise<Trip> {
+  const db = getMockDb()
+  const { packages } = await db.getTrip(tripId)
+  return db.updateTrip(tripId, { packages: [...packages, ...imported] })
+}
+
 export async function deletePackage(tripId: string, packageId: string): Promise<Trip> {
   const db = getMockDb()
   const { packages } = await db.getTrip(tripId)

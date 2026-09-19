@@ -12,6 +12,7 @@ import {
   fetchTripFormOptions,
   fetchTripRevisions,
   fetchTrips,
+  importPackages,
   removeTripStop,
   savePackage,
   updateTripFrame,
@@ -119,6 +120,15 @@ export function useSavePackageMutation(tripId: string) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (pkg: CargoPackage) => savePackage(tripId, pkg),
+    onSuccess: () => invalidateTrip(client, tripId),
+  })
+}
+
+/** Nhập kiện từ file (LM-093): một lần ghi, làm mới chuyến, revision (lỗi thời) và bảng điều khiển như mọi thay đổi kiện. */
+export function useImportPackagesMutation(tripId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (packages: readonly CargoPackage[]) => importPackages(tripId, packages),
     onSuccess: () => invalidateTrip(client, tripId),
   })
 }
