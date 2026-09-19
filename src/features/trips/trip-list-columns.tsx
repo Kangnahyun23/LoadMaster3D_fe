@@ -21,7 +21,8 @@ export function createTripColumns(t: TFunction, format: Formatter) {
       header: t('trips.list.date'),
       enableSorting: true,
       sortDescFirst: true,
-      meta: { width: '112px' } satisfies ColumnMeta,
+      // Đủ chỗ cho tiêu đề "Ngày chạy" cùng mũi tên sắp xếp 16px
+      meta: { width: '128px' } satisfies ColumnMeta,
       cell: (info) => <span className={mono}>{format.date(dateOnly(info.getValue()))}</span>,
     }),
     helper.accessor('id', {
