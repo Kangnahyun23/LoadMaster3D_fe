@@ -17,7 +17,8 @@ test('a driver opening the admin screen gets 403 with a way back', { tag: '@phon
   await login('/nguoi-dung', 'driver')
   await expect(page.getByRole('heading', { name: 'Không có quyền truy cập', exact: true })).toBeVisible()
   await page.getByRole('link', { name: 'Về màn chính', exact: true }).click()
-  await page.waitForURL(/\/tai-xe\/diem-giao/)
+  await page.waitForURL((url) => url.pathname === '/tai-xe')
+  await expect(page.getByRole('heading', { level: 1, name: 'Chuyến của tôi', exact: true })).toBeVisible()
   expect(browserErrors).toStrictEqual([])
 })
 

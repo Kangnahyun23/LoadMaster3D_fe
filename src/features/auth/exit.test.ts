@@ -11,8 +11,10 @@ test('a warehouse worker leaving a loading session goes back to the trip list; d
   expect(exitAction('admin', session, '/chuyen/TRIP-2026-0914')).toStrictEqual({ kind: 'link', to: '/chuyen/TRIP-2026-0914' })
 })
 
-test('a driver leaving the driver screen signs out', () => {
-  expect(exitAction('driver', '/tai-xe/diem-giao')).toStrictEqual({ kind: 'signOut' })
+test('a driver leaving "My trips" signs out; leaving a trip goes back to the list (LM-087)', () => {
+  expect(exitAction('driver', '/tai-xe')).toStrictEqual({ kind: 'signOut' })
+  expect(exitAction('driver', '/tai-xe/diem-giao', '/tai-xe')).toStrictEqual({ kind: 'link', to: '/tai-xe' })
+  expect(exitAction('admin', '/tai-xe/diem-giao', '/tai-xe')).toStrictEqual({ kind: 'link', to: '/tai-xe' })
 })
 
 test('a dispatcher returns to the trip the screen was opened from, or to the trip list', () => {

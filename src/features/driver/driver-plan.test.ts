@@ -1,43 +1,8 @@
 import { expect, test } from 'vitest'
 import type { PackagePlacement } from '@/domain/models'
 import { adaptResult } from '@/features/viewer3d/scene-input'
-import type { Revision, Trip } from '@/lib/mock-db'
-import { tripRecord, twoCartonRequest, twoCartonResult, twoCartonTrip } from '@/test/mock-db-samples'
-import { pickDriverPlan, stopDeliveries } from './driver-plan'
-
-function trip(id: string): Trip {
-  return tripRecord(id)
-}
-
-function revision(id: string, tripId: string, approvedAt?: string): Revision {
-  return {
-    id, jobId: `JOB-${id}`, tripId, request: twoCartonRequest(), result: twoCartonResult(), inputVersion: 1,
-    createdAt: '2026-09-14T01:00:00.000Z', manuallyEdited: false, ordersRecomputed: approvedAt !== undefined,
-    ...(approvedAt ? { approvedAt } : {}),
-  }
-}
-
-test('không chỉ định chuyến: lấy chuyến đầu tiên theo thứ tự kho có revision đã duyệt, bản duyệt mới nhất', () => {
-  const plans = [
-    { trip: trip('TRIP-A'), revisions: [revision('REV-001', 'TRIP-A')] },
-    { trip: trip('TRIP-B'), revisions: [revision('REV-002', 'TRIP-B', '2026-09-14T02:00:00.000Z'), revision('REV-003', 'TRIP-B', '2026-09-14T03:00:00.000Z'), revision('REV-004', 'TRIP-B')] },
-    { trip: trip('TRIP-C'), revisions: [revision('REV-005', 'TRIP-C', '2026-09-14T04:00:00.000Z')] },
-  ]
-  const picked = pickDriverPlan(plans)
-  expect(picked?.trip.id).toBe('TRIP-B')
-  expect(picked?.revision.id).toBe('REV-003')
-})
-
-test('?chuyen chỉ định chuyến: chỉ đúng chuyến đó, không rơi sang chuyến khác', () => {
-  const plans = [
-    { trip: trip('TRIP-A'), revisions: [revision('REV-001', 'TRIP-A', '2026-09-14T02:00:00.000Z')] },
-    { trip: trip('TRIP-B'), revisions: [revision('REV-002', 'TRIP-B')] },
-  ]
-  expect(pickDriverPlan(plans, 'TRIP-A')?.revision.id).toBe('REV-001')
-  expect(pickDriverPlan(plans, 'TRIP-B')).toBeUndefined()
-  expect(pickDriverPlan(plans, 'TRIP-X')).toBeUndefined()
-  expect(pickDriverPlan([])).toBeUndefined()
-})
+import { twoCartonRequest, twoCartonResult, twoCartonTrip } from '@/test/mock-db-samples'
+import { stopDeliveries } from './driver-plan'
 
 test('điểm giao lấy tên, địa chỉ từ chuyến (số = vị trí + 1); kiện của điểm theo unloadingOrder của kết quả', () => {
   const result = twoCartonResult()
