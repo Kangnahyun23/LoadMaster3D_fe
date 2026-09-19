@@ -28,6 +28,8 @@ function animationFrames(page: Page, kind: 'loading' | 'unloading'): Promise<Ani
     const samples: AnimationSample[] = [], matrix = state.camera.matrixWorld.clone()
     document.querySelector<HTMLButtonElement>('button[aria-label="Tiến một bước"]')!.click()
     const started = performance.now()
+    // Máy chậm cần lâu hơn để React xử lý cú bấm rồi mới chạy animation: đếm 850 ms từ lúc hình dỡ hiện ra, chờ tối đa 6 giây
+    let appearedAt: number | null = null
     await new Promise<void>((resolve) => {
       const sample = () => {
         if (kind === 'loading') {
@@ -36,8 +38,11 @@ function animationFrames(page: Page, kind: 'loading' | 'unloading'): Promise<Ani
         } else {
           const mesh = state.scene.getObjectByName('unloading-motion') as Mesh
           samples.push({ x: mesh.position.x, visible: mesh.visible, opacity: (mesh.material as Material).opacity })
+          if (mesh.visible && appearedAt === null) appearedAt = performance.now()
         }
-        if (performance.now() - started > 850) resolve(); else requestAnimationFrame(sample)
+        const now = performance.now()
+        const done = kind === 'loading' || appearedAt !== null ? now - (appearedAt ?? started) > 850 : now - started > 6_000
+        if (done) resolve(); else requestAnimationFrame(sample)
       }
       requestAnimationFrame(sample)
     })

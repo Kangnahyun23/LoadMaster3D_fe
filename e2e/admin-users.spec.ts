@@ -48,6 +48,8 @@ test('a driver account the admin creates signs in with its one-time password; lo
   await signIn(page, DEMO_EMAILS.admin, DEMO_PASSWORD)
   await page.waitForURL(/\/nguoi-dung$/)
   await page.getByRole('searchbox', { name: 'Tìm theo tên, email, số điện thoại, mã', exact: true }).fill('phuc.mai')
+  // Lọc có debounce: chờ bảng còn đúng dòng cần rồi mới bấm, nếu không cú bấm rơi vào chỗ dòng vừa rời đi (máy chậm)
+  await expect(page.getByRole('row')).toHaveCount(2)
   await page.getByRole('button', { name: `Thao tác cho ${NEW_DRIVER.name}`, exact: true }).click()
   await page.getByRole('menuitem', { name: 'Khoá tài khoản', exact: true }).click()
   await expect(page.getByText(`Đã khoá tài khoản ${NEW_DRIVER.name}`, { exact: true })).toBeVisible()

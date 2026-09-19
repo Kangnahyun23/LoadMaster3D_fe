@@ -22,7 +22,15 @@ type FitCounter = { __previewFits?: number }
 async function startFitCounter(page: Page) {
   await page.evaluate(async (url) => {
     const { _roots } = (await import(url)) as R3FModule
-    const store = _roots.get(document.querySelector('canvas')!)!.store
+    // Canvas có thể vừa được dựng lại: chờ đúng root của canvas đang có mặt, đừng tin cái đã đọc trước đó
+    const store = await new Promise<NonNullable<ReturnType<R3FModule['_roots']['get']>>['store']>((resolve) => {
+      const wait = () => {
+        const canvas = document.querySelector('canvas')
+        const root = canvas ? _roots.get(canvas) : undefined
+        if (root) resolve(root.store); else requestAnimationFrame(wait)
+      }
+      wait()
+    })
     const counter = window as unknown as FitCounter
     counter.__previewFits = 0
     let previous = ''
