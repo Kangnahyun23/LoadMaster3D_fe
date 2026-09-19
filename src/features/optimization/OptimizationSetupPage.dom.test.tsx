@@ -10,11 +10,11 @@ import { OptimizationSetupPage } from './OptimizationSetupPage'
 const TRIP_ID = 'TRIP-2026-0914'
 
 /** Seam: kho dùng chung → `optimization-api.ts` → hook → màn hình, không giả lập module nào. */
-function renderSetup(client = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
+function renderSetup(client = new QueryClient({ defaultOptions: { queries: { retry: false } } }), tripId = TRIP_ID) {
   return render(
     <QueryClientProvider client={client}>
       <I18nProvider>
-        <MemoryRouter initialEntries={[`/chuyen/${TRIP_ID}/toi-uu`]}>
+        <MemoryRouter initialEntries={[`/chuyen/${tripId}/toi-uu`]}>
           <Routes><Route path="/chuyen/:tripId/toi-uu" element={<OptimizationSetupPage />} /></Routes>
         </MemoryRouter>
       </I18nProvider>
@@ -65,4 +65,18 @@ test('fixing the cargo and coming back enables Optimize without touching the set
   renderSetup(client)
   expect(await screen.findByText('Không có lỗi — có thể tối ưu.')).toBeInTheDocument()
   await waitFor(() => expect(screen.getByRole('button', { name: 'Tối ưu' })).toBeEnabled())
+})
+
+test('a trip the warehouse is loading cannot be optimized again: the banner says why and nothing can be changed (D-45)', async () => {
+  renderSetup(undefined, 'TRIP-011')
+  expect(await screen.findByText('Kho đang xếp hàng theo phương án đã duyệt nên xe, điểm giao và kiện đã khoá.')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Tối ưu' })).toBeDisabled()
+  expect(screen.getByRole('combobox', { name: 'Xe chở chuyến này' })).toBeDisabled()
+})
+
+test('a vehicle under maintenance is listed with the reason but cannot be chosen (D-53)', async () => {
+  renderSetup()
+  const select = await screen.findByRole('combobox', { name: 'Xe chở chuyến này' })
+  expect(within(select).getByRole('option', { name: 'Hyundai Mighty EX8 · 50H-118.29 · đang bảo dưỡng' })).toBeDisabled()
+  expect(within(select).getByRole('option', { name: 'Truck 6m' })).toBeEnabled()
 })

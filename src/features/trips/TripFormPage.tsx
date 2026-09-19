@@ -1,39 +1,57 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Plus, Save, Trash2 } from 'lucide-react'
-import { useMemo } from 'react'
-import { useFieldArray, useForm, useWatch } from 'react-hook-form'
+import { ChevronLeft, Save } from 'lucide-react'
+import { useMemo, type ReactNode } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
-import { SelectField } from '@/components/ui/SelectField'
-import type { Trip } from '@/lib/mock-db'
-import { useFormat, useT } from '@/lib/i18n'
-import { createTripFormSchema, type TripFormValues } from './trip-form.schema'
-import { useCreateTripMutation, useTripDetailQuery, useUpdateTripFrameMutation, useVehicleOptionsQuery } from './useTripsQuery'
+import { SelectField, type SelectOption } from '@/components/ui/SelectField'
+import type { Trip, TripPhase } from '@/lib/mock-db'
+import { dataErrorMessage, useFormat, useT, type TFunction } from '@/lib/i18n'
+import { compareText } from '@/lib/list-filter'
+import { createTripFormSchema, driverIdOf, tripFormDefaults, UNASSIGNED, type TripFormValues } from './trip-form.schema'
+import { TripStopsFields } from './TripStopsFields'
+import { useCreateTripMutation, useTripDetailQuery, useTripFormOptionsQuery, useUpdateTripFrameMutation } from './useTripsQuery'
+import type { TripFormOptions } from './trips-api'
+
+/** Pha còn mở form sửa: lập kế hoạch sửa mọi thứ; kho đang/đã xếp chỉ còn tên, ngày chạy, tài xế (D-45). */
+const EDITABLE_PHASES: readonly TripPhase[] = ['planning', 'loading', 'loaded']
 
 /**
- * Tạo mới hoặc sửa khung chuyến (LM-053): ghi thật vào kho qua mutation, không báo thành công giả.
- * Tạo: tên, xe, điểm giao theo thứ tự. Sửa: tên và xe; điểm giao và kiện sửa ở Chi tiết chuyến.
+ * Tạo mới hoặc sửa khung chuyến (LM-053, LM-088): ghi thật vào kho qua mutation, không báo thành công giả.
+ * Tên, ngày chạy, tài xế, xe và điểm giao; xe bảo dưỡng không chọn được (D-53). Kiện thêm ở Chi tiết chuyến.
  */
 export function TripFormPage() {
   const { tripId = '' } = useParams()
   const t = useT()
   const detail = useTripDetailQuery(tripId)
   if (tripId === '') return <TripForm />
-  if (detail.isPending) return <FormShell title={t('trips.create.editTitle', { id: tripId })} backTo={`/chuyen/${tripId}`} />
+  const title = t('trips.create.editTitle', { id: tripId })
+  if (detail.isPending) return <FormShell title={title} backTo={`/chuyen/${tripId}`} />
   if (!detail.data) {
     return (
-      <FormShell title={t('trips.create.editTitle', { id: tripId })} backTo="/chuyen">
+      <FormShell title={title} backTo="/chuyen">
         <p role="alert" className="text-body text-danger">{t('trips.create.notFound', { id: tripId })}</p>
       </FormShell>
     )
   }
-  return <TripForm key={detail.data.trip.id} existing={detail.data.trip} />
+  const { trip } = detail.data
+  if (!EDITABLE_PHASES.includes(trip.phase)) {
+    return (
+      <FormShell title={title} backTo={`/chuyen/${tripId}`}>
+        <div className="flex flex-col items-start gap-3">
+          <p role="alert" className="text-body text-text-2">{t('trips.create.notEditable', { id: tripId })}</p>
+          <Button variant="secondary" asChild><Link to={`/chuyen/${tripId}`}>{t('trips.create.back')}</Link></Button>
+        </div>
+      </FormShell>
+    )
+  }
+  return <TripForm key={trip.id} existing={trip} />
 }
 
-function FormShell({ title, backTo, children }: { title: string; backTo: string; children?: React.ReactNode }) {
+function FormShell({ title, backTo, children }: { title: string; backTo: string; children?: ReactNode }) {
   const t = useT()
   return (
     <div className="flex min-w-0 flex-1 flex-col">
@@ -56,35 +74,37 @@ function TripForm({ existing }: { existing?: Trip }) {
   const t = useT()
   const format = useFormat()
   const navigate = useNavigate()
-  const vehicles = useVehicleOptionsQuery()
+  const options = useTripFormOptionsQuery()
   const create = useCreateTripMutation()
   const update = useUpdateTripFrameMutation(existing?.id ?? '')
   const schema = useMemo(() => createTripFormSchema(t, { withStops: !existing }), [t, existing])
-
-  const form = useForm<TripFormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: existing
-      ? { name: existing.name, vehicleId: existing.vehicleId, stops: [] }
-      : { name: '', vehicleId: '', stops: [{ name: '', address: '' }] },
-  })
-  const stops = useFieldArray({ control: form.control, name: 'stops' })
+  const form = useForm<TripFormValues>({ resolver: zodResolver(schema), defaultValues: tripFormDefaults(existing) })
   const vehicleId = useWatch({ control: form.control, name: 'vehicleId' })
-  const selectedVehicle = vehicles.data?.find((vehicle) => vehicle.id === vehicleId)
-  const errors = form.formState.errors
+  const choices = useMemo(() => formChoices(options.data, existing, t), [options.data, existing, t])
+  const selected = options.data?.vehicles.find((option) => option.vehicle.id === vehicleId)
+  // Kho đã bắt đầu xếp: xe và điểm giao khoá, còn tên, ngày chạy, tài xế (D-45)
+  const locked = existing !== undefined && existing.phase !== 'planning'
+  const { errors } = form.formState
   const backTo = existing ? `/chuyen/${existing.id}` : '/chuyen'
   const pending = create.isPending || update.isPending
 
   function handleSubmit(values: TripFormValues) {
-    const onError = () => toast.error(t('trips.create.failed'))
+    const onError = (error: unknown) => toast.error(t('trips.create.failed'), { description: dataErrorMessage(error, t) })
+    const driverId = driverIdOf(values.driverId)
+    const onSuccess = (trip: Trip, message: string) => {
+      toast.success(message)
+      void navigate(`/chuyen/${trip.id}`)
+    }
     if (existing) {
-      update.mutate({ name: values.name, vehicleId: values.vehicleId }, {
-        onSuccess: (trip) => { toast.success(t('trips.create.saved', { id: trip.id })); void navigate(`/chuyen/${trip.id}`) },
+      const frame = { name: values.name, scheduledDate: values.scheduledDate, driverId }
+      update.mutate(locked ? frame : { ...frame, vehicleId: values.vehicleId, stops: values.stops }, {
+        onSuccess: (trip) => onSuccess(trip, t('trips.create.saved', { id: trip.id })),
         onError,
       })
       return
     }
-    create.mutate(values, {
-      onSuccess: (trip) => { toast.success(t('trips.create.created', { id: trip.id })); void navigate(`/chuyen/${trip.id}`) },
+    create.mutate({ name: values.name, vehicleId: values.vehicleId, scheduledDate: values.scheduledDate, driverId, stops: values.stops }, {
+      onSuccess: (trip) => onSuccess(trip, t('trips.create.created', { id: trip.id })),
       onError,
     })
   }
@@ -92,59 +112,46 @@ function TripForm({ existing }: { existing?: Trip }) {
   return (
     <FormShell title={existing ? t('trips.create.editTitle', { id: existing.id }) : t('trips.create.title')} backTo={backTo}>
       <form noValidate onSubmit={form.handleSubmit(handleSubmit)} className="flex max-w-160 flex-col gap-5">
+        {locked ? (
+          <p role="status" className="rounded-md border border-badge-warning-border bg-badge-warning-bg px-4 py-3 text-body text-badge-warning-fg">
+            {t('trips.create.lockedHint')}
+          </p>
+        ) : null}
         <Card className="flex flex-col gap-4 p-5">
           <Input label={t('trips.create.name')} placeholder={t('trips.create.namePlaceholder')} error={errors.name?.message} {...form.register('name')} />
-          <SelectField
-            control={form.control}
-            name="vehicleId"
-            label={t('trips.create.vehicle')}
-            placeholder={t('trips.create.vehiclePlaceholder')}
-            options={(vehicles.data ?? []).map((vehicle) => ({ value: vehicle.id, label: vehicle.name }))}
-            hint={t('trips.create.vehicleHint')}
-          />
-          {selectedVehicle ? (
-            <dl className="grid grid-cols-2 gap-3 rounded-md border border-border bg-surface p-4">
-              <div className="flex flex-col gap-0.5">
-                <dt className="text-caption text-text-3">{t('trips.create.cargoSpace')}</dt>
-                <dd className="font-mono text-body font-medium">
-                  {format.dimensions(selectedVehicle.innerLengthCm, selectedVehicle.innerWidthCm, selectedVehicle.innerHeightCm)}
-                </dd>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <dt className="text-caption text-text-3">{t('trips.create.payload')}</dt>
-                <dd className="font-mono text-body font-medium">{format.weight(selectedVehicle.maxPayloadKg)}</dd>
-              </div>
-            </dl>
-          ) : null}
+          <div className="grid grid-cols-2 gap-3">
+            <Input type="date" label={t('trips.create.scheduledDate')} error={errors.scheduledDate?.message} {...form.register('scheduledDate')} />
+            <SelectField control={form.control} name="driverId" label={t('trips.create.driver')} options={choices.drivers} hint={t('trips.create.driverHint')} />
+          </div>
+          <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
+            <SelectField
+              control={form.control}
+              name="vehicleId"
+              label={t('trips.create.vehicle')}
+              placeholder={t('trips.create.vehiclePlaceholder')}
+              options={choices.vehicles}
+              hint={selected?.status === 'maintenance' ? t('trips.create.vehicleMaintenanceHint') : t('trips.create.vehicleHint')}
+            />
+            {selected ? (
+              <dl className="grid grid-cols-2 gap-3 rounded-md border border-border bg-surface p-4">
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-caption text-text-3">{t('trips.create.cargoSpace')}</dt>
+                  <dd className="font-mono text-body font-medium">
+                    {format.dimensions(selected.vehicle.innerLengthCm, selected.vehicle.innerWidthCm, selected.vehicle.innerHeightCm)}
+                  </dd>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-caption text-text-3">{t('trips.create.payload')}</dt>
+                  <dd className="font-mono text-body font-medium">{format.weight(selected.vehicle.maxPayloadKg)}</dd>
+                </div>
+              </dl>
+            ) : null}
+          </fieldset>
         </Card>
 
-        {existing ? <p className="text-body text-text-2">{t('trips.create.editStopsHint')}</p> : (
-          <Card className="flex flex-col gap-4 p-5">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-h3 font-semibold">{t('trips.create.stopsTitle')}</h2>
-              <p className="text-caption text-text-3">{t('trips.create.stopsHint')}</p>
-            </div>
-            <ol className="m-0 flex list-none flex-col gap-3 p-0">
-              {stops.fields.map((field, index) => (
-                <li key={field.id} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
-                  <Input label={t('trips.create.stopName', { number: index + 1 })} error={errors.stops?.[index]?.name?.message} {...form.register(`stops.${index}.name`)} />
-                  <Input label={t('trips.create.stopAddress', { number: index + 1 })} error={errors.stops?.[index]?.address?.message} {...form.register(`stops.${index}.address`)} />
-                  <Button type="button" variant="ghost" className="size-10 px-0" aria-label={t('trips.create.removeStop', { number: index + 1 })}
-                    disabled={stops.fields.length === 1} onClick={() => stops.remove(index)}>
-                    <Trash2 strokeWidth={1.5} />
-                  </Button>
-                </li>
-              ))}
-            </ol>
-            {errors.stops?.root?.message ?? errors.stops?.message ? (
-              <p role="alert" className="text-caption text-danger">{errors.stops?.root?.message ?? errors.stops?.message}</p>
-            ) : null}
-            <Button type="button" variant="secondary" className="self-start" onClick={() => stops.append({ name: '', address: '' })}>
-              <Plus strokeWidth={1.5} />
-              {t('trips.create.addStop')}
-            </Button>
-          </Card>
-        )}
+        <fieldset disabled={locked} className="m-0 min-w-0 border-0 p-0">
+          <TripStopsFields form={form} creating={!existing} />
+        </fieldset>
 
         <div className="flex gap-2">
           <Button type="submit" variant="primary" loading={pending}>
@@ -158,4 +165,26 @@ function TripForm({ existing }: { existing?: Trip }) {
       </form>
     </FormShell>
   )
+}
+
+/**
+ * Lựa chọn của hai ô chọn. Xe bảo dưỡng vẫn hiện, kèm lý do, nhưng không chọn được (D-53) — trừ xe chuyến đang dùng, để form sửa
+ * không mất giá trị. Tài xế: người dùng vai trò tài xế đang hoạt động; tài xế đang gán mà tài khoản đã khoá vẫn hiện, không chọn lại được.
+ */
+function formChoices(data: TripFormOptions | undefined, existing: Trip | undefined, t: TFunction) {
+  const vehicles: SelectOption[] = (data?.vehicles ?? []).map(({ vehicle, status }) => {
+    const maintenance = status === 'maintenance'
+    return {
+      value: vehicle.id,
+      label: maintenance ? t('trips.create.vehicleMaintenance', { name: vehicle.name }) : vehicle.name,
+      disabled: maintenance && vehicle.id !== existing?.vehicleId,
+    }
+  })
+  const drivers: SelectOption[] = (data?.drivers ?? [])
+    .filter((user) => user.status === 'active' || user.id === existing?.driverId)
+    .toSorted((a, b) => compareText(a.fullName, b.fullName))
+    .map((user) => user.status === 'active'
+      ? { value: user.id, label: user.fullName }
+      : { value: user.id, label: t('trips.create.driverSuspended', { name: user.fullName }), disabled: true })
+  return { vehicles, drivers: [{ value: UNASSIGNED, label: t('trips.create.unassigned') }, ...drivers] }
 }

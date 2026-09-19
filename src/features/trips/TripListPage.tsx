@@ -1,78 +1,24 @@
-import { createColumnHelper } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
+import { DataTable } from '@/components/DataTable'
 import { EmptyState } from '@/components/EmptyState'
-import { StatusBadge } from '@/components/StatusBadge'
+import { FilterBar, type FilterField } from '@/components/FilterBar'
 import { Button } from '@/components/ui/Button'
-import { ProgressBar } from '@/components/ui/ProgressBar'
+import { useListUrlState } from '@/components/useListUrlState'
 import { useCan } from '@/features/auth/useCan'
-import { useFormat, useT, type TFunction } from '@/lib/i18n'
+import { useFormat, useT } from '@/lib/i18n'
 import { EmptyTripsIllustration } from './EmptyTripsIllustration'
-import type { TripRow } from './trip-list'
+import { FILTERABLE_STATUSES, filterTripRows, TRIP_LIST_FILTERS, tripFilterOptions, UNASSIGNED_DRIVER, type TripListFilter, type TripRow } from './trip-list'
+import { createTripColumns } from './trip-list-columns'
 import { TripListSkeleton } from './TripListSkeleton'
 import { useTripsQuery } from './useTripsQuery'
 
-const helper = createColumnHelper<BaseTableFeatures, TripRow>()
-const mono = 'font-mono text-caption'
-
-function createColumns(t: TFunction, format: ReturnType<typeof useFormat>) {
-  return helper.columns([
-    helper.accessor('id', {
-      header: t('trips.list.id'),
-      meta: { width: '150px' } satisfies ColumnMeta,
-      cell: (info) => <span className={mono}>{info.getValue()}</span>,
-    }),
-    helper.accessor('name', {
-      header: t('trips.list.name'),
-      cell: (info) => (
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate">{info.getValue()}</span>
-          <span className="truncate text-caption text-text-3">{info.row.original.route}</span>
-        </span>
-      ),
-    }),
-    helper.accessor('vehicleName', {
-      header: t('trips.list.vehicle'),
-      meta: { width: '220px' } satisfies ColumnMeta,
-      cell: (info) => <span className="block truncate">{info.getValue()}</span>,
-    }),
-    helper.accessor('stopCount', {
-      header: t('trips.list.stops'),
-      meta: { align: 'right', width: '72px' } satisfies ColumnMeta,
-      cell: (info) => <span className={mono}>{format.integer(info.getValue())}</span>,
-    }),
-    helper.accessor('packageCount', {
-      header: t('trips.list.packages'),
-      meta: { align: 'right', width: '80px' } satisfies ColumnMeta,
-      cell: (info) => <span className={mono}>{format.integer(info.getValue())}</span>,
-    }),
-    helper.accessor('volumePercent', {
-      header: t('trips.list.volume'),
-      meta: { width: '160px' } satisfies ColumnMeta,
-      cell: (info) => {
-        const value = info.getValue()
-        if (value === null) return <span className="text-caption text-text-3">{t('trips.list.notOptimized')}</span>
-        return (
-          <span className="flex items-center gap-2">
-            <ProgressBar value={value} className="w-20" />
-            <span className={mono}>{format.percent(value)}</span>
-          </span>
-        )
-      },
-    }),
-    helper.accessor('status', {
-      header: t('trips.list.status'),
-      meta: { width: '140px' } satisfies ColumnMeta,
-      cell: (info) => <StatusBadge status={info.getValue()} />,
-    }),
-  ])
-}
+const NO_ROWS: TripRow[] = []
 
 /**
- * Danh sách chuyến của dispatcher (LM-053): đọc kho qua `useTripsQuery`, ba trạng thái đang tải, rỗng, có dữ liệu.
- * Mỗi dòng chỉ gồm số có trong kho — không ngày chạy hay trạng thái giao hàng khi kho chưa lưu chúng.
+ * Danh sách chuyến (LM-053, LM-088): đọc kho qua `useTripsQuery`; tìm bỏ dấu, lọc trạng thái / khoảng ngày chạy / xe / tài xế,
+ * sắp xếp (mặc định ngày chạy mới nhất trước) và phân trang, giữ trên URL (D-52).
  */
 export function TripListPage() {
   const navigate = useNavigate()
@@ -80,8 +26,19 @@ export function TripListPage() {
   const format = useFormat()
   const canCreate = useCan()('trips.edit')
   const query = useTripsQuery()
-  const columns = useMemo(() => createColumns(t, format), [t, format])
-  const trips = query.data ?? []
+  const list = useListUrlState({ filters: TRIP_LIST_FILTERS, defaultSort: { id: 'scheduledDate', desc: true } })
+  const columns = useMemo(() => createTripColumns(t, format), [t, format])
+  const trips = query.data ?? NO_ROWS
+  const rows = useMemo(() => filterTripRows(trips, list.query, list.filters), [trips, list.query, list.filters])
+  const fields = useMemo<FilterField<TripListFilter>[]>(() => {
+    const { vehicles, drivers } = tripFilterOptions(trips)
+    return [
+      { kind: 'select', name: 'trang-thai', label: t('trips.list.status'), options: FILTERABLE_STATUSES.map((status) => ({ value: status, label: t(`status.${status}`) })) },
+      { kind: 'dateRange', label: t('trips.list.date'), from: 'tu', to: 'den' },
+      { kind: 'select', name: 'xe', label: t('trips.list.vehicle'), options: vehicles },
+      { kind: 'select', name: 'tai-xe', label: t('trips.list.driver'), options: [{ value: UNASSIGNED_DRIVER, label: t('trips.list.unassigned') }, ...drivers] },
+    ]
+  }, [trips, t])
   const hasTrips = trips.length > 0
 
   return (
@@ -98,7 +55,7 @@ export function TripListPage() {
         ) : null}
       </header>
 
-      <div className="min-h-0 flex-1 overflow-auto p-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-6">
         {query.isPending ? (
           <TripListSkeleton />
         ) : query.isError ? (
@@ -118,14 +75,33 @@ export function TripListPage() {
             ) : undefined}
           />
         ) : (
-          <div className="overflow-hidden rounded-md border border-border bg-bg">
-            <DataTable
-              data={trips}
-              columns={columns}
-              density="comfortable"
-              onRowClick={(trip) => void navigate(`/chuyen/${trip.id}`)}
+          <>
+            <FilterBar
+              query={list.query}
+              onQueryChange={list.setQuery}
+              searchLabel={t('trips.list.search')}
+              fields={fields}
+              values={list.filters}
+              onValueChange={list.setFilter}
+              onClear={list.clearAll}
             />
-          </div>
+            {/* Màn điều phối là màn desktop (AGENTS mục 5): khung hẹp hơn bảng thì cuộn ngang trong khung, không bóp cột */}
+            <div className="overflow-x-auto rounded-md border border-border bg-bg">
+              <div className="min-w-285">
+                <DataTable
+                  data={rows}
+                  columns={columns}
+                  density="comfortable"
+                  sorting={list.sorting}
+                  onSortingChange={list.setSorting}
+                  pagination={{ pageIndex: list.pageIndex, pageSize: list.pageSize, onPageChange: list.setPage, onPageSizeChange: list.setPageSize }}
+                  isFiltering={list.isFiltering}
+                  onClearFilters={list.clearAll}
+                  onRowClick={(trip) => void navigate(`/chuyen/${trip.id}`)}
+                />
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
