@@ -65,6 +65,12 @@ export const trips = {
     stopsRequired: 'Add at least one stop',
     tooLong: 'Too long',
   },
+  leave: {
+    title: 'Leave without saving?',
+    description: 'The changes on this trip form are lost if you leave now.',
+    stay: 'Stay',
+    confirm: 'Leave the page',
+  },
   vehicle: 'Vehicle',
   changeVehicle: 'Change vehicle',
   vehicleCard: {

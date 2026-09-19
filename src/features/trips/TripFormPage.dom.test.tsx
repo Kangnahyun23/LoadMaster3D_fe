@@ -14,6 +14,7 @@ function renderForm(route: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const router = createMemoryRouter(
     [
+      { path: '/chuyen', element: <p>Danh sách chuyến</p> },
       { path: '/chuyen/moi', element: <TripFormPage /> },
       { path: '/chuyen/:tripId/sua', element: <TripFormPage /> },
       { path: '/chuyen/:tripId', element: <p>Chi tiết chuyến</p> },
@@ -114,6 +115,29 @@ test('while the warehouse loads, only name, run date and driver can change (D-45
   expect(await screen.findByText('Chi tiết chuyến', {}, SLOW)).toBeInTheDocument()
   const saved = await getMockDb().getTrip('TRIP-011')
   expect(saved).toMatchObject({ driverId: 'US-0006', vehicleId: before.vehicleId, phase: 'loading' })
+})
+
+test('leaving with unsaved changes asks first; staying keeps the input, confirming leaves (LM-100)', async () => {
+  const { user, router } = renderForm('/chuyen/moi')
+  await user.type(await screen.findByLabelText('Tên chuyến'), 'Tuyến chưa lưu')
+  await user.click(screen.getByRole('link', { name: 'Huỷ' }))
+
+  const dialog = await screen.findByRole('dialog', { name: 'Rời trang khi chưa lưu?' })
+  await user.click(within(dialog).getByRole('button', { name: 'Ở lại' }))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(router.state.location.pathname).toBe('/chuyen/moi')
+  expect(screen.getByLabelText('Tên chuyến')).toHaveValue('Tuyến chưa lưu')
+
+  await user.click(screen.getByRole('link', { name: 'Quay lại' }))
+  await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Rời trang' }))
+  expect(await screen.findByText('Danh sách chuyến')).toBeInTheDocument()
+})
+
+test('an untouched form leaves without asking', async () => {
+  const { user } = renderForm('/chuyen/moi')
+  await user.click(await screen.findByRole('link', { name: 'Huỷ' }))
+  expect(await screen.findByText('Danh sách chuyến')).toBeInTheDocument()
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })
 
 test('a trip that has left the warehouse opens no form', async () => {
