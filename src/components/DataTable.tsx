@@ -101,6 +101,9 @@ type DataTableProps<TData extends RowData> = SortingProps & {
   /** Hàng 56px cho tablet tại kho */
   touch?: boolean
   onRowClick?: (row: TData) => void
+  /** Khoá dòng theo mã thay vì vị trí: lọc/sắp xếp không gỡ hay tráo trạng thái của dòng (menu thao tác đang mở). Chỉ truyền khi mã
+   * chắc chắn duy nhất — kiện có thể trùng mã khi dữ liệu còn lỗi. */
+  getRowId?: (row: TData) => string
   /** Đánh dấu hàng đang chọn — nền primary-bg */
   isRowSelected?: (row: TData) => boolean
   /** Bảng rỗng vì chưa có dữ liệu. */
@@ -121,6 +124,7 @@ export function DataTable<TData extends RowData>({
   cellPadding = 'normal',
   touch = false,
   onRowClick,
+  getRowId,
   isRowSelected,
   emptyMessage,
   sorting,
@@ -152,6 +156,7 @@ export function DataTable<TData extends RowData>({
     manualPagination: page === undefined,
     state: { ...(sorting ? { sorting } : {}), ...(page ? { pagination: page } : {}) },
     ...controlledSorting,
+    ...(getRowId ? { getRowId } : {}),
   })
   const rowHeight = touch ? TOUCH_ROW_HEIGHT : ROW_HEIGHT[density]
   const padX = CELL_PADDING[cellPadding]

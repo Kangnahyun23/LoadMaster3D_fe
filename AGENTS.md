@@ -330,6 +330,11 @@ Không phải thứ gì cũng cần card. Nhóm nội dung bằng khoảng trắ
 
 ### Bảng dữ liệu
 
+*(bổ sung 20/09/2026, LM-101)* Bảng có trạng thái theo dòng — menu thao tác, hộp thoại mở từ dòng — **phải** truyền
+`getRowId` cho `DataTable`. Mặc định của TanStack là khoá theo **vị trí**: lọc hay sắp xếp trong lúc menu đang mở thì dòng bị gỡ
+(menu biến mất) hoặc menu nhảy sang người khác và thao tác chạy nhầm đối tượng. Chỉ truyền khi mã chắc chắn duy nhất — kiện có thể
+trùng mã khi dữ liệu còn lỗi, bảng kiện giữ khoá theo vị trí.
+
 Chiều cao dòng cố định (48px thoáng, 36px gọn, 56px cảm ứng). Cột số căn phải, JetBrains Mono. Tiêu đề cột 12px weight 500 màu `--text-3`, không viết hoa, dính khi cuộn. Bảng hẹp (cột phụ ≤ 360px) dùng padding ngang 10px thay vì 12px để tiêu đề không xuống dòng.
 
 *(bổ sung 19/09/2026, LM-085, D-52)* Danh sách có tìm/lọc/sắp xếp/phân trang ghép `FilterBar` + `@/lib/list-filter` (tìm bỏ dấu:
@@ -482,7 +487,7 @@ kết quả tối ưu; không có nguồn thì **bỏ hẳn phần đó**, khôn
 - Cả ba vai trò dùng chung `SceneCanvas` với `frameloop="demand"`. CameraControls tự invalidate khi chuyển động; mọi thay đổi buffer imperative phải gọi invalidate. Spring chỉ ghi ma trận/proxy kiện đang chạy, không đưa state từng frame qua React.
 - `frustumCulled={false}` không loại bỏ nhu cầu bounds của **raycast**. Cargo dùng sphere bao toàn bộ effective geometry và quãng animation, cập nhật khi geometry đổi. Không tính lại `computeBoundingSphere()` trong animation/step/slice path; cập nhật màu không ghi lại ma trận.
 - Dữ liệu đo riêng trong `features/viewer3d/benchmark.mock.ts` (`createBenchmarkInput`: request + result đúng contract Spec, cm; tài xế dùng `createBenchmarkInput`): `?debug&packages=132|300|500|1000`, có thể thêm `&quality=high|balanced|low`. Không đổi mock nghiệp vụ và không kích hoạt benchmark khi thiếu `debug`. Đây là fixture renderer có khe hở, không phải phương án đã xác nhận ổn định chất xếp.
-- Debug chỉ quan sát: FPS khi scene chuyển động, draw calls, tam giác, số kiện, DPR và tier. Khi nghỉ hiển thị trạng thái nghỉ; không tự invalidate để đo FPS. Chưa nâng mục tiêu FPS trên thiết bị thật chỉ dựa vào số đo Chromium phần mềm.
+- Debug chỉ quan sát: FPS khi scene chuyển động, draw calls, tam giác, số kiện, DPR và tier. Khi nghỉ hiển thị trạng thái nghỉ; không tự invalidate để đo FPS. *(đã điều chỉnh 20/09/2026, LM-101)* "Nghỉ" là **demand loop đã dừng** — frame cuối không xin frame tiếp — rồi lặng 250 ms (`scene/perf-idle.ts`), không phải "lâu rồi chưa vẽ": máy yếu vẽ 2–3 FPS thì frame nào cũng cách nhau hơn 250 ms, lấy khoảng lặng làm chuẩn sẽ báo nghỉ giữa lúc scene đang chạy, giấu mất FPS và làm `quality-policy` (bỏ qua mẫu nghỉ) không bao giờ hạ tier trên đúng máy cần hạ. Chưa nâng mục tiêu FPS trên thiết bị thật chỉ dựa vào số đo Chromium phần mềm.
 - Low tier dùng DPR 0,5 và vật liệu cargo Lambert sau phép đo kéo camera 1.000 kiện trên SwiftShader; giữ nguyên picking và nhãn HTML. Balanced/high giữ Standard. Phần 3D mềm hơn là trade-off có chủ ý để ưu tiên tương tác. Không suy diễn kết quả này thành cam kết FPS trên mọi thiết bị hoặc mọi tier.
 
 ### Manual editor *(bổ sung)*
@@ -644,6 +649,15 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
   `@tablet`/`@phone`). Tự bật Vite ở `127.0.0.1:5175`; cổng đang do checkout khác giữ thì đặt
   `E2E_PORT`. Trước khi so tư thế camera phải chờ camera đã vẽ xong (`waitCameraSettled`) —
   overlay debug có thể báo nghỉ sớm. CI: `.github/workflows/ci.yml` (LM-006).
+- *(bổ sung 20/09/2026, LM-101)* **Máy CI chậm hơn máy dev nhiều** — mọi thứ đo bằng thời gian phải chịu được điều đó:
+  - Không bấm nút đóng của toast: sonner chỉ dừng đếm giờ khi con trỏ nằm **trên** toast, nên trên máy chậm toast đã tự tắt trước
+    khi bấm và lệnh chờ tới hết giờ. Chờ `[data-sonner-toast]` về 0 thay vì bấm.
+    Cùng lý do, đừng dựa vào toast còn trên màn để khẳng định một việc đã xảy ra.
+  - Thao tác sau khi gõ vào ô lọc phải chờ danh sách lọc xong (URL hoặc số dòng), vì giữa gõ và lọc có debounce.
+  - Chữ tiếng Việt lọt vào giao diện `en` có thể là **tên riêng trong dữ liệu**: Radix Select dựng sẵn `<option>` ẩn cho form nên
+    tên tài xế, tên xe vào DOM ngay khi truy vấn về. Cổng `i18n-en.spec.ts` lấy danh sách tên từ kho (`seedNames`), không liệt kê tay.
+  - Đo hiệu năng 3D ở CI (SwiftShader, 2 nhân) chạy dưới 4 FPS là bình thường; test phải hỏi "loop còn chạy không", không hỏi
+    "có frame nào trong 250 ms vừa rồi không". Dựng lại máy chậm tại chỗ bằng CDP `Emulation.setCPUThrottlingRate` (40×).
 
 ### Chia chunk theo route
 

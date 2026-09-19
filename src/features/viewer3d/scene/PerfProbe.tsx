@@ -1,6 +1,7 @@
 import { addAfterEffect, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import type { QualityTier } from '../usePerformanceFlags'
+import { isSceneIdle } from './perf-idle'
 
 export type PerfSample = {
   /** Chỉ đo chuỗi frame liên tục; null khi scene nghỉ hoặc chưa đủ mẫu. */
@@ -17,7 +18,6 @@ export type PerfSample = {
 }
 
 const SAMPLE_INTERVAL_MS = 500
-const IDLE_AFTER_MS = 250
 
 type Counters = {
   renderedFrames: number
@@ -86,7 +86,7 @@ export function PerfProbe({
     const timer = window.setInterval(() => {
       const current = counters.current
       if (current.renderedFrames === 0) return
-      const idle = performance.now() - current.lastFrameAt >= IDLE_AFTER_MS
+      const idle = isSceneIdle(current.requestedNextFrame, performance.now() - current.lastFrameAt)
       if (publishedFrames === current.renderedFrames && publishedIdle === idle) return
       const frameTimeMs = !idle && current.activeIntervals > 0
         ? current.activeElapsedMs / current.activeIntervals

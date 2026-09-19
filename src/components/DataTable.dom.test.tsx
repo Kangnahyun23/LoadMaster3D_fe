@@ -121,3 +121,13 @@ test('the footer reads in English with English number grouping', () => {
   expect(screen.getByRole('combobox', { name: 'Rows per page' })).toHaveTextContent('100')
   expect(screen.getByRole('button', { name: 'Previous page' })).toHaveAttribute('aria-disabled', 'true')
 })
+
+test('a screen that names its rows keeps each row on its own node when a filter removes the rows before it', () => {
+  // Khoá theo vị trí thì menu thao tác đang mở ở dòng thứ ba bị gỡ khi lọc, hoặc sang nhầm dòng của người khác (LM-101)
+  const byCode = (place: Place) => place.code
+  const { rerender } = renderInVietnamese(<DataTable data={PLACES} columns={PLAIN_COLUMNS} getRowId={byCode} />)
+  const before = screen.getByRole('row', { name: /Kho Bình Dương/ })
+
+  rerender(<I18nProvider><DataTable data={PLACES.slice(2)} columns={PLAIN_COLUMNS} getRowId={byCode} /></I18nProvider>)
+  expect(screen.getByRole('row', { name: /Kho Bình Dương/ })).toBe(before)
+})

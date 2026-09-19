@@ -23,7 +23,22 @@ const VIEWPORTS: readonly Viewport[] = [
   { name: 'phone-390', width: 390, height: 844 },
 ]
 
-async function vietnameseText(page: Page): Promise<string[]> {
+/**
+ * Tên riêng trong dữ liệu không dịch (AGENTS mục 6): tên người dùng và tên xe của seed hiện trong ô chọn tài xế/xe — Radix Select
+ * dựng sẵn `<option>` ẩn cho form, nên chúng vào `document` ngay khi hai truy vấn về.
+ */
+async function seedNames(page: Page): Promise<string[]> {
+  const names = await page.evaluate(async (url) => {
+    const { getMockDb } = (await import(url)) as typeof import('@/lib/mock-db')
+    const db = getMockDb()
+    const [users, vehicles] = await Promise.all([db.listUsers(), db.listVehicles()])
+    return [...users.map((user) => user.fullName), ...vehicles.map((vehicle) => vehicle.name)]
+  }, MOCK_DB)
+  // Tên dài trước: "Nguyễn Thanh Tùng" phải bị gỡ trước khi thử "Tùng" của người khác
+  return [...DATA_NAMES, ...names].sort((a, b) => b.length - a.length)
+}
+
+async function vietnameseText(page: Page, allowedNames: string[]): Promise<string[]> {
   return page.evaluate((allowed) => {
     const vietnamese = /[À-ÃÈ-ÊÌÍÒ-ÕÙÚÝà-ãè-êìíò-õùúýĂăĐđĨĩŨũƠơƯưẠ-ỹ]/
     const texts = [document.body.innerText]
@@ -35,7 +50,7 @@ async function vietnameseText(page: Page): Promise<string[]> {
     return [...new Set(texts.flatMap((text) => text.split('\n'))
       .map((line) => allowed.reduce((rest, name) => rest.replaceAll(name, ''), line))
       .filter((line) => vietnamese.test(line)))]
-  }, DATA_NAMES)
+  }, allowedNames)
 }
 
 /** Phần tử có chữ bị tràn ngang ngoài chủ ý, và trang có cuộn ngang hay không. */
@@ -52,9 +67,9 @@ async function overflow(page: Page) {
   })
 }
 
-async function check(page: Page, testInfo: TestInfo, name: string, { layout: checkLayout = true } = {}) {
+async function check(page: Page, testInfo: TestInfo, name: string, allowed: string[], { layout: checkLayout = true } = {}) {
   await attachScreenshot(page, testInfo, name)
-  const found = await vietnameseText(page)
+  const found = await vietnameseText(page, allowed)
   const layout = await overflow(page)
   await attachJson(testInfo, `${name}.overflow`, layout)
   expect(found, `${name}: Vietnamese text in the en UI`).toStrictEqual([])
@@ -93,6 +108,7 @@ for (const viewport of VIEWPORTS) {
     // `?lang=en` đọc lúc tải trang; tải lại trước khi ghi kho, phiên đăng nhập nằm trong sessionStorage.
     await page.goto('/chuyen?lang=en')
     await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+    const allowed = await seedNames(page)
     if (!phone) {
       await expect(page.getByRole('heading', { name: 'Trips', exact: true })).toBeVisible()
       await attachScreenshot(page, testInfo, `${viewport.name}-trip-list`)
@@ -102,7 +118,7 @@ for (const viewport of VIEWPORTS) {
     if (viewport.width >= 1440) {
       await navigateInApp(page, '/chuyen/moi')
       await expect(page.getByRole('heading', { name: 'Create trip', exact: true })).toBeVisible()
-      await check(page, testInfo, `${viewport.name}-trip-form`)
+      await check(page, testInfo, `${viewport.name}-trip-form`, allowed)
     }
 
     const tripId = await createEnglishTrip(page)
@@ -110,11 +126,11 @@ for (const viewport of VIEWPORTS) {
     await expect(page.getByRole('link', { name: 'Run optimization', exact: true })).toBeVisible()
     await expect(page.getByRole('row', { name: /PKG-001/ })).toBeVisible()
     // Màn điều phối là màn desktop (AGENTS mục 1): trên điện thoại chỉ kiểm chữ, không kiểm bố cục.
-    await check(page, testInfo, `${viewport.name}-trip-detail`, { layout: !phone })
+    await check(page, testInfo, `${viewport.name}-trip-detail`, allowed, { layout: !phone })
 
     await page.getByRole('link', { name: 'Run optimization', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Optimization setup', exact: true })).toBeVisible()
-    await check(page, testInfo, `${viewport.name}-optimization-setup`, { layout: !phone })
+    await check(page, testInfo, `${viewport.name}-optimization-setup`, allowed, { layout: !phone })
 
     const optimize = page.getByRole('button', { name: 'Optimize', exact: true })
     await expect(optimize).toBeEnabled()
@@ -123,34 +139,33 @@ for (const viewport of VIEWPORTS) {
     await page.locator('canvas').waitFor()
     await settleScene(page)
     await expect(page.locator('header').first()).toContainText('MOCK RESULT')
-    // Toast "đã tối ưu" che thanh trên: đóng nó để ảnh chụp thấy header.
-    await page.locator('[data-sonner-toast] [data-close-button]').click()
-    await expect(page.locator('[data-sonner-toast]')).toHaveCount(0)
-    await check(page, testInfo, `${viewport.name}-planner`)
+    // Toast "đã tối ưu" nằm dưới thanh tiêu đề (LM-101) và tự tắt: chờ nó đi rồi mới chụp, không bấm nút đóng.
+    await expect(page.locator('[data-sonner-toast]')).toHaveCount(0, { timeout: 15_000 })
+    await check(page, testInfo, `${viewport.name}-planner`, allowed)
 
     // Hộp thông tin: từng tab
     await page.getByRole('button', { name: 'Details / Display', exact: true }).click()
     const dialog = page.getByRole('dialog', { name: 'Plan details' })
     await expect(dialog).toBeVisible()
-    await check(page, testInfo, `${viewport.name}-inspector-operations`)
+    await check(page, testInfo, `${viewport.name}-inspector-operations`, allowed)
     await dialog.getByRole('button', { name: 'Package', exact: true }).click()
     await dialog.getByRole('combobox', { name: 'Select package', exact: true }).selectOption({ index: 1 })
     await expect(dialog.getByText('Source package', { exact: true })).toBeVisible()
-    await check(page, testInfo, `${viewport.name}-inspector-package`)
+    await check(page, testInfo, `${viewport.name}-inspector-package`, allowed)
     await dialog.getByRole('button', { name: 'Display', exact: true }).click()
     await expect(dialog.getByRole('heading', { name: 'Display layers', exact: true })).toBeVisible()
-    await check(page, testInfo, `${viewport.name}-inspector-display`)
+    await check(page, testInfo, `${viewport.name}-inspector-display`, allowed)
     await dialog.getByRole('button', { name: 'List', exact: true }).click()
-    await check(page, testInfo, `${viewport.name}-inspector-packages`)
+    await check(page, testInfo, `${viewport.name}-inspector-packages`, allowed)
     await dialog.getByRole('button', { name: 'Metrics', exact: true }).click()
-    await check(page, testInfo, `${viewport.name}-inspector-metrics`)
+    await check(page, testInfo, `${viewport.name}-inspector-metrics`, allowed)
     await dialog.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(dialog).toHaveCount(0)
 
     // Dỡ hàng: HUD, timeline và panel vận hành đổi nhãn
     await page.getByRole('button', { name: 'Unloading', exact: true }).click()
     await settleScene(page)
-    await check(page, testInfo, `${viewport.name}-planner-unloading`)
+    await check(page, testInfo, `${viewport.name}-planner-unloading`, allowed)
 
     if (!phone) {
       // Chế độ chỉnh sửa: thanh công cụ và panel editor
@@ -158,7 +173,7 @@ for (const viewport of VIEWPORTS) {
       await page.getByRole('combobox', { name: 'Select package', exact: true }).selectOption({ index: 1 })
       await expect(page.getByRole('complementary', { name: 'Edit package' })).toBeVisible()
       await settleScene(page)
-      await check(page, testInfo, `${viewport.name}-planner-editor`)
+      await check(page, testInfo, `${viewport.name}-planner-editor`, allowed)
     }
 
     expect(browserErrors).toStrictEqual([])

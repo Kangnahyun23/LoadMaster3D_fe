@@ -111,6 +111,7 @@ export function AuditLogPage() {
             <DataTable
               data={rows}
               columns={columns}
+              getRowId={(event) => event.id}
               density="comfortable"
               sorting={list.sorting}
               onSortingChange={list.setSorting}

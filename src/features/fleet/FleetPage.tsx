@@ -176,6 +176,7 @@ export function FleetPage() {
               <DataTable
                 data={rows}
                 columns={columns}
+                getRowId={(row) => row.id}
                 density="comfortable"
                 sorting={list.sorting}
                 onSortingChange={list.setSorting}

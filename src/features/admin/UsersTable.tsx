@@ -58,6 +58,7 @@ export function UsersTable({ users, currentUserId, onAction }: {
         <DataTable
           data={rows}
           columns={columns}
+          getRowId={(user) => user.id}
           density="comfortable"
           sorting={list.sorting}
           onSortingChange={list.setSorting}
