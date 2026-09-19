@@ -26,6 +26,9 @@ export default mergeConfig(
             environment: 'jsdom',
             include: ['src/**/*.dom.test.tsx'],
             setupFiles: ['./src/test/setup-dom.ts'],
+            // Test màn đi cả luồng người dùng (gõ form, mở Select, chuyển route) mất 2–3 giây khi chạy riêng; chạy song song
+            // với cả bộ thì vượt mức 5 giây mặc định dù không hỏng gì (TripFormPage, DriverStopPage — LM-085).
+            testTimeout: 15_000,
             // Benchmark domain chỉ chạy một lần, ở project unit (node). `include: []` bị coi là mặc định nên dùng exclude.
             benchmark: { exclude: ['**/*'] },
           },

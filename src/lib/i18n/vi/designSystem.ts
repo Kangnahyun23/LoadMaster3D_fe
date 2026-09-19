@@ -235,6 +235,18 @@ export const designSystem = {
       rearAxle: 'Trục sau',
       overload: 'Quá tải',
       barsCaption: '{count} kiện · trục 0–100%',
+      /** Mẫu `FilterBar` + `DataTable` + `useListUrlState` (LM-085) trên mọi kiện của các chuyến trong kho. */
+      table: {
+        note:
+          'Tìm không dấu, chọn một giá trị, khoảng ngày; tiêu đề cột có mũi tên là nút sắp xếp; 25/50/100 dòng mỗi trang. Trạng thái nằm trên URL nên tải lại hay quay lại vẫn giữ. Dữ liệu: mọi kiện của các chuyến trong kho.',
+        search: 'Tìm theo mã kiện, tên hàng, chuyến',
+        trip: 'Chuyến',
+        date: 'Ngày chạy',
+        packageId: 'Mã kiện',
+        goods: 'Tên hàng',
+        stop: 'Điểm giao',
+        weight: 'Khối lượng',
+      },
     },
     feedback: {
       toastNote:
