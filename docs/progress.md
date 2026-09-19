@@ -21,8 +21,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
 | 5 | i18n phần còn lại, nghiệm thu | 3 / 3 | ~3,5 ngày | ✅ Xong 16/09/2026 — 520 unit/DOM, 55 E2E, cổng chuỗi cứng |
-| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 9 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
-| **Tổng** | | **65 / 80 issue** | **~83,5 ngày công** | |
+| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 14 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
+| **Tổng** | | **70 / 80 issue** | **~83,5 ngày công** | |
 
 **Phase 5 xong (16/09/2026) — MVP nghiệm thu.** 56/57 issue; LM-002 chờ backend. Nợ sau nghiệm thu: [acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend), LM-073.
 
@@ -517,12 +517,12 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-086](issues/LM-086-kho-chon-chuyen-tien-do.md) | Kho | ✅ | 19/09/2026 | 19/09/2026 | Agent, `197818d`; danh sách + tiến độ bền trong phiên |
 | [LM-087](issues/LM-087-tai-xe-chuyen-cua-toi-tong-ket.md) | Tài xế | ✅ | 19/09/2026 | 19/09/2026 | Agent, `0184351`; chuyến của tôi, sự cố, tổng kết; E2E 30/30 |
 | [LM-088](issues/LM-088-chuyen-trang-thai-loc-tien-trinh.md) | Chuyến | ⬜ | | | |
-| [LM-089](issues/LM-089-doi-xe-trang-thai-bao-duong.md) | Đội xe | ⬜ | | | |
-| [LM-090](issues/LM-090-dashboard-bieu-do-xuat-xlsx.md) | Dashboard | ⬜ | | | |
-| [LM-091](issues/LM-091-nhat-ky-he-thong.md) | Nhật ký | ⬜ | | | |
-| [LM-092](issues/LM-092-nguoi-dung-quan-tri-day-du.md) | Người dùng | ⬜ | | | |
+| [LM-089](issues/LM-089-doi-xe-trang-thai-bao-duong.md) | Đội xe | ✅ | 19/09/2026 | 19/09/2026 | Agent, `c64f7d3`; trạng thái, bảo dưỡng, lọc |
+| [LM-090](issues/LM-090-dashboard-bieu-do-xuat-xlsx.md) | Dashboard | ✅ | 19/09/2026 | 19/09/2026 | Agent, `917480c`; lọc kỳ, 5 KPI, 3 biểu đồ, .xlsx |
+| [LM-091](issues/LM-091-nhat-ky-he-thong.md) | Nhật ký | ✅ | 19/09/2026 | 19/09/2026 | Agent, `50aed9a`; /nhat-ky có lọc |
+| [LM-092](issues/LM-092-nguoi-dung-quan-tri-day-du.md) | Người dùng | ✅ | 19/09/2026 | 19/09/2026 | Agent, `d34acc0`; khoá/xoá/đặt lại mật khẩu, ma trận quyền |
 | [LM-093](issues/LM-093-nhap-kien-csv-xlsx.md) | Nhập kiện CSV/.xlsx | ⬜ | | | |
-| [LM-094](issues/LM-094-planner-gon.md) | Planner gọn | ⬜ | | | |
+| [LM-094](issues/LM-094-planner-gon.md) | Planner gọn | ✅ | 19/09/2026 | 19/09/2026 | Agent, `46282cc`; một hàng 56 px từ 1.366 px, không Duyệt khi đã duyệt |
 | [LM-095](issues/LM-095-bo-cuc-1366-het-cat-chu.md) | Bố cục 1.366 px | ⬜ | | | |
 | [LM-096](issues/LM-096-ho-so-doi-mat-khau.md) | Hồ sơ | ⬜ | | | |
 | [LM-097](issues/LM-097-so-do-tuyen-svg.md) | Sơ đồ tuyến | ⬜ | | | |

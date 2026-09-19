@@ -153,3 +153,14 @@ test('twelve seeded users cover the five roles; the history names only real user
   expect(events.filter((event) => event.actorId !== null && !ids.has(event.actorId))).toStrictEqual([])
   expect(events.map((event) => event.at)).toStrictEqual(events.map((event) => event.at).toSorted().toReversed())
 })
+
+test('seeded history keeps the operation order: loading finishes before the delivery starts', async () => {
+  const db = createMockDb({ today: '2026-09-19' })
+  for (const trip of await db.listTrips()) {
+    if (!trip.delivery) continue
+    expect(trip.loading?.completedAt, trip.id).toBeDefined()
+    expect((trip.loading?.completedAt ?? '') < trip.delivery.startedAt, trip.id).toBe(true)
+    const completed = trip.delivery.stops.map((stop) => stop.completedAt).filter((at) => at !== undefined)
+    expect(completed.every((at) => at > trip.delivery!.startedAt), trip.id).toBe(true)
+  }
+})
