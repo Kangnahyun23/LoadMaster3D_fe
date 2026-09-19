@@ -38,6 +38,8 @@ export type Formatter = {
   ratio(value: number): string
   /** "14/09/2026" · "Sep 14, 2026" */
   date(value: Date | string): string
+  /** Ngày như `date` nhưng bỏ năm, cho nhãn trục biểu đồ: "14/09" · "Sep 14" */
+  dayMonth(value: Date | string): string
   /** Đồng hồ 24 giờ ở mọi ngôn ngữ: "14:30" */
   time(value: Date | string): string
 }
@@ -99,12 +101,23 @@ export function createFormatter(locale: FormatLocale): Formatter {
     percent: (value) => percent.format(value),
     ratio: (value) => twoDecimals.format(value),
     date: (value) => date.format(toDate(value)),
+    dayMonth: (value) => withoutYear(date.formatToParts(toDate(value))),
     time: (value) => time.format(toDate(value)),
   }
 }
 
 function toDate(value: Date | string): Date {
   return value instanceof Date ? value : new Date(value)
+}
+
+/**
+ * Bỏ năm và dấu nối nó khỏi ngày đầy đủ của ngôn ngữ, để "14/09" cùng kiểu với "14/09/2026" (tuỳ chọn ngày + tháng riêng
+ * của Intl cho vi-VN lại ra "14-09").
+ */
+function withoutYear(parts: readonly Intl.DateTimeFormatPart[]): string {
+  const yearAt = parts.findIndex((part) => part.type === 'year')
+  const joinerAt = yearAt === parts.length - 1 ? yearAt - 1 : yearAt + 1
+  return parts.filter((_, index) => index !== yearAt && index !== joinerAt).map((part) => part.value).join('')
 }
 
 /* ---------------------------------------------------------------------------
