@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { MessageKey, TFunction } from '@/lib/i18n'
-import { ROLES, USER_STATUSES } from '@/types/user'
+import { ROLES } from '@/types/user'
 
 /** Số điện thoại Việt Nam: 10 chữ số bắt đầu bằng 0, cho phép khoảng trắng. */
 const PHONE_PATTERN = /^0\d{9}$/
@@ -8,6 +8,8 @@ const PHONE_PATTERN = /^0\d{9}$/
 /**
  * Schema giữ key từ điển thay vì câu chữ (như form đăng nhập); hộp thoại dịch lúc hiển thị,
  * nên đổi ngôn ngữ khi lỗi đang hiện thì lỗi đổi theo.
+ *
+ * Không có trạng thái: khoá/mở khoá là thao tác riêng ở menu dòng (LM-092), tài khoản mới luôn đang hoạt động.
  */
 const ERRORS = {
   fullNameRequired: 'admin.users.errors.fullNameRequired',
@@ -17,7 +19,6 @@ const ERRORS = {
   phoneRequired: 'admin.users.errors.phoneRequired',
   phoneInvalid: 'admin.users.errors.phoneInvalid',
   roleRequired: 'admin.users.errors.roleRequired',
-  statusRequired: 'admin.users.errors.statusRequired',
   depotRequired: 'admin.users.errors.depotRequired',
 } as const satisfies Record<string, MessageKey>
 
@@ -29,9 +30,10 @@ export const userFormSchema = z.object({
     .trim()
     .min(1, ERRORS.phoneRequired)
     .transform((value) => value.replace(/\s/g, ''))
-    .refine((value) => PHONE_PATTERN.test(value), ERRORS.phoneInvalid),
+    .refine((value) => PHONE_PATTERN.test(value), ERRORS.phoneInvalid)
+    // Lưu theo dạng hiển thị của kho ("0901 234 567"), để mở form rồi lưu không đổi gì thì kho không thấy thay đổi
+    .transform((value) => `${value.slice(0, 4)} ${value.slice(4, 7)} ${value.slice(7)}`),
   role: z.enum(ROLES, { error: ERRORS.roleRequired }),
-  status: z.enum(USER_STATUSES, { error: ERRORS.statusRequired }),
   depot: z.string().trim().min(1, ERRORS.depotRequired),
 })
 
