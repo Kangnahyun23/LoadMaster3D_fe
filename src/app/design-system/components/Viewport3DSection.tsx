@@ -7,8 +7,8 @@ import { StopLegend } from '@/features/viewer3d/overlays/StopLegend'
 import { adaptResult } from '@/features/viewer3d/scene-input'
 import { Timeline } from '@/features/viewer3d/Timeline'
 import { useT } from '@/lib/i18n'
-import { seedRevisions } from '@/lib/mock-db/seed-revisions'
-import { seedTrip } from '@/lib/mock-db/seed-trip'
+import { buildSeed } from '@/lib/mock-db/seed'
+import { SEED_ANCHOR_DATE } from '@/lib/mock-db/clock'
 import type { CameraPreset, ColorMode, PlaybackSpeed } from '@/features/viewer3d/viewer-types'
 import { SAMPLE_AXLES } from '../design-system.mock'
 import { DarkStage, SheetRow, SheetSection } from '../SheetLayout'
@@ -30,9 +30,11 @@ export function Viewport3DSection() {
   const t = useT()
   // Revision đã duyệt của chuyến seed — cùng dữ liệu Planner mở mặc định, không dựng phương án riêng cho trang tài liệu.
   const plan = useMemo(() => {
-    const approved = seedRevisions().findLast((revision) => revision.approvedAt !== undefined)
-    if (!approved) throw new Error('seed has no approved revision')
-    return adaptResult({ trip: seedTrip(), revision: approved })
+    const { trips, revisions } = buildSeed(SEED_ANCHOR_DATE)
+    const [trip] = trips
+    const approved = revisions.findLast((revision) => revision.tripId === trip?.id && revision.approvedAt !== undefined)
+    if (!trip || !approved) throw new Error('seed has no approved revision')
+    return adaptResult({ trip, revision: approved })
   }, [])
   const colorContext = useMemo(() => createColorContext(plan), [plan])
   const [camera, setCamera] = useState<CameraPreset>('goc-cheo')

@@ -38,3 +38,9 @@ t('nav.account', { fullName: 'Nguyễn Thanh Tùng' })
 
 // @ts-expect-error — count của câu số nhiều phải là số
 t('common.packageCount', { count: '3' })
+
+// Nhánh `audit` (LM-082): mỗi mã hành động của kho có đúng một nhãn.
+declare const auditLabels: import('@/lib/mock-db/audit').AuditActionLabels
+void auditLabels
+// @ts-expect-error — thiếu nhãn cho 'trip.cancelled'
+void ({ ...auditLabels, trip: { created: 'Tạo', updated: 'Sửa' } } satisfies import('@/lib/mock-db/audit').AuditActionLabels)

@@ -72,6 +72,7 @@ async function createEnglishTrip(page: Page): Promise<string> {
     const trip = await db.createTrip({
       name: 'Riverside route',
       vehicleId: seed.vehicleId,
+      scheduledDate: seed.scheduledDate,
       stops: [
         { id: 'STOP-01', name: 'North Market', address: '12 River Road' },
         { id: 'STOP-02', name: 'Harbor Foods', address: '30 Harbor Avenue' },

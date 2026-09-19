@@ -127,7 +127,8 @@ src/
     admin/              người dùng
   lib/                  format, helper, mock dùng chung, api client
     i18n/               từ điển vi/en (mỗi nhánh một file trong vi/, en/ — LM-080), provider, hook (LM-027)
-    mock-db/            kho in-memory: xe, chuyến, revision bất biến, Duyệt, seed chuyến đã duyệt (LM-026)
+    mock-db/            kho in-memory: xe, chuyến, revision bất biến, Duyệt (LM-026); vòng đời chuyến, tiến độ kho/giao,
+                        bảo dưỡng xe (LM-081); người dùng, phiên, nhật ký (LM-082); seed 15 chuyến neo theo ngày (LM-083)
   types/                type dùng từ hai feature trở lên
   domain/               logic nghiệp vụ THUẦN theo Spec — không React, không Three.js
     geometry/           số (roundCm, EPSILON), hộp, chồng lấn, biên thùng, 6 hướng đặt, lưới không gian
@@ -544,6 +545,16 @@ Màn nào còn giữ dữ liệu ở `useState` (Người dùng) thì phải chu
   trước khi gọi. `message` của kiện chưa xếp là `reasonCode`, UI dịch mã (LM-024).
 - Kết quả là **revision bất biến** theo `jobId`. Duyệt tạo revision approved mới; sửa xe/kiện sau
   khi tối ưu làm revision lỗi thời và chặn Duyệt. Kho và tài xế chỉ đọc revision đã duyệt.
+- *(bổ sung 19/09/2026, LM-081 → LM-083)* Kho lưu **pha** chuyến `planning → loading → loaded → delivering → completed` (+ `cancelled`);
+  trạng thái hiển thị lấy qua `tripStatus(trip, revisions)` (pha `planning` vẫn suy từ revision). Từ `loading` trở đi xe/điểm giao/kiện,
+  tối ưu và Duyệt bị từ chối `TRIP_LOCKED`. Tiến độ kho (`loading.steps`) và giao (`delivery.stops`, `issues`) chỉ ghi qua hàm vận hành
+  của kho (`startLoading`…`completeStop`). Bảo dưỡng xe lưu ngoài `VehicleConfig` (`listVehicleStates`, D-04).
+- Người dùng và mật khẩu nằm trong kho; kho giữ **phiên** như cookie server (`authenticate`, `restoreSession`) và mọi hàm ghi thêm
+  một sự kiện nhật ký `{ action, actorId, target, params }` — không lưu câu chữ, UI dịch nhánh `audit`. Lỗi của kho (`MockDbError`)
+  hiện cho người dùng qua `dataErrorMessage(error, t)` (nhánh `dataErrors`, key trùng mã).
+- Seed neo theo ngày (D-44): `getMockDb()` neo hôm nay giờ Việt Nam, dưới Vitest và `createMockDb()` mặc định neo `SEED_ANCHOR_DATE`
+  (14/09/2026) để test tất định. Chuyến chính `TRIP-2026-0914` luôn đứng đầu `listTrips` và giữ `REV-001`/`REV-002`; test so số
+  của seed (tổng kiện, số xe…) phải cập nhật khi đổi `seed-trips.ts`. Dựng seed ≈ 0,3 s một lần mỗi ngày neo.
 - Trạng thái demo lỗi service bật bằng tham số URL (`?mo-phong=loi`), đọc ở `-api.ts`, không đưa
   công tắc kỹ thuật lên UI vận hành. `-api.ts` lấy service qua `createOptimizationService({ simulateFailure })`:
   Web Worker trong trình duyệt, chạy trên luồng gọi khi không có Worker (jsdom), mọi đường kết thúc đều `terminate` (LM-025).

@@ -2,10 +2,14 @@ import { expect, test } from 'vitest'
 import { createMockDb } from '@/lib/mock-db'
 import { twoCartonRequest, twoCartonResult, twoCartonTrip } from '@/test/mock-db-samples'
 
-test('a created trip gets the next trip id and starts at input version 1', async () => {
-  const db = createMockDb()
-  expect(await db.createTrip(twoCartonTrip())).toStrictEqual({ ...twoCartonTrip(), id: 'TRIP-001', inputVersion: 1 })
-  expect((await db.listTrips()).map(({ id }) => id)).toStrictEqual(['TRIP-2026-0914', 'TRIP-001'])
+test('a created trip gets the next trip id, starts planning at input version 1 and is stamped with the time it was created', async () => {
+  const db = createMockDb({ now: () => new Date('2026-09-15T02:00:00.000Z') })
+  expect(await db.createTrip(twoCartonTrip())).toStrictEqual({
+    ...twoCartonTrip(), id: 'TRIP-015', inputVersion: 1, driverId: null, phase: 'planning', createdAt: '2026-09-15T02:00:00.000Z',
+  })
+  const ids = (await db.listTrips()).map(({ id }) => id)
+  // the sample trip comes first, then the 14 seeded trips in creation order
+  expect([ids[0], ids.at(-1), ids.length]).toStrictEqual(['TRIP-2026-0914', 'TRIP-015', 16])
 })
 
 test('an update changes only the fields it gives and never the id or the input version', async () => {

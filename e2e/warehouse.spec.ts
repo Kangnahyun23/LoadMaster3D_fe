@@ -115,7 +115,7 @@ test('a trip without an approved plan shows the empty state with a way out', asy
     const { getMockDb } = (await import(db)) as typeof import('@/lib/mock-db')
     const store = getMockDb()
     const seed = await store.getTrip('TRIP-2026-0914')
-    const trip = await store.createTrip({ name: 'Tuyến chưa duyệt', vehicleId: seed.vehicleId, stops: seed.stops, packages: seed.packages })
+    const trip = await store.createTrip({ name: 'Tuyến chưa duyệt', vehicleId: seed.vehicleId, stops: seed.stops, packages: seed.packages, scheduledDate: seed.scheduledDate })
     return trip.id
   }, MOCK_DB)
 

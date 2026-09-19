@@ -1,4 +1,5 @@
 import type { CargoPackage } from '@/domain/models'
+import { addDays, SEED_ANCHOR_DATE, vnTime } from './clock'
 import type { Trip } from './types'
 
 type CargoLine = Pick<
@@ -24,18 +25,22 @@ function cargo(line: CargoLine): CargoPackage {
 /**
  * Chuyến mẫu TRIP-2026-0914 từ Kho Long Bình: 6 dòng kiện, 132 instance, 5.844 kg, 16,55 m³ trên Hyundai HD210 (41% thể tích,
  * 62% tải). `maxTopLoadKg` mỗi dòng chịu được cả cột `maxStackCount` kiện cùng loại. `groupId` là mã đơn hàng.
- * Chưa có revision: bản đã tối ưu và đã duyệt cần MockOptimizationService của LM-024.
+ * Là chuyến chính của ngày neo (D-44): chạy ngày `today`, gán tài xế demo, đã duyệt và chờ kho xếp (revision ở `seed-revisions`).
  */
-export function seedTrip(): Trip {
+export function seedTrip(today: string = SEED_ANCHOR_DATE): Trip {
   return {
     id: 'TRIP-2026-0914',
     name: 'Tuyến Q.7 – Thủ Dầu Một – Dĩ An – Biên Hoà',
     vehicleId: 'VEHICLE-002',
+    scheduledDate: today,
+    driverId: 'US-0004',
+    phase: 'planning',
+    createdAt: vnTime(addDays(today, -1), '15:20'),
     stops: [
-      { id: 'STOP-01', name: 'Công ty TNHH Thực phẩm Sài Gòn', address: '12 Nguyễn Văn Linh, Q.7, TP. Hồ Chí Minh' },
-      { id: 'STOP-02', name: 'Siêu thị Co.opmart Bình Dương', address: '30 Đại lộ Bình Dương, Thủ Dầu Một' },
-      { id: 'STOP-03', name: 'Kho Bách Hoá Xanh Dĩ An', address: '215 Quốc lộ 1K, P. Đông Hoà, Dĩ An' },
-      { id: 'STOP-04', name: 'Nhà thuốc Long Châu Biên Hoà', address: '58 Võ Thị Sáu, P. Quyết Thắng, Biên Hoà' },
+      { id: 'STOP-01', name: 'Công ty TNHH Thực phẩm Sài Gòn', address: '12 Nguyễn Văn Linh, Q.7, TP. Hồ Chí Minh', phone: '0283 775 1122', contactName: 'Chị Hương' },
+      { id: 'STOP-02', name: 'Siêu thị Co.opmart Bình Dương', address: '30 Đại lộ Bình Dương, Thủ Dầu Một', phone: '0274 382 6655', contactName: 'Anh Phúc' },
+      { id: 'STOP-03', name: 'Kho Bách Hoá Xanh Dĩ An', address: '215 Quốc lộ 1K, P. Đông Hoà, Dĩ An', phone: '0909 318 204', contactName: 'Anh Toàn' },
+      { id: 'STOP-04', name: 'Nhà thuốc Long Châu Biên Hoà', address: '58 Võ Thị Sáu, P. Quyết Thắng, Biên Hoà', phone: '0251 382 7719', contactName: 'Chị Ngân' },
     ],
     packages: [
       cargo({

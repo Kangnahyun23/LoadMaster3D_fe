@@ -21,7 +21,10 @@ function vehicle(id: string): VehicleConfig {
 }
 
 function trip(id: string, packages: Trip['packages']): Trip {
-  return { id, name: `Chuyến ${id}`, vehicleId: 'VEHICLE-001', stops: [], packages, inputVersion: 1 }
+  return {
+    id, name: `Chuyến ${id}`, vehicleId: 'VEHICLE-001', stops: [], packages, inputVersion: 1,
+    scheduledDate: '2026-09-14', driverId: null, phase: 'planning', createdAt: '2026-09-13T08:00:00.000Z',
+  }
 }
 
 function cargo(id: string, weightKg: number, quantity: number): Trip['packages'][number] {

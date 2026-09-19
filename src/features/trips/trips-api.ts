@@ -1,5 +1,5 @@
 import type { CargoPackage, VehicleConfig } from '@/domain/models'
-import { getMockDb, type DeliveryStop, type Revision, type Trip } from '@/lib/mock-db'
+import { getMockDb, vnDate, type DeliveryStop, type Revision, type Trip } from '@/lib/mock-db'
 import { tripRow, type TripRow } from './trip-list'
 import { duplicatePackage, renumberDeliveryStops, stopRemoval, type StopRemoval } from './trip-packages'
 
@@ -17,13 +17,21 @@ export async function fetchTrips(): Promise<TripRow[]> {
   return trips.map((trip, index) => tripRow(trip, vehicleById.get(trip.vehicleId), revisions[index] ?? []))
 }
 
-export type TripFrame = { readonly name: string; readonly vehicleId: string; readonly stops: readonly Pick<DeliveryStop, 'name' | 'address'>[] }
+export type TripFrame = {
+  readonly name: string
+  readonly vehicleId: string
+  readonly stops: readonly Pick<DeliveryStop, 'name' | 'address' | 'phone' | 'contactName'>[]
+  /** Ngày chạy `YYYY-MM-DD`; vắng thì hôm nay (giờ Việt Nam). */
+  readonly scheduledDate?: string
+  readonly driverId?: string | null
+}
 
 /** Tạo chuyến: kho cấp mã chuyến; điểm giao nhận mã `STOP-NN` theo thứ tự nhập, chưa có kiện. */
-export async function createTrip({ name, vehicleId, stops }: TripFrame): Promise<Trip> {
+export async function createTrip({ name, vehicleId, stops, scheduledDate, driverId = null }: TripFrame): Promise<Trip> {
   return getMockDb().createTrip({
-    name, vehicleId, packages: [],
-    stops: stops.map((stop, index) => ({ id: `STOP-${String(index + 1).padStart(2, '0')}`, name: stop.name, address: stop.address })),
+    name, vehicleId, packages: [], driverId,
+    scheduledDate: scheduledDate ?? vnDate(new Date()),
+    stops: stops.map((stop, index) => ({ ...stop, id: `STOP-${String(index + 1).padStart(2, '0')}` })),
   })
 }
 

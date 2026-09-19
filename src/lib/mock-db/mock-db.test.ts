@@ -40,25 +40,20 @@ test('a created vehicle gets the next vehicle id and keeps its own copy of the i
   const zone = { ...PALLET_JACK_ZONE }
   const created = await db.createVehicle(ollinTruck(zone))
   zone.heightCm = 999
-  const expected = { ...ollinTruck(PALLET_JACK_ZONE), id: 'VEHICLE-005' }
+  const expected = { ...ollinTruck(PALLET_JACK_ZONE), id: 'VEHICLE-009' }
   expect(created).toStrictEqual(expected)
-  expect(await db.getVehicle('VEHICLE-005')).toStrictEqual(expected)
-  expect((await db.listVehicles()).map(({ id }) => id)).toStrictEqual([
-    'VEHICLE-001',
-    'VEHICLE-002',
-    'VEHICLE-003',
-    'VEHICLE-004',
-    'VEHICLE-005',
-  ])
+  expect(await db.getVehicle('VEHICLE-009')).toStrictEqual(expected)
+  expect((await db.listVehicles()).map(({ id }) => id).slice(-2)).toStrictEqual(['VEHICLE-008', 'VEHICLE-009'])
 })
 
 test('a vehicle is replaced as a whole on update and is gone after delete; both need an existing id', async () => {
   const db = createMockDb()
-  const moreLoad = { ...(await db.getVehicle('VEHICLE-003')), maxPayloadKg: 6000 }
+  // VEHICLE-008 is in maintenance and no trip uses it
+  const moreLoad = { ...(await db.getVehicle('VEHICLE-008')), maxPayloadKg: 7500 }
   expect(await db.updateVehicle(moreLoad)).toStrictEqual(moreLoad)
-  expect(await db.getVehicle('VEHICLE-003')).toStrictEqual(moreLoad)
-  await db.deleteVehicle('VEHICLE-003')
-  await expect(db.getVehicle('VEHICLE-003')).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  expect(await db.getVehicle('VEHICLE-008')).toStrictEqual(moreLoad)
+  await db.deleteVehicle('VEHICLE-008')
+  await expect(db.getVehicle('VEHICLE-008')).rejects.toMatchObject({ code: 'NOT_FOUND' })
   const missing = { collection: 'vehicles', id: 'VEHICLE-404' }
   await expect(db.updateVehicle({ ...moreLoad, id: 'VEHICLE-404' })).rejects.toMatchObject({ code: 'NOT_FOUND', params: missing })
   await expect(db.deleteVehicle('VEHICLE-404')).rejects.toMatchObject({ code: 'NOT_FOUND', params: missing })
@@ -90,7 +85,7 @@ test('a vehicle that a trip still uses cannot be deleted', async () => {
   const db = createMockDb()
   await expect(db.deleteVehicle('VEHICLE-002')).rejects.toMatchObject({
     code: 'VEHICLE_IN_USE',
-    params: { vehicleId: 'VEHICLE-002', tripIds: ['TRIP-2026-0914'] },
+    params: { vehicleId: 'VEHICLE-002', tripIds: ['TRIP-2026-0914', 'TRIP-002'] },
   })
   expect((await db.getVehicle('VEHICLE-002')).id).toBe('VEHICLE-002')
 })

@@ -23,7 +23,7 @@ test('seed trip: approved revision gives its volume utilisation and the "approve
 
 test('a trip without revisions is a draft with no utilisation', async () => {
   const { db, vehicle } = await seed()
-  const created = await db.createTrip({ name: 'Chuyến Q.7', vehicleId: vehicle.id, stops: [{ id: 'S1', name: 'Q.7', address: '' }], packages: [] })
+  const created = await db.createTrip({ name: 'Chuyến Q.7', vehicleId: vehicle.id, stops: [{ id: 'S1', name: 'Q.7', address: '' }], packages: [], scheduledDate: '2026-09-15' })
   expect(tripRow(created, vehicle, [])).toMatchObject({ packageCount: 0, volumePercent: null, status: 'nhap' })
 })
 

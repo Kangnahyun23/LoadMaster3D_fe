@@ -16,6 +16,8 @@ import { viewer } from './vi/viewer'
 import { fields } from './vi/fields'
 import { admin } from './vi/admin'
 import { designSystem } from './vi/designSystem'
+import { dataErrors } from './vi/dataErrors'
+import { audit } from './vi/audit'
 
 /**
  * Từ điển nguồn. Mọi ngôn ngữ khác khai báo `satisfies Dictionary<typeof vi>`,
@@ -45,4 +47,6 @@ export const vi = {
   fields,
   admin,
   designSystem,
+  dataErrors,
+  audit,
 } as const
