@@ -11,11 +11,12 @@ for (const device of ['desktop', 'tablet'] as const) {
   const details = device === 'tablet' ? { tag: '@tablet' } : {}
 
   test(`${device}: approving in the Planner then opening /kho starts at loadingOrder 1 of that revision`, details, async ({ page, login, browserErrors }) => {
-    await login(PLANNER_ROUTE, 'admin')
+    // Bản seed đã duyệt không có nút Duyệt (LM-094): duyệt lại revision nguồn chưa duyệt REV-001
+    await login(`${PLANNER_ROUTE}?revision=REV-001`, 'admin')
     await page.locator('canvas').waitFor()
     await page.getByRole('button', { name: 'Duyệt phương án', exact: true }).click()
     await page.getByRole('dialog', { name: 'Duyệt phương án này?' }).getByRole('button', { name: 'Duyệt', exact: true }).click()
-    await page.waitForURL(/\/phuong-an\?revision=REV-/)
+    await page.waitForURL(/\/phuong-an\?revision=REV-(?!001)/)
     const approvedId = new URL(page.url()).searchParams.get('revision')
 
     const approved = await page.evaluate(async ({ db, tripId }) => {

@@ -1,0 +1,144 @@
+import type { Page } from '@playwright/test'
+import { attachScreenshot, expect, PLANNER_ROUTE, test } from './fixtures'
+import { enterEdit, selectPlacement, SOURCE_MODULES } from './viewer-helpers'
+
+/**
+ * Planner gọn (LM-094, D-51): từ 1.366 px thanh trên là hàng điều khiển duy nhất; bản đã duyệt không có nút Duyệt mà có
+ * "Đã duyệt lúc …"; chỉnh một kiện thì có "Duyệt bản chỉnh"; chuyến đã sang pha vận hành hoặc người xem chỉ đọc thì không
+ * Chỉnh sửa, không Duyệt và nói lý do một lần; tablet giữ hai hàng 56 px. Lý do chặn Duyệt (tooltip của nút): plan-approval.spec.ts.
+ */
+test.use({ collectConsoleErrors: true })
+
+const APPROVED_AT = /Đã duyệt lúc\s*\d{2}:\d{2} \d{2}\/\d{2}/
+const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
+const header = (page: Page) => page.locator('header').first()
+
+/** Chữ tràn trong thanh trên (bỏ qua chữ cố ý cắt bằng dấu ba chấm và `sr-only`), và mã chuyến xuống dòng. */
+function headerOverflow(page: Page) {
+  return header(page).evaluate((root) => {
+    const clipped: string[] = []
+    if (root.scrollWidth > root.clientWidth + 1) clipped.push(`header ${root.scrollWidth} > ${root.clientWidth}`)
+    for (const element of root.querySelectorAll<HTMLElement>('*')) {
+      if (!element.offsetParent || element.closest('.sr-only')) continue
+      if (getComputedStyle(element).textOverflow === 'ellipsis') continue
+      if (element.scrollWidth > element.clientWidth + 1) clipped.push(`${element.tagName.toLowerCase()}: ${element.innerText.slice(0, 40)}`)
+    }
+    const title = root.querySelector('h1')
+    if (title && title.getBoundingClientRect().height > 24) clipped.push(`h1 wraps: ${title.textContent}`)
+    return clipped
+  })
+}
+
+/** Một hàng: điều khiển mô phỏng nằm trong thanh trên, thanh công cụ riêng ẩn, không gì tràn. */
+async function expectOneRow(page: Page, width: number) {
+  await page.setViewportSize({ width, height: width === 1366 ? 768 : 1000 })
+  await expect(page.locator('[data-workspace-toolbar]')).toBeHidden()
+  await expect(header(page).getByRole('combobox', { name: 'Góc nhìn', exact: true })).toBeVisible()
+  await expect(header(page).getByRole('combobox', { name: 'Tập trung điểm giao', exact: true })).toBeVisible()
+  expect((await header(page).boundingBox())!.height).toBe(56)
+  expect(await headerOverflow(page), `header at ${width} px`).toStrictEqual([])
+}
+
+/** Kiện trên cùng (không kiện nào đè lên) của bản seed đã duyệt, gần cửa trước — ứng viên dời 1 cm hợp lệ. */
+function topPackagesNearDoor(page: Page) {
+  return page.evaluate(async (url) => {
+    const { seedScene } = (await import(url)) as typeof import('@/test/scene')
+    const { placements } = await seedScene()
+    const overlaps = (a: number, al: number, b: number, bl: number) => a < b + bl && b < a + al
+    return placements
+      .filter((p) => !placements.some((q) => q.id !== p.id && q.position.z === p.position.z + p.heightCm
+        && overlaps(p.position.x, p.lengthCm, q.position.x, q.lengthCm) && overlaps(p.position.y, p.widthCm, q.position.y, q.widthCm)))
+      .toSorted((a, b) => b.position.x + b.lengthCm - (a.position.x + a.lengthCm))
+      .map((p) => p.id)
+  }, SOURCE_MODULES.scene)
+}
+
+/**
+ * Dời một kiện 1 cm bằng nút nudge; constraint engine của editor quyết định hợp lệ (lệnh bị chặn không đổi vị trí). Thử lần lượt
+ * các kiện trên cùng gần cửa và bốn hướng tới khi một lệnh được ghi nhận.
+ */
+async function nudgeOnePackage(page: Page) {
+  const status = page.locator('[data-editor-status]')
+  const position = () => status.evaluate((el) => `${el.dataset.x}/${el.dataset.y}/${el.dataset.z}`)
+  for (const id of (await topPackagesNearDoor(page)).slice(0, 10)) {
+    await selectPlacement(page, id)
+    for (const nudge of ['Tăng X', 'Giảm X', 'Tăng Y', 'Giảm Y']) {
+      const before = await position()
+      await button(page, nudge).click()
+      if (await position() !== before) return id
+    }
+  }
+  throw new Error('no package of the seed plan could move by 1 cm')
+}
+
+test('an approved plan shows when it was approved; one edited package turns it into "Duyệt bản chỉnh"', async ({ page, login, browserErrors }, testInfo) => {
+  await page.setViewportSize({ width: 1366, height: 768 })
+  await login(PLANNER_ROUTE)
+  await page.locator('canvas').waitFor()
+
+  await expect(header(page)).toContainText(APPROVED_AT)
+  await expect(button(page, 'Duyệt phương án')).toHaveCount(0)
+  await expect(button(page, 'Duyệt bản chỉnh')).toHaveCount(0)
+  await expectOneRow(page, 1366)
+  await attachScreenshot(page, testInfo, 'planner-approved-1366')
+  await expectOneRow(page, 1600)
+  await page.setViewportSize({ width: 1366, height: 768 })
+
+  await enterEdit(page)
+  await nudgeOnePackage(page)
+  await expect(button(page, 'Hoàn tác')).toBeEnabled()
+  await button(page, 'Xem').click()
+
+  const approveEdits = button(page, 'Duyệt bản chỉnh')
+  await expect(approveEdits).toBeVisible()
+  await expect(header(page)).not.toContainText(APPROVED_AT)
+  await expectOneRow(page, 1366)
+  await attachScreenshot(page, testInfo, 'planner-draft-1366')
+
+  await approveEdits.click()
+  const dialog = page.getByRole('dialog', { name: 'Duyệt phương án này?' })
+  await expect(dialog).toContainText('Có 1 kiện chỉnh tay sẽ được áp vào bản duyệt.')
+  await dialog.getByRole('button', { name: 'Duyệt', exact: true }).click()
+  await expect(page.getByText('Đã duyệt phương án.')).toBeVisible()
+  await page.waitForURL(/\/phuong-an\?revision=REV-/)
+  // Bản vừa duyệt mang chỉnh tay: nhãn "Đã chỉnh tay" cùng "Đã duyệt lúc …", vẫn một hàng ở 1.366 px
+  await expect(header(page)).toContainText('Đã chỉnh tay')
+  await expect(header(page)).toContainText(APPROVED_AT)
+  await expect(approveEdits).toHaveCount(0)
+  await expectOneRow(page, 1366)
+  await attachScreenshot(page, testInfo, 'planner-approved-edited-1366')
+  expect(browserErrors).toStrictEqual([])
+})
+
+test('a trip being loaded opens its plan locked: no Edit, no Approve, one reason', async ({ page, login, browserErrors }, testInfo) => {
+  await page.setViewportSize({ width: 1366, height: 768 })
+  await login('/chuyen/TRIP-011/phuong-an')
+  await page.locator('canvas').waitFor()
+
+  await expect(page.getByRole('status').filter({ hasText: 'phương án đã chốt' }))
+    .toHaveText('Chuyến đang xếp hàng — phương án đã chốt.')
+  for (const name of ['Chỉnh sửa', 'Chỉnh sửa kiện', 'Duyệt phương án', 'Duyệt bản chỉnh']) {
+    await expect(button(page, name), name).toHaveCount(0)
+  }
+  await expect(header(page)).toContainText(APPROVED_AT)
+  await expectOneRow(page, 1366)
+  await attachScreenshot(page, testInfo, 'planner-locked-1366')
+  expect(browserErrors).toStrictEqual([])
+})
+
+test('tablet keeps two 56 px control rows; the manager reads the plan with one reason and no actions', { tag: '@tablet' }, async ({ page, login, browserErrors }, testInfo) => {
+  await login(PLANNER_ROUTE, 'manager')
+  await page.locator('canvas').waitFor()
+  const toolbar = page.locator('[data-workspace-toolbar]')
+  await expect(toolbar).toBeVisible()
+  expect((await toolbar.getByRole('combobox', { name: 'Góc nhìn', exact: true }).boundingBox())!.height).toBe(56)
+  expect((await header(page).boundingBox())!.height).toBe(56)
+  await expect(page.getByRole('status').filter({ hasText: 'Chỉ xem' }))
+    .toHaveText('Chỉ xem: tài khoản của bạn không chỉnh sửa hay duyệt phương án.')
+  for (const name of ['Chỉnh sửa', 'Chỉnh sửa kiện', 'Duyệt phương án', 'Duyệt bản chỉnh']) {
+    await expect(button(page, name), name).toHaveCount(0)
+  }
+  expect(await headerOverflow(page), 'tablet header').toStrictEqual([])
+  await attachScreenshot(page, testInfo, 'planner-manager-tablet')
+  expect(browserErrors).toStrictEqual([])
+})

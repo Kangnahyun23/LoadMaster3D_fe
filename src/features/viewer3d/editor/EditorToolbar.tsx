@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { useT } from '@/lib/i18n'
 import type { LoadPlanViewerState } from '../useLoadPlanViewer'
 import type { ManualEditor } from './useManualEditor'
-import { CAMERA_PRESETS } from '../viewer-options'
-import type { CameraPreset } from '@/features/viewer3d/viewer-types'
+import { CameraSelect } from '../panels/PlannerSelect'
 
 export function EditorToolbar({ state, editor, onModeChange = editor.setMode }: {
   state: LoadPlanViewerState; editor: ManualEditor; onModeChange?: ManualEditor['setMode']
@@ -31,10 +30,8 @@ export function EditorToolbar({ state, editor, onModeChange = editor.setMode }: 
           <Redo2 strokeWidth={1.5} />
         </Button>
       </> : null}
-      <select aria-label={t('viewer.editor.camera')} value={state.cameraPreset} onChange={(e) => state.setCameraPreset(e.target.value as CameraPreset)}
-        className="h-14 min-w-0 rounded-md border border-border bg-bg px-2 text-body-lg xl:h-11 xl:text-body">
-        {CAMERA_PRESETS.map((p) => <option key={p} value={p}>{t(`viewer.camera.${p}`)}</option>)}
-      </select>
+      <CameraSelect label={t('viewer.editor.camera')} preset={state.cameraPreset} onPreset={state.setCameraPreset} />
+      {/* Chọn kiện giữ `<select>` gốc: tới 1.000 dòng, Radix Select dựng hết mọi dòng khi mở (LM-094) */}
       <label className="ml-auto flex min-w-0 basis-full items-center gap-2 text-body-lg sm:basis-auto xl:text-body">
         <span className="shrink-0 sm:hidden xl:inline">{t('viewer.editor.selectPackage')}</span>
         <select aria-label={t('viewer.editor.selectPackage')} value={state.selectedId ?? ''} disabled={dragging}

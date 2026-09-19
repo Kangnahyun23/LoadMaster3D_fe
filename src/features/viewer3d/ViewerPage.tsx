@@ -58,7 +58,8 @@ function ResultSession() {
   return <LoadedResult key={revision.id} source={{ trip: query.data.trip, revision }} />
 }
 
+/** Pha chuyến đọc lại mỗi lần kho trả chuyến (kho bắt đầu xếp là khoá ngay), không thuộc snapshot của revision. */
 function LoadedResult({ source }: { source: PlanSource }) {
   const model = useMemo(() => adaptResult(source), [source])
-  return <ViewerSession model={model} />
+  return <ViewerSession model={model} phase={source.trip.phase} />
 }
