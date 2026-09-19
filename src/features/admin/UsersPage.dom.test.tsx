@@ -131,6 +131,9 @@ test('đặt lại mật khẩu: xác nhận rồi hiện mật khẩu tạm m�
   await user.click(within(await openMenu(user, 'Đỗ Thị Hạnh')).getByRole('menuitem', { name: 'Đặt lại mật khẩu' }))
   const confirm = await screen.findByRole('dialog', { name: 'Đặt lại mật khẩu cho Đỗ Thị Hạnh?' })
   await user.click(within(confirm).getByRole('button', { name: 'Đặt lại mật khẩu' }))
+  // Đang đặt lại (kho trễ 300 ms): Esc không đóng được hộp thoại, kẻo mật khẩu tạm bật ra sau khi người dùng tưởng đã huỷ
+  await user.keyboard('{Escape}')
+  expect(screen.getByRole('dialog', { name: 'Đặt lại mật khẩu cho Đỗ Thị Hạnh?' })).toBeInTheDocument()
   const result = await screen.findByRole('dialog', { name: 'Đã đặt lại mật khẩu cho Đỗ Thị Hạnh' }, SLOW)
   const value = (within(result).getByLabelText('Mật khẩu tạm') as HTMLInputElement).value
   await expect(getMockDb().authenticate('hanh.do@loadmaster.vn', 'loadmaster')).rejects.toMatchObject({ code: 'INVALID_CREDENTIALS' })
