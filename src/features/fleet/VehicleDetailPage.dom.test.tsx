@@ -3,7 +3,9 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { expect, test } from 'vitest'
+import { AuthProvider } from '@/features/auth/AuthProvider'
 import { I18nProvider } from '@/lib/i18n'
+import { signedInAs } from '@/test/signed-in'
 import { FleetPage } from './FleetPage'
 import { VehicleDetailPage } from './VehicleDetailPage'
 
@@ -24,11 +26,14 @@ function renderAt(path: string) {
     { initialEntries: [path] },
   )
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  signedInAs('dispatcher')
   render(
     <I18nProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </AuthProvider>
     </I18nProvider>,
   )
   return userEvent.setup()

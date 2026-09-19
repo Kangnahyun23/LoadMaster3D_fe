@@ -2,7 +2,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { expect, test } from 'vitest'
+import { AuthProvider } from '@/features/auth/AuthProvider'
 import { I18nProvider } from '@/lib/i18n'
+import { signedInAs } from '@/test/signed-in'
 import { getMockDb } from '@/lib/mock-db'
 import { DashboardPage } from './DashboardPage'
 
@@ -12,13 +14,16 @@ import { DashboardPage } from './DashboardPage'
  */
 function renderDashboard() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  signedInAs('dispatcher')
   render(
     <QueryClientProvider client={client}>
-      <I18nProvider>
-        <MemoryRouter>
-          <DashboardPage />
-        </MemoryRouter>
-      </I18nProvider>
+      <AuthProvider>
+        <I18nProvider>
+          <MemoryRouter>
+            <DashboardPage />
+          </MemoryRouter>
+        </I18nProvider>
+      </AuthProvider>
     </QueryClientProvider>,
   )
   return client

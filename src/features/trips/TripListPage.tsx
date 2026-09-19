@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/Button'
 import { ProgressBar } from '@/components/ui/ProgressBar'
+import { useCan } from '@/features/auth/useCan'
 import { useFormat, useT, type TFunction } from '@/lib/i18n'
 import { EmptyTripsIllustration } from './EmptyTripsIllustration'
 import type { TripRow } from './trip-list'
@@ -77,6 +78,7 @@ export function TripListPage() {
   const navigate = useNavigate()
   const t = useT()
   const format = useFormat()
+  const canCreate = useCan()('trips.edit')
   const query = useTripsQuery()
   const columns = useMemo(() => createColumns(t, format), [t, format])
   const trips = query.data ?? []
@@ -86,7 +88,7 @@ export function TripListPage() {
     <div className="flex min-w-0 flex-1 flex-col">
       <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-bg px-6">
         <h1 className="text-h2 font-semibold">{t('trips.list.title')}</h1>
-        {hasTrips ? (
+        {hasTrips && canCreate ? (
           <Button variant="primary" className="h-9 px-3.5" asChild>
             <Link to="/chuyen/moi">
               <Plus strokeWidth={1.5} />
@@ -106,14 +108,14 @@ export function TripListPage() {
             illustration={<EmptyTripsIllustration />}
             title={t('trips.list.emptyTitle')}
             description={t('trips.list.emptyDescription')}
-            action={
+            action={canCreate ? (
               <Button variant="primary" asChild>
                 <Link to="/chuyen/moi">
                   <Plus strokeWidth={1.5} />
                   {t('trips.list.createFirst')}
                 </Link>
               </Button>
-            }
+            ) : undefined}
           />
         ) : (
           <div className="overflow-hidden rounded-md border border-border bg-bg">

@@ -21,7 +21,8 @@ export function SceneInspector({ state, operations, tripId, colorContext, issues
   state: LoadPlanViewerState; operations: OperationsState; tripId: string; colorContext: ColorContext
   /** Lỗi và cảnh báo ràng buộc của phương án đang xem (gồm chỉnh tay), LM-049 */
   issues: readonly ConstraintIssue[]
-  onEdit: () => void; onFocus: () => void; onSelect: (p: ScenePlacement) => void
+  /** Vắng khi người xem không được chỉnh phương án (D-41) hoặc chuyến đã khoá: ẩn nút Chỉnh sửa. */
+  onEdit?: () => void; onFocus: () => void; onSelect: (p: ScenePlacement) => void
   tab: InspectorTab | null; onTab: (tab: InspectorTab) => void; onClose: () => void
 }) {
   const t = useT()
@@ -52,7 +53,7 @@ export function SceneInspector({ state, operations, tripId, colorContext, issues
           <SelectedPackagePanel placement={state.selected} placements={state.placements} totalSteps={state.totalSteps}
             orientationRules={state.selected ? state.sceneModel.orientationRulesById.get(state.selected.id) : undefined}
             stops={[...state.sceneModel.stops]} tripId={tripId} issues={issues} onClose={() => state.select(null)}
-            onEdit={() => { onClose(); onEdit() }} onFocus={() => { onClose(); onFocus() }} />
+            onEdit={onEdit ? () => { onClose(); onEdit() } : undefined} onFocus={() => { onClose(); onFocus() }} />
         </> : null}
         {tab === 'display' ? <div className="flex flex-col gap-4 p-4 text-body-lg xl:text-body">
           <h2 className="font-medium">{t('viewer.inspector.layers')}</h2>

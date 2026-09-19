@@ -10,16 +10,18 @@ import { useFormat, useT } from '@/lib/i18n'
  * Lệch có chủ ý khỏi design: nhãn mục trong bản design viết hoa toàn bộ
  * kèm letter-spacing, CLAUDE.md mục 5 cấm cả hai — ở đây viết thường.
  */
-export function VehicleCard({ vehicle, tripId }: { vehicle: VehicleConfig; tripId: string }) {
+export function VehicleCard({ vehicle, tripId, canChange = true }: { vehicle: VehicleConfig; tripId: string; canChange?: boolean }) {
   const t = useT()
   const format = useFormat()
   return (
     <Card className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between gap-3">
         <span className="text-caption font-medium text-text-3">{t('trips.vehicle')}</span>
-        <Link to={`/chuyen/${tripId}/sua`} className="text-caption text-primary">
-          {t('trips.changeVehicle')}
-        </Link>
+        {canChange ? (
+          <Link to={`/chuyen/${tripId}/sua`} className="text-caption text-primary">
+            {t('trips.changeVehicle')}
+          </Link>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-3">

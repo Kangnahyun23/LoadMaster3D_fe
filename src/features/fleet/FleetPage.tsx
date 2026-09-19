@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router'
 import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
 import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/Button'
+import { useCan } from '@/features/auth/useCan'
 import { Spinner } from '@/components/ui/Spinner'
 import type { VehicleConfig } from '@/domain/models'
 import type { Formatter } from '@/lib/format'
@@ -66,6 +67,7 @@ export function FleetPage() {
   const t = useT()
   const format = useFormat()
   const navigate = useNavigate()
+  const canEdit = useCan()('fleet.edit')
   const query = useVehiclesQuery()
   const columns = useMemo(() => createColumns(t, format), [t, format])
   const vehicles = query.data ?? []
@@ -81,7 +83,7 @@ export function FleetPage() {
             </span>
           ) : null}
         </div>
-        {vehicles.length > 0 ? (
+        {vehicles.length > 0 && canEdit ? (
           <Button variant="primary" asChild>
             <Link to="/doi-xe/moi">
               <Plus strokeWidth={1.5} />
@@ -111,14 +113,14 @@ export function FleetPage() {
           <EmptyState
             title={t('fleet.empty.title')}
             description={t('fleet.empty.description')}
-            action={
+            action={canEdit ? (
               <Button variant="primary" asChild>
                 <Link to="/doi-xe/moi">
                   <Plus strokeWidth={1.5} />
                   {t('fleet.empty.action')}
                 </Link>
               </Button>
-            }
+            ) : undefined}
           />
         ) : (
           <>

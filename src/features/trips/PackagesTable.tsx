@@ -29,7 +29,8 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
   stops: readonly StopRow[]
   selectedId: string | null
   onSelect: (pkg: CargoPackage) => void
-  onAdd: () => void
+  /** Vắng khi không được thêm kiện (chỉ xem, chuyến đã khoá): ẩn nút Thêm kiện. */
+  onAdd?: () => void
 }) {
   const t = useT()
   const format = useFormat()
@@ -114,14 +115,14 @@ export function PackagesTable({ packages, vehicle, stops, selectedId, onSelect, 
       illustration={<EmptyTripsIllustration />}
       title={t('trips.packages.emptyTitle')}
       description={t('trips.packages.emptyDescription')}
-      action={<Button variant="primary" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button>}
+      action={onAdd ? <Button variant="primary" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button> : undefined}
     />
   }
 
   return (
     <div className="flex min-h-0 min-w-0 flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="primary" className="h-9 px-3" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button>
+        {onAdd ? <Button variant="secondary" className="h-9 px-3" onClick={onAdd}><Plus strokeWidth={1.5} />{t('trips.packages.add')}</Button> : null}
         <label className="flex items-center gap-2 text-caption text-text-2">
           <span className="sr-only">{t('trips.packages.filterStop')}</span>
           <select

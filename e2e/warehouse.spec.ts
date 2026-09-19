@@ -11,7 +11,7 @@ for (const device of ['desktop', 'tablet'] as const) {
   const details = device === 'tablet' ? { tag: '@tablet' } : {}
 
   test(`${device}: approving in the Planner then opening /kho starts at loadingOrder 1 of that revision`, details, async ({ page, login, browserErrors }) => {
-    await login(PLANNER_ROUTE)
+    await login(PLANNER_ROUTE, 'admin')
     await page.locator('canvas').waitFor()
     await page.getByRole('button', { name: 'Duyệt phương án', exact: true }).click()
     await page.getByRole('dialog', { name: 'Duyệt phương án này?' }).getByRole('button', { name: 'Duyệt', exact: true }).click()
@@ -63,7 +63,7 @@ for (const device of ['desktop', 'tablet'] as const) {
  * chữ tiếng Anh không tràn ở tablet dọc (project) và ngang 1024×768. Không ghi kho nên được tải trang để đặt `?lang`.
  */
 test('tablet: the warehouse runs in English and switching language mid-session keeps the step', { tag: '@tablet' }, async ({ page, login, browserErrors }, testInfo) => {
-  await login('/chuyen')
+  await login('/kho', 'warehouse')
   await page.goto('/kho?lang=en')
   const plan = await page.evaluate(async (db) => {
     const { getMockDb } = (await import(db)) as typeof import('@/lib/mock-db')
@@ -110,7 +110,7 @@ test('tablet: the warehouse runs in English and switching language mid-session k
 })
 
 test('a trip without an approved plan shows the empty state with a way out', async ({ page, login, browserErrors }) => {
-  await login('/chuyen')
+  await login('/chuyen', 'admin')
   const tripId = await page.evaluate(async (db) => {
     const { getMockDb } = (await import(db)) as typeof import('@/lib/mock-db')
     const store = getMockDb()

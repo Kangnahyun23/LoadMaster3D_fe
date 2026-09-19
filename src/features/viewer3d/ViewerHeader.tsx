@@ -22,7 +22,8 @@ export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockR
   manuallyEdited: boolean
   /** Lý do chặn Duyệt (LM-050) — hiện cạnh nút; `null` là duyệt được. */
   blockedReason: string | null
-  onApprove: () => void
+  /** Vắng khi người xem không có quyền Duyệt (D-41): ẩn nút và lý do chặn. */
+  onApprove?: () => void
 }) {
   const t = useT()
   const format = useFormat()
@@ -56,7 +57,7 @@ export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockR
 
       <div className="flex-1" />
 
-      {blockedReason ? <span role="status" className="hidden max-w-72 text-caption text-badge-danger-fg xl:block">{blockedReason}</span> : null}
+      {blockedReason && onApprove ? <span role="status" className="hidden max-w-72 text-caption text-badge-danger-fg xl:block">{blockedReason}</span> : null}
       <div className="flex gap-2">
         <Button variant="secondary" className="hidden h-10 px-3.5 xl:flex" asChild>
           <Link to={`/chuyen/${tripId}/so-sanh`}>
@@ -64,10 +65,12 @@ export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockR
             {t('viewer.plan.compare')}
           </Link>
         </Button>
-        <Button variant="primary" className="h-14 px-4 text-body-lg xl:h-10 xl:text-body" onClick={onApprove}>
-          <Check strokeWidth={1.5} />
-          {t('viewer.plan.approve')}
-        </Button>
+        {onApprove ? (
+          <Button variant="primary" className="h-14 px-4 text-body-lg xl:h-10 xl:text-body" onClick={onApprove}>
+            <Check strokeWidth={1.5} />
+            {t('viewer.plan.approve')}
+          </Button>
+        ) : null}
       </div>
     </header>
   )

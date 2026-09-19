@@ -17,7 +17,7 @@ import type { StopRow } from './trip-summary'
  * Tự đồng bộ theo D-25 — `keepUpright` bỏ các hướng nằm nghiêng và khoá ô, `stackable` tắt đưa tải trên về 0 —
  * còn `cargoPackageSchema` là nơi từ chối dữ liệu xung đột. Lỗi cửa (`DOOR_TOO_SMALL`) hiện ngay theo xe của chuyến.
  */
-export function PackageFormPanel({ value, vehicle, stops, onSave, onDelete, onDuplicate, onClose }: {
+export function PackageFormPanel({ value, vehicle, stops, onSave, onDelete, onDuplicate, onClose, readOnly = false }: {
   value: CargoPackage
   vehicle: VehicleConfig
   stops: readonly StopRow[]
@@ -25,6 +25,8 @@ export function PackageFormPanel({ value, vehicle, stops, onSave, onDelete, onDu
   onDelete?: (pkg: CargoPackage) => void
   onDuplicate?: (pkg: CargoPackage) => void
   onClose: () => void
+  /** Xem không sửa: người không có quyền sửa chuyến, hoặc chuyến đã khoá (D-41, D-45). */
+  readOnly?: boolean
 }) {
   const t = useT()
   const format = useFormat()
@@ -91,10 +93,12 @@ export function PackageFormPanel({ value, vehicle, stops, onSave, onDelete, onDu
           </p>
         ))}
 
-        <PackageFormFields form={form} stops={stops} onKeepUprightChange={handleKeepUpright} onStackableChange={handleStackable} />
+        <fieldset disabled={readOnly} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
+          <PackageFormFields form={form} stops={stops} onKeepUprightChange={handleKeepUpright} onStackableChange={handleStackable} />
+        </fieldset>
       </form>
 
-      <div className="flex flex-none flex-wrap gap-2 border-t border-border p-4">
+      {readOnly ? null : <div className="flex flex-none flex-wrap gap-2 border-t border-border p-4">
         <Button type="submit" form="package-form" variant="primary" className="h-14 flex-1 md:h-10">{t('trips.form.save')}</Button>
         <Button type="button" variant="secondary" className="h-14 md:h-10" onClick={handleSubmit((values) => onSave(values, true))}>
           {t('trips.form.saveAndNew')}
@@ -109,7 +113,7 @@ export function PackageFormPanel({ value, vehicle, stops, onSave, onDelete, onDu
             <Trash2 strokeWidth={1.5} />{t('trips.form.delete')}
           </Button>
         ) : null}
-      </div>
+      </div>}
 
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DialogContent>
