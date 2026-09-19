@@ -1,144 +1,109 @@
-import { createColumnHelper } from '@tanstack/react-table'
 import { Plus } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { toast } from 'sonner'
-import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
-import { Badge } from '@/components/ui/Badge'
+import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/Button'
-import type { Formatter } from '@/lib/format'
-import { useFormat, useT, type TFunction } from '@/lib/i18n'
-import { initialsOf, type User } from '@/types/user'
-import type { UserFormValues } from './user-form.schema'
+import { Spinner } from '@/components/ui/Spinner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
+import { useAuth } from '@/features/auth/AuthProvider'
+import { ConfirmDialog } from '@/features/fleet/ConfirmDialog'
+import { useT } from '@/lib/i18n'
+import { accountGuards } from './account-guards'
+import { PermissionMatrix } from './PermissionMatrix'
+import { TemporaryPasswordDialog } from './TemporaryPasswordDialog'
 import { UserFormDialog } from './UserFormDialog'
-import { USERS } from './users.mock'
+import { UsersTable } from './UsersTable'
+import { useUserActions } from './useUserActions'
+import { useUsersQuery } from './useUsersQuery'
 
-const helper = createColumnHelper<BaseTableFeatures, User>()
-
-/** Cột phụ thuộc ngôn ngữ đang chọn (tiêu đề, nhãn, ngày giờ), nên dựng trong component chứ không ở module. */
-function createColumns(t: TFunction, format: Formatter) {
-  return helper.columns([
-    helper.accessor('fullName', {
-      header: t('admin.users.columns.user'),
-      cell: (info) => (
-        <span className="flex items-center gap-2.5">
-          <span className="grid size-8 flex-none place-items-center rounded-full bg-primary-bg text-caption font-semibold leading-none text-primary-hover">
-            {initialsOf(info.getValue())}
-          </span>
-          <span className="flex min-w-0 flex-col">
-            <span className="truncate">{info.getValue()}</span>
-            <span className="truncate font-mono text-caption text-text-3">
-              {info.row.original.email}
-            </span>
-          </span>
-        </span>
-      ),
-    }),
-    helper.accessor('phone', {
-      header: t('admin.users.columns.phone'),
-      meta: { width: '140px' } satisfies ColumnMeta,
-      cell: (info) => <span className="font-mono text-caption">{info.getValue()}</span>,
-    }),
-    helper.accessor('role', {
-      header: t('admin.users.columns.role'),
-      meta: { width: '170px' } satisfies ColumnMeta,
-      cell: (info) => t(`roles.${info.getValue()}`),
-    }),
-    helper.accessor('depot', {
-      header: t('admin.users.columns.depot'),
-      meta: { width: '200px' } satisfies ColumnMeta,
-      cell: (info) => <span className="block truncate">{info.getValue()}</span>,
-    }),
-    helper.accessor('lastActiveAt', {
-      header: t('admin.users.columns.lastActive'),
-      meta: { align: 'right', width: '180px' } satisfies ColumnMeta,
-      cell: (info) => {
-        const value = info.getValue()
-        return value ? (
-          <span className="font-mono text-caption">{`${format.time(value)} ${format.date(value)}`}</span>
-        ) : (
-          <span className="text-caption text-text-3">{t('admin.users.neverSignedIn')}</span>
-        )
-      },
-    }),
-    helper.accessor('status', {
-      header: t('admin.users.columns.status'),
-      meta: { width: '150px' } satisfies ColumnMeta,
-      cell: (info) => (
-        <Badge tone={info.getValue() === 'active' ? 'success' : 'danger'}>
-          {t(`admin.users.status.${info.getValue()}`)}
-        </Badge>
-      ),
-    }),
-  ])
-}
-
-/** Quản trị người dùng — danh sách, thêm và sửa bằng hộp thoại form. */
+/**
+ * Quản trị người dùng (LM-092, D-41, D-42): danh sách đọc từ kho qua `useUsersQuery` (tìm, lọc, sắp xếp, phân trang trên URL), menu
+ * thao tác mỗi dòng, mật khẩu tạm hiện một lần, và tab "Ma trận quyền" chỉ đọc. Hành động chính duy nhất: thêm người dùng.
+ */
 export function UsersPage() {
   const t = useT()
-  const format = useFormat()
-  const columns = useMemo(() => createColumns(t, format), [t, format])
-  const [users, setUsers] = useState<User[]>(USERS)
-  const [editing, setEditing] = useState<User | undefined>(undefined)
-  const [dialogOpen, setDialogOpen] = useState(false)
-
-  function openCreate() {
-    setEditing(undefined)
-    setDialogOpen(true)
-  }
-
-  function openEdit(user: User) {
-    setEditing(user)
-    setDialogOpen(true)
-  }
-
-  function handleSubmit(values: UserFormValues) {
-    if (editing) {
-      setUsers((current) =>
-        current.map((u) => (u.id === editing.id ? { ...u, ...values } : u)),
-      )
-      toast.success(t('admin.users.updated', { name: values.fullName }))
-      return
-    }
-
-    const created: User = {
-      id: `US-${String(users.length + 1).padStart(4, '0')}`,
-      ...values,
-      lastActiveAt: null,
-    }
-    setUsers((current) => [created, ...current])
-    toast.success(t('admin.users.created', { name: values.fullName }), {
-      description: t('admin.users.createdDescription'),
-    })
-  }
+  const { user: currentUser } = useAuth()
+  const query = useUsersQuery()
+  const actions = useUserActions()
+  const users = query.data ?? []
+  const { dialog } = actions
+  const editing = dialog?.kind === 'edit' ? dialog.user : undefined
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-bg px-6">
         <div className="flex items-baseline gap-2">
           <h1 className="text-h2 font-semibold">{t('admin.users.title')}</h1>
-          <span className="font-mono text-caption text-text-3">
-            {t('admin.users.count', { count: users.length })}
-          </span>
+          {query.data ? (
+            <span className="font-mono text-caption text-text-3">{t('admin.users.count', { count: users.length })}</span>
+          ) : null}
         </div>
-        <Button variant="primary" className="h-9 px-3.5" onClick={openCreate}>
-          <Plus strokeWidth={1.5} />
+        <Button variant="primary" onClick={actions.openCreate}>
+          <Plus strokeWidth={1.5} aria-hidden />
           {t('admin.users.form.createTitle')}
         </Button>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-auto p-6">
-        <div className="overflow-hidden rounded-md border border-border bg-bg">
-          <DataTable data={users} columns={columns} density="comfortable" onRowClick={openEdit} />
-        </div>
-        <p className="mt-3 text-caption text-text-3">{t('admin.users.rowHint')}</p>
-      </div>
+      <Tabs defaultValue="accounts" className="flex min-h-0 flex-1 flex-col">
+        <TabsList className="flex-none bg-bg px-6">
+          <TabsTrigger value="accounts">{t('admin.users.tabs.accounts')}</TabsTrigger>
+          <TabsTrigger value="permissions">{t('admin.users.tabs.permissions')}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="accounts" className="min-h-0 flex-1 overflow-auto p-6">
+          {query.isPending ? (
+            <div role="status" aria-label={t('admin.users.loading')} className="flex h-24 items-center justify-center"><Spinner /></div>
+          ) : query.isError ? (
+            <EmptyState
+              title={t('admin.users.errorTitle')}
+              description={t('admin.users.errorDescription')}
+              action={<Button variant="secondary" onClick={() => void query.refetch()}>{t('admin.users.retry')}</Button>}
+            />
+          ) : (
+            <UsersTable users={users} currentUserId={currentUser?.id ?? null} onAction={actions.handleAction} />
+          )}
+        </TabsContent>
+        <TabsContent value="permissions" className="min-h-0 flex-1 overflow-auto p-6">
+          <PermissionMatrix />
+        </TabsContent>
+      </Tabs>
 
-      <UserFormDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        user={editing}
-        onSubmit={handleSubmit}
+      {dialog?.kind === 'create' || dialog?.kind === 'edit' ? (
+        <UserFormDialog
+          key={editing?.id ?? 'new'}
+          user={editing}
+          roleBlock={editing ? accountGuards(editing, currentUser?.id ?? null, users).role : null}
+          onClose={actions.close}
+          onSubmit={(values) => (editing ? actions.submitEdit(editing, values) : actions.submitCreate(values))}
+        />
+      ) : null}
+      <TemporaryPasswordDialog
+        result={dialog?.kind === 'password' ? dialog.result : undefined}
+        reason={dialog?.kind === 'password' ? dialog.reason : 'created'}
+        onClose={actions.close}
       />
+      {dialog?.kind === 'reset' ? (
+        <ConfirmDialog
+          open
+          onOpenChange={(open) => (open ? undefined : actions.close())}
+          title={t('admin.users.reset.title', { name: dialog.user.fullName })}
+          description={t('admin.users.reset.description')}
+          cancelLabel={t('admin.users.reset.cancel')}
+          confirmLabel={t('admin.users.reset.confirm')}
+          pending={actions.resetPending}
+          onConfirm={() => actions.confirmReset(dialog.user)}
+        />
+      ) : null}
+      {dialog?.kind === 'delete' ? (
+        <ConfirmDialog
+          open
+          danger
+          onOpenChange={(open) => (open ? undefined : actions.close())}
+          title={t('admin.users.remove.title', { name: dialog.user.fullName })}
+          description={t('admin.users.remove.description')}
+          cancelLabel={t('admin.users.remove.cancel')}
+          confirmLabel={t('admin.users.remove.confirm')}
+          pending={actions.deletePending}
+          onConfirm={() => actions.confirmDelete(dialog.user)}
+        />
+      ) : null}
     </div>
   )
 }
