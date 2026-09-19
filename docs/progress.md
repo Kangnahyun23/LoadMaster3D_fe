@@ -21,8 +21,8 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | 3 | Đội xe, kiện, thiết lập tối ưu, Planner, Duyệt, Dashboard | 15 / 15 | ~16,5 ngày | ✅ Xong 16/09/2026 — 492 unit/DOM, 45 E2E |
 | 4 | Kho, tài xế, dọn mock mm | 3 / 3 | ~2,5 ngày | ✅ Xong 16/09/2026 — 515 unit/DOM, 50 E2E |
 | 5 | i18n phần còn lại, nghiệm thu | 3 / 3 | ~3,5 ngày | ✅ Xong 16/09/2026 — 520 unit/DOM, 55 E2E, cổng chuỗi cứng |
-| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 6 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
-| **Tổng** | | **62 / 80 issue** | **~83,5 ngày công** | |
+| 6 | Hoàn thiện 5 vai trò (bảo vệ SEP490) | 7 / 23 | ~27,5 ngày | 🟦 Đang làm từ 19/09/2026 — nhánh `feat/ui-complete` |
+| **Tổng** | | **63 / 80 issue** | **~83,5 ngày công** | |
 
 **Phase 5 xong (16/09/2026) — MVP nghiệm thu.** 56/57 issue; LM-002 chờ backend. Nợ sau nghiệm thu: [acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend), LM-073.
 
@@ -513,7 +513,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 | [LM-082](issues/LM-082-nguoi-dung-phien-nhat-ky.md) | Người dùng, phiên, nhật ký | ✅ | 19/09/2026 | 19/09/2026 | Đăng nhập qua kho, 28 mã nhật ký |
 | [LM-083](issues/LM-083-seed-mo-rong-theo-ngay.md) | Seed mở rộng | ✅ | 19/09/2026 | 19/09/2026 | 8 xe, 12 người, 15 chuyến; dựng 0,31 s |
 | [LM-084](issues/LM-084-phan-quyen-mock-403.md) | Phân quyền, 403 | ✅ | 19/09/2026 | 19/09/2026 | 13 quyền, 403, quản lý chỉ đọc; E2E 10/10 |
-| [LM-085](issues/LM-085-bang-du-lieu-loc-sap-xep-phan-trang.md) | Bảng lọc/sắp xếp/phân trang | ⬜ | | | |
+| [LM-085](issues/LM-085-bang-du-lieu-loc-sap-xep-phan-trang.md) | Bảng lọc/sắp xếp/phân trang | ✅ | 19/09/2026 | 19/09/2026 | Agent, `f0d2e87`; +23 test; sửa vòng focus toàn app |
 | [LM-086](issues/LM-086-kho-chon-chuyen-tien-do.md) | Kho | ⬜ | | | |
 | [LM-087](issues/LM-087-tai-xe-chuyen-cua-toi-tong-ket.md) | Tài xế | ⬜ | | | |
 | [LM-088](issues/LM-088-chuyen-trang-thai-loc-tien-trinh.md) | Chuyến | ⬜ | | | |
