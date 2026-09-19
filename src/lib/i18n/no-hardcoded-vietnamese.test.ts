@@ -8,7 +8,7 @@ import { findHardcodedVietnamese } from './hardcoded-strings'
 const SOURCES = import.meta.glob<string>('/src/**/*.{ts,tsx}', { query: '?raw', import: 'default', eager: true })
 
 const EXCLUDED = [
-  /^\/src\/lib\/i18n\/(vi|en)\.ts$/,
+  /^\/src\/lib\/i18n\/(vi|en)(\.ts$|\/)/,
   /\.test(-d)?\.tsx?$/,
   /\.bench\.ts$/,
   /\.mock\.ts$/,

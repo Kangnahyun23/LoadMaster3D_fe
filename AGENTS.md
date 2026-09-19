@@ -126,7 +126,7 @@ src/
     fleet/              đội xe
     admin/              người dùng
   lib/                  format, helper, mock dùng chung, api client
-    i18n/               từ điển vi/en, provider, hook (LM-027)
+    i18n/               từ điển vi/en (mỗi nhánh một file trong vi/, en/ — LM-080), provider, hook (LM-027)
     mock-db/            kho in-memory: xe, chuyến, revision bất biến, Duyệt, seed chuyến đã duyệt (LM-026)
   types/                type dùng từ hai feature trở lên
   domain/               logic nghiệp vụ THUẦN theo Spec — không React, không Three.js
@@ -351,7 +351,8 @@ format nhận locale đang chọn.
 
 ### i18n vi/en *(bổ sung, D-07, D-08)*
 
-- Từ điển TypeScript tự viết trong `src/lib/i18n/`. `vi` là nguồn chuẩn; `en` khai báo sao cho
+- Từ điển TypeScript tự viết trong `src/lib/i18n/`. *(LM-080)* Mỗi nhánh cấp 1 một file ở `vi/<nhánh>.ts` và `en/<nhánh>.ts`;
+  `vi.ts`/`en.ts` chỉ ghép — màn mới thêm nhánh bằng file mới, không sửa nhánh của màn khác. `vi` là nguồn chuẩn; `en` khai báo sao cho
   **thiếu hoặc thừa key là lỗi TypeScript** lúc build.
 - Ngôn ngữ đọc theo thứ tự `?lang` → `sessionStorage` → `vi`. Không dùng `localStorage`.
   Đổi ngôn ngữ không tải lại trang, không mất dữ liệu đang nhập.
@@ -592,7 +593,7 @@ Thêm màn mới thì thêm theo đúng lối này.
 4. Dữ liệu để mock đặt trong file riêng `*.mock.ts` (xem mục 3 để biết đặt ở đâu), không nhúng vào component.
 5. Không viết một file dài quá 250 dòng. Tách sớm — thường tách được ngay ở phần header hoặc từng panel.
    *(bổ sung 16/09/2026, LM-041)* Giới hạn này tính cho file **có logic**: component, hook, module. File chỉ
-   chứa dữ liệu phẳng — từ điển `src/lib/i18n/{vi,en}.ts`, `*.mock.ts`, fixture — được dài hơn, vì cắt chúng
+   chứa dữ liệu phẳng — từ điển `src/lib/i18n/{vi,en}/*.ts`, `*.mock.ts`, fixture — được dài hơn, vì cắt chúng
    ra chỉ thêm chỗ để hai bản dịch lệch nhau. Mỗi nhánh của từ điển vẫn phải có chú thích nói nó phục vụ màn nào.
 
 ### Những chỗ đã lệch khỏi bản design gốc, có chủ ý
