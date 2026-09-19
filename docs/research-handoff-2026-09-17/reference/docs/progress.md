@@ -1,6 +1,6 @@
 # Theo dõi tiến độ — LoadMaster FE MVP
 
-Cập nhật lần cuối: **17/09/2026**
+Cập nhật lần cuối: **15/09/2026**
 
 Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](../LoadMaster_FE_MVP_Build_Spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](../handoff.md)
 
@@ -30,14 +30,6 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 ---
 
 ## 2. Nhật ký
-
-### 17/09/2026 — Gói bàn giao cho nhóm nghiên cứu
-
-- Đối chiếu tài liệu rebuild với domain, service, repository/revision và core 3D hiện tại; không sửa code sản phẩm.
-- Tạo [gói nghiên cứu](research-handoff-2026-09-17/README.md): prompt, hiện trạng, tài liệu nền và gallery 11 PNG chụp mới.
-- Chụp dashboard, cấu hình xe, kiện, thiết lập tối ưu, Planner/view/editor/partial/stale, kho tablet và tài xế/list/3D phone bằng Chromium SwiftShader; không ghi nhận `pageerror` ở các phiên chụp.
-- Nêu rõ LM-073, benchmark domain chưa nối CI, khác biệt phân trang/ảo hóa và giới hạn dữ liệu mock. Số đo hiệu năng dùng báo cáo 16/09, không đo lại.
-- Kiểm tra tài liệu/ảnh; không chạy full lint/build/test vì chỉ bổ sung gói bàn giao, không đổi app. Không xác nhận lại CI từ xa.
 
 ### 16/09/2026 — Xong phase 5: i18n toàn `src/`, nghiệm thu và bàn giao (LM-070 → LM-072)
 
