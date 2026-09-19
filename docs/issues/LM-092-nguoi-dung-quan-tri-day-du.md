@@ -83,3 +83,10 @@ là `VEHICLE-009`) — chưa tới bảng điều khiển, không thuộc phạm
 - Mục 5: *Lớp nổi mở từ trong hộp thoại (Select) phải cao hơn lớp phủ Dialog (`z-300`): `SelectContent` dùng `z-400`.*
 - Mục 3: `ConfirmDialog` nay dùng ở hai feature (đội xe, người dùng) — đề xuất chuyển lên `components/` khi gộp (issue này không được sửa
   `features/fleet`).
+
+### Sửa sau review độc lập (19/09/2026, `d52a88b`)
+
+Review độc lập phát hiện: huỷ hộp thoại tạo tài khoản / đặt lại mật khẩu trong lúc kho đang ghi không dừng thao tác, rồi hộp thoại mật
+khẩu tạm bật lên sau khi người dùng tưởng đã huỷ; xoá xong có thể đóng nhầm hộp thoại khác mở sau đó. Sửa: hộp thoại không đóng được khi
+`pending`/`isSubmitting` (Esc, bấm nền, nút Huỷ); kết quả sửa/xoá chỉ đóng đúng hộp thoại đã gửi thao tác (cập nhật state theo hàm).
+Test DOM "đặt lại mật khẩu" thêm bước Esc khi đang chạy — đỏ khi bỏ bản sửa, xanh khi có.
