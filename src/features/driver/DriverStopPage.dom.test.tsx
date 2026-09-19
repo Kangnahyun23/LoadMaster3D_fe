@@ -1,47 +1,26 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { toast } from 'sonner'
-import { MemoryRouter } from 'react-router'
 import { expect, test, vi } from 'vitest'
-import { AuthProvider } from '@/features/auth/AuthProvider'
-import { signedInAs } from '@/test/signed-in'
-import type { Role } from '@/types/user'
-import { I18nProvider } from '@/lib/i18n'
 import { getMockDb } from '@/lib/mock-db'
-import { twoCartonTrip } from '@/test/mock-db-samples'
-import { DriverStopPage } from './DriverStopPage'
+import { twoCartonRequest, twoCartonResult, twoCartonTrip } from '@/test/mock-db-samples'
+import { LOAD, renderDriver } from './driver-test-utils'
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), warning: vi.fn(), success: vi.fn(), info: vi.fn() } }))
 
 /**
- * Seam: kho dùng chung (`@/lib/mock-db`) → `driver-api.ts` → hook → màn hình, không giả lập module dữ liệu nào (LM-061).
- * Test theo thứ tự: bài cuối sửa kho.
+ * Một chuyến của tài xế `/tai-xe/diem-giao?chuyen=` (LM-087): kho dùng chung → `driver-api.ts` → hook → màn, không giả lập module
+ * nào. Tiến độ đọc/ghi trong kho. Test theo thứ tự: bài cuối làm chuyến chính lỗi thời.
  */
 const SEED_TRIP = 'TRIP-2026-0914'
+const WRITE = { timeout: 5000 }
 
-function renderDriver(route = '/tai-xe/diem-giao', role: Role = 'dispatcher') {
-  signedInAs(role)
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
-    <QueryClientProvider client={client}>
-      <I18nProvider>
-        <AuthProvider>
-          <MemoryRouter initialEntries={[route]}>
-            <DriverStopPage />
-          </MemoryRouter>
-        </AuthProvider>
-      </I18nProvider>
-    </QueryClientProvider>,
-  )
-}
-
-/** Mã kiện điểm `stop` theo `unloadingOrder` của revision đã duyệt mới nhất, đọc thẳng từ kho. */
+/** Mã kiện điểm `stop` theo `unloadingOrder` của bản duyệt mới nhất, đọc thẳng từ kho. */
 async function approvedUnloadOrder(tripId: string, stop: number) {
-  const revisions = await getMockDb().listRevisions(tripId)
-  const approved = revisions.findLast((revision) => revision.approvedAt !== undefined)!
-  const stopPackages = approved.request.packages.filter((pkg) => pkg.deliveryStop === stop).map((pkg) => `${pkg.id}-`)
-  return approved.result.placements
-    .filter((p) => stopPackages.some((prefix) => p.packageInstanceId.startsWith(prefix)))
+  const approved = (await getMockDb().listRevisions(tripId)).findLast((revision) => revision.approvedAt !== undefined)
+  const prefixes = approved?.request.packages.filter((pkg) => pkg.deliveryStop === stop).map((pkg) => `${pkg.id}-`) ?? []
+  return (approved?.result.placements ?? [])
+    .filter((p) => prefixes.some((prefix) => p.packageInstanceId.startsWith(prefix)))
     .toSorted((a, b) => a.unloadingOrder - b.unloadingOrder)
     .map((p) => p.packageInstanceId)
 }
@@ -50,63 +29,128 @@ function rowIds(container: HTMLElement) {
   return [...container.querySelectorAll('li[data-package-id]')].map((row) => row.getAttribute('data-package-id'))
 }
 
-test('chuyến seed: điểm 1 lấy từ chuyến, kiện theo unloadingOrder của revision đã duyệt, không thanh tab, một nút primary', async () => {
-  const { container } = renderDriver()
-  expect(await screen.findByRole('heading', { name: 'Điểm 1 / 4' })).toBeInTheDocument()
-  const trip = await getMockDb().getTrip(SEED_TRIP)
-  expect(screen.getByText(trip.stops[0]!.name, { selector: 'span' })).toBeInTheDocument()
-  expect(screen.getByText(trip.stops[0]!.address)).toBeInTheDocument()
+/** Chuyến hai thùng của tài xế demo, đã duyệt và kho đã xếp xong: `missing` là các kiện kho báo thiếu. */
+async function loadedTwoCartonTrip(missing: string[] = []) {
+  const db = getMockDb()
+  const trip = await db.createTrip({ ...twoCartonTrip(), driverId: 'US-0004' })
+  const revision = await db.addRevision({ tripId: trip.id, request: twoCartonRequest(), result: twoCartonResult() })
+  await db.approveRevision(revision.id, [])
+  await db.startLoading(trip.id)
+  for (const id of ['PKG-001-01', 'PKG-002-01']) await db.recordLoadingStep(trip.id, { packageInstanceId: id, outcome: missing.includes(id) ? 'missing' : 'loaded' })
+  await db.completeLoading(trip.id)
+  return trip.id
+}
 
+test('without a trip the screen goes back to My trips', async () => {
+  renderDriver('/tai-xe/diem-giao')
+  expect(await screen.findByRole('heading', { level: 1, name: 'Chuyến của tôi' }, LOAD)).toBeInTheDocument()
+}, 15_000)
+
+test('a trip the warehouse has not loaded: preview of stop 1 in the approved unloading order, call and directions, nothing to start', async () => {
+  const { container } = renderDriver(`/tai-xe/diem-giao?chuyen=${SEED_TRIP}`)
+  expect(await screen.findByRole('heading', { level: 1, name: 'Điểm 1 / 4' }, LOAD)).toBeInTheDocument()
+  expect(screen.getByRole('status')).toHaveTextContent('Kho chưa xếp xong chuyến này: bạn xem trước được, chưa bắt đầu giao được.')
   const expected = await approvedUnloadOrder(SEED_TRIP, 1)
-  expect(expected.length).toBeGreaterThan(0)
+  expect(expected).toHaveLength(38)
   expect(rowIds(container)).toStrictEqual(expected)
-  expect(screen.getByText(`Cần dỡ ${expected.length} kiện · Đã dỡ 0`)).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /^Đánh dấu đã dỡ/ })).not.toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Gọi Chị Hương' })).toHaveAttribute('href', 'tel:02837751122')
+  expect(screen.getByText('Chị Hương · 0283 775 1122')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Chỉ đường tới Công ty TNHH Thực phẩm Sài Gòn' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Xem vị trí hàng' })).toBeInTheDocument()
+  expect(container.querySelectorAll('a.bg-primary, button.bg-primary')).toHaveLength(0)
+  expect(screen.getByRole('link', { name: 'Về danh sách chuyến' })).toHaveAttribute('href', '/tai-xe')
+}, 15_000)
 
-  expect(screen.queryByRole('navigation', { name: 'Điều hướng tài xế' })).not.toBeInTheDocument()
-  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-  expect(container.querySelectorAll('a.bg-primary, button.bg-primary')).toHaveLength(1)
-})
+test("another driver's trip is not shown: the store answers not found", async () => {
+  renderDriver('/tai-xe/diem-giao?chuyen=TRIP-009')
+  expect(await screen.findByText('Không tải được chuyến', {}, LOAD)).toBeInTheDocument()
+  expect(screen.getByText('Không tìm thấy TRIP-009.')).toBeInTheDocument()
+  expect(screen.getAllByRole('link', { name: 'Về danh sách chuyến' }).map((link) => link.getAttribute('href'))).toStrictEqual(['/tai-xe', '/tai-xe'])
+}, 15_000)
 
-test('hoàn tất điểm giao: còn kiện thì cảnh báo; dỡ đủ thì chuyển sang điểm kế tiếp trong phiên', async () => {
-  const { container } = renderDriver()
-  await screen.findByRole('heading', { name: 'Điểm 1 / 4' })
-  const complete = screen.getByRole('button', { name: 'Hoàn tất điểm giao' })
+test('packages missing at the warehouse are not on the list and a notice says so', async () => {
+  const tripId = await loadedTwoCartonTrip(['PKG-002-01'])
+  renderDriver(`/tai-xe/diem-giao?chuyen=${tripId}`)
+  expect(await screen.findByRole('heading', { level: 1, name: 'Điểm 1 / 3' }, LOAD)).toBeInTheDocument()
+  expect(screen.getByText('Kho báo thiếu 1 kiện của điểm này: không có trên xe, không cần dỡ.')).toBeInTheDocument()
+  expect(screen.getByText('Không có kiện nào của điểm giao này trên xe.')).toBeInTheDocument()
+}, 15_000)
 
-  fireEvent.click(complete)
-  const count = rowIds(container).length
-  expect(toast.warning).toHaveBeenCalledWith(`Còn ${count} kiện chưa dỡ`, { description: 'Đánh dấu hết các kiện đã dỡ trước khi hoàn tất.' })
-  expect(screen.getByRole('heading', { name: 'Điểm 1 / 4' })).toBeInTheDocument()
+test('the driver delivers a trip: start, unload, a stop with nothing on board, an issue, then the trip summary', async () => {
+  const tripId = await loadedTwoCartonTrip()
+  const { container } = renderDriver(`/tai-xe/diem-giao?chuyen=${tripId}`)
+  expect(await screen.findByRole('heading', { level: 1, name: 'Điểm 1 / 3' }, LOAD)).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Bắt đầu giao' }))
 
-  const list = screen.getByRole('list')
-  for (const button of within(list).getAllByRole('button', { name: /^Đánh dấu đã dỡ / })) fireEvent.click(button)
-  expect(screen.getByText('Còn 0 kiện chưa dỡ')).toBeInTheDocument()
-  fireEvent.click(complete)
+  // Điểm 1: PKG-002-01. Chưa dỡ thì chưa hoàn tất được
+  const complete = await screen.findByRole('button', { name: 'Hoàn tất điểm giao' }, WRITE)
+  expect(complete).toBeDisabled()
+  expect(screen.getByText('Còn 1 kiện chưa dỡ hoặc chưa báo sự cố')).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Đánh dấu đã dỡ PKG-002-01' }))
+  const row = container.querySelector('li[data-package-id="PKG-002-01"]') as HTMLElement
+  expect(row).toHaveAttribute('data-state', 'unloaded')
+  expect(row).toHaveClass('bg-badge-success-bg')
+  expect(within(row).getByText('Đã dỡ')).toBeInTheDocument()
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Hoàn tất điểm giao' })).toBeEnabled(), WRITE)
+  await userEvent.click(screen.getByRole('button', { name: 'Hoàn tất điểm giao' }))
+  expect(await screen.findByRole('heading', { level: 1, name: 'Điểm 2 / 3' }, WRITE)).toBeInTheDocument()
+  expect(toast.success).toHaveBeenCalledWith('Đã hoàn tất điểm giao 1', { description: 'Chuyển sang điểm giao 2.' })
 
-  expect(toast.success).toHaveBeenCalledWith('Đã dỡ đủ kiện tại điểm giao 1', { description: 'Chuyển sang điểm giao 2.' })
-  expect(await screen.findByRole('heading', { name: 'Điểm 2 / 4' })).toBeInTheDocument()
-  expect(rowIds(container)).toStrictEqual(await approvedUnloadOrder(SEED_TRIP, 2))
-})
+  // Điểm 2 không có kiện nào
+  expect(screen.getByText('Mọi kiện của điểm này đã dỡ hoặc đã báo sự cố.')).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Hoàn tất điểm giao' }))
+  expect(await screen.findByRole('heading', { level: 1, name: 'Điểm 3 / 3' }, WRITE)).toBeInTheDocument()
 
-test('?chuyen trỏ tới chuyến chưa duyệt: trạng thái rỗng nói cần duyệt trước, không rơi sang chuyến khác', async () => {
-  const trip = await getMockDb().createTrip(twoCartonTrip())
-  renderDriver(`/tai-xe/diem-giao?chuyen=${trip.id}`)
-  expect(await screen.findByText('Chưa có phương án đã duyệt')).toBeInTheDocument()
-  expect(screen.getByText(`Chuyến ${trip.id} chưa có phương án đã duyệt. Điều phối viên cần duyệt phương án xếp hàng của chuyến trước.`)).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Về danh sách chuyến' })).toHaveAttribute('href', '/chuyen')
-})
+  // Điểm 3: khách từ chối PKG-001-01; "Khác" mà không ghi chú thì không ghi
+  await userEvent.click(screen.getByRole('button', { name: 'Báo sự cố' }))
+  const dialog = within(screen.getByRole('dialog', { name: 'Báo sự cố tại điểm 3' }))
+  expect(dialog.getByRole('combobox', { name: 'Kiện' })).toHaveValue('PKG-001-01')
+  await userEvent.click(dialog.getByRole('radio', { name: 'Khác' }))
+  await userEvent.click(dialog.getByRole('button', { name: 'Ghi sự cố' }))
+  expect(await dialog.findByText('Chọn Khác thì cần ghi chú.')).toBeInTheDocument()
+  await userEvent.click(dialog.getByRole('radio', { name: 'Khách từ chối' }))
+  await userEvent.type(dialog.getByRole('textbox', { name: 'Ghi chú' }), 'Khách đổi đơn')
+  await userEvent.click(dialog.getByRole('button', { name: 'Ghi sự cố' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument(), WRITE)
+  expect(toast.success).toHaveBeenCalledWith('Đã ghi sự cố cho PKG-001-01')
+  const refused = container.querySelector('li[data-package-id="PKG-001-01"]') as HTMLElement
+  expect(refused).toHaveAttribute('data-state', 'issue')
+  expect(within(refused).getByText('Sự cố: Khách từ chối')).toBeInTheDocument()
 
-test('tài xế: nút thoát là Đăng xuất, không dẫn sang trang chuyến của điều phối viên', async () => {
-  renderDriver('/tai-xe/diem-giao', 'driver')
-  await screen.findByRole('heading', { name: 'Điểm 1 / 4' })
-  expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument()
-  expect(screen.queryByRole('link', { name: 'Thoát màn hình tài xế' })).not.toBeInTheDocument()
-})
+  await userEvent.click(screen.getByRole('button', { name: 'Hoàn tất điểm giao' }))
+  expect(await screen.findByRole('heading', { level: 1, name: 'Tổng kết chuyến' }, WRITE)).toBeInTheDocument()
+  expect(screen.getByText(`Đã giao xong chuyến ${tripId}`)).toBeInTheDocument()
+  expect(screen.getByText('Số điểm giao').nextSibling).toHaveTextContent('3')
+  expect(screen.getByText('Kiện đã giao').nextSibling).toHaveTextContent('1')
+  const issues = within(screen.getByRole('region', { name: 'Sự cố' }))
+  expect(issues.getByText('Khách từ chối')).toBeInTheDocument()
+  expect(issues.getByText('PKG-001-01 · Điểm 3')).toBeInTheDocument()
+  expect(issues.getByText('Carton A')).toBeInTheDocument()
+  expect(issues.getByText('Khách đổi đơn')).toBeInTheDocument()
+  // Nút thoát ở thanh trên và nút chính ở chân màn đều về danh sách
+  expect(screen.getAllByRole('link', { name: 'Về danh sách chuyến' }).map((link) => link.getAttribute('href'))).toStrictEqual(['/tai-xe', '/tai-xe'])
 
-test('bản duyệt lỗi thời vẫn hiện, kèm cảnh báo', async () => {
+  const stored = await getMockDb().getTrip(tripId)
+  expect([stored.phase, stored.delivery?.issues.map((issue) => [issue.kind, issue.packageInstanceId, issue.note, issue.reportedBy])]).toStrictEqual([
+    'completed', [['refused', 'PKG-001-01', 'Khách đổi đơn', 'US-0004']],
+  ])
+}, 30_000)
+
+test('reopening a trip in delivery resumes at the first stop not completed', async () => {
+  // TRIP-009 (seed): điểm 1 đã xong, điểm 2 dỡ được 25/50 kiện
+  renderDriver('/tai-xe/diem-giao?chuyen=TRIP-009', 'admin')
+  expect(await screen.findByRole('heading', { level: 1, name: 'Điểm 2 / 3' }, LOAD)).toBeInTheDocument()
+  expect(screen.getByText('Cần dỡ 50 kiện · Đã dỡ 25 · Sự cố 0')).toBeInTheDocument()
+  expect(screen.getByText('Còn 25 kiện chưa dỡ hoặc chưa báo sự cố')).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Về danh sách chuyến' })).toHaveAttribute('href', '/tai-xe')
+}, 15_000)
+
+test('a stale approved plan still previews, with a warning', async () => {
   const db = getMockDb()
   const trip = await db.getTrip(SEED_TRIP)
   await db.updateTrip(SEED_TRIP, { packages: trip.packages.map((pkg, i) => (i === 0 ? { ...pkg, weightKg: pkg.weightKg + 1 } : pkg)) })
   renderDriver(`/tai-xe/diem-giao?chuyen=${SEED_TRIP}`)
-  expect(await screen.findByRole('alert')).toHaveTextContent('Phương án đã duyệt này đã lỗi thời')
-  expect(screen.getByRole('heading', { name: 'Điểm 1 / 4' })).toBeInTheDocument()
-})
+  expect(await screen.findByRole('alert', {}, LOAD)).toHaveTextContent('Phương án đã duyệt này đã lỗi thời')
+  expect(screen.getByRole('heading', { level: 1, name: 'Điểm 1 / 4' })).toBeInTheDocument()
+}, 15_000)

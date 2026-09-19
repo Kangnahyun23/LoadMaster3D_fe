@@ -22,6 +22,7 @@ const OptimizationSetupPage = lazy(() => import('@/features/optimization/Optimiz
 const PlanComparisonPage = lazy(() => import('@/features/trips/PlanComparisonPage').then((m) => ({ default: m.PlanComparisonPage })))
 const ViewerPage = lazy(() => import('@/features/viewer3d/ViewerPage').then((m) => ({ default: m.ViewerPage })))
 const WarehousePage = lazy(() => import('@/features/warehouse/WarehousePage').then((m) => ({ default: m.WarehousePage })))
+const MyTripsPage = lazy(() => import('@/features/driver/MyTripsPage').then((m) => ({ default: m.MyTripsPage })))
 const DriverStopPage = lazy(() => import('@/features/driver/DriverStopPage').then((m) => ({ default: m.DriverStopPage })))
 const FleetPage = lazy(() => import('@/features/fleet/FleetPage').then((m) => ({ default: m.FleetPage })))
 const VehicleDetailPage = lazy(() => import('@/features/fleet/VehicleDetailPage').then((m) => ({ default: m.VehicleDetailPage })))
@@ -94,10 +95,11 @@ const router = createBrowserRouter([
               guarded('plans.view', [{ path: '/chuyen/:tripId/phuong-an', element: <ViewerPage /> }]),
               // `/kho` là danh sách chuyến cần xếp; `/kho?chuyen=<mã>` là phiên xếp của chuyến đó (LM-086).
               guarded('warehouse.operate', [{ path: '/kho', element: <WarehousePage /> }]),
+              // `/tai-xe` là "Chuyến của tôi"; `/tai-xe/diem-giao?chuyen=<mã>` là một chuyến; đường dẫn lạ về danh sách (LM-087).
               guarded('driver.operate', [
-                { path: '/tai-xe', element: <Navigate to="/tai-xe/diem-giao" replace /> },
+                { path: '/tai-xe', element: <MyTripsPage /> },
                 { path: '/tai-xe/diem-giao', element: <DriverStopPage /> },
-                { path: '/tai-xe/*', element: <Navigate to="/tai-xe/diem-giao" replace /> },
+                { path: '/tai-xe/*', element: <Navigate to="/tai-xe" replace /> },
               ]),
             ],
           },

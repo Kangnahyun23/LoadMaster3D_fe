@@ -150,7 +150,9 @@ test.describe('touch', () => {
     const viewport = page.viewportSize()!
     const requests: string[] = []
     page.on('request', (request) => requests.push(request.url()))
-    await login('/tai-xe/diem-giao?debug&packages=1000&quality=low', 'driver')
+    // Chuyến đã xếp xong của tài xế demo (LM-087); `debug&packages` thay khung 3D bằng fixture benchmark như trước. Kịch bản đi
+    // tiếp sang Planner nên dùng quản trị viên (toàn quyền, D-41) — tài xế mở Planner là 403
+    await login('/tai-xe/diem-giao?chuyen=TRIP-010&debug&packages=1000&quality=low', 'admin')
     await button(page, 'Xem vị trí hàng').waitFor()
     expect(await page.locator('canvas').count()).toBe(0)
     expect(requests.some((url) => /@react-three|three\.module|three\.core/.test(url)), 'driver 2D must not fetch Three.js').toBe(false)
@@ -167,7 +169,7 @@ test.describe('touch', () => {
     await attachScreenshot(page, testInfo, `driver-${viewport.width}`)
     await button(page, 'Đóng 3D').tap()
     expect(await page.locator('canvas').count()).toBe(0)
-    await button(page, 'Hoàn tất điểm giao').waitFor()
+    await button(page, 'Bắt đầu giao').waitFor()
 
     await page.goto(OPERATIONS_ROUTE); await settle(page)
     await button(page, 'Dỡ hàng').tap()

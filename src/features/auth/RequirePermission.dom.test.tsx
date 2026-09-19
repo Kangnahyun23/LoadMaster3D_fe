@@ -29,7 +29,7 @@ test('a driver opening the users screen gets 403 with a way back to the driver s
   renderUsersRoute('driver')
   expect(screen.getByRole('heading', { name: 'Không có quyền truy cập' })).toBeInTheDocument()
   expect(screen.getByText('403')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Về màn chính' })).toHaveAttribute('href', '/tai-xe/diem-giao')
+  expect(screen.getByRole('link', { name: 'Về màn chính' })).toHaveAttribute('href', '/tai-xe')
   expect(screen.queryByRole('heading', { name: 'Người dùng' })).not.toBeInTheDocument()
 })
 

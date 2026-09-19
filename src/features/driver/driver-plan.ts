@@ -1,26 +1,7 @@
 import { lt } from '@/domain/geometry'
 import type { ScenePlacement, ViewerSceneModel } from '@/features/viewer3d/scene-input'
 import { unloadSequence } from '@/features/viewer3d/operations/unloading'
-import type { DeliveryStop, Revision, Trip } from '@/lib/mock-db'
-
-/** Một chuyến và các revision của nó theo thứ tự tạo (cũ trước), như kho trả. */
-export type TripRevisions = { readonly trip: Trip; readonly revisions: readonly Revision[] }
-
-export type DriverPlan = { readonly trip: Trip; readonly revision: Revision }
-
-/**
- * Phương án tài xế làm theo (LM-061, D-14): revision đã duyệt mới nhất. Có `tripId` (`?chuyen=`) thì chỉ xét đúng chuyến đó;
- * không có thì lấy chuyến đầu tiên theo thứ tự kho có revision đã duyệt. Không có gì để giao trả `undefined`.
- */
-export function pickDriverPlan(plans: readonly TripRevisions[], tripId?: string): DriverPlan | undefined {
-  for (const { trip, revisions } of plans) {
-    if (tripId !== undefined && trip.id !== tripId) continue
-    const revision = revisions.findLast((item) => item.approvedAt !== undefined)
-    if (revision) return { trip, revision }
-    if (tripId !== undefined) return undefined
-  }
-  return undefined
-}
+import type { DeliveryStop } from '@/lib/mock-db'
 
 /** Vùng dọc thùng theo tâm kiện: một phần ba sát vách trước, giữa, một phần ba gần cửa sau. */
 export type DeliveryArea = 'front' | 'middle' | 'door'
@@ -44,7 +25,10 @@ export type StopDelivery = {
   readonly number: number
   readonly name: string
   readonly address: string
-  /** Kiện đã xếp của điểm, theo `unloadingOrder` */
+  /** Số điện thoại người nhận để gọi (`tel:`, D-46); vắng thì không có nút Gọi. */
+  readonly phone?: string
+  readonly contactName?: string
+  /** Kiện đã xếp của điểm theo phương án (kể cả kiện kho báo thiếu), theo `unloadingOrder` */
   readonly items: readonly DeliveryItem[]
 }
 
@@ -73,6 +57,6 @@ export function stopDeliveries(stops: readonly DeliveryStop[], model: Pick<Viewe
       area: areaOf(p, innerLengthCm),
       layer: layerOf(p, innerHeightCm),
     }))
-    return { number, name: stop.name, address: stop.address, items }
+    return { number, name: stop.name, address: stop.address, phone: stop.phone, contactName: stop.contactName, items }
   })
 }

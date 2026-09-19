@@ -130,7 +130,8 @@ test('benchmark fixture requires debug; warehouse camera, next step and driver 2
   await page.getByRole('button', { name: 'Xác nhận đã xếp', exact: true }).click()
   await expect(page.getByRole('heading', { level: 1, name: second, exact: true })).toBeVisible()
 
-  await page.goto('/tai-xe/diem-giao')
+  // Chuyến đang giao của seed (quản trị thấy mọi chuyến, LM-087): màn điểm giao 2D, chưa tải Three.js
+  await page.goto('/tai-xe/diem-giao?chuyen=TRIP-009')
   await page.getByRole('button', { name: 'Hoàn tất điểm giao', exact: true }).waitFor()
   expect(await page.locator('canvas').count()).toBe(0)
   expect(browserErrors).toStrictEqual([])
