@@ -2,20 +2,23 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tansta
 import type { CargoPackage } from '@/domain/models'
 import type { DeliveryStop } from '@/lib/mock-db'
 import {
+  cancelTrip,
   createTrip,
   deletePackage,
   duplicateTripPackage,
   fetchPackages,
+  fetchTripActivity,
   fetchTripDetail,
+  fetchTripFormOptions,
   fetchTripRevisions,
   fetchTrips,
-  fetchVehicleOptions,
+  importPackages,
   removeTripStop,
   savePackage,
-  setTripVehicle,
   updateTripFrame,
   updateTripStops,
   type TripFrame,
+  type TripFrameChanges,
 } from './trips-api'
 
 /** Chuyến và kiện qua TanStack Query — component không gọi API trực tiếp (mục 9). */
@@ -25,8 +28,9 @@ export function useTripsQuery() {
   return useQuery({ queryKey: ['trips', 'list'], queryFn: fetchTrips, staleTime: 0 })
 }
 
-export function useVehicleOptionsQuery() {
-  return useQuery({ queryKey: ['vehicles'], queryFn: fetchVehicleOptions })
+/** Xe (kèm trạng thái bảo dưỡng) và tài xế của form chuyến: đọc lại mỗi lần mở form vì Đội xe và Người dùng đổi chúng. */
+export function useTripFormOptionsQuery() {
+  return useQuery({ queryKey: ['trips', 'form-options'], queryFn: fetchTripFormOptions, staleTime: 0 })
 }
 
 /** Tạo chuyến: làm mới danh sách chuyến và bảng điều khiển. */
@@ -44,7 +48,19 @@ export function useCreateTripMutation() {
 export function useUpdateTripFrameMutation(tripId: string) {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: (frame: Pick<TripFrame, 'name' | 'vehicleId'>) => updateTripFrame(tripId, frame),
+    mutationFn: (changes: TripFrameChanges) => updateTripFrame(tripId, changes),
+    onSuccess: () => Promise.all([
+      invalidateTrip(client, tripId),
+      client.invalidateQueries({ queryKey: ['trips', 'list'] }),
+    ]),
+  })
+}
+
+/** Huỷ chuyến: đổi trạng thái ở chi tiết, danh sách và bảng điều khiển. */
+export function useCancelTripMutation(tripId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (reason: string) => cancelTrip(tripId, reason),
     onSuccess: () => Promise.all([
       invalidateTrip(client, tripId),
       client.invalidateQueries({ queryKey: ['trips', 'list'] }),
@@ -54,6 +70,14 @@ export function useUpdateTripFrameMutation(tripId: string) {
 
 export function useTripDetailQuery(tripId: string) {
   return useQuery({ queryKey: ['trips', tripId, 'detail'], queryFn: () => fetchTripDetail(tripId), enabled: tripId !== '' })
+}
+
+/**
+ * Revision, nhật ký, người dùng cho thẻ Tiến trình. Kho và tài xế ghi tiến độ ở màn khác (không qua hook của màn này), nên đọc lại
+ * mỗi lần mở chi tiết chuyến.
+ */
+export function useTripActivityQuery(tripId: string) {
+  return useQuery({ queryKey: ['trips', tripId, 'activity'], queryFn: () => fetchTripActivity(tripId), enabled: tripId !== '', staleTime: 0 })
 }
 
 /** Khoá nằm dưới `['trips', tripId]` nên mọi mutation của chuyến và lần tối ưu mới đều làm mới danh sách này. */
@@ -92,18 +116,19 @@ export function useRemoveStopMutation(tripId: string) {
   })
 }
 
-export function useTripVehicleMutation(tripId: string) {
-  const client = useQueryClient()
-  return useMutation({
-    mutationFn: (vehicleId: string) => setTripVehicle(tripId, vehicleId),
-    onSuccess: () => invalidateTrip(client, tripId),
-  })
-}
-
 export function useSavePackageMutation(tripId: string) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (pkg: CargoPackage) => savePackage(tripId, pkg),
+    onSuccess: () => invalidateTrip(client, tripId),
+  })
+}
+
+/** Nhập kiện từ file (LM-093): một lần ghi, làm mới chuyến, revision (lỗi thời) và bảng điều khiển như mọi thay đổi kiện. */
+export function useImportPackagesMutation(tripId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (packages: readonly CargoPackage[]) => importPackages(tripId, packages),
     onSuccess: () => invalidateTrip(client, tripId),
   })
 }

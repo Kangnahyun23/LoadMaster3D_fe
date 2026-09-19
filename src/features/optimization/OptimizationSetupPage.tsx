@@ -5,6 +5,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { TripLockBanner } from '@/components/TripLockBanner'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { validateRequest } from '@/domain/constraints'
@@ -21,6 +22,7 @@ import { useOptimizationRun, useOptimizationSetupQuery } from './useOptimization
 /**
  * Thiết lập tối ưu (LM-047) và chạy job (LM-048): chọn xe, xem tóm tắt hàng, chỉnh thiết lập, validation summary gom
  * theo nhóm; nút primary duy nhất "Tối ưu" khoá khi còn lỗi. Chạy xong mở Planner với revision mới.
+ * Chuyến đã sang pha vận hành (D-45, LM-088): banner nói lý do, không đổi xe, nút Tối ưu tắt — kho cũng từ chối `TRIP_LOCKED`.
  */
 export function OptimizationSetupPage() {
   const { tripId = '' } = useParams()
@@ -47,6 +49,7 @@ export function OptimizationSetupPage() {
   const { isValid } = form.formState
 
   const setup = query.data
+  const locked = setup !== undefined && setup.trip.phase !== 'planning'
   const request = setup ? buildOptimizationRequest(setup.trip, setup.vehicle, { ...DEFAULT_SETTINGS, ...watched }) : null
   const summary = request && setup ? groupRequestIssues(validateRequest(request), { tripId, vehicleId: setup.vehicle.id }) : null
 
@@ -90,7 +93,7 @@ export function OptimizationSetupPage() {
         <div className="flex-1" />
         <Button
           variant="primary"
-          disabled={!summary?.canRun || run.isPending || !isValid}
+          disabled={locked || !summary?.canRun || run.isPending || !isValid}
           onClick={form.handleSubmit(start)}
         >
           <Play strokeWidth={1.5} />
@@ -106,8 +109,9 @@ export function OptimizationSetupPage() {
         </div>
       ) : (
         <div className="grid min-h-0 flex-1 grid-cols-1 items-start gap-6 overflow-auto px-8 py-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+          {locked ? <div className="lg:col-span-2"><TripLockBanner trip={setup.trip} /></div> : null}
           <div className="flex flex-col gap-6">
-            <SetupContextPanels tripId={tripId} setup={setup} />
+            <SetupContextPanels tripId={tripId} setup={setup} locked={locked} />
             <section className="flex flex-col gap-3 rounded-md border border-border p-4">
               <h2 className="text-h3 font-semibold">{t('optimization.settings')}</h2>
               <SetupSettingsFields form={form} />

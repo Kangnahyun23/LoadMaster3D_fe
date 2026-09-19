@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
-export type SelectOption = { value: string; label: string }
+/** `disabled`: hiện trong danh sách nhưng không chọn được — nhãn tự nói lý do (xe đang bảo dưỡng, LM-088). */
+export type SelectOption = { value: string; label: string; disabled?: boolean }
 
 /**
  * Select nối vào react-hook-form. Radix Select không phải input gốc nên phải
@@ -58,7 +59,7 @@ export function SelectField<TValues extends FieldValues>({
               </SelectTrigger>
               <SelectContent>
                 {options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
                     {option.label}
                   </SelectItem>
                 ))}
