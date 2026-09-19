@@ -5,11 +5,12 @@ import {
   ScrollText,
   Tablet,
   Truck,
+  UserRound,
   Users,
   Warehouse,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { NavLink, useNavigate } from 'react-router'
+import { Link, NavLink, useNavigate } from 'react-router'
 import { LanguageSwitch } from '@/components/LanguageSwitch'
 import {
   DropdownMenu,
@@ -22,6 +23,8 @@ import {
 import { useAuth } from '@/features/auth/AuthProvider'
 import type { Permission } from '@/features/auth/permissions'
 import { useCan } from '@/features/auth/useCan'
+import { NotificationBell } from '@/features/notifications/NotificationBell'
+import { QuickSearch } from '@/features/search/QuickSearch'
 import { useT, type MessageKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { initialsOf } from '@/types/user'
@@ -107,6 +110,9 @@ export function NavRail() {
 
       <div className="flex-1" />
 
+      <QuickSearch />
+      <NotificationBell />
+
       <LanguageSwitch orientation="vertical" className="mb-2" />
 
       {user ? (
@@ -126,6 +132,12 @@ export function NavRail() {
               </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/ho-so">
+                <UserRound strokeWidth={1.5} aria-hidden />
+                {t('nav.profile')}
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => void handleSignOut()}>
               <LogOut strokeWidth={1.5} aria-hidden />
               {t('nav.signOut')}

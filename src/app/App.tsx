@@ -28,6 +28,7 @@ const FleetPage = lazy(() => import('@/features/fleet/FleetPage').then((m) => ({
 const VehicleDetailPage = lazy(() => import('@/features/fleet/VehicleDetailPage').then((m) => ({ default: m.VehicleDetailPage })))
 const UsersPage = lazy(() => import('@/features/admin/UsersPage').then((m) => ({ default: m.UsersPage })))
 const AuditLogPage = lazy(() => import('@/features/admin/AuditLogPage').then((m) => ({ default: m.AuditLogPage })))
+const ProfilePage = lazy(() => import('@/features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 const StyleSheetPage = lazy(() => import('./design-system/StyleSheetPage').then((m) => ({ default: m.StyleSheetPage })))
 const ComponentSheetPage = lazy(() => import('./design-system/ComponentSheetPage').then((m) => ({ default: m.ComponentSheetPage })))
 
@@ -85,6 +86,8 @@ const router = createBrowserRouter([
                   guarded('fleet.edit', [{ path: '/doi-xe/moi', element: <VehicleDetailPage /> }]),
                   guarded('users.manage', [{ path: '/nguoi-dung', element: <UsersPage /> }]),
                   guarded('audit.view', [{ path: '/nhat-ky', element: <AuditLogPage /> }]),
+                  // Hồ sơ cá nhân (LM-096): mọi người đã đăng nhập, không cần quyền riêng.
+                  { path: '/ho-so', element: <ProfilePage /> },
                 ],
               },
             ],

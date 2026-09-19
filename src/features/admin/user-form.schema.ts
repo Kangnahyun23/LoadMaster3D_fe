@@ -1,9 +1,7 @@
 import { z } from 'zod'
 import type { MessageKey, TFunction } from '@/lib/i18n'
+import { formatPhone, PHONE_PATTERN, phoneDigits } from '@/lib/phone'
 import { ROLES } from '@/types/user'
-
-/** Số điện thoại Việt Nam: 10 chữ số bắt đầu bằng 0, cho phép khoảng trắng. */
-const PHONE_PATTERN = /^0\d{9}$/
 
 /**
  * Schema giữ key từ điển thay vì câu chữ (như form đăng nhập); hộp thoại dịch lúc hiển thị,
@@ -29,10 +27,10 @@ export const userFormSchema = z.object({
     .string()
     .trim()
     .min(1, ERRORS.phoneRequired)
-    .transform((value) => value.replace(/\s/g, ''))
+    .transform(phoneDigits)
     .refine((value) => PHONE_PATTERN.test(value), ERRORS.phoneInvalid)
     // Lưu theo dạng hiển thị của kho ("0901 234 567"), để mở form rồi lưu không đổi gì thì kho không thấy thay đổi
-    .transform((value) => `${value.slice(0, 4)} ${value.slice(4, 7)} ${value.slice(7)}`),
+    .transform(formatPhone),
   role: z.enum(ROLES, { error: ERRORS.roleRequired }),
   depot: z.string().trim().min(1, ERRORS.depotRequired),
 })

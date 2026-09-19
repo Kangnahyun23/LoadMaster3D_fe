@@ -10,5 +10,7 @@ export const nav = {
   audit: 'Nhật ký',
   account: 'Tài khoản {name}',
   signOut: 'Đăng xuất',
+  /** Mục của menu tài khoản, mở `/ho-so` (LM-096). */
+  profile: 'Hồ sơ cá nhân',
   backHome: 'Về màn chính',
 } as const

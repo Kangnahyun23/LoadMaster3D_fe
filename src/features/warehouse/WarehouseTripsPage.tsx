@@ -2,6 +2,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { LanguageSwitch } from '@/components/LanguageSwitch'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { AccountMenu } from '@/features/auth/AccountMenu'
 import { ExitIconButton } from '@/features/auth/ExitControl'
 import { dataErrorMessage, useT } from '@/lib/i18n'
 import { useWarehouseTripsQuery } from './useWarehouseQueries'
@@ -9,7 +10,8 @@ import { WarehouseTripCard } from './WarehouseTripCard'
 
 /**
  * Màn chính của nhân viên kho (LM-086, D-46): chuyến đã duyệt chờ xếp, đang xếp, và chuyến có bản duyệt lỗi thời (không bắt đầu được).
- * Máy tính bảng: thẻ cỡ cảm ứng, nút 56px, chữ ≥ 16px (mục 10). Nút thoát ở đây là đăng xuất với nhân viên kho.
+ * Máy tính bảng: thẻ cỡ cảm ứng, nút 56px, chữ ≥ 16px (mục 10). Nút thoát ở đây là đăng xuất với nhân viên kho;
+ * nút tài khoản mở hồ sơ cá nhân hoặc đăng xuất (LM-096).
  */
 export function WarehouseTripsPage() {
   const t = useT()
@@ -19,6 +21,7 @@ export function WarehouseTripsPage() {
         <ExitIconButton screenHome="/kho" label={t('warehouse.exit')} iconClassName="size-7" />
         <h1 className="min-w-0 flex-1 truncate text-h1 font-semibold">{t('warehouse.list.title')}</h1>
         <LanguageSwitch size="touch" className="flex-none" />
+        <AccountMenu />
       </header>
       <main className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
         <TripList />
