@@ -19,6 +19,7 @@ import { designSystem } from './vi/designSystem'
 import { dataErrors } from './vi/dataErrors'
 import { audit } from './vi/audit'
 import { profile } from './vi/profile'
+import { notifications } from './vi/notifications'
 
 /**
  * Từ điển nguồn. Mọi ngôn ngữ khác khai báo `satisfies Dictionary<typeof vi>`,
@@ -51,4 +52,5 @@ export const vi = {
   dataErrors,
   audit,
   profile,
+  notifications,
 } as const

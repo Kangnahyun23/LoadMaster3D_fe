@@ -21,6 +21,7 @@ import { designSystem } from './en/designSystem'
 import { dataErrors } from './en/dataErrors'
 import { audit } from './en/audit'
 import { profile } from './en/profile'
+import { notifications } from './en/notifications'
 
 /** Bản tiếng Anh: mỗi nhánh một file trong `en/`, kiểm thiếu/thừa key theo nhánh nguồn `vi/`. */
 export const en = {
@@ -45,4 +46,5 @@ export const en = {
   dataErrors,
   audit,
   profile,
+  notifications,
 } satisfies Dictionary<typeof vi>

@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
@@ -59,21 +60,25 @@ test.each([
 
 test('signing out and in as another role lands on that role screen, not on the page the previous user left', async () => {
   const user = userEvent.setup()
+  // Chuông thông báo của nav rail (LM-098) đọc kho qua TanStack Query
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
-    <I18nProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <MemoryRouter initialEntries={['/dang-nhap']}>
-            <Routes>
-              <Route path="/dang-nhap" element={<LoginPage />} />
-              <Route element={<RequireAuth />}>
-                <Route path="*" element={<><NavRail /><Where /></>} />
-              </Route>
-            </Routes>
-          </MemoryRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </I18nProvider>,
+    <QueryClientProvider client={client}>
+      <I18nProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <MemoryRouter initialEntries={['/dang-nhap']}>
+              <Routes>
+                <Route path="/dang-nhap" element={<LoginPage />} />
+                <Route element={<RequireAuth />}>
+                  <Route path="*" element={<><NavRail /><Where /></>} />
+                </Route>
+              </Routes>
+            </MemoryRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </I18nProvider>
+    </QueryClientProvider>,
   )
   await signInAs('dieuphoi@loadmaster.vn')
   expect(await screen.findByText('Đang ở /chuyen', {}, { timeout: 3000 })).toBeInTheDocument()

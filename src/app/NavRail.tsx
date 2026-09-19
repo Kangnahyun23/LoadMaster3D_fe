@@ -23,6 +23,7 @@ import {
 import { useAuth } from '@/features/auth/AuthProvider'
 import type { Permission } from '@/features/auth/permissions'
 import { useCan } from '@/features/auth/useCan'
+import { NotificationBell } from '@/features/notifications/NotificationBell'
 import { useT, type MessageKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { initialsOf } from '@/types/user'
@@ -107,6 +108,8 @@ export function NavRail() {
       ))}
 
       <div className="flex-1" />
+
+      <NotificationBell />
 
       <LanguageSwitch orientation="vertical" className="mb-2" />
 
