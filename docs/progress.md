@@ -54,6 +54,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - Lượt CI đầu (`e798428`) đỏ 4 + 1 flaky dù máy dev xanh 80/80 — CI chậm hơn nên lộ ba lỗi: khoá dòng bảng theo vị trí (menu thao tác
   nhảy sang người khác), overlay debug báo "nghỉ" khi máy dưới 4 FPS (kéo theo `quality-policy` không hạ tier), và hai giả định sai
   trong `i18n-en.spec.ts`. Sửa ở `fc271d3`; hai lỗi đầu có từ trước đợt 6 (CI của `main` cũng đỏ vì lỗi thứ hai).
+- Lượt CI thứ tư (`b708c57`) **xanh trọn: 80/80, 19,6 phút, không lần thử lại nào**.
 - Lượt CI thứ ba xanh (79 test, 26,3 phút); `admin-users` còn flaky vì cú bấm mở menu thỉnh thoảng không ăn trên runner — E2E bấm lại,
   ghi nợ N-17.
 - Lượt CI thứ hai còn ba chỗ test tự cho rằng máy nhanh (bấm khi bộ lọc chưa đáp, cửa sổ lấy mẫu animation tính từ lúc bấm, root
@@ -65,7 +66,9 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 - Thử màn tài xế trên điện thoại thật (D-57) chưa làm — người dùng tự thử.
 
 **Việc tiếp theo**
-- Người dùng thử màn tài xế trên điện thoại thật; gộp `feat/ui-complete` vào `main` khi người dùng đồng ý.
+- Người dùng thử màn tài xế trên điện thoại thật (D-57).
+- `main` **giữ nguyên bản MVP** `751fdc8` theo quyết định 20/09 của người dùng; đợt 6 nằm ở `feat/ui-complete` (đã push) cho tới khi
+  người dùng duyệt gộp.
 - LM-002: contract backend.
 
 ### 19–20/09/2026 — Đợt 6: nền dữ liệu, phân quyền và 5 nhóm màn (LM-080 → LM-094, LM-097, LM-073)

@@ -71,6 +71,8 @@ thao tác không ăn. Không dựng lại được ở máy dev kể cả khi b�
 lại → lọc), nên E2E bấm lại tới khi menu mở thay vì đứng chờ 4 phút; ghi nợ N-17. Menu đang mở **không** bị đóng khi danh sách người
 dùng được đọc lại (đã thử riêng), nên đây không phải lỗi giữ trạng thái dòng.
 
+**Lượt CI thứ tư** (`b708c57`, sau khi E2E bấm lại nút mở menu) xanh trọn: **80/80, 19,6 phút, không lần thử lại nào**.
+
 **Kiểm tra cuối:** `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · `pnpm test:e2e` **80/80** ✅ (15,6 phút, 1 worker)
 · `pnpm test:bench` ✅ — dựng + `evaluateAll` 1.000 kiện p95 33,8 ms (ngân sách 50), `evaluateMove` 1,7 ms, `commitMove` 1,5 ms
 (ngân sách 8). Lượt chạy ngay sau khi chụp 48 ảnh 3D (máy còn tải) đo 55,2 ms và đỏ: cổng này nhạy với tải máy, chạy lúc máy nghỉ.

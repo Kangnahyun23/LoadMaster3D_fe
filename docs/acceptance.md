@@ -75,7 +75,7 @@ Thước đo: bảng 5 vai trò ở AGENTS mục 1 (D-40). Bằng chứng là te
 | Chung | Phân quyền giả lập + 403; hồ sơ + đổi mật khẩu; chuông thông báo theo vai trò; tìm nhanh Ctrl+K; tiêu đề tab theo màn; 404 về đúng màn chính; toast không che nút header | `rbac`, `profile`, `notifications`, `quick-search`, `plan-compare-404`, `i18n-en` |
 
 Kiểm tra cuối đợt (20/09/2026): `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · `pnpm test:e2e` **80/80** ✅ (15,6 phút)
-· `pnpm test:bench` ✅ (chạy tay, 1.000 kiện p95 33,8 ms / 1,7 ms) · CI ✅ (79 xanh, 1 flaky — xem N-17). Ảnh bàn giao vi/en (48 ảnh) chụp lại bằng `node tests/handoff-screenshots.mjs` (chạy tay, cần
+· `pnpm test:bench` ✅ (chạy tay, 1.000 kiện p95 33,8 ms / 1,7 ms) · CI ✅ (`b708c57`: 80/80, 19,6 phút). Ảnh bàn giao vi/en (48 ảnh) chụp lại bằng `node tests/handoff-screenshots.mjs` (chạy tay, cần
 dev server). Chưa làm: thử màn tài xế trên điện thoại thật (D-57) — người dùng tự thử.
 
 ### Nợ còn lại sau đợt 6
