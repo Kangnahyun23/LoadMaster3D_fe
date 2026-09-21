@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": ["design/**", "dist/**", "docs/**"],
+  "ignorePatterns": ["dist/**", "docs/**"],
   "env": { "browser": true, "es2024": true },
   "plugins": ["react", "react-hooks", "typescript", "oxc"],
   "rules": {

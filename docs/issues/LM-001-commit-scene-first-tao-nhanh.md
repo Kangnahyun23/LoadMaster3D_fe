@@ -20,7 +20,7 @@ Working tree đang có đợt scene-first chưa commit: 28 file sửa và nhiề
 - [x] Bảo đảm file untracked cần giữ được thêm: `src/features/viewer3d/**` mới, `tests/viewer-scene-first*`, `docs/benchmarks/*`, `docs/screenshots/scene-first/`, `docs/viewer-scene-first-report.md`, `handoff.md`.
 - [x] Không commit `.claude/settings.json` nếu chỉ còn `{"enabledPlugins": {}}`.
 - [x] Commit code theo Conventional Commits, ví dụ `feat(viewer3d): scene-first workspace and spatial editor feedback`.
-- [x] Commit riêng tài liệu: `docs/prd.md`, `docs/issues/`, `LoadMaster_FE_MVP_Build_Spec.md` (dọn ký tự escape `\#`, `\-`, `\~` trước).
+- [x] Commit riêng tài liệu: `docs/prd.md`, `docs/issues/`, `docs/build-spec.md` (dọn ký tự escape `\#`, `\-`, `\~` trước).
 - [x] Tạo nhánh `feat/spec-mvp` từ `main`.
 
 ## Tiêu chí nghiệm thu

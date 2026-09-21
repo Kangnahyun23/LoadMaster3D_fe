@@ -20,7 +20,7 @@ import { NoMatchRow, SortHeader } from './DataTableParts'
 import { clampPageIndex, PaginationFooter, type DataTablePagination } from './DataTablePagination'
 
 /**
- * Bảng dữ liệu dùng chung (CLAUDE.md mục 5).
+ * Bảng dữ liệu dùng chung (AGENTS.md mục 5).
  * Chiều cao dòng cố định, tiêu đề dính khi cuộn, không kẻ sọc xen kẽ,
  * phân tách bằng đường 1px. Cột số căn phải dùng mono — khai báo qua
  * `meta.align` trên từng cột.

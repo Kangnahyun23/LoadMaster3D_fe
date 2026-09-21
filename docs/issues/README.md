@@ -1,6 +1,6 @@
 # Gói issue — LoadMaster FE MVP (tích hợp Build Spec)
 
-Nguồn: [docs/prd.md](../prd.md) (quyết định D-01 → D-39) và [LoadMaster_FE_MVP_Build_Spec.md](../../LoadMaster_FE_MVP_Build_Spec.md).
+Nguồn: [docs/prd.md](../prd.md) (quyết định D-01 → D-39) và [Build Spec](../build-spec.md).
 Tiến độ và nhật ký theo ngày: [docs/progress.md](../progress.md).
 Cập nhật 19/09/2026: thêm phase 6 (LM-080 → LM-101). Phase 0–5: 55 issue, ước lượng tổng **~55 ngày công** cho một người; làm song song theo các luồng ở mục 3 thì rút ngắn được đáng kể.
 
@@ -33,7 +33,7 @@ Mỗi issue là một file `LM-0xx-ten-ngan.md` với frontmatter:
 |---|---|---|---|
 | [LM-001](LM-001-commit-scene-first-tao-nhanh.md) | Commit scene-first lên main, tạo nhánh `feat/spec-mvp` | 0,5d | — |
 | [LM-002](LM-002-chot-contract-backend.md) | Chốt contract với backend *(theo dõi, không chặn)* | — | — |
-| [LM-003](LM-003-cap-nhat-agents-claude-md.md) | Cập nhật AGENTS.md và CLAUDE.md | 0,5d | 001 |
+| [LM-003](LM-003-gom-luat-ve-mot-nguon.md) | Cập nhật AGENTS.md | 0,5d | 001 |
 | [LM-004](LM-004-them-vitest-rtl.md) | Vitest + RTL, chuyển 37 test | 1d | 001 |
 | [LM-005](LM-005-them-playwright-test.md) | `@playwright/test`, chuyển suite trình duyệt | 1,5d | 001 |
 | [LM-006](LM-006-github-actions-ci.md) | GitHub Actions CI | 0,5d | 004, 005 |

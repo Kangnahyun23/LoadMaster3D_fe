@@ -2,7 +2,7 @@ import { readToken } from './tokens'
 
 /**
  * Phép chiếu đẳng cự cho ảnh xem trước dạng SVG (modal tối ưu, thẻ so sánh
- * phương án). Không phải viewer 3D — không đụng `three` (CLAUDE.md mục 7).
+ * phương án). Không phải viewer 3D — không đụng `three` (AGENTS.md mục 7).
  * Đơn vị đầu vào là mét; đầu ra là toạ độ SVG.
  */
 

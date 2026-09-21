@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils'
  * Card: viền 1px, radius 8px, padding 20px.
  *
  * Lệch có chủ ý khỏi style sheet: bản design đặt `box-shadow: 0 1px 2px`
- * lên card, nhưng CLAUDE.md mục 5 cấm đổ bóng lên card — bóng chỉ dành cho
- * dropdown, modal, toast, popover. Ở đây theo CLAUDE.md.
+ * lên card, nhưng AGENTS.md mục 5 cấm đổ bóng lên card — bóng chỉ dành cho
+ * dropdown, modal, toast, popover. Ở đây theo AGENTS.md.
  */
 export function Card({ className, ...props }: ComponentProps<'div'>) {
   return (

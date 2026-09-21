@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
- * Menu thả xuống. Là lớp nổi nên được dùng bóng (mục 5 CLAUDE.md).
+ * Menu thả xuống. Là lớp nổi nên được dùng bóng (mục 5 AGENTS.md).
  */
 export const DropdownMenu = DropdownMenuPrimitive.Root
 export const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger

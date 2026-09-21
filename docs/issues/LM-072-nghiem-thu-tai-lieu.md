@@ -34,5 +34,5 @@ spec: [15]
   không đo balanced/high ở 132/500 như issue ghi — mức 1.000 là trường hợp nặng nhất.
 - Ảnh: `tests/handoff-screenshots.mjs` (chạy tay) → [docs/screenshots/handoff/](../screenshots/handoff/), 9 màn × vi/en
   (bảng điều khiển, chi tiết xe, bảng kiện, thiết lập tối ưu, Planner thành công / một phần / lỗi thời, kho tablet, tài xế điện thoại).
-- Viết lại [handoff.md](../../handoff.md); PRD đổi trạng thái và tick mục 12; AGENTS mục 6 ghi cổng chuỗi cứng.
+- Viết lại [handoff.md](../handoff.md); PRD đổi trạng thái và tick mục 12; AGENTS mục 6 ghi cổng chuỗi cứng.
 - E2E cục bộ gặp hai lỗi ngẫu nhiên không tái hiện khi chạy riêng (ghi ở handoff mục 4); CI là nơi xác nhận.

@@ -35,8 +35,9 @@ test-results/
 playwright-report/
 blob-report/
 
-# git worktree tạm của agent chạy song song (xem AGENTS.md mục 12)
-.claude/worktrees/
+# cấu hình và thư mục tạm của công cụ soạn thảo trên máy, không thuộc dự án
+.claude/
+CLAUDE.md
 
-# gói bàn giao nén — bản sao của docs/research-handoff-*/
+# gói bàn giao nén
 docs/*.zip

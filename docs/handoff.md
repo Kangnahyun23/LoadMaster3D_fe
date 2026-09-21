@@ -1,9 +1,9 @@
 # LoadMaster Frontend — Bàn giao hiện trạng
 
 Ngày cập nhật: 20/09/2026. Repo `E:\SEP490\LoadMaster`. `main` = MVP theo Build Spec (nghiệm thu 16/09); nhánh `feat/ui-complete` = đợt 6
-hoàn thiện 5 vai trò (bảo vệ SEP490). Luật code: [AGENTS.md](AGENTS.md). Phạm vi và quyết định: [docs/prd.md](docs/prd.md) (D-01 → D-57).
-Tiến độ: [docs/progress.md](docs/progress.md). Nghiệm thu: [docs/acceptance.md](docs/acceptance.md) (mục 5 là đợt 6).
-Rà soát giao diện trước đợt 6: [docs/ui-audit-2026-09-19.md](docs/ui-audit-2026-09-19.md).
+hoàn thiện 5 vai trò (bảo vệ SEP490). Luật code: [AGENTS.md](../AGENTS.md). Phạm vi và quyết định: [docs/prd.md](prd.md) (D-01 → D-57).
+Tiến độ: [docs/progress.md](progress.md). Nghiệm thu: [docs/acceptance.md](acceptance.md) (mục 5 là đợt 6).
+Rà soát giao diện trước đợt 6: [docs/ui-audit-2026-09-19.md](ui-audit-2026-09-19.md).
 
 ## 1. Kết luận
 
@@ -52,7 +52,7 @@ bằng tiếng Anh.
 | Đo hiệu năng 3D | `/chuyen/TRIP-2026-0914/phuong-an?debug&packages=1000&quality=low` |
 | Tài liệu UI | `/kieu-dang`, `/thanh-phan` |
 
-Ảnh bàn giao vi/en: [docs/screenshots/handoff/](docs/screenshots/handoff/) — chụp lại bằng `node tests/handoff-screenshots.mjs` (cần dev server).
+Ảnh bàn giao vi/en: [docs/screenshots/handoff/](screenshots/handoff/) — chụp lại bằng `node tests/handoff-screenshots.mjs` (cần dev server).
 
 ## 3. Kiến trúc
 
@@ -96,7 +96,7 @@ giải xung đột, áp đề xuất luật vào AGENTS và cập nhật tiến 
 
 ## 6. Nợ và phần chờ backend
 
-Danh sách có ID: [docs/acceptance.md mục 4 và 5](docs/acceptance.md). Quan trọng nhất:
+Danh sách có ID: [docs/acceptance.md mục 4 và 5](acceptance.md). Quan trọng nhất:
 
 1. **Backend (LM-002):** contract `OptimizationRequest/Result`, revision và duyệt, pha chuyến, người dùng/phiên thật (cookie HttpOnly),
    phân quyền ở server, nhật ký, lưu bền.

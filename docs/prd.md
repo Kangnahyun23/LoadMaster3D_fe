@@ -4,7 +4,7 @@
 |---|---|
 | Ngày | 14/09/2026 |
 | Trạng thái | MVP đã hiện thực trên `feat/spec-mvp` (16/09/2026) — nghiệm thu: [acceptance.md](acceptance.md); còn chờ backend: mục 14. Đợt 6 (hoàn thiện 5 vai trò): mục 15 — đã hiện thực trên `feat/ui-complete` (20/09/2026), nghiệm thu: [acceptance.md mục 5](acceptance.md#5-đợt-6--5-vai-trò-lm-080--lm-101-1920092026) |
-| Nguồn | [LoadMaster_FE_MVP_Build_Spec.md](../LoadMaster_FE_MVP_Build_Spec.md) (gọi tắt **Spec**), [AGENTS.md](../AGENTS.md), buổi chốt quyết định 14/09/2026 |
+| Nguồn | [Build Spec](build-spec.md) (gọi tắt **Spec**), [AGENTS.md](../AGENTS.md), buổi chốt quyết định 14/09/2026 |
 | Phạm vi repo | Frontend `E:\SEP490\LoadMaster` |
 
 Tài liệu này mô tả **sản phẩm cần xây** khi đưa Spec vào repo đang có. Spec là nguồn cho quy tắc nghiệp vụ; PRD này ghi lại cách áp Spec vào repo và các quyết định đã chốt. Khi PRD và Spec lệch nhau ở phần nghiệp vụ bắt buộc (mục 3.1), Spec thắng và PRD phải được sửa.
@@ -255,7 +255,7 @@ Thông báo lỗi có đủ bản vi và en, giữ nguyên nội dung và số l
 
 | Phase | Nội dung | Điều kiện xong |
 |---|---|---|
-| 0 | Commit scene-first lên `main`, tạo nhánh `feat/spec-mvp`; cập nhật AGENTS.md và CLAUDE.md; Vitest, Playwright, GitHub Actions | Tài liệu được duyệt, CI chạy |
+| 0 | Commit scene-first lên `main`, tạo nhánh `feat/spec-mvp`; cập nhật AGENTS.md; Vitest, Playwright, GitHub Actions | Tài liệu được duyệt, CI chạy |
 | 1 | `src/domain` (models, geometry, orientation, constraints, metrics); `MockOptimizationService` trong worker; mock repository; hạ tầng i18n và nút chuyển ngôn ngữ | Unit test cho volume, orientation, boundary, overlap, payload, door, obstacle, stacking, LIFO; benchmark đạt D-29; mock trả placement hợp lệ |
 | 2 | Engine 3D sang cm, 6 hướng đặt, vật cản, view model từ `OptimizationResult`, editor dùng constraint engine | Browser suite 3D hiện có vẫn xanh; draw call không tăng theo số kiện |
 | 3 | Màn mới viết bằng từ điển i18n ngay từ đầu; Đội xe + chi tiết xe; bảng kiện trong chuyến; thiết lập tối ưu; Planner hiển thị kết quả, MOCK RESULT, metric, unplaced; Duyệt; So sánh revision; Dashboard | Checklist Spec mục 15 đạt trên luồng điều phối |

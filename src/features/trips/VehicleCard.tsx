@@ -10,7 +10,7 @@ import type { User } from '@/types/user'
  * Thẻ phương tiện ở cột trái, kèm tài xế chạy chuyến (LM-088).
  *
  * Lệch có chủ ý khỏi design: nhãn mục trong bản design viết hoa toàn bộ
- * kèm letter-spacing, CLAUDE.md mục 5 cấm cả hai — ở đây viết thường.
+ * kèm letter-spacing, AGENTS.md mục 5 cấm cả hai — ở đây viết thường.
  */
 export function VehicleCard({ vehicle, tripId, driverId = null, driver = null, canChange = true }: {
   vehicle: VehicleConfig

@@ -40,7 +40,7 @@ Rail của quản trị cao ~880 px: màn thấp hơn thì rail cuộn (`overflo
 
 ### MVP theo Build Spec *(bổ sung 15/09/2026)*
 
-Đang tích hợp [LoadMaster_FE_MVP_Build_Spec.md](LoadMaster_FE_MVP_Build_Spec.md) vào repo
+Đang tích hợp [docs/build-spec.md](docs/build-spec.md) vào repo
 này trên nhánh `feat/spec-mvp`. Quyết định và phạm vi: [docs/prd.md](docs/prd.md) (D-01 → D-39).
 Việc chia nhỏ: [docs/issues/](docs/issues/README.md). Tiến độ theo ngày: [docs/progress.md](docs/progress.md).
 
@@ -261,7 +261,7 @@ của nút. Thêm token `--text-*` mới vào `@theme` thì phải thêm tên v�
 
 **Nguồn quét class của Tailwind** *(bổ sung 15/09/2026, LM-005)*: `src/index.css` khai báo
 `@import 'tailwindcss' source('.')` — chỉ quét `src/`. Không bỏ `source('.')`: mặc định Tailwind v4 quét
-cả gốc repo (`AGENTS.md`, `docs/`, `design/`, `.claude/worktrees/`) và **tải lại toàn trang** dev server
+cả gốc repo (`AGENTS.md`, `docs/` và các thư mục tạm) và **tải lại toàn trang** dev server
 mỗi khi một file ngoài app đổi, làm mất state và làm E2E đỏ ngẫu nhiên. Class chỉ được sinh từ code
 trong `src/`; muốn dùng class từ nơi khác thì thêm `@source` tường minh.
 
