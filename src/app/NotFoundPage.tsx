@@ -8,7 +8,7 @@ import { useT } from '@/lib/i18n'
  * render. Không hiện stack trace cho người dùng cuối.
  *
  * Đây là màn không có dữ liệu nghiệp vụ nên được phép căn giữa và có hình
- * minh hoạ — xem ngoại lệ bố cục ở CLAUDE.md mục 5.
+ * minh hoạ — xem ngoại lệ bố cục ở AGENTS.md mục 5.
  */
 export function NotFoundPage() {
   const t = useT()

@@ -1,4 +1,4 @@
-/** Năm vai trò trong hệ thống (CLAUDE.md mục 1). Tên hiển thị: key `roles.<vai trò>` của từ điển. */
+/** Năm vai trò trong hệ thống (AGENTS.md mục 1). Tên hiển thị: key `roles.<vai trò>` của từ điển. */
 export const ROLES = ['dispatcher', 'warehouse', 'driver', 'manager', 'admin'] as const
 
 export type Role = (typeof ROLES)[number]

@@ -8,7 +8,7 @@ import * as authApi from './auth-api'
  * Phiên được giữ trong `sessionStorage` để tải lại trang không bị đăng xuất
  * khi đang phát triển. Đây là chỗ tạm: backend thật sẽ đặt cookie HttpOnly,
  * lúc đó bỏ hẳn phần lưu trữ này. Không dùng `localStorage` và không lưu dữ
- * liệu nghiệp vụ ở client (CLAUDE.md mục 9).
+ * liệu nghiệp vụ ở client (AGENTS.md mục 9).
  */
 
 const SESSION_KEY = 'loadmaster.phien'

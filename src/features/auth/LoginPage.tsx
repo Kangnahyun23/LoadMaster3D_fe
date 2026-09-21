@@ -51,7 +51,7 @@ const HIGHLIGHTS = [
 
 /**
  * Đăng nhập. Đây là một trong số ít màn không có dữ liệu nghiệp vụ, nên được
- * phép dùng bố cục hai cột có hình minh hoạ — xem ngoại lệ ở CLAUDE.md mục 5.
+ * phép dùng bố cục hai cột có hình minh hoạ — xem ngoại lệ ở AGENTS.md mục 5.
  */
 export function LoginPage() {
   const t = useT()

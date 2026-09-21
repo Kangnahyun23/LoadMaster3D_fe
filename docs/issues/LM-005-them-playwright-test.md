@@ -125,5 +125,5 @@ Không có seam test tự động đúng cho lỗi này (cần dev server đang 
 
 - LM-006: job e2e cần `pnpm exec playwright install --with-deps chromium`, upload `playwright-report/` khi lỗi; không chạy `tests/viewer-benchmark.mjs`. *(Đã làm.)*
 - LM-038: đổi mm → cm trong `e2e/*.spec.ts`; `proxyPoint` nhận độ dời theo mm.
-- LM-003: ghi `e2e/`, `@playwright/test`, `pnpm test:e2e` vào AGENTS.md/CLAUDE.md (mục 2, 3, 12). *(Đã làm.)*
+- LM-003: ghi `e2e/`, `@playwright/test`, `pnpm test:e2e` vào AGENTS.md (mục 2, 3, 12). *(Đã làm.)*
 - Sửa lỗi `CameraRig` → issue **LM-056**; khi đó bỏ bước `invalidate()` trong `renderCameraChange`.

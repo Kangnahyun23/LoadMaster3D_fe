@@ -9,7 +9,7 @@ import type { StopRow } from './trip-summary'
 /**
  * Thẻ một điểm giao, kéo được để đổi thứ tự.
  *
- * Lệch có chủ ý khỏi mục 5 CLAUDE.md: thẻ đang kéo dùng bóng `--e3`.
+ * Lệch có chủ ý khỏi mục 5 AGENTS.md: thẻ đang kéo dùng bóng `--e3`.
  * Luật cấm bóng áp cho thẻ ở trạng thái nghỉ; thẻ đang kéo là lớp đang
  * nhấc khỏi mặt phẳng nên xử lý như lớp nổi, đúng như bản design.
  */

@@ -1,6 +1,6 @@
 ---
 id: LM-003
-title: Cập nhật AGENTS.md và CLAUDE.md theo PRD
+title: Cập nhật AGENTS.md theo PRD
 phase: 0
 labels: [docs, rules]
 depends_on: [LM-001]
@@ -8,11 +8,11 @@ estimate: 0.5d
 prd: [D-03, D-06, D-07, D-15, D-19, D-20, D-27, D-28, D-29, D-30, D-39]
 ---
 
-# LM-003 — Cập nhật AGENTS.md và CLAUDE.md theo PRD
+# LM-003 — Cập nhật AGENTS.md theo PRD
 
 ## Bối cảnh
 
-AGENTS.md là "luật sống": code và luật không được lệch nhau. Nhiều quyết định PRD đổi luật hiện có. CLAUDE.md đang là bản cũ hơn AGENTS.md (thiếu phần foundation/editor/operations và mục 12).
+AGENTS.md là "luật sống": code và luật không được lệch nhau. Nhiều quyết định PRD đổi luật hiện có. Bản sao luật ở gốc repo đang cũ hơn AGENTS.md (thiếu phần foundation/editor/operations và mục 12).
 
 ## Việc cần làm
 
@@ -24,7 +24,7 @@ AGENTS.md là "luật sống": code và luật không được lệch nhau. Nhi�
 - [x] Mục 7: engine dùng cm (`SCENE_SCALE = 0.01`), 6 hướng đặt, vật cản; editor chạy constraint engine; ngân sách D-29; mock service trong Web Worker.
 - [x] Mục 9: domain trả mã lỗi + tham số; i18n bằng từ điển typed; ngôn ngữ lưu `sessionStorage` và `?lang`.
 - [x] Mục 12: lệnh kiểm tra mới (`pnpm test`, `pnpm test:e2e`, CI).
-- [x] Đồng bộ CLAUDE.md với AGENTS.md (hoặc để CLAUDE.md chỉ trỏ tới AGENTS.md).
+- [x] Gom luật về một nguồn duy nhất: AGENTS.md.
 
 ## Tiêu chí nghiệm thu
 
@@ -43,6 +43,6 @@ AGENTS.md là "luật sống": code và luật không được lệch nhau. Nhi�
 - Mục 9: "Dữ liệu dùng chung và tối ưu" (mock repository → `-api.ts` → Query, `OptimizationService`, revision bất biến, `?mo-phong=loi`); "Kiểm thử" (project unit/dom, seam, TDD, bench, e2e).
 - Mục 12: quy tắc làm song song bằng worktree; lệnh xác nhận cuối task thêm `pnpm test`; mỗi task ghi issue + nhật ký `docs/progress.md`.
 
-**CLAUDE.md**: thay bản sao cũ bằng lệnh import `@AGENTS.md` (Claude Code nạp nội dung AGENTS.md vào ngữ cảnh), để luật chỉ còn một nguồn.
+**Bản sao luật ở gốc repo**: gỡ bỏ, luật chỉ còn một nguồn là AGENTS.md.
 
 **Lưu ý:** mục 7 "Tích hợp Spec vào engine" và dòng "trạng thái chuyển đổi" ở mục 6 phải được sửa lại mỗi khi một issue phase 2–4 hoàn tất.

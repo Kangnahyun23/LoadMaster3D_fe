@@ -5,7 +5,7 @@ import { Spinner } from './Spinner'
 import { cn } from '@/lib/utils'
 
 /**
- * Nút theo mục 3 style sheet + mục 5 CLAUDE.md.
+ * Nút theo mục 3 style sheet + mục 5 AGENTS.md.
  * Hover chỉ đổi nền — không phóng to, không nhấc lên, không bóng.
  */
 const buttonVariants = cva(

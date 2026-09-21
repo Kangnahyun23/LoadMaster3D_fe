@@ -1,14 +1,14 @@
 # LoadMaster Frontend — Bàn giao hiện trạng
 
 Ngày cập nhật: 16/09/2026. Repo `E:\SEP490\LoadMaster`, nhánh `feat/spec-mvp` (tích hợp Build Spec, 5 phase, 56/57 issue;
-LM-002 chờ backend). Luật code: [AGENTS.md](AGENTS.md). Phạm vi và quyết định: [docs/prd.md](docs/prd.md).
-Tiến độ theo ngày: [docs/progress.md](docs/progress.md). Nghiệm thu từng dòng: [docs/acceptance.md](docs/acceptance.md).
+LM-002 chờ backend). Luật code: [AGENTS.md](../AGENTS.md). Phạm vi và quyết định: [docs/prd.md](prd.md).
+Tiến độ theo ngày: [docs/progress.md](progress.md). Nghiệm thu từng dòng: [docs/acceptance.md](acceptance.md).
 
 Bản bàn giao 14/09/2026 (đợt scene-first, dữ liệu mm) đã lỗi thời; các báo cáo `docs/viewer-*-report.md` là lịch sử.
 
 ## 1. Kết luận
 
-- MVP theo [Build Spec](LoadMaster_FE_MVP_Build_Spec.md) chạy đủ luồng: đội xe (cm/kg, vật cản, xem trước 3D) → chuyến và kiện
+- MVP theo [Build Spec](build-spec.md) chạy đủ luồng: đội xe (cm/kg, vật cản, xem trước 3D) → chuyến và kiện
   → thiết lập tối ưu → chạy mock trong Web Worker → Planner 3D (chỉ số, kiện chưa xếp, editor có constraint engine) → Duyệt
   → kho làm theo `loadingOrder`, tài xế theo `unloadingOrder`. So sánh revision và bảng điều khiển đọc cùng kho dữ liệu.
 - Toàn app dùng **cm/kg**; không còn dữ liệu mm. Giao diện chuyển **vi / en**, không chuỗi tiếng Việt cứng ngoài từ điển (có test chặn).
@@ -41,10 +41,10 @@ Tài khoản demo: `dieuphoi@loadmaster.vn` / `loadmaster` (`features/auth/auth.
 
 Seed kho: 3 xe, chuyến `TRIP-2026-0914` (4 điểm giao, 132 kiện), revision `REV-001` (kết quả) và `REV-002` (đã duyệt).
 
-Ảnh bàn giao vi/en ở [docs/screenshots/handoff/](docs/screenshots/handoff/) — chụp lại bằng `node tests/handoff-screenshots.mjs`
-(cần dev server). Ví dụ: [Planner](docs/screenshots/handoff/vi-planner-success.png) ·
-[kết quả một phần](docs/screenshots/handoff/en-planner-partial.png) · [lỗi thời](docs/screenshots/handoff/vi-planner-stale.png) ·
-[kho](docs/screenshots/handoff/en-warehouse-tablet.png) · [tài xế](docs/screenshots/handoff/vi-driver-phone.png).
+Ảnh bàn giao vi/en ở [docs/screenshots/handoff/](screenshots/handoff/) — chụp lại bằng `node tests/handoff-screenshots.mjs`
+(cần dev server). Ví dụ: [Planner](screenshots/handoff/vi-planner-success.png) ·
+[kết quả một phần](screenshots/handoff/en-planner-partial.png) · [lỗi thời](screenshots/handoff/vi-planner-stale.png) ·
+[kho](screenshots/handoff/en-warehouse-tablet.png) · [tài xế](screenshots/handoff/vi-driver-phone.png).
 
 ## 3. Kiến trúc
 
@@ -79,9 +79,9 @@ Số đo 16/09/2026 (Ryzen 7 5800H; Chromium headless + SwiftShader — **không
 
 | Đo | Kết quả | Dữ liệu |
 |---|---|---|
-| Constraint engine `evaluateAll` 1.000 kiện | p95 30,8 ms (ngân sách 50) | [constraint-engine-2026-09-16.json](docs/benchmarks/constraint-engine-2026-09-16.json) |
+| Constraint engine `evaluateAll` 1.000 kiện | p95 30,8 ms (ngân sách 50) | [constraint-engine-2026-09-16.json](benchmarks/constraint-engine-2026-09-16.json) |
 | `evaluateMove` / `commitMove` 1.000 kiện | p95 1,8 / 1,5 ms (ngân sách 8) | như trên |
-| Viewer low, 132 / 300 / 500 / 1.000 kiện | 16 draw call; 60 / 60 / 60 / 42 FPS khi kéo | [viewer-2026-09-16.json](docs/benchmarks/viewer-2026-09-16.json) |
+| Viewer low, 132 / 300 / 500 / 1.000 kiện | 16 draw call; 60 / 60 / 60 / 42 FPS khi kéo | [viewer-2026-09-16.json](benchmarks/viewer-2026-09-16.json) |
 | Viewer 1.000 kiện balanced / high | 25 / 33 draw call; 14 / 8 FPS | như trên |
 
 E2E đáng đọc trước: `spec-flow.spec.ts` (luồng Spec đầu cuối, gắn từng dòng Spec §15), `plan-approval.spec.ts`,
@@ -102,9 +102,9 @@ Hai lỗi E2E ngẫu nhiên đã gặp khi chạy cả bộ trên máy Windows (
 
 ## 6. Nợ kỹ thuật và phần chờ backend
 
-Danh sách đầy đủ có ID: [docs/acceptance.md mục 4](docs/acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend). Quan trọng nhất:
+Danh sách đầy đủ có ID: [docs/acceptance.md mục 4](acceptance.md#4-nợ-kỹ-thuật-và-phần-chờ-backend). Quan trọng nhất:
 
 1. **Backend (LM-002):** chốt contract `OptimizationRequest/Result`, revision và trạng thái duyệt, lưu draft, RBAC, phiên thật.
 2. **Thiết bị thật:** đo FPS và thao tác chạm trên tablet kho, điện thoại tài xế; số hiện tại chỉ là SwiftShader.
 3. **Màn điều phối chỉ desktop** (quyết định 16/09/2026); chi tiết chuyến chật ở 1.440 px.
-4. **E2E kéo kiện vào vật cản** chưa có (logic có test ở engine) — [LM-073](docs/issues/LM-073-e2e-keo-kien-vao-vat-can.md).
+4. **E2E kéo kiện vào vật cản** chưa có (logic có test ở engine) — [LM-073](issues/LM-073-e2e-keo-kien-vao-vat-can.md).

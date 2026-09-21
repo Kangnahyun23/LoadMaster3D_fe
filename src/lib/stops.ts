@@ -1,6 +1,6 @@
 /**
  * 8 màu định danh điểm giao — bảng Okabe–Ito, an toàn cho người mù màu.
- * Chỉ dùng để định danh điểm giao, không dùng trang trí (CLAUDE.md mục 5).
+ * Chỉ dùng để định danh điểm giao, không dùng trang trí (AGENTS.md mục 5).
  * Màu luôn đi kèm nhãn hoặc số, không bao giờ chỉ dựa vào màu (mục 10).
  */
 

@@ -2,7 +2,7 @@
 
 Cập nhật lần cuối: **17/09/2026**
 
-Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](../LoadMaster_FE_MVP_Build_Spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](../handoff.md)
+Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](build-spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](handoff.md)
 
 **Cách cập nhật:** mỗi phiên làm việc thêm một mục vào *Nhật ký* (mới nhất ở trên), đổi trạng thái issue ở mục 3 và ghi ngày bắt đầu / xong theo định dạng `dd/mm/yyyy`. Sửa "Cập nhật lần cuối" ở đầu file.
 
@@ -34,7 +34,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 ### 17/09/2026 — Gói bàn giao cho nhóm nghiên cứu
 
 - Đối chiếu tài liệu rebuild với domain, service, repository/revision và core 3D hiện tại; không sửa code sản phẩm.
-- Tạo [gói nghiên cứu](research-handoff-2026-09-17/README.md): prompt, hiện trạng, tài liệu nền và gallery 11 PNG chụp mới.
+- Tạo gói nghiên cứu: prompt, hiện trạng, tài liệu nền và gallery 11 PNG chụp mới.
 - Chụp dashboard, cấu hình xe, kiện, thiết lập tối ưu, Planner/view/editor/partial/stale, kho tablet và tài xế/list/3D phone bằng Chromium SwiftShader; không ghi nhận `pageerror` ở các phiên chụp.
 - Nêu rõ LM-073, benchmark domain chưa nối CI, khác biệt phân trang/ảo hóa và giới hạn dữ liệu mock. Số đo hiệu năng dùng báo cáo 16/09, không đo lại.
 - Kiểm tra tài liệu/ảnh; không chạy full lint/build/test vì chỉ bổ sung gói bàn giao, không đổi app. Không xác nhận lại CI từ xa.
@@ -296,7 +296,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 - Chốt seam TDD: LM-010 test qua `@/domain/models`, lỗi zod là mã i18n; LM-027 hai seam — `@/lib/format` (unit) và `I18nProvider` qua RTL (dom).
 - Giao 3 agent chạy nền, mỗi agent một worktree từ `fa7a68c`: LM-005, LM-010, LM-027. Agent không sửa file này; gộp và cập nhật tiến độ do người điều phối làm.
-- LM-003 (tự làm): cập nhật AGENTS.md mục 1, 2, 3, 6, 7, 9, 12 theo PRD — đơn vị cm/kg *(đã điều chỉnh)* kèm trạng thái chuyển đổi, i18n + mã lỗi, ẩn nút chưa hoạt động *(đã điều chỉnh)*, đích tích hợp engine, mock repository + revision, quy trình kiểm thử và làm song song. CLAUDE.md chỉ còn `@AGENTS.md`.
+- LM-003 (tự làm): cập nhật AGENTS.md mục 1, 2, 3, 6, 7, 9, 12 theo PRD — đơn vị cm/kg *(đã điều chỉnh)* kèm trạng thái chuyển đổi, i18n + mã lỗi, ẩn nút chưa hoạt động *(đã điều chỉnh)*, đích tích hợp engine, mock repository + revision, quy trình kiểm thử và làm song song. Luật gom về một nguồn duy nhất: AGENTS.md.
 
 **Kiểm tra**
 
@@ -359,7 +359,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 **Đã làm**
 
 - LM-001: kiểm tra trên working tree trước khi commit, rồi commit đợt scene-first lên `main` — commit `d737f93` (55 file, gồm code viewer3d, test, `AGENTS.md`, `handoff.md`, benchmark JSON, 12 ảnh, báo cáo scene-first).
-- Dọn ký tự escape markdown trong `LoadMaster_FE_MVP_Build_Spec.md` (không còn `\#`, `\-`, `\~`, `\_`), bỏ khoảng trắng cuối dòng.
+- Dọn ký tự escape markdown trong `docs/build-spec.md` (không còn `\#`, `\-`, `\~`, `\_`), bỏ khoảng trắng cuối dòng.
 - Commit riêng tài liệu kế hoạch: Spec, PRD, gói issue, file tiến độ này.
 - Tạo nhánh `feat/spec-mvp` từ `main` cho toàn bộ tích hợp Spec.
 - Không commit `.claude/settings.json` (chỉ còn `{"enabledPlugins": {}}` sau khi cài lại plugin ở phạm vi user).
@@ -381,10 +381,10 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 **Đã làm**
 
-1. Đọc codebase và toàn bộ tài liệu: `CLAUDE.md`, `AGENTS.md`, `handoff.md`, 4 báo cáo trong `docs/`. Nắm kiến trúc engine 3D (LoadPlan bất biến → ViewerSceneModel + ViewerDraft → SceneCanvas dùng chung Planner/Kho/Tài xế).
+1. Đọc codebase và toàn bộ tài liệu: `AGENTS.md`, `docs/handoff.md`, 4 báo cáo trong `docs/`. Nắm kiến trúc engine 3D (LoadPlan bất biến → ViewerSceneModel + ViewerDraft → SceneCanvas dùng chung Planner/Kho/Tài xế).
 2. Phát hiện ban đầu: `operations/OperationsToolbar.tsx` không còn nơi import; `leftOpen`/`toggleLeft` thừa; một số chỗ lệch luật AGENTS (hardcode hex, nhiều nút primary, nút không làm gì, format số tự nối chuỗi, mock import chéo feature).
 3. Cài lại plugin `mattpocock-skills` ở phạm vi **user**: bản cài phạm vi project ghi đường dẫn `E:\` trong khi VS Code chạy ở `e:\`, nên plugin không nạp. `.claude/settings.json` còn lại `{"enabledPlugins": {}}`.
-4. Đọc `LoadMaster_FE_MVP_Build_Spec.md`, hỏi đáp chốt **22 quyết định** (D-01 → D-22): tích hợp vào repo, chuyển toàn bộ sang cm, contract Spec + view model FE, map vào màn có sẵn, mock repo + TanStack Query, i18n vi/en tự viết, giữ editor với constraint engine, Vitest + RTL, `src/domain` + `src/services`, ẩn nút chưa hoạt động, làm theo phase.
+4. Đọc `docs/build-spec.md`, hỏi đáp chốt **22 quyết định** (D-01 → D-22): tích hợp vào repo, chuyển toàn bộ sang cm, contract Spec + view model FE, map vào màn có sẵn, mock repo + TanStack Query, i18n vi/en tự viết, giữ editor với constraint engine, Vitest + RTL, `src/domain` + `src/services`, ẩn nút chưa hoạt động, làm theo phase.
 5. Viết [docs/prd.md](prd.md).
 6. Chất vấn PRD, chốt thêm **17 quyết định** (D-23 → D-39): vượt tải là cảnh báo; mustLoad chưa xếp chặn Duyệt; tự đồng bộ trường xung đột; định nghĩa LIFO che kín 100%; `roundCm` + EPSILON; mã lỗi + tham số; ngân sách hiệu năng 50 ms / 8 ms với lưới không gian; mock trong Web Worker; revision bất biến; tính lại thứ tự khi Duyệt; quy tắc ID instance; debounce xem trước xe; bảng kiện ảo hoá + panel form; ngưỡng trọng tâm 10% / 50%; So sánh revision; route mới; Playwright + GitHub Actions.
 7. Sinh gói **55 issue** trong [docs/issues/](issues/README.md); kiểm tra bằng script: không thiếu phụ thuộc, không vòng lặp, không phụ thuộc phase sau. Đường găng ~26 ngày.
@@ -405,7 +405,7 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 |---|---|---|---|---|---|
 | [LM-001](issues/LM-001-commit-scene-first-tao-nhanh.md) | Commit scene-first, tạo nhánh | ✅ | 14/09/2026 | 14/09/2026 | `d737f93`, nhánh `feat/spec-mvp` |
 | [LM-002](issues/LM-002-chot-contract-backend.md) | Chốt contract backend | 🟨 | 14/09/2026 | | Chờ nhóm backend, không chặn |
-| [LM-003](issues/LM-003-cap-nhat-agents-claude-md.md) | Cập nhật AGENTS.md, CLAUDE.md | ✅ | 15/09/2026 | 15/09/2026 | CLAUDE.md import `@AGENTS.md` |
+| [LM-003](issues/LM-003-gom-luat-ve-mot-nguon.md) | Cập nhật AGENTS.md | ✅ | 15/09/2026 | 15/09/2026 | Luật gom về AGENTS.md |
 | [LM-004](issues/LM-004-them-vitest-rtl.md) | Vitest + RTL | ✅ | 14/09/2026 | 14/09/2026 | 39/39 test, Vitest 5.0.0 |
 | [LM-005](issues/LM-005-them-playwright-test.md) | Playwright | ✅ | 15/09/2026 | 15/09/2026 | `6c4287a`, 23/23 E2E (CI mode); sửa Tailwind `source('.')` |
 | [LM-006](issues/LM-006-github-actions-ci.md) | GitHub Actions | ✅ | 15/09/2026 | 15/09/2026 | Run 34949580777 xanh 5/5; job đỏ đúng chỗ đã kiểm |

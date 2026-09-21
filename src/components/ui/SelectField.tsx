@@ -13,7 +13,7 @@ export type SelectOption = { value: string; label: string }
 
 /**
  * Select nối vào react-hook-form. Radix Select không phải input gốc nên phải
- * đi qua Controller thay vì register (CLAUDE.md mục 9: mọi form dùng RHF).
+ * đi qua Controller thay vì register (AGENTS.md mục 9: mọi form dùng RHF).
  */
 export function SelectField<TValues extends FieldValues>({
   control,

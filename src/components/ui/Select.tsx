@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 /**
  * Select theo mục 5 style sheet: cao 40px, viền 1px, radius 8px,
  * mũi tên 16px stroke 1.5. Danh sách thả xuống là lớp nổi nên được
- * dùng bóng (mục 5 CLAUDE.md cho phép bóng ở dropdown).
+ * dùng bóng (mục 5 AGENTS.md cho phép bóng ở dropdown).
  */
 export const Select = SelectPrimitive.Root
 export const SelectValue = SelectPrimitive.Value

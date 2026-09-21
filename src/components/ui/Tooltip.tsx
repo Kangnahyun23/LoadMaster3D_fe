@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Tooltip nền tối, chữ trắng 12px, radius 6px.
- * Là lớp nổi nên được dùng bóng (mục 5 CLAUDE.md).
+ * Là lớp nổi nên được dùng bóng (mục 5 AGENTS.md).
  */
 export const TooltipProvider = TooltipPrimitive.Provider
 export const Tooltip = TooltipPrimitive.Root

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Hộp thoại theo bản design: rộng 640px, radius 12px, bóng --e3,
- * lớp phủ rgba(17,24,39,.45). Modal mở 220ms standard (mục 8 CLAUDE.md).
+ * lớp phủ rgba(17,24,39,.45). Modal mở 220ms standard (mục 8 AGENTS.md).
  */
 export const Dialog = DialogPrimitive.Root
 export const DialogTrigger = DialogPrimitive.Trigger
