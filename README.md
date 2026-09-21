@@ -72,6 +72,17 @@ pnpm test:bench    # cổng ngân sách hiệu năng của bộ kiểm ràng bu�
 
 Lần chạy gần nhất: lint, build, 776/776 unit, 80/80 E2E — xanh trên CI (`.github/workflows/ci.yml`).
 
+## Làm việc trên repo
+
+| Nhánh | Dùng làm gì |
+|---|---|
+| `main` | bản đã nghiệm thu; vào bằng pull request, không push thẳng |
+| `developer` | nhánh phát triển hằng ngày |
+| `feat/**`, `fix/**` | một việc một nhánh, gộp về `developer` |
+
+CI chạy lint, kiểm kiểu, unit và E2E cho cả bốn kiểu nhánh trên.
+Luật viết code, đặt tên, design token, quy ước 3D và quy ước git nằm trong [AGENTS.md](AGENTS.md).
+
 ## Tài liệu
 
 | Tài liệu | Nội dung |

@@ -713,3 +713,55 @@ Thêm màn mới thì thêm theo đúng lối này.
 - Chạy full `pnpm lint`, `pnpm build` và `pnpm test` để xác nhận cuối task (thêm `pnpm test:e2e` khi task đụng UI, sau LM-005); không lặp lại sau từng thay đổi nhỏ nếu chưa có lỗi hoặc rủi ro mới cần kiểm tra.
 - Mỗi task xong: ghi kết quả vào file issue tương ứng và thêm một mục nhật ký có ngày vào `docs/progress.md`.
 - Giữ chất lượng implementation và bằng chứng kiểm thử, đồng thời giảm tối đa context/token không cần thiết.
+
+## 13. Git, nhánh và bộ mặt repo *(bổ sung 22/09/2026)*
+
+Repo là thứ người ngoài mở ra xem trước cả khi chạy app. Mọi luật dưới đây sinh ra từ một lần phải **viết lại toàn
+bộ 124 commit** để dọn — làm đúng từ đầu thì không phải làm lần hai.
+
+### Danh tính commit
+
+- Trước commit đầu tiên trong **mỗi checkout mới** (clone, worktree, máy khác), kiểm `git config user.email`.
+  Email toàn cục trên máy dev đang là `Kangnahyun23@github.com` — email này **không gắn với tài khoản GitHub nào**,
+  commit ký bằng nó hiện avatar xám và không được tính là đóng góp. Repo này ký bằng `tankhang6a6@gmail.com`.
+- Thông điệp commit chỉ nói **việc đã làm và vì sao**: không dòng đồng tác giả, không tên công cụ, không "Generated with".
+  Tên nhánh và merge message cũng thế — đặt theo việc (`feat/lm-095-bo-cuc`), không theo công cụ sinh ra nó.
+
+### Nhánh và CI
+
+| Nhánh | Dùng làm gì |
+|---|---|
+| `main` | bản đã nghiệm thu; **không push thẳng**, vào bằng PR |
+| `developer` | nhánh phát triển hằng ngày |
+| `feat/**`, `fix/**` | một việc một nhánh, gộp về `developer` |
+
+- CI (`.github/workflows/ci.yml`) chạy cho `main`, `developer`, `feat/**`, `fix/**`. **Đặt kiểu tên nhánh mới thì thêm
+  vào trigger ngay trong cùng commit** — `fix/**` từng nằm ngoài CI và 6 lỗi TypeScript ngồi im ở đó nhiều ngày,
+  không ai thấy cho tới lúc định gộp.
+- Không gộp nhánh chưa từng qua CI. Chạy `pnpm lint && pnpm build && pnpm test` trên chính nhánh đó trước, kể cả khi
+  đó là code của người khác.
+
+### Bộ mặt repo
+
+- Gốc repo chỉ giữ: file cấu hình công cụ bắt buộc, `README.md`, `AGENTS.md`. **Tài liệu mới đặt trong `docs/`**,
+  không thêm `.md` ở gốc. Cấu hình cá nhân của công cụ soạn thảo không commit (đã nằm trong `.gitignore`).
+- `README.md` là trang đọc đầu tiên: mô tả sản phẩm, cách chạy, trạng thái và số liệu kiểm thử **thật**. Trạng thái đổi
+  thì sửa README cùng lúc — repo từng để nguyên template mặc định của Vite suốt nhiều tuần.
+
+### Tài liệu không trích mã commit
+
+Nhật ký, issue và nghiệm thu **không** dẫn chứng bằng mã commit: một lần viết lại lịch sử là 76 mã trong `docs/` trỏ
+vào hư không. Dẫn bằng mã issue (LM-xxx), ngày, tên file hoặc tên test — những thứ không đổi theo lịch sử.
+
+### Di chuyển file tài liệu
+
+Đổi chỗ file `.md` thì sửa hết đường dẫn tương đối rồi **kiểm bằng máy**: quét mọi `](…)` trong file `.md` và mở thử
+từng đường dẫn. Lần dọn gốc gần nhất làm gãy 12 liên kết mà đọc bằng mắt không thấy.
+
+### Viết lại lịch sử — chỉ khi thật cần, theo đúng thứ tự
+
+1. `git bundle create <file> --all` để sao lưu toàn bộ ref.
+2. Viết lại trên **bản sao**, không làm trên repo đang có việc chưa commit.
+3. So `git rev-parse <nhánh>^{tree}` trước và sau: phải **trùng khít** — chỉ thông điệp được đổi, nội dung thì không.
+4. Push, rồi đồng bộ repo đang làm việc bằng cách dời ref (giữ nguyên phần chưa commit).
+5. Báo mọi người clone lại; ai push từ bản cũ là lịch sử cũ quay về.

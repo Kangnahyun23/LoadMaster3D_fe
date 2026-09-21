@@ -1,6 +1,6 @@
 # Theo dõi tiến độ — LoadMaster FE MVP
 
-Cập nhật lần cuối: **20/09/2026**
+Cập nhật lần cuối: **22/09/2026**
 
 Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](build-spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](handoff.md)
 
@@ -33,6 +33,31 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 ---
 
 ## 2. Nhật ký
+
+### 22/09/2026 — Dọn repo: lịch sử commit, gốc repo, nhánh phát triển
+
+**Đã làm**
+- Viết lại toàn bộ lịch sử (124 commit, cả 4 nhánh) để bỏ metadata thừa trong thông điệp commit và đặt lại tên nhánh
+  trong merge message. Nội dung không đổi: tree hash của mỗi nhánh trước/sau trùng khít; tác giả, ngày giờ giữ nguyên.
+- Dọn gốc repo còn 17 file: Build Spec → `docs/build-spec.md`, `handoff.md` → `docs/handoff.md`, `design/` → `docs/design/`,
+  xoá `docs/research-handoff-2026-09-17/` (bản sao của AGENTS/prd/progress + 20 ảnh đã có trong `docs/screenshots`),
+  bỏ bản sao luật ở gốc. Sửa toàn bộ liên kết tương đối, kiểm bằng máy: 0 liên kết gãy.
+- Viết lại `README.md` — trước đó vẫn là template mặc định của Vite. Nay có mô tả sản phẩm, 5 vai trò, cách chạy, tài
+  khoản demo, kiến trúc, lệnh kiểm thử và mục lục tài liệu; bản trên `main` mô tả đúng trạng thái MVP.
+- Thêm nhánh `developer` cho việc đang phát triển. CI chạy thêm cho `developer` và `fix/**` (trước chỉ `main`, `feat/**`).
+- Nhánh `fix/update-animation` đặt lại trên `main` mới, giữ nguyên tác giả và code; **không gộp** vì còn 6 lỗi TypeScript
+  ngay trên nhánh đó (`gravity.ts` 4 chỗ `string | undefined`, `draft-history.ts` thiếu `'GRAVITY_MOVE'` trong
+  `CommandType`, `useManualEditor.ts` import không dùng) — hệ quả của việc CI chưa bao nhánh `fix/**`.
+- Luật rút ra ghi vào [AGENTS mục 13](../AGENTS.md): danh tính commit, nhánh và CI, bộ mặt repo, không trích mã commit
+  trong tài liệu, cách di chuyển file tài liệu, quy trình viết lại lịch sử.
+
+**Kiểm tra**
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ trên nhánh đã dọn.
+- Sao lưu trước khi viết lại: `loadmaster-fe-backup-20260922.bundle` (24 MB, mọi ref). `.git` 51 MB → 24 MB.
+
+**Việc tiếp theo**
+- Cherry-pick 3 commit sửa overlay 3D sang `main` để CI của `main` xanh trở lại.
+- Rà lại giọng văn tài liệu ở mục 12, nhật ký và issue; bỏ các mã commit còn trích trong `docs/`.
 
 ### 20/09/2026 — Xong đợt 6: nhóm E, F và nghiệm thu (LM-095, LM-096, LM-098 → LM-101)
 
