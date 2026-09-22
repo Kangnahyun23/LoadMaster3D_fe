@@ -297,6 +297,12 @@ Cao **72px** cho mọi màn có nav rail. Chỉ **56px** cho màn xem phương �
 chiều cao nhường cho khung 3D. Không tự chọn chiều cao khác — lệch là nội dung nhảy
 khi chuyển màn.
 
+### Thử nghiệm visual V2 (21/09/2026)
+
+Vòng ý tưởng 02: người dùng cho phép **thay đổi mạnh** trong prototype, thử nền sáng xanh chuyển nhẹ, gradient, kính lồi, phản sáng, bóng và thang bo góc ngoài luật V1. Chỉ áp dụng `design/v2`, chưa là chuẩn production; duy trì khả năng đọc, focus và reduced-motion. Xem brief V2 để biết đánh đổi và các mục chưa kiểm trên thiết bị thật.
+
+Người dùng cho phép thử glassmorphism trên navigation và một số nút trong **prototype biệt lập `design/v2/`** để duyệt trước. Được dùng blur, viền sáng, bóng nhẹ cho navigation nổi; nút chính giữ nền đặc, chữ/focus rõ, có công tắc nền đặc và reduced-motion. Token cục bộ và nhãn Việt trong prototype chưa là chuẩn production. Chưa áp ngoại lệ này lên toàn app; giữ luật dưới đây cho giao diện vận hành đến khi duyệt. Quyết định và phạm vi: [docs/v2-design-brief.md](docs/v2-design-brief.md).
+
 ### Cấm tuyệt đối
 
 - Không dùng chữ gạch chân làm nút hành động. Gạch chân chỉ cho link trong đoạn văn.

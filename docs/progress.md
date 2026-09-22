@@ -34,6 +34,71 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
+### 22/09/2026 — V2 Mobile 03: đăng nhập, cài đặt và bàn giao
+
+- Thêm login/settings/access/about; nối tài khoản, đăng xuất nhắc hàng đợi, hết phiên quay về đăng nhập mẫu. Không lưu mật khẩu; không gọi backend hoặc tự nhận đã có RBAC.
+- Nền rõ/chữ lớn/giảm chuyển động hoạt động trong phiên; hướng dẫn camera/ảnh ghi rõ chưa tích hợp. Sửa badge tài khoản bị áp style avatar.
+- Gallery 21 ảnh / 12 màn. Ba bộ Playwright prototype pass, gồm chữ lớn 360/430 px và luồng cũ. Lint/build pass (cảnh báo chunk 3D hiện có), 126 files / 776 tests pass.
+- Bàn giao: [v2-mobile-handoff.md](v2-mobile-handoff.md). Còn Flutter, xác thực, queue bền, camera, tích hợp engine và thử Android thật.
+
+
+### 22/09/2026 — V2 Mobile 02: cùng nhận diện web B, nối luồng tài xế
+
+- Navigation/kính/tổng quan lấy vật liệu của web B; thêm nhận chuyến, kiểm mã → xác nhận → kiện kế tiếp, tiến độ phiên và queue xác nhận mẫu.
+- Chặn mã sai, mã đã đổi sau khi khớp, xác nhận trùng và tài xế chưa nhận chuyến. Thêm đặt lại luồng và 4 cảnh tải/rỗng/lỗi/hết phiên.
+- Sơ đồ từ trên khớp tọa độ kiện; ảnh xe chính vẫn tĩnh. Gallery 15 hình / 8 màn; không thêm Flutter, backend hoặc đổi production.
+- Lint/build pass (cảnh báo chunk 3D hiện có), 126 files / 776 tests pass; Playwright prototype + luồng cảm ứng pass. Phạm vi và phần còn thiếu: [Mobile 02](v2-mobile-sketch.md#mobile-02--hoàn-thiện-theo-web-b-22092026).
+
+
+### 22/09/2026 — V2 Mobile 01: phác thảo điện thoại cho tài xế và kho
+
+- Thêm 7 màn riêng, bảng 9 ảnh tại `design/v2/mobile-board.html`, nối vào sketchbook. Công việc sáng, vùng xe tối, thông tin kiện ở đáy; controls 56 px và tùy chọn nền đặc.
+- Dùng ảnh engine và 132 placements từ seed. Trình phát đổi thông tin, ảnh xe cố định; không thêm editor mobile hoặc giả backend.
+- Thử điểm giao, hướng dẫn xếp/dỡ, đối chiếu mã, ảnh sự cố, queue phiên và retry mẫu. `verify-mobile.mjs` pass ở 360/390/430 px; chưa thử điện thoại thật.
+- Kiểm tra cuối vòng: lint/build pass (cảnh báo chunk 3D hiện có), 126 files / 776 tests pass; Playwright prototype pass cả gallery và giữ kiện khi quay lại từ kiểm mã.
+- Phạm vi/bàn giao: [mobile brief](v2-mobile-sketch.md). Chưa triển khai Flutter, camera scan, queue bền hoặc xác nhận nghiệp vụ.
+
+
+### 22/09/2026 — V2 vòng 08: bổ sung desktop trước mobile
+
+- Đối chiếu router với bộ phác thảo; ghi phạm vi và lỗ hổng tại [v2-screen-coverage.md](v2-screen-coverage.md).
+- Thêm 9 màn: kiện/kiểm lỗi nhập, so sánh, đội xe, chi tiết xe, tổng quan, người dùng/quyền, nhật ký, hồ sơ, bảng thành phần. Chỉ `design/v2`, không thay `src/` hoặc backend.
+- Snapshot từ seed và hàm tổng hợp hiện tại: 8 xe, 12 người, 115 sự kiện, REV-001/002; không bịa chênh lệch, thời gian tối ưu hoặc số tăng trưởng.
+- `verify-desktop.mjs` và `verify-screens.mjs` pass; `pnpm lint` pass; `pnpm build` pass (cảnh báo chunk 3D hiện hữu); `pnpm test` 126 files / 776 tests pass. Gallery 16 màn không tràn 1366; ảnh mới tải được. Kiểm và ảnh bổ sung tại README prototype.
+- Mobile giữ 3 mẫu vòng trước. Chưa Flutter, chưa ghi nghiệp vụ production, chưa hoàn tất toàn bộ luồng sâu desktop.
+
+
+### 22/09/2026 — V2 vòng 07: mở rộng phác thảo các màn
+
+- Thêm 7 màn trong `design/v2/screens.html`: danh sách chuyến, tạo chuyến, thiết lập tối ưu, Planner, tài xế, kho, hàng đợi gửi lại. Giữ hướng B, số liệu màu mực, kính ở chrome/summary, bảng nền rõ.
+- Sketchbook có ảnh/link từng màn, tách desktop/phone; Chi tiết chuyến nối về danh sách mẫu.
+- Có lọc/tìm, validation form, đổi thứ tự điểm, inspector, đối chiếu mã, sự cố và retry queue mô phỏng trong sessionStorage. Planner dùng ảnh engine hiện tại.
+- `node design/v2/verify-screens.mjs`: pass 7 màn desktop 1366/phone 390 và tương tác chính. Không sửa production/dependency, không chạy lại suite production.
+- Chưa triển khai Flutter, lưu ảnh, queue bền/backend. V2 còn thiếu quản lý/admin/đội xe/nhập kiện; ghi trong sketchbook và README.
+
+
+### 22/09/2026 — V2: chọn B, hoàn thiện bàn điều phối và bảng phác thảo
+
+- Người dùng chọn B. Thu gọn phần trên, tăng chữ tiến trình, phân biệt đang làm/bước tiếp theo; ở 1366×768 thấy trọn 4 dòng thay vì 2. Bảng có sort, `aria-sort`, header sticky.
+- Inspector có đóng ở đầu, Escape/trả focus, vẫn giữ tóm tắt xe. Màn hẹp dùng sheet native dialog; giữ selection khi chuyển sheet/panel theo viewport.
+- Thêm 9 cảnh review gồm chuyến cần duyệt lại, khoá sửa, đang giao, loading/error/empty/missing. Không ghi kho, không phát API hay giả thành công nghiệp vụ.
+- Thêm `design/v2/sketchbook.html`: 6 phần phác thảo, ảnh thật của prototype và liên kết cảnh; `design/v2/README.md` bàn giao cách dùng/phần còn thiếu. Mẫu component mới là khởi đầu, chưa tuyên bố hoàn thiện DS/Flutter.
+- `node design/v2/verify.mjs` kiểm prototype: A/B, lọc/tìm/mật độ, sort, chín cảnh, inspector/keyboard/focus/viewport, deep link và ảnh board; 1366/1024/768/390 không tràn trang. Chưa đổi code production/dependency; không chạy full suite app.
+
+### 21/09/2026 — V2: brief và bản thử Chi tiết chuyến
+
+- Vòng 05: người dùng giữ chất kính nhưng từ chối KPI nhiều màu và độ chi tiết A/B. [Nghiên cứu visual](v2-visual-research.md) đối chiếu Apple/Linear/Carbon, phân biệt tham chiếu và nhận định. Số KPI chung màu mực, kính tổng hợp dùng chung công thức; bổ sung kích thước trong bảng, khối lượng từng điểm, filter context và inspector có sơ đồ/kích thước/yêu cầu xếp từ snapshot. Kiểm prototype riêng; chưa duyệt hướng cuối, chưa đổi production.
+
+- Vòng 04 sau 8 lựa chọn của người dùng: hai mẫu toàn màn A (tổng quan tuyến, rail dọc) / B (bàn điều phối, nav ngang, tuyến–bảng–panel). `concepts.css` thay stylesheet vòng 03; kính ở vùng tổng hợp/navigation, bảng nền đặc; nét tuyến nền và màu phân loại thông tin. Giữ kính bao toàn button. Có query `layout=a/b`, chuyển cảnh tôn trọng reduced motion. Kiểm prototype riêng hai mẫu, lựa chọn kiện/focus, bộ lọc, mật độ, không tràn 1366/390; chưa đổi production/Flutter.
+
+- Vòng 03 theo phản hồi: giữ navigation kính, gỡ lens quanh icon; thay nội dung bằng bố cục hồ sơ vận tải (tên tuyến, trạng thái gọn, điểm giao tương tác, bảng + phương tiện), bỏ hero/slogan/minh hoạ trang trí. Thêm tỷ lệ tải/thể tích tính từ seed. `manifest.css` được dùng thay expressive; kiểm prototype riêng gồm full-button glass/tỷ lệ, chưa đổi app production.
+
+- Vòng ý tưởng 02 theo phản hồi: tăng rõ chất glass (spring easing người dùng, lớp kính lồi và SVG filter), nền xanh chuyển nhẹ, header/nhóm hàng/thống kê có chiều sâu. Người dùng cho phép vượt luật visual V1 trong prototype; kiểm lại tương tác riêng, chưa có benchmark mobile thật.
+
+- Người dùng chốt nhóm 5 người, review tuần sau, ưu tiên demo rồi pilot; app Flutter kho/tài xế Android phone trước; hàng đợi gửi lại thuộc V2. Ngày bảo vệ và phân công chưa chốt.
+- [Brief V2](v2-design-brief.md) ghi nhận quyết định; ba bố cục A/B/C tại `design/v2/trip-detail.html`, cùng snapshot 132 kiện. Có bật/tắt glass navigation/nút phụ, mật độ, lọc/tìm và chi tiết kiện.
+- Kiểm riêng prototype bằng `node design/v2/verify.mjs`; ảnh tại `design/v2/`. Chưa thay code vận hành, chưa triển khai Flutter/queue, chưa chọn hướng cuối. Không chạy lại full suite của app cho thay đổi prototype/tài liệu.
+- Ghi ngoại lệ V2 giới hạn ở `design/v2` vào AGENTS; các luật production còn nguyên.
 ### 22/09/2026 — Dọn repo: lịch sử commit, gốc repo, nhánh phát triển
 
 **Đã làm**
