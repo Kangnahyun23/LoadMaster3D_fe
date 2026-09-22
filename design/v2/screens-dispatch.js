@@ -1,20 +1,10 @@
 import { trips } from './screens.mock.js';
 import { packages, stops, addresses } from './trip-detail.mock.js';
-import { $, fmt, escape, href, badge, link, shell, dialog } from './screen-ui.js';
+import { $, fmt, escape, href, badge, link, shell, dialog, icon, metricTile } from './screen-ui.js';
 import { packageDetail } from './package-detail.js';
 const totalWeight = packages.reduce((n, p) => n + p.kg * p.quantity, 0);
 const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
 const summary = () => `<dl class="review-facts"><div><dt>Kiện hàng</dt><dd>132 <small>/ 6 loại</small></dd></div><div><dt>Khối lượng</dt><dd>${fmt.format(totalWeight)} <small>kg</small></dd></div><div><dt>Điểm giao</dt><dd>4</dd></div></dl>`;
-
-// Lucide icon paths, ISC license: https://lucide.dev/license — cùng bộ với trip-detail.js.
-const kpiIcons = {
-  truck: '<path d="M10 17h4V5H2v12h3m10-9h4l3 4v5h-3"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>',
-  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
-  review: '<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
-  calendar: '<path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
-};
-const kpiIcon = name => `<span class="kpi-icon ${name}" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${kpiIcons[name]}</svg></span>`;
-const kpiTile = (name, label, value) => `<div class="kpi-tile">${kpiIcon(name)}<div><strong>${value}</strong><span>${label}</span></div></div>`;
 
 export function tripList() {
   const active = trips.filter(t => ['loading', 'delivering'].includes(t.state)).length;
@@ -22,11 +12,11 @@ export function tripList() {
   // Việc gấp hơn đứng trước: bản đã duyệt bị lệch, rồi mới tới bản chờ duyệt.
   const attentionTrips = ['stale', 'optimized'].flatMap(state => trips.filter(t => t.state === state));
 
-  $('screen-root').innerHTML = shell('trips', `<section class="kpi-grid">${
-    kpiTile('truck', 'Chuyến trong mẫu', trips.length)
-  }${kpiTile('activity', 'Đang thực hiện', active)
-  }${kpiTile('review', 'Cần xem phương án', attention)
-  }<div class="kpi-tile kpi-context">${kpiIcon('calendar')}<div><strong>22–24 tháng 9, 2026</strong><small>Trích từ dữ liệu seed · Không phải báo cáo toàn đội xe</small></div></div></section><div class="dispatch-grid"><section class="paper"><div class="list-tools trip-tools"><label class="search"><input id="trip-search" placeholder="Tìm mã chuyến hoặc tuyến giao…" aria-label="Tìm chuyến"></label><div class="tool-group"><label class="tool-field">Trạng thái<select id="trip-status"><option value="all">Mọi trạng thái</option><option value="attention">Cần xem phương án</option><option value="active">Đang thực hiện</option></select></label><span class="tool-divider" aria-hidden="true"></span><label class="tool-field">Mật độ<select id="trip-density"><option value="compact">Gọn</option><option value="default" selected>Mặc định</option><option value="roomy">Thoáng</option></select></label></div></div><div class="suite-table-scroll"><table class="trip-table" data-density="default"><thead><tr><th scope="col">Chuyến / tuyến giao</th><th scope="col">Ngày chạy</th><th scope="col">Phương tiện</th><th scope="col">Hàng</th><th scope="col">Trạng thái</th></tr></thead><tbody id="trip-rows"></tbody></table></div><footer class="list-foot" id="trip-count" aria-live="polite"></footer></section><aside class="attention-panel"><div class="attention-head"><h2>Cần xử lý</h2><span class="attention-count">${attentionTrips.length}</span></div><ul class="attention-list">${attentionTrips.map(t => `<li><strong class="mono">${t.id}</strong><span>${t.state === 'stale' ? 'Dữ liệu thay đổi sau khi duyệt' : escape(t.name)}</span><span class="attention-state">${t.label}</span><button type="button" class="attention-link" data-attention-trip="${t.id}">${t.state === 'stale' ? 'Xem chi tiết' : 'Xem phương án'} <span aria-hidden="true">→</span></button></li>`).join('')}</ul><div class="attention-helper"><p>Bạn có thể lọc danh sách theo trạng thái để xem nhanh các chuyến cần xử lý.</p><button type="button" class="button secondary" id="attention-filter">Lọc chuyến cần xử lý</button></div></aside></div>${dialog('trip-preview', 'Thông tin chuyến', '<div id="trip-preview-body"></div>')}`, link('＋ Tạo chuyến', 'create', true));
+  $('screen-root').innerHTML = shell('trips', `<section class="kpi-grid kpi-4" aria-label="Số liệu tổng hợp">${
+    metricTile({ tone: 'blue', icon: 'truck', value: trips.length, label: 'Chuyến trong mẫu' })
+  }${metricTile({ tone: 'green', icon: 'activity', value: active, label: 'Đang thực hiện' })
+  }${metricTile({ tone: 'amber', icon: 'review', value: attention, label: 'Cần xem phương án' })
+  }<div class="kpi-tile kpi-context"><span class="kpi-icon">${icon('calendar')}</span><div><strong>22–24 tháng 9, 2026</strong><small>Trích từ dữ liệu seed · Không phải báo cáo toàn đội xe</small></div></div></section><div class="dispatch-grid"><section class="paper"><div class="list-tools trip-tools"><label class="search"><input id="trip-search" placeholder="Tìm mã chuyến hoặc tuyến giao…" aria-label="Tìm chuyến"></label><div class="tool-group"><label class="tool-field">Trạng thái<select id="trip-status"><option value="all">Mọi trạng thái</option><option value="attention">Cần xem phương án</option><option value="active">Đang thực hiện</option></select></label><span class="tool-divider" aria-hidden="true"></span><label class="tool-field">Mật độ<select id="trip-density"><option value="compact">Gọn</option><option value="default" selected>Mặc định</option><option value="roomy">Thoáng</option></select></label></div></div><div class="suite-table-scroll"><table class="trip-table" data-density="default"><thead><tr><th scope="col">Chuyến / tuyến giao</th><th scope="col">Ngày chạy</th><th scope="col">Phương tiện</th><th scope="col">Hàng</th><th scope="col">Trạng thái</th></tr></thead><tbody id="trip-rows"></tbody></table></div><footer class="list-foot" id="trip-count" aria-live="polite"></footer></section><aside class="attention-panel"><div class="attention-head"><h2>Cần xử lý</h2><span class="attention-count">${attentionTrips.length}</span></div><ul class="attention-list">${attentionTrips.map(t => `<li><strong class="mono">${t.id}</strong><span>${t.state === 'stale' ? 'Dữ liệu thay đổi sau khi duyệt' : escape(t.name)}</span><span class="attention-state">${t.label}</span><button type="button" class="attention-link" data-attention-trip="${t.id}">${t.state === 'stale' ? 'Xem chi tiết' : 'Xem phương án'} <span aria-hidden="true">→</span></button></li>`).join('')}</ul><div class="attention-helper"><p>Bạn có thể lọc danh sách theo trạng thái để xem nhanh các chuyến cần xử lý.</p><button type="button" class="button secondary" id="attention-filter">Lọc chuyến cần xử lý</button></div></aside></div>${dialog('trip-preview', 'Thông tin chuyến', '<div id="trip-preview-body"></div>')}`, link('＋ Tạo chuyến', 'create', true));
 
   function openTrip(id) {
     const t = trips.find(x => x.id === id);
