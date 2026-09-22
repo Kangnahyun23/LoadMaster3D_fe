@@ -80,6 +80,32 @@
   --stop-7: #cc79a7;
   --stop-8: #555555;
 
+  /* thang mực bốn cấp (V2): tiêu đề và số quan trọng → dữ liệu vận hành → thông tin
+     phụ → chú thích. Ba cấp --text/--text-2/--text-3 cũ nằm quá gần nhau nên màn
+     trông nhạt; thang này giãn hai đầu ra. Vẫn giữ thang cũ cho code chưa chuyển. */
+  --ink-strong: #131f34;
+  --ink-1: #1f2c3e;
+  --ink-2: #4a5c75;
+  --ink-3: #71829a;
+
+  /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
+     blue = vận hành · green = sẵn sàng/xong · amber = cần chú ý
+     violet = phân tích phụ · slate = ngữ cảnh (không phải số đo) */
+  --tint-blue: #dce8fb;
+  --tint-blue-fg: #1a4da3;
+  --tint-green: #d1ecde;
+  --tint-green-fg: #0c6b4c;
+  --tint-amber: #fce6c2;
+  --tint-amber-fg: #85500a;
+  --tint-violet: #e2e0fa;
+  --tint-violet-fg: #443e9e;
+  --tint-slate: #e1e8f1;
+  --tint-slate-fg: #4e6681;
+
+  /* bề rộng tối đa vùng làm việc. Màn 2K trở lên không kéo giãn nội dung:
+     điều phối cần thêm dòng, không cần thêm chiều ngang */
+  --shell-max: 1680px;
+
   /* bo góc */
   --r-sm: 6px;
   --r-md: 8px;
@@ -112,6 +138,20 @@
   --color-text-2: var(--text-2);
   --color-text-3: var(--text-3);
   --color-text-disabled: var(--text-disabled);
+  --color-ink-strong: var(--ink-strong);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-tint-blue: var(--tint-blue);
+  --color-tint-blue-fg: var(--tint-blue-fg);
+  --color-tint-green: var(--tint-green);
+  --color-tint-green-fg: var(--tint-green-fg);
+  --color-tint-amber: var(--tint-amber);
+  --color-tint-amber-fg: var(--tint-amber-fg);
+  --color-tint-violet: var(--tint-violet);
+  --color-tint-violet-fg: var(--tint-violet-fg);
+  --color-tint-slate: var(--tint-slate);
+  --color-tint-slate-fg: var(--tint-slate-fg);
   --color-switch-off: var(--switch-off);
   --color-highlight: var(--highlight);
 
