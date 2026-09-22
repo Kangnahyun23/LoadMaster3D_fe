@@ -1,23 +1,42 @@
 import { trips } from './screens.mock.js';
 import { packages, stops, addresses } from './trip-detail.mock.js';
-import { $, fmt, escape, href, badge, link, shell, dialog } from './screen-ui.js';
+import { $, fmt, escape, href, badge, link, shell, dialog, icon, metricTile } from './screen-ui.js';
 import { packageDetail } from './package-detail.js';
 const totalWeight = packages.reduce((n, p) => n + p.kg * p.quantity, 0);
 const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
 const summary = () => `<dl class="review-facts"><div><dt>Kiện hàng</dt><dd>132 <small>/ 6 loại</small></dd></div><div><dt>Khối lượng</dt><dd>${fmt.format(totalWeight)} <small>kg</small></dd></div><div><dt>Điểm giao</dt><dd>4</dd></div></dl>`;
 
 export function tripList() {
-  $('screen-root').innerHTML = shell('trips', `<section class="summary-strip glass"><div><span>Chuyến trong mẫu</span><strong>${trips.length}</strong></div><div><span>Đang thực hiện</span><strong>${trips.filter(t => ['loading', 'delivering'].includes(t.state)).length}</strong></div><div><span>Cần xem phương án</span><strong>${trips.filter(t => ['stale', 'optimized'].includes(t.state)).length}</strong></div><p>22–24 tháng 9, 2026<br><small>Trích từ dữ liệu seed · Không phải báo cáo toàn đội xe</small></p></section><div class="dispatch-grid"><section class="paper"><div class="list-tools"><label class="search"><input id="trip-search" placeholder="Tìm mã chuyến hoặc tuyến giao…" aria-label="Tìm chuyến"></label><select id="trip-status" aria-label="Trạng thái"><option value="all">Mọi trạng thái</option><option value="attention">Cần xem phương án</option><option value="active">Đang thực hiện</option></select><button class="button secondary" id="trip-density">Gọn</button></div><div class="suite-table-scroll"><table class="trip-table"><thead><tr><th>Chuyến / tuyến giao</th><th>Ngày chạy</th><th>Phương tiện</th><th>Hàng</th><th>Trạng thái</th></tr></thead><tbody id="trip-rows"></tbody></table></div><footer class="list-foot" id="trip-count" aria-live="polite"></footer></section><aside class="attention-panel"><span class="suite-caption">Cần chú ý</span><h2>Trước khi bàn giao kho</h2><button id="attention-filter" class="attention-item"><strong>1 chuyến cần duyệt lại</strong><span>TRIP-013 · Dữ liệu thay đổi sau khi duyệt</span><b>Xem chuyến →</b></button><div class="attention-item"><strong>1 phương án chờ duyệt</strong><span>TRIP-012 · Bình Chánh → Biên Hoà</span></div><p class="quiet-note">Hoàn tất kiểm tra phương án trước khi nhân viên kho bắt đầu xếp.</p></aside></div>${dialog('trip-preview', 'Thông tin chuyến', '<div id="trip-preview-body"></div>')}`, link('＋ Tạo chuyến', 'create', true));
+  const active = trips.filter(t => ['loading', 'delivering'].includes(t.state)).length;
+  const attention = trips.filter(t => ['stale', 'optimized'].includes(t.state)).length;
+  // Việc gấp hơn đứng trước: bản đã duyệt bị lệch, rồi mới tới bản chờ duyệt.
+  const attentionTrips = ['stale', 'optimized'].flatMap(state => trips.filter(t => t.state === state));
+
+  $('screen-root').innerHTML = shell('trips', `<section class="kpi-grid kpi-4" aria-label="Số liệu tổng hợp">${
+    metricTile({ tone: 'blue', icon: 'truck', value: trips.length, label: 'Chuyến trong mẫu' })
+  }${metricTile({ tone: 'green', icon: 'activity', value: active, label: 'Đang thực hiện' })
+  }${metricTile({ tone: 'amber', icon: 'review', value: attention, label: 'Cần xem phương án' })
+  }<div class="kpi-tile kpi-context"><span class="kpi-icon">${icon('calendar')}</span><div><strong>22–24 tháng 9, 2026</strong><small>Trích từ dữ liệu seed · Không phải báo cáo toàn đội xe</small></div></div></section><div class="dispatch-grid"><section class="paper"><div class="list-tools trip-tools"><label class="search"><input id="trip-search" placeholder="Tìm mã chuyến hoặc tuyến giao…" aria-label="Tìm chuyến"></label><div class="tool-group"><label class="tool-field">Trạng thái<select id="trip-status"><option value="all">Mọi trạng thái</option><option value="attention">Cần xem phương án</option><option value="active">Đang thực hiện</option></select></label><span class="tool-divider" aria-hidden="true"></span><label class="tool-field">Mật độ<select id="trip-density"><option value="compact">Gọn</option><option value="default" selected>Mặc định</option><option value="roomy">Thoáng</option></select></label></div></div><div class="suite-table-scroll"><table class="trip-table" data-density="default"><thead><tr><th scope="col">Chuyến / tuyến giao</th><th scope="col">Ngày chạy</th><th scope="col">Phương tiện</th><th scope="col">Hàng</th><th scope="col">Trạng thái</th></tr></thead><tbody id="trip-rows"></tbody></table></div><footer class="list-foot" id="trip-count" aria-live="polite"></footer></section><aside class="attention-panel"><div class="attention-head"><h2>Cần xử lý</h2><span class="attention-count">${attentionTrips.length}</span></div><ul class="attention-list">${attentionTrips.map(t => `<li><strong class="mono">${t.id}</strong><span>${t.state === 'stale' ? 'Dữ liệu thay đổi sau khi duyệt' : escape(t.name)}</span><span class="attention-state">${t.label}</span><button type="button" class="attention-link" data-attention-trip="${t.id}">${t.state === 'stale' ? 'Xem chi tiết' : 'Xem phương án'} <span aria-hidden="true">→</span></button></li>`).join('')}</ul><div class="attention-helper"><p>Bạn có thể lọc danh sách theo trạng thái để xem nhanh các chuyến cần xử lý.</p><button type="button" class="button secondary" id="attention-filter">Lọc chuyến cần xử lý</button></div></aside></div>${dialog('trip-preview', 'Thông tin chuyến', '<div id="trip-preview-body"></div>')}`, link('＋ Tạo chuyến', 'create', true));
+
+  function openTrip(id) {
+    const t = trips.find(x => x.id === id);
+    if (t.id === 'TRIP-2026-0914') { location.href = './trip-detail.html?layout=b'; return; }
+    $('trip-preview-body').innerHTML = `<p class="mono">${t.id}</p><h3>${escape(t.name)}</h3>${badge(t.label, t.tone)}<dl><div><dt>Hàng hoá</dt><dd>${t.count} kiện / ${t.stops} điểm</dd></div><div><dt>Ngày chạy</dt><dd>${t.date}</dd></div></dl><a class="button secondary" href="/chuyen/${t.id}">Mở chuyến trong FE hiện tại ↗</a>`;
+    $('trip-preview').showModal();
+  }
+
   function render() {
     const q = normalize($('trip-search').value), filter = $('trip-status').value;
     const rows = trips.filter(t => normalize(`${t.id} ${t.name}`).includes(q) && (filter === 'all' || (filter === 'attention' ? ['stale', 'optimized'] : ['loading', 'delivering']).includes(t.state)));
-    $('trip-rows').innerHTML = rows.map(t => `<tr><td><button class="trip-row-link" data-trip="${t.id}"><strong>${t.name}</strong><span class="mono">${t.id}</span></button></td><td>${t.date}</td><td>${t.vehicle}<small>${t.plate || 'Xe theo danh mục mẫu'}</small></td><td><strong>${t.count} kiện</strong><small>${t.stops} điểm giao</small></td><td>${badge(t.label, t.tone)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Không có chuyến phù hợp với bộ lọc.</td></tr>';
+    $('trip-rows').innerHTML = rows.map(t => `<tr><td><button class="trip-row-link" data-trip="${t.id}"><strong>${escape(t.name)}</strong><span class="mono">${t.id}</span></button></td><td class="col-date">${t.date}</td><td><strong>${t.vehicle}</strong><small>${t.plate || 'Xe theo danh mục mẫu'}</small></td><td><strong>${t.count} kiện</strong><small>${t.stops} điểm giao</small></td><td>${badge(t.label, t.tone)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Không có chuyến phù hợp với bộ lọc.</td></tr>';
     $('trip-count').textContent = `${rows.length} / ${trips.length} chuyến mẫu`;
   }
-  $('trip-search').addEventListener('input', render); $('trip-status').addEventListener('change', render);
+  $('trip-search').addEventListener('input', render);
+  $('trip-status').addEventListener('change', render);
   $('attention-filter').onclick = () => { $('trip-status').value = 'attention'; render(); };
-  $('trip-density').onclick = e => { const spacious = document.querySelector('.trip-table').classList.toggle('roomy'); e.currentTarget.textContent = spacious ? 'Thoáng' : 'Gọn'; };
-  $('trip-rows').onclick = e => { const button = e.target.closest('[data-trip]'); if (!button) return; const t = trips.find(t => t.id === button.dataset.trip); if (t.id === 'TRIP-2026-0914') { location.href = './trip-detail.html?layout=b'; return; } $('trip-preview-body').innerHTML = `<p class="mono">${t.id}</p><h3>${t.name}</h3>${badge(t.label, t.tone)}<dl><div><dt>Hàng hoá</dt><dd>${t.count} kiện / ${t.stops} điểm</dd></div><div><dt>Ngày chạy</dt><dd>${t.date}</dd></div></dl><a class="button secondary" href="/chuyen/${t.id}">Mở chuyến trong FE hiện tại ↗</a>`; $('trip-preview').showModal(); };
+  $('trip-density').onchange = e => { document.querySelector('.trip-table').dataset.density = e.target.value; };
+  $('trip-rows').onclick = e => { const button = e.target.closest('[data-trip]'); if (button) openTrip(button.dataset.trip); };
+  document.querySelectorAll('.attention-link').forEach(b => { b.onclick = () => openTrip(b.dataset.attentionTrip); });
   render();
 }
 
