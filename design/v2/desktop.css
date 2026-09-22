@@ -6,7 +6,7 @@
 .workspace-intro p { color: var(--muted); font-size: 13px; line-height: 1.8; margin-top: 8px; }
 .workbench { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 20px; align-items: start; }
 .list-tools { align-items: center; justify-content: space-between; min-height: 56px; padding: 9px 16px; }
-.list-tools .search { flex: 0 1 430px; max-width: 46%; min-height: 38px; border-radius: 8px; border-color: #cfdcea; }
+.list-tools .search { flex: 1 1 430px; max-width: 46%; min-height: 38px; border-radius: 8px; border-color: #cfdcea; }
 .list-tools .search input { flex: 1; min-width: 0; height: auto; border: 0; padding: 8px 0; background: transparent; font-size: 13px; }
 .list-tools > .tool-field:first-of-type { margin-left: auto; }
 .list-tools .tool-field select { min-width: 150px; min-height: 38px; }
@@ -162,3 +162,8 @@ meter::-webkit-meter-bar { background: #dfe8f4; border: 0; border-radius: 5px; b
 @media(max-width:1150px) { .workbench { grid-template-columns: minmax(0,1fr) 260px; gap: 16px; } .vehicle-workspace { grid-template-columns: 1fr; } .vehicle-drawing svg { max-width: 420px; } .suite-main { padding: 22px 20px; } }
 @media(max-width:900px) { .workbench,.profile-layout,.insights-grid,.spec-grid { grid-template-columns: 1fr; } .workspace-intro,.comparison-context { flex-wrap: wrap; } .revision-heading { gap: 10px; padding: 16px; } }
 @media(prefers-reduced-transparency:reduce) { .kpi-tile,.hero-icon { background: white; } }
+
+/* Màn rộng hơn cột làm việc: chrome vẫn trải hết bề ngang, nội dung canh theo cột. */
+@media (min-width: 1729px) {
+  .suite-rail { padding-inline: calc((100% - 1680px) / 2 + 24px); }
+}

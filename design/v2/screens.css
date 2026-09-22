@@ -1,4 +1,5 @@
 :where(.screen-suite) {
+  --shell-max: 1680px;
   --ink-strong: #131f34; --ink-1: #1f2c3e; --ink-2: #4a5c75; --ink-3: #71829a;
   --tint-blue: #dce8fb; --tint-blue-fg: #1a4da3;
   --tint-green: #d1ecde; --tint-green-fg: #0c6b4c;
@@ -54,8 +55,11 @@
 .suite-person strong { display: block; font-size: 12px; }
 .suite-person small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
 .suite-work { min-width: 0; }
-.suite-top { display: flex; align-items: center; justify-content: space-between; min-height: 40px; margin: 0 24px; border-bottom: 1px solid #c9dced; font-size: 12px; color: var(--muted); }
-.suite-main { padding: 18px 24px 28px; }
+.suite-top { display: flex; align-items: center; justify-content: space-between; max-width: var(--shell-max); min-height: 40px; margin: 0 auto; padding: 0 24px; border-bottom: 1px solid #c9dced; font-size: 12px; color: var(--ink-2); }
+/* Chặn chiều rộng vùng làm việc: màn 2K trở lên trước đây kéo giãn mọi thứ — ô số
+   liệu chỉ lấp một phần tư, thanh công cụ hở gần 800px, cột đầu bảng rộng gấp đôi
+   chữ trong nó. Điều phối cần thêm dòng, không cần thêm chiều ngang. */
+.suite-main { max-width: var(--shell-max); margin-inline: auto; padding: 18px 24px 28px; }
 .suite-title h1 { font-size: 24px; margin: 0; }
 .suite-lede { margin: 5px 0 0; max-width: 66ch; color: var(--ink-2); font-size: 13.5px; line-height: 1.62; }
 .suite-title .button { min-height: 40px; font-size: 14px; flex-shrink: 0; }
@@ -95,7 +99,7 @@
 /* Thanh công cụ của Trips: tìm bên trái, nhóm lọc bên phải. Modifier riêng để
    không đụng .list-tools của kiện hàng / đội xe / người dùng / nhật ký. */
 .trip-tools { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; padding: 8px 16px; }
-.trip-tools .search { flex: 0 1 480px; max-width: 48%; min-height: 38px; border-radius: 8px; }
+
 /* desktop.css cho mọi input trong .list-tools một viền + cao 40px; trong ô tìm
    điều đó thành hộp lồng hộp, nên trả input về đúng vai trò của nó. */
 .trip-tools .search input { border: 0; height: auto; padding: 8px 0; background: transparent; font-size: 13px; }
