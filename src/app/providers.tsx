@@ -50,10 +50,11 @@ export function Providers({ children }: { children: ReactNode }) {
           position="top-right"
           closeButton
           gap={12}
-          // Dưới thanh tiêu đề (72 px, Planner 56 px): toast không che nút hành động ở góc phải header. Rê chuột lên toast làm nó
-          // dừng đếm giờ, nên toast nằm đè nút Duyệt thì người dùng không bấm được nút cho tới khi đóng toast (LM-101).
-          offset={{ top: 80, right: 16 }}
-          mobileOffset={{ top: 80, right: 16, left: 16 }}
+          // Dưới cả hai dải chrome: thanh điều hướng ngang 56 px + thanh tiêu đề màn 72 px = 128. Trước đây là 80 vì
+          // điều hướng nằm dọc bên trái nên chỉ phải tránh thanh tiêu đề. Rê chuột lên toast làm nó dừng đếm giờ, nên
+          // toast đè nút hành động góc phải header thì người dùng không bấm được nút cho tới khi đóng toast (LM-101).
+          offset={{ top: 136, right: 16 }}
+          mobileOffset={{ top: 136, right: 16, left: 16 }}
           icons={{
             success: <CircleCheck className="text-success" strokeWidth={1.5} />,
             warning: <TriangleAlert className="text-warning" strokeWidth={1.5} />,

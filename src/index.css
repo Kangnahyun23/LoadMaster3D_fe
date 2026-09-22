@@ -106,6 +106,15 @@
      điều phối cần thêm dòng, không cần thêm chiều ngang */
   --shell-max: 1680px;
 
+  /* vật liệu kính của lớp chrome (V2). Chỉ dùng ở thanh điều hướng và khối tổng
+     hợp số liệu — bảng, form, inspector giữ nền đặc. Xem AGENTS mục 5. */
+  --nav-glass: 130deg, #ffffffc2, #ffffff45;
+  --nav-glass-shadow: 0 8px 20px #33517a10, inset 0 1px 0 #fff;
+  --follow-glass: linear-gradient(125deg, #ffffffe0, #ffffff55 60%, #ffffffad);
+  --follow-shadow: 0 5px 10px #46658721, inset 0 1px 0 #fff, inset 0 -1px 1px #aec1d950;
+  /* chuyển động lò xo của chỉ báo: vượt nhẹ rồi lắng lại */
+  --spring: linear(0, .0069 1.15%, .1135 5.18%, .5977 15.84%, .9676 28.8%, 1.0352 36.29%, 1.046 42.05%, 1.0118 61.63%, .9981 80.35%, 1);
+
   /* bo góc */
   --r-sm: 6px;
   --r-md: 8px;
@@ -415,3 +424,54 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Chỉ báo kính trượt theo con trỏ trong thanh điều hướng (V2, `app/useGlassFollow.ts`).
+   Vị trí và kích thước do hook đặt inline; ở đây chỉ có vật liệu và chuyển động. */
+.glass-follow {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border: 1px solid #fff;
+  border-radius: var(--r-md);
+  background: var(--follow-glass);
+  box-shadow: var(--follow-shadow);
+  backdrop-filter: blur(5px) saturate(1.4);
+}
+/* Phản sáng hai góc — thứ làm bề mặt trông như kính chứ không phải ô trắng. */
+.glass-follow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 15% 0, #fff, transparent 55%),
+    radial-gradient(ellipse at 90% 100%, #ffffff9c, transparent 55%);
+}
+/* Chỉ bật chuyển động sau khi hook đã đặt đúng chỗ ở frame đầu, nếu không lúc tải
+   trang chỉ báo sẽ trượt từ mép trái thanh vào mục đang mở. */
+.glass-nav[data-follow='ready'] .glass-follow {
+  transition:
+    transform 1s var(--spring),
+    left 1s var(--spring),
+    width 1s var(--spring),
+    height 1s var(--spring);
+}
+/* Trình duyệt thiếu backdrop-filter, hoặc người dùng xin bớt trong suốt: nền đặc. */
+@supports not (backdrop-filter: blur(5px)) {
+  .glass-nav,
+  .glass-follow {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-nav,
+  .glass-follow {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+}
+/* Không cần rule prefers-reduced-motion riêng: khối toàn cục phía trên đã ép
+   transition-duration 100ms !important cho mọi phần tử (AGENTS mục 8), nên chỉ báo
+   nhảy tới nơi gần như tức thì thay vì bật lò xo. */

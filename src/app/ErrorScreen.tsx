@@ -14,7 +14,7 @@ export function ErrorScreen({ code, title, description, actions, className }: {
   className?: string
 }) {
   return (
-    <main className={cn('flex min-h-dvh flex-1 flex-col items-center justify-center gap-8 bg-surface px-6 py-16', className)}>
+    <main className={cn('flex min-h-dvh flex-1 flex-col items-center justify-center gap-8 overflow-auto bg-surface px-6 py-16 in-[.app-shell]:min-h-0', className)}>
       <div className="flex items-center gap-2.5">
         <span className="grid size-9 place-items-center rounded-md bg-primary">
           <span className="h-3 w-4.5 rounded-xs border-2 border-t-4 border-white" />
