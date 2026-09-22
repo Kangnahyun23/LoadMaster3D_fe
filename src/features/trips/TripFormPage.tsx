@@ -57,7 +57,7 @@ function FormShell({ title, backTo, children }: { title: string; backTo: string;
   const t = useT()
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg px-6">
+      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-6">
         <Link
           to={backTo}
           aria-label={t('trips.create.back')}

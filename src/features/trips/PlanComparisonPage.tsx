@@ -25,7 +25,7 @@ export function PlanComparisonPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg px-8">
+      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-8">
         <Link
           to={`/chuyen/${tripId}`}
           aria-label={t('trips.compare.back')}
@@ -111,7 +111,7 @@ function Comparison({ tripId, cards, canRun }: { tripId: string; cards: readonly
         </div>
       </div>
 
-      <div className="flex h-16 flex-none items-center justify-between gap-4 border-t border-border bg-bg px-8">
+      <div className="flex h-16 flex-none items-center justify-between gap-4 border-t border-border bg-chrome px-8">
         <span className="truncate text-caption text-text-3">
           {selected ? t('trips.compare.selectedLabel', { id: selected.id }) : null}
         </span>

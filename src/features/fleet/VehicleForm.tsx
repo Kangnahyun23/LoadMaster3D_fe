@@ -97,7 +97,7 @@ export function VehicleForm({ vehicle, readOnly = false, status, actions, notice
 
   return (
     <form noValidate onSubmit={form.handleSubmit(handleSave)} className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg px-6">
+      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-6">
         <Button variant="ghost" size="icon" aria-label={t('fleet.detail.back')} asChild>
           <Link to={FLEET_PATH}>
             <ChevronLeft strokeWidth={1.5} />

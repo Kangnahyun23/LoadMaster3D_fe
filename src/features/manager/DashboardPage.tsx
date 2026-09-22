@@ -36,7 +36,7 @@ export function DashboardPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-3 border-b border-border bg-bg px-8">
+      <header className="flex h-18 flex-none items-center gap-3 border-b border-border bg-chrome px-8">
         <h1 className="text-h2 font-semibold tracking-[-0.01em]">{t('manager.title')}</h1>
         <div className="flex-1" />
         {canExport ? (

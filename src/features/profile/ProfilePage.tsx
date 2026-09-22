@@ -13,7 +13,7 @@ export function ProfilePage() {
   const user = useCurrentUser()
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center border-b border-border bg-bg px-6">
+      <header className="flex h-18 flex-none items-center border-b border-border bg-chrome px-6">
         <h1 className="text-h2 font-semibold">{t('profile.title')}</h1>
       </header>
       <main className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">

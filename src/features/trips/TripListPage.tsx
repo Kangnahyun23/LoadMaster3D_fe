@@ -43,7 +43,7 @@ export function TripListPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-bg px-6">
+      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-chrome px-6">
         <h1 className="text-h2 font-semibold">{t('trips.list.title')}</h1>
         {hasTrips && canCreate ? (
           <Button variant="primary" className="h-9 px-3.5" asChild>

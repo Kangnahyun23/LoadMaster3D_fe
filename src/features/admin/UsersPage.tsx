@@ -29,7 +29,7 @@ export function UsersPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-bg px-6">
+      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-chrome px-6">
         <div className="flex items-baseline gap-2">
           <h1 className="text-h2 font-semibold">{t('admin.users.title')}</h1>
           {query.data ? (
@@ -43,7 +43,7 @@ export function UsersPage() {
       </header>
 
       <Tabs defaultValue="accounts" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="flex-none bg-bg px-6">
+        <TabsList className="flex-none bg-chrome px-6">
           <TabsTrigger value="accounts">{t('admin.users.tabs.accounts')}</TabsTrigger>
           <TabsTrigger value="permissions">{t('admin.users.tabs.permissions')}</TabsTrigger>
         </TabsList>

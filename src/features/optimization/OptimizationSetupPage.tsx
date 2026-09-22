@@ -80,7 +80,7 @@ export function OptimizationSetupPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg px-8">
+      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-8">
         <Link
           to={`/chuyen/${tripId}`}
           aria-label={t('optimization.back')}

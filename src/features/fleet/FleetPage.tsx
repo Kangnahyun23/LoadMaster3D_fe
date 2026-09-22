@@ -113,7 +113,7 @@ export function FleetPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-bg px-6">
+      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-chrome px-6">
         <div className="flex items-baseline gap-2">
           <h1 className="text-h2 font-semibold">{t('fleet.title')}</h1>
           {vehiclesQuery.isSuccess ? (

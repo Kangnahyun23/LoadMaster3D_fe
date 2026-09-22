@@ -106,6 +106,16 @@
      điều phối cần thêm dòng, không cần thêm chiều ngang */
   --shell-max: 1680px;
 
+  /* trường nền của trang (V2). Bề mặt đọc giữ --bg trắng để nổi lên khỏi trường này;
+     KHÔNG đổi --bg, vì 110 chỗ dùng bg-bg là card, input và hộp thoại. */
+  /* Mọi lớp phải là ảnh: background-image có lớp cuối là màu là CSS không hợp lệ và
+     bị bỏ cả khai báo. Prototype dùng shorthand background nên không gặp. */
+  --field: radial-gradient(ellipse at 18% -12%, #c9e7ff, transparent 56%),
+    radial-gradient(ellipse at 102% 46%, #dbe8ff, transparent 52%),
+    linear-gradient(#edf4fb, #edf4fb);
+  /* nền của dải chrome đè lên trường: đủ đục để chữ đọc rõ, đủ trong để thấy trường */
+  --chrome: #ffffffd9;
+
   /* vật liệu kính của lớp chrome (V2). Chỉ dùng ở thanh điều hướng và khối tổng
      hợp số liệu — bảng, form, inspector giữ nền đặc. Xem AGENTS mục 5. */
   --nav-glass: 130deg, #ffffffc2, #ffffff45;
@@ -147,6 +157,8 @@
   --color-text-2: var(--text-2);
   --color-text-3: var(--text-3);
   --color-text-disabled: var(--text-disabled);
+  --color-chrome: var(--chrome);
+  --container-shell: var(--shell-max);
   --color-ink-strong: var(--ink-strong);
   --color-ink-1: var(--ink-1);
   --color-ink-2: var(--ink-2);

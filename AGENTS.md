@@ -331,7 +331,9 @@ phản và FPS. Đây đúng hai vai trò cần tương phản nhất. Phải đ
 ### Cấm tuyệt đối
 
 - Không dùng chữ gạch chân làm nút hành động. Gạch chân chỉ cho link trong đoạn văn.
-- Không gradient trên nút, card, header hay nền trang.
+- Không gradient trên nút, card hay thanh tiêu đề. *(đã điều chỉnh 23/09/2026)* **Nền trang** được dùng trường màu rất nhạt
+  (`--field`): hai vệt radial xanh trên nền `#edf4fb`, biên độ dưới 5% độ sáng. Đây là lớp khí quyển để bề mặt đọc màu trắng
+  nổi lên khỏi nó — không phải trang trí, và không áp cho bất kỳ bề mặt nào khác.
 - *(đã điều chỉnh 23/09/2026)* Kính (blur nền, viền sáng) dùng **theo lớp**, không rải tuỳ ý.
   **Được** ở chrome điều hướng, khối tổng hợp số liệu, và panel điều khiển nổi đè lên khung 3D nền tối.
   **Không** ở bảng, form, inspector và mọi bề mặt người dùng đọc lâu — những chỗ đó giữ nền đặc, phân tách bằng viền 1px.
