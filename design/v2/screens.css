@@ -1,26 +1,36 @@
 :where(.screen-suite) {
-  --ink-strong: #16233a; --ink-1: #243142; --ink-2: #51627a; --ink-3: #7a8a9f;
-  --tint-blue: #e6effc; --tint-blue-fg: #1d54ad;
-  --tint-green: #dcf2e7; --tint-green-fg: #0f7454;
-  --tint-amber: #fdeed2; --tint-amber-fg: #8a5606;
-  --tint-violet: #eae9fb; --tint-violet-fg: #4b45a6;
-  --tint-slate: #e9eef5; --tint-slate-fg: #566f8c;
+  --ink-strong: #131f34; --ink-1: #1f2c3e; --ink-2: #4a5c75; --ink-3: #71829a;
+  --tint-blue: #dce8fb; --tint-blue-fg: #1a4da3;
+  --tint-green: #d1ecde; --tint-green-fg: #0c6b4c;
+  --tint-amber: #fce6c2; --tint-amber-fg: #85500a;
+  --tint-violet: #e2e0fa; --tint-violet-fg: #443e9e;
+  --tint-slate: #e1e8f1; --tint-slate-fg: #4e6681;
 }
 .screen-suite { background: #edf3fb; color: var(--ink); font-size: 14px; }
 
 /* ---- Hero dùng chung: icon nhận diện màn + tiêu đề + hoạ tiết tuyến rất nhẹ ---- */
-.suite-title { position: relative; display: flex; align-items: flex-start; gap: 14px; overflow: hidden; }
-.hero-icon { display: grid; place-items: center; width: 40px; height: 40px; margin-top: 1px; border-radius: 12px; border: 1px solid #fff; background: linear-gradient(140deg,#e9f1fd,#d9e7fb); box-shadow: var(--glass-edge); color: var(--blue); flex-shrink: 0; }
+/* Một nguồn duy nhất cho hàng tiêu đề. Trước đây rule này bị một rule khác phía
+   dưới ghi đè align-items thành flex-end, nên icon tụt xuống chân khối chữ. */
+.suite-title {
+  position: relative; display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 18px; overflow: hidden;
+}
+.suite-title > .hero-text { flex: 1 1 auto; }
+.hero-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; border: 1px solid #ffffff; background: linear-gradient(140deg,#e2edfd,#cbdefa); box-shadow: inset 0 1px 0 #fff,inset 0 -1px 2px #b7cdec80,0 2px 6px #4e79a51f; color: #1c56b8; flex-shrink: 0; }
 .hero-text { flex: 1; min-width: 0; }
-.hero-text h1 { color: var(--ink-strong); }
+.hero-text h1 { color: var(--ink-strong); letter-spacing: -.35px; }
 .hero-actions { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.hero-motif { position: absolute; right: 190px; top: -14px; width: 300px; height: 92px; color: #6f9fd8; opacity: .17; pointer-events: none; }
+/* Hoạ tiết nhận diện màn: thấy được khi nhìn, không tranh chỗ với tiêu đề. */
+.hero-motif { position: absolute; right: 210px; top: 50%; translate: 0 -50%; width: 300px; height: 62px; color: #5b93d4; opacity: .26; pointer-events: none; }
+[data-screen=dashboard] .hero-motif { opacity: .24; }
+[data-screen=audit] .hero-motif { opacity: .2; right: 230px; }
+[data-screen=users] .hero-motif { opacity: .22; }
 
 /* ---- Ô số liệu dùng chung cho mọi màn có phần tổng hợp ---- */
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 12px; margin-bottom: 16px; }
 .kpi-action { text-align: left; cursor: pointer; transition: border-color 140ms, box-shadow 140ms; }
-.kpi-action:hover { border-color: #bed4f2; box-shadow: var(--glass-edge),0 8px 20px #4e79a520; }
-.kpi-tile small { display: block; margin-top: 2px; font-size: 11px; color: var(--ink-3); line-height: 1.5; }
+.kpi-action:hover { border-color: #b6cff2; box-shadow: var(--glass-edge),0 10px 24px #4e79a52e; }
+.kpi-tile small { display: block; margin-top: 3px; font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
 .kpi-icon.blue { background: var(--tint-blue); color: var(--tint-blue-fg); }
 .kpi-icon.green { background: var(--tint-green); color: var(--tint-green-fg); }
 .kpi-icon.amber { background: var(--tint-amber); color: var(--tint-amber-fg); }
@@ -46,9 +56,8 @@
 .suite-work { min-width: 0; }
 .suite-top { display: flex; align-items: center; justify-content: space-between; min-height: 40px; margin: 0 24px; border-bottom: 1px solid #c9dced; font-size: 12px; color: var(--muted); }
 .suite-main { padding: 18px 24px 28px; }
-.suite-title { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; gap: 24px; }
 .suite-title h1 { font-size: 24px; margin: 0; }
-.suite-lede { margin: 6px 0 0; max-width: 62ch; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.suite-lede { margin: 5px 0 0; max-width: 66ch; color: var(--ink-2); font-size: 13.5px; line-height: 1.62; }
 .suite-title .button { min-height: 40px; font-size: 14px; flex-shrink: 0; }
 /* Khối tổng hợp dùng chung: kính, số cùng màu mực, đơn vị nhỏ hơn. */
 .summary-block { display: flex; padding: 18px 24px; border: 1px solid #fff; border-radius: 16px; background: var(--glass-fill); box-shadow: var(--glass-edge),var(--glass-lift); margin-bottom: 22px; }
@@ -66,12 +75,12 @@
 /* ---- Danh sách chuyến ---- */
 /* KPI: ba ô đếm được + một ô ngữ cảnh. Ngày không phải số đo nên nhẹ hơn hẳn. */
 .kpi-grid.kpi-4 { grid-template-columns: repeat(3,minmax(0,1fr)) minmax(300px,1.1fr); }
-.kpi-tile { display: flex; align-items: center; gap: 14px; min-height: 84px; padding: 15px 18px; border: 1px solid white; border-radius: 15px; background: var(--glass-fill); backdrop-filter: blur(9px) saturate(1.35); box-shadow: var(--glass-edge),var(--glass-lift); }
+.kpi-tile { display: flex; align-items: center; gap: 14px; min-height: 84px; padding: 14px 18px; border: 1px solid #ffffff; border-radius: 15px; background: linear-gradient(118deg,#ffffffc4,#ffffff5c); backdrop-filter: blur(10px) saturate(1.45); box-shadow: var(--glass-edge),0 7px 18px #4e79a51c; }
 .kpi-tile > div { display: grid; gap: 3px; min-width: 0; }
 .kpi-tile strong { color: var(--ink-strong); font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .kpi-tile strong em { margin-left: 5px; font-style: normal; font-size: 14px; font-weight: 400; color: var(--ink-2); }
 .kpi-tile span { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
-.kpi-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; }
+.kpi-icon { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 12px; box-shadow: inset 0 0 0 1px #ffffff9c; flex-shrink: 0; }
 /* Ô ngữ cảnh: cùng hệ kính với ba ô kia nhưng nhạt hơn một bậc — nó là ngữ
    cảnh của kỳ báo cáo, không phải một chỉ số đọc được. */
 .kpi-context { background: linear-gradient(115deg,#ffffff7d,#ffffff2b); box-shadow: var(--glass-lift); }

@@ -18,10 +18,10 @@
 .context-chip { display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; border: 1px solid #cfdcea; border-radius: 8px; background: #fff; font-size: 13px; color: var(--ink-1); }
 .desktop-table-scroll { overflow-x: auto; position: relative; }
 .desktop-table { width: 100%; border-collapse: collapse; min-width: 560px; table-layout: auto; }
-.desktop-table th { width: auto !important; height: 40px; background: #f5f8fc; color: var(--ink-2); font-weight: 600; font-size: 12px; padding: 0 14px; text-align: left; white-space: nowrap; border-block: 1px solid #e4ebf3; }
+.desktop-table th { width: auto !important; height: 40px; background: #f2f6fc; color: var(--ink-2); font-weight: 600; font-size: 12px; padding: 0 14px; text-align: left; white-space: nowrap; border-block: 1px solid #dfe8f3; }
 .desktop-table td { padding: 10px 14px; font-size: 13px; line-height: 1.5; border-bottom: 1px solid #e9eef5; vertical-align: middle; }
 .desktop-table tr:last-child td { border-bottom: 0; }
-.desktop-table tbody tr:hover { background: #f7faff; }
+.desktop-table tbody tr:hover { background: #f4f8ff; }
 .desktop-table small { display: block; font-size: 12px; color: var(--ink-3); margin-top: 3px; max-width: 240px; line-height: 1.45; }
 .desktop-table .num { font-family: 'JetBrains Mono',monospace; font-size: 13px; color: var(--ink-1); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
 .row-title { display: block; text-align: left; background: none; padding: 0; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--ink-strong); }
@@ -33,14 +33,15 @@
 .cell-thumb.green { background: var(--tint-green); color: var(--tint-green-fg); }
 .cell-thumb.amber { background: var(--tint-amber); color: var(--tint-amber-fg); }
 .cell-thumb.violet { background: var(--tint-violet); color: var(--tint-violet-fg); }
+.cell-thumb.small-thumb { width: 28px; height: 28px; border-radius: 8px; font-size: 11px; font-weight: 600; }
 /* Ô trạng thái: badge trên, câu giải thích dưới — câu là ngữ cảnh, không phải nhãn thứ hai. */
 .status-cell { display: grid; gap: 4px; justify-items: start; }
-.selected-row { background: rgba(37,99,235,.055) !important; }
-.selected-row td { border-bottom-color: #cfdff6; }
-.selected-row td:first-child { box-shadow: inset 3px 0 #2563eb; }
+.selected-row { background: rgba(37,99,235,.075) !important; }
+.selected-row td { border-bottom-color: #c4d8f5; box-shadow: inset 0 1px 0 #c4d8f5; }
+.selected-row td:first-child { box-shadow: inset 3px 0 #2563eb,inset 0 1px 0 #c4d8f5; }
 .source-note { padding: 14px 18px; color: var(--muted); font-size: 12px; line-height: 1.8; }
-.editor-paper { padding: 0 20px 20px; background: #fff; border: 1px solid #d5e2f0; border-radius: 12px; box-shadow: 0 6px 18px #4e79a514; }
-.editor-paper > .section-heading, .inspector-head { margin: 0 -20px 18px; padding: 16px 20px; border-bottom: 1px solid #e9eef5; }
+.editor-paper { padding: 0 20px 20px; background: #fff; border: 1px solid #ccdcee; border-radius: 12px; box-shadow: 0 8px 22px #4e79a51f; }
+.editor-paper > .section-heading, .inspector-head { margin: 0 -20px 18px; padding: 16px 20px; background: linear-gradient(180deg,#f7faff,#fff); border-bottom: 1px solid #e3ebf5; border-radius: 11px 11px 0 0; }
 .editor-paper .section-heading { align-items: center; }
 .editor-code { margin: 20px 0; font-size: 12px; color: var(--muted); }
 .editor-paper .field { margin-top: 18px; }
@@ -107,7 +108,7 @@ input[type=checkbox],input[type=radio] { accent-color: var(--blue); width: 17px;
 .inspector-head .quiet-note { margin: 3px 0 6px; font-size: 12px; }
 .inspector-head strong { display: block; font-size: 14px; margin-top: 4px; }
 .inspector-head small { display: block; margin-top: 3px; font-size: 12px; color: var(--ink-3); line-height: 1.45; }
-.inspector-section { margin: 22px 0 2px; padding-bottom: 8px; border-bottom: 1px solid #eef2f7; font-size: 13px; font-weight: 600; color: var(--ink-strong); }
+.inspector-section { margin: 22px 0 2px; padding-bottom: 8px; border-bottom: 1px solid #e3ebf5; font-size: 13px; font-weight: 600; color: var(--ink-strong); }
 .editor-paper .inspector-section:first-of-type { margin-top: 0; }
 .chart-paper { padding: 20px; }
 .chart-paper .section-heading span { font-size: 13px; color: var(--ink-2); }
@@ -115,8 +116,8 @@ input[type=checkbox],input[type=radio] { accent-color: var(--blue); width: 17px;
 .status-bars { display: grid; gap: 15px; margin-top: 26px; }
 .status-bars > div { display: grid; grid-template-columns: 148px 1fr 22px 38px; align-items: center; gap: 14px; font-size: 13px; }
 .status-bars meter { width: 100%; height: 10px; border-radius: 5px; }
-meter::-webkit-meter-optimum-value { background: var(--blue); border-radius: 5px; }
-meter::-webkit-meter-bar { background: #e9eff8; border: 0; border-radius: 5px; }
+meter::-webkit-meter-optimum-value { background: linear-gradient(90deg,#3b78ee,#2563eb); border-radius: 5px; }
+meter::-webkit-meter-bar { background: #dfe8f4; border: 0; border-radius: 5px; box-shadow: inset 0 1px 2px #94aecc2e; }
 .fleet-ratio { display: flex; align-items: baseline; gap: 10px; margin: 22px 0 14px; }
 .fleet-ratio strong { font-size: 34px; font-weight: 600; color: var(--ink-strong); }
 .fleet-ratio span { color: var(--ink-2); font-size: 13px; }
