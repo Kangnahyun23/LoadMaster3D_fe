@@ -99,8 +99,43 @@ export function mobileShell(screen, content, footer = '') {
 export function dialog(id, title, content) {
   return `<dialog id="${id}" aria-labelledby="${id}-title" class="suite-dialog"><form method="dialog"><header><h2 id="${id}-title">${title}</h2><button class="button secondary" aria-label="Đóng hộp thoại">Đóng ×</button></header></form>${content}</dialog>`;
 }
+// Chỉ báo kính chạy theo con trỏ. Port nguyên cơ chế của trip-detail.js: một nav
+// một chỉ báo, bám hover và focus, trả về mục đang mở khi rời nav. Không nghe
+// pointermove, không vòng lặp frame — chỉ pointerenter/focus và một ResizeObserver.
+export function setupGlassNav(nav) {
+  if (!nav) return;
+  let indicator = nav.querySelector('.glass-follow');
+  if (!indicator) {
+    indicator = document.createElement('span');
+    indicator.className = 'glass-follow';
+    nav.prepend(indicator);
+  }
+  const current = nav.querySelector('[aria-current]');
+  const anchor = link => {
+    // Màn phụ như Hồ sơ hay Bảng thành phần không có mục nav nào đang mở;
+    // lúc đó giấu chỉ báo thay vì neo nó vào một chỗ tuỳ tiện.
+    if (!link) { indicator.hidden = true; return; }
+    indicator.hidden = false;
+    indicator.style.transform = `translateY(${link.offsetTop}px)`;
+    indicator.style.left = `${link.offsetLeft}px`;
+    indicator.style.width = `${link.offsetWidth}px`;
+    indicator.style.height = `${link.offsetHeight}px`;
+  };
+  nav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('pointerenter', () => anchor(link));
+    link.addEventListener('focus', () => anchor(link));
+  });
+  nav.addEventListener('pointerleave', () => anchor(current));
+  nav.addEventListener('focusout', e => { if (!nav.contains(e.relatedTarget)) anchor(current); });
+  new ResizeObserver(() => anchor(current)).observe(nav);
+  anchor(current);
+  // Đặt đúng chỗ xong mới bật chuyển động, nếu không lúc tải trang chỉ báo sẽ
+  // trượt từ mép trái nav vào mục đang mở.
+  requestAnimationFrame(() => { nav.dataset.follow = 'ready'; });
+}
 export function activateShell() {
   $('screen-picker').addEventListener('change', e => { location.href = href(e.target.value); });
+  setupGlassNav(document.querySelector('.suite-nav'));
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('click', e => { if (e.target === d) { const r = d.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close(); } }));
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('keydown', e => {
     if (e.key !== 'Tab') return;

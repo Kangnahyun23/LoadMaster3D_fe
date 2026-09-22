@@ -46,10 +46,18 @@
 .suite-rail { display: flex; align-items: center; gap: 32px; height: 60px; padding: 6px 24px; border-bottom: 1px solid #fff; }
 .suite-rail .brand { flex-shrink: 0; padding: 0 4px; }
 .suite-caption { font-size: 12px; color: var(--muted); line-height: 1.6; }
-.suite-nav { display: flex; padding: 5px; border-radius: 18px; background: linear-gradient(130deg,#ffffffc2,#ffffff45); border: 1px solid #fff; backdrop-filter: blur(16px) saturate(1.35); box-shadow: 0 6px 16px #33517a10,inset 0 1px 0 #fff; }
+.suite-nav { display: flex; position: relative; padding: 5px; border-radius: 18px; background: linear-gradient(130deg,#ffffffc2,#ffffff45); border: 1px solid #fff; outline: 1px solid #b8cde348; backdrop-filter: blur(18px) saturate(1.5); box-shadow: 0 8px 20px #33517a10,inset 0 1px 0 #fff; }
 .suite-nav a { min-height: 42px; padding: 0 18px; gap: 0; border-radius: 13px; white-space: nowrap; }
-.suite-nav a:hover { background: #ffffff80; }
-.suite-nav [aria-current] { background: linear-gradient(125deg,#fffffff0,#ffffff75); border: 1px solid #fff; box-shadow: 0 3px 8px #46658718; }
+.suite-nav a:hover { color: #1555d1; }
+.suite-nav [aria-current] { color: #1555d1; font-weight: 600; }
+/* Chỉ báo kính chạy theo con trỏ: chép đúng khối .glass .glass-follow của
+   concepts.css, chỉ đổi bo góc cho vừa mục nav. Vỏ .glass-follow và ::before đã
+   khai báo chung ở concepts.css nên không chép lại; --spring-easing dùng từ :root. */
+.suite-nav .glass-follow { overflow: hidden; border-radius: 13px; background: linear-gradient(125deg,#ffffffe0,#ffffff55 60%,#ffffffad); border: 1px solid white; backdrop-filter: blur(5px) saturate(1.4); box-shadow: 0 5px 10px #46658721,inset 0 1px 0 #fff,inset 0 -1px 1px #aec1d950; }
+/* Bật chuyển động sau khi đã đặt đúng chỗ lần đầu, nếu không lúc tải trang chỉ báo
+   sẽ trượt từ mép trái nav vào mục đang mở. */
+.suite-nav[data-follow=ready] .glass-follow { transition: transform 1s var(--spring-easing),left 1s var(--spring-easing),width 1s var(--spring-easing),height 1s var(--spring-easing); }
+@media (prefers-reduced-motion: reduce) { .suite-nav[data-follow=ready] .glass-follow { transition: none; } }
 .suite-person { margin-left: auto; display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 12px; color: inherit; flex-shrink: 0; }
 .suite-person:hover { background: #ffffff7a; }
 .suite-person strong { display: block; font-size: 12px; }
