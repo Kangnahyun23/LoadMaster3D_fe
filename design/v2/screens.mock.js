@@ -1,11 +1,9 @@
 // Selected rows from seed-trips.ts, anchored to 22/09/2026 for this design review.
 // Counts are sums of seed line quantities (TRIP-013 includes staleEdit).
-// tone theo nghĩa vận hành: chờ người khác làm = warning, đã xong một chặng = success,
-// đang chạy = info, chưa bắt đầu = neutral. Không tô màu theo cảm tính.
 export const trips = [
-  { id: 'TRIP-2026-0914', name: 'Q.7 → Thủ Dầu Một → Dĩ An → Biên Hoà', date: '22/09/2026', vehicle: 'Hyundai HD210', plate: '60C-446.32', stops: 4, count: 132, state: 'approved', label: 'Chờ kho bắt đầu', tone: 'warning' },
+  { id: 'TRIP-2026-0914', name: 'Q.7 → Thủ Dầu Một → Dĩ An → Biên Hoà', date: '22/09/2026', vehicle: 'Hyundai HD210', plate: '60C-446.32', stops: 4, count: 132, state: 'approved', label: 'Chờ kho bắt đầu', tone: 'success' },
   { id: 'TRIP-009', name: 'Thủ Dầu Một → Sóng Thần', date: '22/09/2026', vehicle: 'VEHICLE-006', plate: '', stops: 3, count: 160, state: 'delivering', label: 'Đang giao', tone: 'info' },
-  { id: 'TRIP-010', name: 'Thủ Đức → An Phú → Phú Nhuận', date: '22/09/2026', vehicle: 'Isuzu NQR 550', plate: '51C-284.19', stops: 3, count: 210, state: 'loaded', label: 'Đã xếp xong', tone: 'success' },
+  { id: 'TRIP-010', name: 'Thủ Đức → An Phú → Phú Nhuận', date: '22/09/2026', vehicle: 'Isuzu NQR 550', plate: '51C-284.19', stops: 3, count: 210, state: 'loaded', label: 'Đã xếp xong', tone: 'info' },
   { id: 'TRIP-011', name: 'Tân Bình → Q.1 → Q.7', date: '22/09/2026', vehicle: 'VEHICLE-007', plate: '', stops: 4, count: 280, state: 'loading', label: 'Đang xếp', tone: 'info' },
   { id: 'TRIP-012', name: 'Bình Chánh → Biên Hoà', date: '23/09/2026', vehicle: 'VEHICLE-005', plate: '', stops: 2, count: 70, state: 'optimized', label: 'Chờ duyệt', tone: 'warning' },
   { id: 'TRIP-013', name: 'Biên Hoà → Long Bình Tân', date: '23/09/2026', vehicle: 'Truck 6m', plate: '', stops: 2, count: 206, state: 'stale', label: 'Cần duyệt lại', tone: 'warning' },
