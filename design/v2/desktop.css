@@ -121,7 +121,7 @@ meter::-webkit-meter-bar { background: #edf2fa; border: 0; }
 .empty-spec p { margin: 12px 0; font-size: 13px; color: var(--muted); line-height: 1.8; }
 .token-spec { margin-top: 24px; }
 .token-spec > h2 { padding: 24px; }
-.solid-desktop .suite-nav,.solid-desktop .summary-block,.solid-desktop .summary-strip,.solid-desktop .mini-glass,.solid-desktop .fleet-summary,.solid-desktop .dashboard-kpis { background: #fff; box-shadow: none; backdrop-filter: none; border-color: #d3dfed; }
+.solid-desktop .suite-nav,.solid-desktop .summary-block,.solid-desktop .mini-glass,.solid-desktop .fleet-summary,.solid-desktop .dashboard-kpis { background: #fff; box-shadow: none; backdrop-filter: none; border-color: #d3dfed; }
 .solid-desktop .suite-nav [aria-current] { background: #eaf2ff; box-shadow: none; border-color: #bfd3ef; }
 @media(max-width:1150px) { .workbench { grid-template-columns: minmax(0,1fr) 260px; gap: 16px; } .vehicle-workspace { grid-template-columns: 1fr; } .vehicle-drawing svg { max-width: 420px; } .dashboard-kpis { grid-template-columns: 1fr 1fr; gap: 24px; } .suite-main { padding: 22px 20px; } }
 @media(max-width:900px) { .workbench,.profile-layout,.insights-grid,.spec-grid { grid-template-columns: 1fr; } .workspace-intro,.comparison-context { flex-wrap: wrap; } .revision-heading { gap: 10px; padding: 16px; } .fleet-summary { grid-template-columns: 1fr 1fr; } }

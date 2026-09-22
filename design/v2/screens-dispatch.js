@@ -1,23 +1,87 @@
 import { trips } from './screens.mock.js';
 import { packages, stops, addresses } from './trip-detail.mock.js';
-import { $, fmt, escape, href, badge, link, shell, dialog } from './screen-ui.js';
+import { $, fmt, escape, href, badge, link, shell, dialog, summaryBlock } from './screen-ui.js';
 import { packageDetail } from './package-detail.js';
 const totalWeight = packages.reduce((n, p) => n + p.kg * p.quantity, 0);
 const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
 const summary = () => `<dl class="review-facts"><div><dt>Kiện hàng</dt><dd>132 <small>/ 6 loại</small></dd></div><div><dt>Khối lượng</dt><dd>${fmt.format(totalWeight)} <small>kg</small></dd></div><div><dt>Điểm giao</dt><dd>4</dd></div></dl>`;
 
 export function tripList() {
-  $('screen-root').innerHTML = shell('trips', `<section class="summary-strip glass"><div><span>Chuyến trong mẫu</span><strong>${trips.length}</strong></div><div><span>Đang thực hiện</span><strong>${trips.filter(t => ['loading', 'delivering'].includes(t.state)).length}</strong></div><div><span>Cần xem phương án</span><strong>${trips.filter(t => ['stale', 'optimized'].includes(t.state)).length}</strong></div><p>22–24 tháng 9, 2026<br><small>Trích từ dữ liệu seed · Không phải báo cáo toàn đội xe</small></p></section><div class="dispatch-grid"><section class="paper"><div class="list-tools"><label class="search"><input id="trip-search" placeholder="Tìm mã chuyến hoặc tuyến giao…" aria-label="Tìm chuyến"></label><select id="trip-status" aria-label="Trạng thái"><option value="all">Mọi trạng thái</option><option value="attention">Cần xem phương án</option><option value="active">Đang thực hiện</option></select><button class="button secondary" id="trip-density">Gọn</button></div><div class="suite-table-scroll"><table class="trip-table"><thead><tr><th>Chuyến / tuyến giao</th><th>Ngày chạy</th><th>Phương tiện</th><th>Hàng</th><th>Trạng thái</th></tr></thead><tbody id="trip-rows"></tbody></table></div><footer class="list-foot" id="trip-count" aria-live="polite"></footer></section><aside class="attention-panel"><span class="suite-caption">Cần chú ý</span><h2>Trước khi bàn giao kho</h2><button id="attention-filter" class="attention-item"><strong>1 chuyến cần duyệt lại</strong><span>TRIP-013 · Dữ liệu thay đổi sau khi duyệt</span><b>Xem chuyến →</b></button><div class="attention-item"><strong>1 phương án chờ duyệt</strong><span>TRIP-012 · Bình Chánh → Biên Hoà</span></div><p class="quiet-note">Hoàn tất kiểm tra phương án trước khi nhân viên kho bắt đầu xếp.</p></aside></div>${dialog('trip-preview', 'Thông tin chuyến', '<div id="trip-preview-body"></div>')}`, link('＋ Tạo chuyến', 'create', true));
-  function render() {
-    const q = normalize($('trip-search').value), filter = $('trip-status').value;
-    const rows = trips.filter(t => normalize(`${t.id} ${t.name}`).includes(q) && (filter === 'all' || (filter === 'attention' ? ['stale', 'optimized'] : ['loading', 'delivering']).includes(t.state)));
-    $('trip-rows').innerHTML = rows.map(t => `<tr><td><button class="trip-row-link" data-trip="${t.id}"><strong>${t.name}</strong><span class="mono">${t.id}</span></button></td><td>${t.date}</td><td>${t.vehicle}<small>${t.plate || 'Xe theo danh mục mẫu'}</small></td><td><strong>${t.count} kiện</strong><small>${t.stops} điểm giao</small></td><td>${badge(t.label, t.tone)}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Không có chuyến phù hợp với bộ lọc.</td></tr>';
-    $('trip-count').textContent = `${rows.length} / ${trips.length} chuyến mẫu`;
+  const active = trips.filter(t => ['loading', 'delivering'].includes(t.state)).length;
+  const attention = trips.filter(t => ['stale', 'optimized'].includes(t.state)).length;
+  const dates = [...new Set(trips.map(t => t.date))];
+  const attentionTrips = trips.filter(t => ['stale', 'optimized'].includes(t.state));
+  const order = ['draft', 'optimized', 'stale', 'approved', 'loading', 'loaded', 'delivering'];
+  const sort = { key: '', dir: 'ascending' };
+  const sortHead = (key, label, extra = '') => `<th scope="col" class="sortable ${extra}" data-sort="${key}" aria-sort="none"><button type="button">${label}<span aria-hidden="true">↕</span></button></th>`;
+
+  $('screen-root').innerHTML = shell('trips', `${summaryBlock([
+    { label: 'Chuyến trong kỳ', value: trips.length },
+    { label: 'Đang thực hiện', value: active },
+    { label: 'Cần xử lý', value: attention },
+  ], 'Kỳ 22–24/09/2026 · trích từ dữ liệu seed, không phải báo cáo toàn đội xe.')}<div class="dispatch-grid"><section class="paper"><div class="list-tools"><label class="search"><input id="trip-search" placeholder="Tìm mã chuyến, tuyến giao hoặc phương tiện…" aria-label="Tìm chuyến"></label><label class="tool-field">Trạng thái<select id="trip-status"><option value="all">Mọi trạng thái</option><option value="attention">Cần xử lý</option><option value="active">Đang thực hiện</option></select></label><label class="tool-field">Ngày chạy<select id="trip-date"><option value="all">Mọi ngày</option>${dates.map(d => `<option value="${d}">${d}</option>`).join('')}</select></label><label class="tool-field tool-density">Mật độ<select id="trip-density"><option value="compact">Gọn</option><option value="default" selected>Mặc định</option><option value="roomy">Thoáng</option></select></label></div><div class="filter-context" id="filter-context" hidden></div><div class="suite-table-scroll"><table class="trip-table" data-density="default"><thead><tr><th scope="col">Chuyến / tuyến giao</th>${sortHead('date', 'Ngày chạy', 'col-date')}<th scope="col" class="col-vehicle">Phương tiện</th>${sortHead('count', 'Hàng', 'num')}${sortHead('state', 'Trạng thái')}</tr></thead><tbody id="trip-rows"></tbody></table></div><footer class="list-foot" id="trip-count" aria-live="polite"></footer></section><details class="attention-panel" id="attention-panel" open><summary><span>Cần xử lý</span><b>${attentionTrips.length}</b></summary><div class="attention-body"><p class="attention-lede">Hoàn tất các mục này trước khi nhân viên kho bắt đầu xếp.</p><ul class="attention-list">${attentionTrips.map(t => `<li><div class="attention-top"><span class="mono">${t.id}</span>${badge(t.label, t.tone)}</div><p>${t.state === 'stale' ? 'Dữ liệu kiện thay đổi sau khi duyệt.' : escape(t.name)}</p><button type="button" class="attention-action" data-attention-trip="${t.id}">Xem chuyến <span aria-hidden="true">→</span></button></li>`).join('')}</ul><button type="button" class="button secondary" id="attention-filter">Lọc ${attentionTrips.length} chuyến cần xử lý</button></div></details></div>${dialog('trip-preview', 'Thông tin chuyến', '<div id="trip-preview-body"></div>')}`, link('＋ Tạo chuyến', 'create', true));
+
+  function openTrip(id) {
+    const t = trips.find(x => x.id === id);
+    if (t.id === 'TRIP-2026-0914') { location.href = './trip-detail.html?layout=b'; return; }
+    $('trip-preview-body').innerHTML = `<p class="mono">${t.id}</p><h3>${escape(t.name)}</h3>${badge(t.label, t.tone)}<dl><div><dt>Hàng hoá</dt><dd>${t.count} kiện / ${t.stops} điểm</dd></div><div><dt>Ngày chạy</dt><dd>${t.date}</dd></div></dl><a class="button secondary" href="/chuyen/${t.id}">Mở chuyến trong FE hiện tại ↗</a>`;
+    $('trip-preview').showModal();
   }
-  $('trip-search').addEventListener('input', render); $('trip-status').addEventListener('change', render);
+
+  function sortRows(rows) {
+    if (!sort.key) return rows;
+    const sign = sort.dir === 'ascending' ? 1 : -1;
+    const iso = d => d.split('/').reverse().join('');
+    return [...rows].sort((a, b) => sign * (sort.key === 'count' ? a.count - b.count
+      : sort.key === 'state' ? order.indexOf(a.state) - order.indexOf(b.state)
+        : iso(a.date).localeCompare(iso(b.date))));
+  }
+
+  function renderChips(q, filter, day) {
+    const chips = [];
+    if (q) chips.push([`Tìm: ${$('trip-search').value.trim()}`, () => { $('trip-search').value = ''; }]);
+    if (filter !== 'all') chips.push([`Trạng thái: ${$('trip-status').selectedOptions[0].textContent}`, () => { $('trip-status').value = 'all'; }]);
+    if (day !== 'all') chips.push([`Ngày chạy: ${day}`, () => { $('trip-date').value = 'all'; }]);
+    const box = $('filter-context');
+    box.hidden = !chips.length;
+    box.innerHTML = chips.length ? `<span>Đang lọc</span>${chips.map(([label], i) => `<button type="button" class="filter-chip" data-chip="${i}">${escape(label)}<span aria-hidden="true">×</span></button>`).join('')}<button type="button" class="filter-clear" id="filter-clear">Xoá bộ lọc</button>` : '';
+    box.querySelectorAll('[data-chip]').forEach(b => { b.onclick = () => { chips[Number(b.dataset.chip)][1](); render(); }; });
+    if (chips.length) $('filter-clear').onclick = () => { $('trip-search').value = ''; $('trip-status').value = 'all'; $('trip-date').value = 'all'; render(); };
+  }
+
+  function render() {
+    const q = normalize($('trip-search').value), filter = $('trip-status').value, day = $('trip-date').value;
+    const rows = sortRows(trips.filter(t => normalize(`${t.id} ${t.name} ${t.vehicle} ${t.plate}`).includes(q)
+      && (filter === 'all' || (filter === 'attention' ? ['stale', 'optimized'] : ['loading', 'delivering']).includes(t.state))
+      && (day === 'all' || t.date === day)));
+    $('trip-rows').innerHTML = rows.map(t => `<tr><td><button type="button" class="trip-row-link" data-trip="${t.id}"><strong>${escape(t.name)}</strong><span class="mono">${t.id}</span></button></td><td class="col-date mono">${t.date}</td><td class="col-vehicle"><strong>${t.vehicle}</strong><small>${t.plate ? `<span class="mono">${t.plate}</span>` : 'Chưa gán biển số'}</small></td><td class="num"><strong>${t.count}<em> kiện</em></strong><small>${t.stops} điểm giao</small></td><td>${badge(t.label, t.tone)}</td></tr>`).join('')
+      || '<tr><td colspan="5" class="empty">Không có chuyến khớp bộ lọc đang bật.</td></tr>';
+    $('trip-count').textContent = rows.length === trips.length
+      ? `Hiển thị 1–${rows.length} trên ${trips.length} chuyến`
+      : `Hiển thị ${rows.length} trên ${trips.length} chuyến`;
+    renderChips(q, filter, day);
+  }
+
+  $('trip-search').addEventListener('input', render);
+  $('trip-status').addEventListener('change', render);
+  $('trip-date').addEventListener('change', render);
   $('attention-filter').onclick = () => { $('trip-status').value = 'attention'; render(); };
-  $('trip-density').onclick = e => { const spacious = document.querySelector('.trip-table').classList.toggle('roomy'); e.currentTarget.textContent = spacious ? 'Thoáng' : 'Gọn'; };
-  $('trip-rows').onclick = e => { const button = e.target.closest('[data-trip]'); if (!button) return; const t = trips.find(t => t.id === button.dataset.trip); if (t.id === 'TRIP-2026-0914') { location.href = './trip-detail.html?layout=b'; return; } $('trip-preview-body').innerHTML = `<p class="mono">${t.id}</p><h3>${t.name}</h3>${badge(t.label, t.tone)}<dl><div><dt>Hàng hoá</dt><dd>${t.count} kiện / ${t.stops} điểm</dd></div><div><dt>Ngày chạy</dt><dd>${t.date}</dd></div></dl><a class="button secondary" href="/chuyen/${t.id}">Mở chuyến trong FE hiện tại ↗</a>`; $('trip-preview').showModal(); };
+  $('trip-density').onchange = e => { document.querySelector('.trip-table').dataset.density = e.target.value; };
+  document.querySelectorAll('.trip-table th.sortable').forEach(th => {
+    th.querySelector('button').onclick = () => {
+      sort.dir = sort.key === th.dataset.sort && sort.dir === 'ascending' ? 'descending' : 'ascending';
+      sort.key = th.dataset.sort;
+      document.querySelectorAll('.trip-table th.sortable').forEach(o => o.setAttribute('aria-sort', 'none'));
+      th.setAttribute('aria-sort', sort.dir);
+      render();
+    };
+  });
+  $('trip-rows').onclick = e => { const b = e.target.closest('[data-trip]'); if (b) openTrip(b.dataset.trip); };
+  $('attention-panel').querySelectorAll('.attention-action').forEach(b => { b.onclick = () => openTrip(b.dataset.attentionTrip); });
+  // Dưới 1280px rail thu lại thành một dòng mở được, không bóp bảng.
+  const narrow = matchMedia('(max-width: 1279px)');
+  const fit = () => { $('attention-panel').open = !narrow.matches; };
+  narrow.addEventListener('change', fit); fit();
   render();
 }
 
