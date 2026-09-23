@@ -3,20 +3,31 @@ export const fleet = {
   title: 'Đội xe',
   count: { one: '{count} xe', other: '{count} xe' },
   add: 'Thêm xe',
-  rowHint: 'Bấm vào một dòng để mở cấu hình xe.',
+  /** Chân bảng (V2): nói trạng thái đến từ đâu và cái chưa có — không hứa vị trí thời gian thực. */
+  sourceNote: 'Trạng thái lấy từ chuyến và lịch bảo dưỡng trong hệ thống. Chưa có GPS hay vị trí xe thời gian thực.',
   columns: {
-    name: 'Xe',
+    name: 'Phương tiện',
     status: 'Trạng thái',
     inner: 'Lòng thùng (D × R × C)',
-    payload: 'Tải trọng',
-    door: 'Cửa (R × C)',
+    payload: 'Tải tối đa',
     obstacles: 'Vật cản',
   },
-  /** Trạng thái xe (D-53), key trùng `VehicleStatus`. */
+  obstacleZones: { one: '{count} vùng', other: '{count} vùng' },
+  /** Trạng thái xe (D-53), key trùng `VehicleStatus`. "Đang phục vụ chuyến" gồm cả lúc xe đứng ở kho chờ xếp. */
   status: {
     available: 'Sẵn sàng',
-    in_use: 'Đang chạy',
+    in_use: 'Đang phục vụ chuyến',
     maintenance: 'Bảo dưỡng',
+  },
+  /** Bốn ô số liệu trên đầu danh sách (V2). Số tính trên cả đội xe; ba ô trạng thái bấm để lọc. */
+  summary: {
+    total: 'Xe trong danh mục',
+    totalNote: 'Tổng số xe đang quản lý',
+    note: {
+      available: 'Chọn được khi lập chuyến',
+      in_use: 'Có chuyến đang xếp, đã xếp hoặc đang giao',
+      maintenance: 'Không chọn được khi lập chuyến',
+    },
   },
   search: 'Tìm theo tên xe, biển số, mã xe',
   loading: 'Đang tải đội xe',

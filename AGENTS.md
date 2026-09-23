@@ -345,6 +345,10 @@ dung cùng thẳng một cột. Không đặt lại `px-6`/`px-8` cho màn trong
 (mục 4); số 26 px **sans** `tabular-nums` `--ink-strong` (không mono — mono dành cho mã và số đo trong bảng, theo brief V2); nhãn
 `--ink-2`; ghi chú nguồn cỡ `note` `--ink-3`. Mọi số cùng màu mực — màu chỉ ở icon, không nói số tốt hay xấu. Vỏ ngoài
 `role="group"` + `aria-label` = nhãn; `value` và `unit` là hai text node liền nhau, không khoảng trắng JSX ở giữa.
+*(bổ sung 23/09/2026, bước 5)* Ô số liệu làm **công tắc lọc** (Đội xe): truyền `onPress` + `pressed`; ô dựng `<button aria-pressed>`
+**bên trong** vỏ group, không biến vỏ thành nút. Bấm đi qua `list.setFilter` của `useListUrlState` (URL đổi, cùng bộ lọc với ô
+chọn), bấm lại ô đang lọc thì bỏ lọc. Rê chuột đổi viền và nâng bóng (`--tile-hover-border`, `--tile-lift-hover`), không phóng
+to; đang lọc: viền `--primary` đậm gấp đôi. Số của ô đếm trên cả tập dữ liệu, không theo ô tìm.
 
 ### Thử nghiệm visual V2 (21/09/2026)
 
@@ -416,6 +420,12 @@ Không phải thứ gì cũng cần card. Nhóm nội dung bằng khoảng trắ
 trùng mã khi dữ liệu còn lỗi, bảng kiện giữ khoá theo vị trí.
 
 Chiều cao dòng cố định (48px thoáng, 36px gọn, 56px cảm ứng). Cột số căn phải, JetBrains Mono. Tiêu đề cột 12px weight 500 màu `--text-3`, không viết hoa, dính khi cuộn. Bảng hẹp (cột phụ ≤ 360px) dùng padding ngang 10px thay vì 12px để tiêu đề không xuống dòng.
+
+*(bổ sung 23/09/2026, V2 bước 5 — đang thử ở Đội xe, bước 6 mới lan)* Kiểu bảng V2: bảng và thanh tìm/lọc nằm **chung một thẻ**
+(`rounded-lg`, viền 1px, nền trắng, `relative flex-none`); `FilterBar layout="toolbar"` là đầu thẻ — ô tìm giãn bên trái, bộ lọc
+có nhãn nằm cạnh dồn phải; `DataTable appearance="paper"` — tiêu đề cột nền `--table-head`, 12px weight **600** `--ink-2`, cao
+40px, lề ngang 14px. Mật độ `spacious` 72px cho bảng có ô hai dòng (tên + mã; trạng thái + mã chuyến / ghi chú tối đa hai dòng)
+thay vì cắt chữ. Bảng khác giữ kiểu mặc định cho tới khi bước 6 duyệt. Lớp kiểu dáng nằm ở `components/data-table-styles.ts`.
 
 *(bổ sung 19/09/2026, LM-085, D-52)* Danh sách có tìm/lọc/sắp xếp/phân trang ghép `FilterBar` + `@/lib/list-filter` (tìm bỏ dấu:
 "bien hoa" khớp "Biên Hoà") + `DataTable` + `useListUrlState`. Cột chỉ sắp xếp được khi khai `enableSorting: true`; tiêu đề là nút có

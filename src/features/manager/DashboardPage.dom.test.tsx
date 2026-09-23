@@ -65,8 +65,8 @@ test('kỳ mặc định 30 ngày: KPI theo kỳ lấy từ kho, mỗi ô nói n
   expect(trips.getByText('7')).toBeInTheDocument()
   expect(trips.getByText('/ 12 chuyến')).toBeInTheDocument()
   expect(trips.getByText('Chuyến có ngày chạy trong kỳ, tổng gồm cả chuyến đã huỷ')).toBeInTheDocument()
-  expect((await kpi('Xe đang chạy hôm nay')).getByText('/ 8 xe')).toBeInTheDocument()
-  expect((await kpi('Xe đang chạy hôm nay')).getByText('3')).toBeInTheDocument()
+  expect((await kpi('Xe đang phục vụ chuyến')).getByText('/ 8 xe')).toBeInTheDocument()
+  expect((await kpi('Xe đang phục vụ chuyến')).getByText('3')).toBeInTheDocument()
   // Tỷ lệ lấp đầy từ kết quả mock mang nhãn MOCK RESULT
   const fill = await kpi('Lấp đầy thể tích trung bình')
   expect(fill.getByText('MOCK RESULT')).toBeInTheDocument()

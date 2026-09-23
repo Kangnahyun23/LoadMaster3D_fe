@@ -56,6 +56,15 @@ const SCREENS: readonly Screen[] = [
     },
   },
   {
+    // V2: ghi chú bảo dưỡng dài (VEHICLE-008) xuống hai dòng dưới badge thay vì bị cắt
+    name: 'fleet',
+    route: '/doi-xe',
+    ready: async (page) => {
+      await expect(page.getByRole('group', { name: 'Bảo dưỡng', exact: true })).toBeVisible()
+      await expect(page.getByRole('row', { name: /VEHICLE-008/ })).toContainText('Thay má phanh')
+    },
+  },
+  {
     name: 'planner',
     route: PLANNER_ROUTE,
     ready: async (page) => {
@@ -98,6 +107,7 @@ const WHEEL_SCREENS: readonly Screen[] = [
   { name: 'dashboard', route: '/', ready: async (page) => { await expect(page.getByRole('group', { name: 'Chuyến hoàn thành', exact: true })).toBeVisible() } },
   { name: 'trip-detail', route: '/chuyen/TRIP-2026-0914', ready: async (page) => { await expect(page.getByRole('heading', { name: 'Kiện hàng', exact: true })).toBeVisible() } },
   { name: 'vehicle-detail', route: '/doi-xe/VEHICLE-002', ready: async (page) => { await expect(page.getByRole('heading', { name: 'Vật cản trong thùng', exact: true })).toBeVisible() } },
+  { name: 'fleet', route: '/doi-xe', ready: async (page) => { await expect(page.getByRole('row', { name: /VEHICLE-008/ })).toBeVisible() } },
   { name: 'audit', route: '/nhat-ky', ready: async (page) => { await expect(page.getByRole('row')).not.toHaveCount(0) } },
 ]
 

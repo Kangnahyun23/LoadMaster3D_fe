@@ -34,6 +34,36 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
+### 23/09/2026 — V2 bước 5: màn Đội xe theo V2
+
+Nghiên cứu bản V2 (`design/v2/desktop-fleet.js`, ảnh `screen-fleet.png`), code hiện tại và các test ràng buộc; người dùng chốt từng
+điểm lệch trước khi làm.
+
+**Đã làm**
+- Bốn ô số liệu trên đầu (tổng · sẵn sàng · đang phục vụ chuyến · bảo dưỡng), đếm trên cả đội xe. Ba ô trạng thái là công tắc lọc:
+  `<button aria-pressed>` trong vỏ `role="group"`, đi qua `list.setFilter('trang-thai', …)` nên URL đổi và ô chọn trạng thái khớp
+  theo; bấm lại thì bỏ lọc. `KpiTile` thêm `onPress`/`pressed`.
+- Bảng theo V2: Phương tiện · Lòng thùng · Tải tối đa · Vật cản · Trạng thái (bỏ cột Cửa — xem ở cấu hình xe). Icon xe tô theo
+  trạng thái, tên + mã hai dòng; trạng thái là badge + mã chuyến / ghi chú bảo dưỡng tối đa hai dòng — hết lỗi ghi chú bị cắt.
+- Thanh tìm/lọc và bảng chung một thẻ: `FilterBar layout="toolbar"`, `DataTable appearance="paper"` (tiêu đề cột nền
+  `--table-head`, 600), mật độ mới `spacious` 72px. Chỉ Đội xe dùng; bước 6 mới lan. Lớp kiểu dáng tách ra `data-table-styles.ts`.
+- Nhãn "Đang chạy" → "Đang phục vụ chuyến" (gồm cả xe đứng ở kho chờ xếp); KPI bảng điều khiển "Xe đang phục vụ chuyến". Tham số
+  URL giữ `trang-thai=dang-chay` để link cũ không gãy. Badge xe đang phục vụ đổi tông xanh dương cho khớp icon tint "vận hành".
+- Chú thích ô số liệu sửa cho đúng dữ liệu thay vì chép V2 (xe đang phục vụ cũng chọn được khi lập chuyến; chỉ xe bảo dưỡng bị
+  chặn — D-53). Chân bảng là câu nguồn dữ liệu: chưa có GPS hay vị trí thời gian thực.
+- Chi tiết xe: giữ đủ chức năng (3D, vật cản, trục, bảo dưỡng, khoá khi đang chạy), khoác vật liệu V2 — ô icon, tên xe h1 24px +
+  mã mono trong cùng header, thẻ bo 12px.
+
+**Test**
+- Mới: ô số liệu đếm đúng và không theo ô tìm; bấm ô lọc + URL + `aria-pressed`, chuyển ô bằng bàn phím, bấm lại bỏ lọc.
+- Sửa: `spec-flow` (thứ tự cột), 6 chỗ nhãn "Đang chạy", helper `vehicleIds` (`\d{3}` — cột sau tên nay bắt đầu bằng số).
+- `layout-1366`: thêm Đội xe vào kiểm chữ bị cắt ở 1.366/1.600 và vào test lăn chuột.
+
+**Kiểm tra**
+- Trình duyệt 1.366 × 768: không chữ bị cắt, ô đang lọc viền primary, tên truy cập dòng "Truck 6m VEHICLE-001 600 × 240 × 250 cm
+  5.000 kg 1 vùng Sẵn sàng".
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **778/778** ✅ · `pnpm test:e2e` **81/81** ✅ (16,1 phút). CI của PR #1 (bước 0 → tài liệu) xanh trọn.
+
 ### 23/09/2026 — Sửa: màn trong khung ứng dụng không lăn chuột được
 
 Người dùng báo bảng điều khiển "bị cố định", không lướt xuống được.

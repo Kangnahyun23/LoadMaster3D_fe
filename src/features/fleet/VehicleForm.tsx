@@ -1,4 +1,4 @@
-import { ChevronLeft, Save, Trash2 } from 'lucide-react'
+import { ChevronLeft, Save, Trash2, Truck } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useForm, type FieldPath } from 'react-hook-form'
 import { Link, useBlocker, useNavigate } from 'react-router'
@@ -103,9 +103,16 @@ export function VehicleForm({ vehicle, readOnly = false, status, actions, notice
             <ChevronLeft strokeWidth={1.5} />
           </Link>
         </Button>
-        <h1 className="min-w-0 truncate text-h2 font-semibold">
-          {vehicle ? vehicle.name : t('fleet.detail.newTitle')}
-        </h1>
+        {/* V2: ô icon như PageHero; tiêu đề là dữ liệu (tên xe) nên không dùng PageHero — AGENTS mục 5 */}
+        <span aria-hidden className="hero-icon -ml-1 grid size-11 flex-none place-items-center rounded-lg text-tint-blue-fg max-sm:hidden">
+          <Truck className="size-5" strokeWidth={1.5} />
+        </span>
+        <div className="flex min-w-0 items-baseline gap-2">
+          <h1 className="min-w-0 truncate text-h1 font-semibold tracking-[-0.35px] text-ink-strong">
+            {vehicle ? vehicle.name : t('fleet.detail.newTitle')}
+          </h1>
+          {vehicle ? <span className="flex-none font-mono text-caption text-ink-3">{vehicle.id}</span> : null}
+        </div>
         {status}
         <div className="flex-1" />
         {actions}
@@ -130,12 +137,12 @@ export function VehicleForm({ vehicle, readOnly = false, status, actions, notice
           <fieldset disabled={readOnly} className="m-0 flex min-w-0 flex-col gap-5 border-0 p-0">
             <VehicleValidationSummary issues={issues} onFocus={(path) => form.setFocus(focusTarget(path))} />
 
-            <Card className="flex flex-col gap-4 p-5">
+            <Card className="flex flex-col gap-4 rounded-lg p-5">
               <h2 className="text-h3 font-semibold">{t('fleet.detail.specTitle')}</h2>
               <VehicleSpecFields control={form.control} register={form.register} />
             </Card>
 
-            <Card className="flex flex-col gap-4 p-5">
+            <Card className="flex flex-col gap-4 rounded-lg p-5">
               <h2 className="text-h3 font-semibold">{t('fleet.detail.obstaclesTitle')}</h2>
               <ObstacleTable
                 control={form.control}
@@ -146,13 +153,13 @@ export function VehicleForm({ vehicle, readOnly = false, status, actions, notice
               />
             </Card>
 
-            <Card className="flex flex-col gap-4 p-5">
+            <Card className="flex flex-col gap-4 rounded-lg p-5">
               <h2 className="text-h3 font-semibold">{t('fleet.detail.axlesTitle')}</h2>
               <AxleTable control={form.control} register={form.register} />
             </Card>
           </fieldset>
 
-          <Card className="flex min-w-0 flex-col gap-4 p-5 xl:sticky xl:top-0">
+          <Card className="flex min-w-0 flex-col gap-4 rounded-lg p-5 xl:sticky xl:top-0">
             <h2 className="text-h3 font-semibold">{t('fleet.preview.title')}</h2>
             <VehiclePreview
               control={form.control}

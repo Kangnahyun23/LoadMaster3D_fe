@@ -36,7 +36,7 @@ export const manager = {
     clean: 'Kiện giao không sự cố',
     cleanNote: '{clean} / {total} kiện của các điểm giao đã hoàn tất',
     cleanEmpty: 'Chưa có điểm giao nào hoàn tất trong kỳ',
-    vehicles: 'Xe đang chạy hôm nay',
+    vehicles: 'Xe đang phục vụ chuyến',
     vehiclesUnit: '/ {total} xe',
     vehiclesNote: 'Xe có chuyến đang xếp, đã xếp hoặc đang giao — không theo kỳ',
   },

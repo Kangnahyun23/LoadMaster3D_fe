@@ -134,6 +134,11 @@
   --hero-icon-shadow: inset 0 1px 0 #fff, inset 0 -1px 2px #b7cdec80, 0 2px 6px #4e79a51f;
   /* vòng sáng mảnh quanh ô icon tint trên nền kính */
   --icon-ring: inset 0 0 0 1px #ffffff9c;
+  /* ô số liệu bấm được (lọc): viền và bóng nâng khi rê chuột — V2 */
+  --tile-hover-border: #b6cff2;
+  --tile-lift-hover: 0 10px 24px #4e79a52e;
+  /* nền tiêu đề cột của bảng kiểu V2 (DataTable appearance="paper") */
+  --table-head: #f2f6fc;
   /* chuyển động lò xo của chỉ báo: vượt nhẹ rồi lắng lại */
   --spring: linear(0, .0069 1.15%, .1135 5.18%, .5977 15.84%, .9676 28.8%, 1.0352 36.29%, 1.046 42.05%, 1.0118 61.63%, .9981 80.35%, 1);
 
@@ -187,6 +192,7 @@
   --color-tint-violet-fg: var(--tint-violet-fg);
   --color-tint-slate: var(--tint-slate);
   --color-tint-slate-fg: var(--tint-slate-fg);
+  --color-table-head: var(--table-head);
   --color-switch-off: var(--switch-off);
   --color-highlight: var(--highlight);
 
@@ -507,6 +513,17 @@
   background: linear-gradient(var(--tile-glass));
   box-shadow: var(--glass-edge), var(--tile-lift);
   backdrop-filter: blur(10px) saturate(1.45);
+}
+/* Ô số liệu bấm được (lọc danh sách): rê chuột đổi viền và nâng bóng như V2, không phóng
+   to. Đang lọc: viền primary đậm gấp đôi. Specificity cao hơn nhánh dự phòng bên dưới nên
+   trạng thái đang lọc vẫn thấy khi không có kính. */
+.glass-tile[data-pressable]:has(> button:hover) {
+  border-color: var(--tile-hover-border);
+  box-shadow: var(--glass-edge), var(--tile-lift-hover);
+}
+.glass-tile[data-pressed='true'] {
+  border-color: var(--primary);
+  box-shadow: var(--glass-edge), 0 0 0 1px var(--primary), var(--tile-lift);
 }
 /* Ô icon nhận diện màn trên thanh tiêu đề (`components/PageHero.tsx`). Không dùng
    backdrop-filter nên chỉ cần nhánh bớt trong suốt ở dưới. */

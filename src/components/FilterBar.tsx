@@ -43,6 +43,7 @@ export function FilterBar<TName extends string = never>({
   values,
   onValueChange,
   onClear,
+  layout = 'stacked',
   className,
 }: {
   query: string
@@ -53,6 +54,11 @@ export function FilterBar<TName extends string = never>({
   values?: Readonly<Record<TName, string>>
   onValueChange?: (name: TName, value: string) => void
   onClear: () => void
+  /**
+   * `stacked`: nhãn trên ô, các ô nối tiếp. `toolbar` (V2): một hàng trong đầu thẻ bảng — ô tìm giãn bên trái, bộ lọc có nhãn
+   * nằm cạnh dồn sang phải. Đang thử ở Đội xe (bước 5) trước khi lan sang màn khác.
+   */
+  layout?: 'stacked' | 'toolbar'
   className?: string
 }) {
   const t = useT()
@@ -66,27 +72,30 @@ export function FilterBar<TName extends string = never>({
     searchRef.current?.focus()
   }
 
+  const toolbar = layout === 'toolbar'
+  const filters = fields.map((field) => field.kind === 'select' ? (
+    <SelectFilter key={field.name} field={field} value={valueOf(field.name)} onChange={(value) => setValue(field.name, value)} inline={toolbar} />
+  ) : (
+    <DateRangeFilter
+      key={`${field.from}/${field.to}`}
+      label={field.label}
+      from={valueOf(field.from)}
+      to={valueOf(field.to)}
+      onFromChange={(value) => setValue(field.from, value)}
+      onToChange={(value) => setValue(field.to, value)}
+    />
+  ))
+  const clear = isFiltering ? (
+    <Button variant="ghost" onClick={handleClear}>
+      <X strokeWidth={1.5} />
+      {t('common.filters.clear')}
+    </Button>
+  ) : null
+
   return (
-    <div role="search" aria-label={t('common.filters.region')} className={cn('flex flex-wrap items-end gap-3', className)}>
-      <SearchField ref={searchRef} value={query} onChange={onQueryChange} label={searchLabel} />
-      {fields.map((field) => field.kind === 'select' ? (
-        <SelectFilter key={field.name} field={field} value={valueOf(field.name)} onChange={(value) => setValue(field.name, value)} />
-      ) : (
-        <DateRangeFilter
-          key={`${field.from}/${field.to}`}
-          label={field.label}
-          from={valueOf(field.from)}
-          to={valueOf(field.to)}
-          onFromChange={(value) => setValue(field.from, value)}
-          onToChange={(value) => setValue(field.to, value)}
-        />
-      ))}
-      {isFiltering ? (
-        <Button variant="ghost" onClick={handleClear}>
-          <X strokeWidth={1.5} />
-          {t('common.filters.clear')}
-        </Button>
-      ) : null}
+    <div role="search" aria-label={t('common.filters.region')} className={cn('flex flex-wrap gap-3', toolbar ? 'items-center' : 'items-end', className)}>
+      <SearchField ref={searchRef} value={query} onChange={onQueryChange} label={searchLabel} grow={toolbar} />
+      {toolbar ? <div className="ml-auto flex flex-wrap items-center gap-3">{clear}{filters}</div> : <>{filters}{clear}</>}
     </div>
   )
 }
@@ -105,15 +114,17 @@ function useDraft(value: string) {
   return [draft, setDraft] as const
 }
 
-function SearchField({ value, onChange, label, ref }: {
+function SearchField({ value, onChange, label, grow, ref }: {
   value: string
   onChange: (value: string) => void
   label: string
+  /** Thanh công cụ: ô tìm giãn theo chỗ trống, tối đa 480px. */
+  grow: boolean
   ref: Ref<HTMLInputElement>
 }) {
   const [draft, setDraft] = useDraft(value)
   return (
-    <div className="relative w-80 max-w-full">
+    <div className={cn('relative max-w-full', grow ? 'min-w-64 flex-1 sm:max-w-120' : 'w-80')}>
       <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-3" strokeWidth={1.5} />
       <Input
         ref={ref}
@@ -133,15 +144,17 @@ function SearchField({ value, onChange, label, ref }: {
 
 const FIELD_LABEL = 'text-caption font-medium text-text-2'
 
-function SelectFilter<TName extends string>({ field, value, onChange }: {
+function SelectFilter<TName extends string>({ field, value, onChange, inline }: {
   field: FilterSelectField<TName>
   value: string
   onChange: (value: string) => void
+  /** Thanh công cụ: nhãn nằm cạnh ô chọn thay vì phía trên. */
+  inline: boolean
 }) {
   const t = useT()
   const id = useId()
   return (
-    <div className="flex flex-col gap-1">
+    <div className={inline ? 'flex items-center gap-2' : 'flex flex-col gap-1'}>
       <label htmlFor={id} className={FIELD_LABEL}>{field.label}</label>
       <Select value={value === '' ? ALL : value} onValueChange={(next) => onChange(next === ALL ? '' : next)}>
         {/* Radix bỏ `className` của SelectValue (chữ của nó được dời sang từ dòng đã chọn), nên cắt chữ dài từ trigger. */}

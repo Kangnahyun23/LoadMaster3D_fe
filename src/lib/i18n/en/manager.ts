@@ -33,7 +33,7 @@ export const manager = {
     clean: 'Packages delivered without issues',
     cleanNote: '{clean} / {total} packages at completed delivery stops',
     cleanEmpty: 'No delivery stop completed in the period yet',
-    vehicles: 'Vehicles on the road today',
+    vehicles: 'Vehicles on a trip',
     vehiclesUnit: '/ {total} vehicles',
     vehiclesNote: 'Vehicles with a trip being loaded, loaded or out for delivery — not tied to the period',
   },

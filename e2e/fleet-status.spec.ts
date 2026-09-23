@@ -58,7 +58,7 @@ test('a vehicle becomes "on a trip" when the warehouse starts loading, and its c
   for (const name of ['Lưu', 'Xoá xe', 'Đưa vào bảo dưỡng']) await expect(page.getByRole('button', { name, exact: true })).toHaveCount(0)
 
   await page.getByRole('link', { name: 'Quay lại đội xe', exact: true }).click()
-  await expect(row(page, 'VEHICLE-002')).toContainText('Đang chạy')
+  await expect(row(page, 'VEHICLE-002')).toContainText('Đang phục vụ chuyến')
   await expect(row(page, 'VEHICLE-002').getByRole('link', { name: SEED_TRIP, exact: true })).toBeVisible()
   expect(browserErrors).toStrictEqual([])
 })

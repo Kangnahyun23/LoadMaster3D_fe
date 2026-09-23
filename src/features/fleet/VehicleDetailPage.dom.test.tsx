@@ -117,7 +117,7 @@ test('a vehicle running a trip opens read-only and says which trip locks it', as
   const banner = await screen.findByRole('status', {}, SLOW)
   expect(banner).toHaveTextContent('Xe đang chạy chuyến TRIP-011: cấu hình bị khoá tới khi chuyến kết thúc')
   expect(within(banner).getByRole('link', { name: 'Xem chuyến TRIP-011' })).toHaveAttribute('href', '/chuyen/TRIP-011')
-  expect(screen.getByText('Đang chạy')).toBeInTheDocument()
+  expect(screen.getByText('Đang phục vụ chuyến')).toBeInTheDocument()
   expect(screen.getByLabelText('Chiều rộng cửa')).toBeDisabled()
   for (const name of ['Lưu', 'Xoá xe', 'Đưa vào bảo dưỡng', 'Kết thúc bảo dưỡng']) {
     expect(screen.queryByRole('button', { name })).toBeNull()
