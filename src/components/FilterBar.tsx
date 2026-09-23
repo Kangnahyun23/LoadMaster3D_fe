@@ -15,6 +15,8 @@ export type FilterSelectField<TName extends string> = {
   options: readonly SelectOption[]
   /** Nhãn dòng không lọc; mặc định "Tất cả". */
   allLabel?: string
+  /** Bố cục toolbar: đặt ở hàng lọc thứ hai (dưới ô tìm) thay vì cạnh ô tìm. */
+  secondary?: boolean
 }
 
 /** Khoảng ngày: hai ô `type="date"`, giá trị `YYYY-MM-DD`, mỗi đầu một tham số (`tu`, `den`). */
@@ -23,6 +25,8 @@ export type FilterDateRangeField<TName extends string> = {
   label: string
   from: TName
   to: TName
+  /** Bố cục toolbar: đặt ở hàng lọc thứ hai (dưới ô tìm) thay vì cạnh ô tìm. */
+  secondary?: boolean
 }
 
 export type FilterField<TName extends string> = FilterSelectField<TName> | FilterDateRangeField<TName>
@@ -73,7 +77,7 @@ export function FilterBar<TName extends string = never>({
   }
 
   const toolbar = layout === 'toolbar'
-  const filters = fields.map((field) => field.kind === 'select' ? (
+  const render = (field: FilterField<TName>) => field.kind === 'select' ? (
     <SelectFilter key={field.name} field={field} value={valueOf(field.name)} onChange={(value) => setValue(field.name, value)} inline={toolbar} />
   ) : (
     <DateRangeFilter
@@ -83,8 +87,9 @@ export function FilterBar<TName extends string = never>({
       to={valueOf(field.to)}
       onFromChange={(value) => setValue(field.from, value)}
       onToChange={(value) => setValue(field.to, value)}
+      inline={toolbar}
     />
-  ))
+  )
   const clear = isFiltering ? (
     <Button variant="ghost" onClick={handleClear}>
       <X strokeWidth={1.5} />
@@ -92,10 +97,24 @@ export function FilterBar<TName extends string = never>({
     </Button>
   ) : null
 
+  if (!toolbar) {
+    return (
+      <div role="search" aria-label={t('common.filters.region')} className={cn('flex flex-wrap items-end gap-3', className)}>
+        <SearchField ref={searchRef} value={query} onChange={onQueryChange} label={searchLabel} grow={false} />
+        {fields.map(render)}
+        {clear}
+      </div>
+    )
+  }
+
+  const secondary = fields.filter((field) => field.secondary)
   return (
-    <div role="search" aria-label={t('common.filters.region')} className={cn('flex flex-wrap gap-3', toolbar ? 'items-center' : 'items-end', className)}>
-      <SearchField ref={searchRef} value={query} onChange={onQueryChange} label={searchLabel} grow={toolbar} />
-      {toolbar ? <div className="ml-auto flex flex-wrap items-center gap-3">{clear}{filters}</div> : <>{filters}{clear}</>}
+    <div role="search" aria-label={t('common.filters.region')} className={cn('flex flex-col gap-2', className)}>
+      <div className="flex flex-wrap items-center gap-3">
+        <SearchField ref={searchRef} value={query} onChange={onQueryChange} label={searchLabel} grow />
+        <div className="ml-auto flex flex-wrap items-center gap-3">{clear}{fields.filter((field) => !field.secondary).map(render)}</div>
+      </div>
+      {secondary.length > 0 ? <div className="flex flex-wrap items-center gap-x-5 gap-y-2">{secondary.map(render)}</div> : null}
     </div>
   )
 }
@@ -172,19 +191,21 @@ function SelectFilter<TName extends string>({ field, value, onChange, inline }: 
   )
 }
 
-function DateRangeFilter({ label, from, to, onFromChange, onToChange }: {
+function DateRangeFilter({ label, from, to, onFromChange, onToChange, inline }: {
   label: string
   from: string
   to: string
   onFromChange: (value: string) => void
   onToChange: (value: string) => void
+  /** Thanh công cụ: nhãn nằm cạnh hai ô ngày thay vì phía trên. */
+  inline: boolean
 }) {
   const t = useT()
   const labelId = useId()
   const [fromDraft, setFromDraft] = useDraft(from)
   const [toDraft, setToDraft] = useDraft(to)
   return (
-    <div role="group" aria-labelledby={labelId} className="flex flex-col gap-1">
+    <div role="group" aria-labelledby={labelId} className={inline ? 'flex items-center gap-2' : 'flex flex-col gap-1'}>
       <span id={labelId} className={FIELD_LABEL}>{label}</span>
       <div className="flex items-center gap-2">
         <div className="w-40">

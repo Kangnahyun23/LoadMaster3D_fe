@@ -62,6 +62,25 @@ test('filters read from the URL: status, and a driver-less trip through "Chưa g
   expect(router.state.location.search).toBe('?tai-xe=chua-gan')
 })
 
+test('summary tiles count the whole list; a group tile filters by status group on the URL and pressing it again clears it', async () => {
+  const { user, router } = renderList()
+  await screen.findByRole('row', { name: /TRIP-014/ }, SLOW)
+  const tile = (name: string) => within(screen.getByRole('group', { name }))
+  // Seed: 15 chuyến; TRIP-009/010/011 đang giao / đã xếp xong / đang xếp; TRIP-012 đã tối ưu, TRIP-013 cần xem lại
+  expect(tile('Chuyến trong danh sách').getByText('15')).toBeInTheDocument()
+  expect(tile('Đang thực hiện').getByText('3')).toBeInTheDocument()
+  expect(tile('Cần xem phương án').getByText('2')).toBeInTheDocument()
+
+  await user.click(tile('Đang thực hiện').getByRole('button'))
+  expect(router.state.location.search).toBe('?trang-thai=dang-thuc-hien')
+  expect(tripIds().toSorted()).toStrictEqual(['TRIP-009', 'TRIP-010', 'TRIP-011'])
+  expect(tile('Đang thực hiện').getByRole('button')).toHaveAttribute('aria-pressed', 'true')
+  expect(screen.getByRole('combobox', { name: 'Trạng thái' })).toHaveTextContent('Đang thực hiện')
+
+  await user.click(tile('Đang thực hiện').getByRole('button'))
+  expect(router.state.location.search).toBe('')
+})
+
 test('search ignores diacritics and covers the driver name', async () => {
   const { user } = renderList()
   const search = await screen.findByRole('searchbox', { name: 'Tìm theo mã, tên, tuyến, xe, tài xế' }, SLOW)

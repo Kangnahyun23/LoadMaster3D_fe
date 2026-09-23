@@ -19,6 +19,16 @@ export const trips = {
     status: 'Trạng thái',
     loadError: 'Không tải được danh sách chuyến.',
     search: 'Tìm theo mã, tên, tuyến, xe, tài xế',
+    stops: { one: '{count} điểm giao', other: '{count} điểm giao' },
+    /** Ba ô số liệu (V2): đếm trên cả danh sách, hai ô nhóm bấm để lọc. Nhãn nhóm cũng là dòng đầu của ô chọn trạng thái. */
+    summary: {
+      total: 'Chuyến trong danh sách',
+      totalNote: 'Mọi chuyến, kể cả đã huỷ',
+      active: 'Đang thực hiện',
+      activeNote: 'Kho đang xếp, đã xếp xong hoặc đang giao',
+      review: 'Cần xem phương án',
+      reviewNote: 'Đã tối ưu chờ duyệt, hoặc cần xem lại',
+    },
   },
   /** Form tạo/sửa chuyến (LM-053, LM-088). */
   create: {

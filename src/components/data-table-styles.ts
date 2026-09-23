@@ -7,8 +7,10 @@ export const ALIGN = {
 } as const
 
 export const ROW_HEIGHT = {
-  /** Rộng — 72px, cho bảng có ô hai dòng (tên + mã, trạng thái + ghi chú) — V2, Đội xe */
+  /** Rộng — 72px, cho bảng có ô hai dòng kèm icon hoặc badge (tên + mã, trạng thái + ghi chú) — V2, Đội xe */
   spacious: 'h-18',
+  /** Vừa — 56px, cho ô hai dòng chữ không icon (tên + tuyến, số kiện + số điểm) — V2, Danh sách chuyến */
+  roomy: 'h-14',
   /** Thoáng — 48px */
   comfortable: 'h-12',
   /** Gọn — 36px, dùng cho danh sách dài */

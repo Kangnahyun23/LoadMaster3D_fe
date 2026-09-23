@@ -20,6 +20,15 @@ export const trips = {
     status: 'Status',
     loadError: 'Could not load trips.',
     search: 'Search by ID, name, route, vehicle, driver',
+    stops: { one: '{count} stop', other: '{count} stops' },
+    summary: {
+      total: 'Trips in the list',
+      totalNote: 'Every trip, including cancelled ones',
+      active: 'In progress',
+      activeNote: 'Being loaded, loaded or out for delivery',
+      review: 'Plan to review',
+      reviewNote: 'Optimized and awaiting approval, or needs review',
+    },
   },
   create: {
     title: 'Create trip',
