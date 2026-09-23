@@ -1,6 +1,7 @@
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Plus, Warehouse } from 'lucide-react'
 import { useState } from 'react'
 import { NavRail } from '@/app/NavRail'
+import { PageHero } from '@/components/PageHero'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Button } from '@/components/ui/Button'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
@@ -24,15 +25,30 @@ export function NavigationSection() {
   return (
     <SheetSection id="nav" number="01" title={t('designSystem.components.nav.navigation')}>
       <SheetRow name="NavRail" note={t('designSystem.components.navigation.navRailNote')}>
-        <div className="flex h-90 overflow-hidden rounded-md border border-border">
-          <NavRail />
-          <div className="flex-1 bg-bg" />
+        {/* Mẫu dựng ở bề rộng thật: khung hẹp hơn thì chính thanh điều hướng tự cuộn và che mục */}
+        <div className="relative w-full overflow-x-auto rounded-md border border-border">
+          <div className="flex h-36 min-w-342 flex-col bg-(image:--field)">
+            <NavRail />
+            <div className="flex-1" />
+          </div>
         </div>
       </SheetRow>
 
-      <SheetRow name="PageHeader" note={t('designSystem.components.navigation.pageHeaderNote')} className="flex-col items-stretch">
+      <SheetRow name="PageHero · PageHeader" note={t('designSystem.components.navigation.pageHeaderNote')} className="flex-col items-stretch">
         <Sample label={t('designSystem.components.navigation.standard')}>
-          <div className="flex h-18 items-center gap-4 rounded-md border border-border px-8">
+          {/* Mẫu chỉ để nhìn: PageHero dựng <h1>, trang tài liệu đã có h1 của nó */}
+          <div inert aria-hidden className="overflow-hidden rounded-md border border-border bg-(image:--field)">
+            <PageHero
+              icon={Warehouse}
+              title={t('fleet.title')}
+              meta={t('fleet.count', { count: 8 })}
+              description={t('pageHero.fleet')}
+              actions={<Button variant="primary"><Plus strokeWidth={1.5} />{t('fleet.add')}</Button>}
+            />
+          </div>
+        </Sample>
+        <Sample label={t('designSystem.components.navigation.dataTitle')}>
+          <div className="flex h-18 items-center gap-4 rounded-md border border-border bg-chrome px-6">
             <Button variant="ghost" size="icon" aria-label={back}><ChevronLeft strokeWidth={1.5} /></Button>
             <span className="font-mono text-[22px] font-semibold tracking-[-0.02em]">TRIP-2026-0914</span>
             <StatusBadge status="nhap" />

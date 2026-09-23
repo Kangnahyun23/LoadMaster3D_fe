@@ -40,4 +40,9 @@ export const TYPE_SAMPLES = {
   bodyLg: 'Kiện dễ vỡ được xếp ở lớp trên cùng; kiện nặng đặt sát vách và giữa trục để giữ trọng tâm ổn định.',
   body: 'Chuyến TRIP-2026-0914 gồm 7 đơn hàng, 132 kiện, giao 4 điểm từ Q.7 tới Biên Hoà.',
   caption: 'Cập nhật lúc 14:30 · 14/09/2026',
+  // V2: số tổng hợp của ô số liệu (132 kiện, 5.844 kg của chuyến mẫu), mô tả dưới tiêu đề màn, ghi chú nguồn, nhãn trục
+  kpi: '132 kiện · 5.844 kg',
+  lede: 'Trạng thái đội xe và xe đang phục vụ chuyến nào.',
+  note: 'Cộng khối lượng các kiện tài xế đã dỡ ở điểm giao',
+  micro: 'Trục X · 0 – 720 cm',
 } as const

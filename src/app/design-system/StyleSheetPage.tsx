@@ -21,7 +21,7 @@ export function StyleSheetPage() {
   const t = useT()
   return (
     <SheetLayout
-      badge="Style sheet · v1"
+      badge="Style sheet · v2"
       title={t('designSystem.style.title')}
       description={t('designSystem.style.description')}
       nav={NAV.map(({ id, key }) => ({ id, label: t(`designSystem.style.nav.${key}`) }))}

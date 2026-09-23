@@ -10,6 +10,11 @@ const ROWS: ReadonlyArray<{ style: string; size: string; className: string; samp
   { style: 'Body-lg · 400', size: '16 / 24', className: 'text-body-lg', sample: 'bodyLg' },
   { style: 'Body · 400', size: '14 / 20', className: 'text-body', sample: 'body' },
   { style: 'Caption · 400', size: '12 / 16', className: 'text-caption text-text-2', sample: 'caption' },
+  // V2 (23/09/2026)
+  { style: 'KPI · 600', size: '26 / 29', className: 'text-[26px] leading-[1.1] font-semibold tabular-nums text-ink-strong', sample: 'kpi' },
+  { style: 'Lede · 400', size: '13,5 / 22', className: 'text-lede text-ink-2', sample: 'lede' },
+  { style: 'Note · 400', size: '11,5 / 17', className: 'text-note text-ink-3', sample: 'note' },
+  { style: 'Micro · 400', size: '11 / 14', className: 'text-micro text-ink-2', sample: 'micro' },
 ]
 
 export function TypeSection() {
