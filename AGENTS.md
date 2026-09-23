@@ -127,7 +127,7 @@ src/
     design-system/      2 trang tài liệu bàn giao (/kieu-dang, /thanh-phan)
   components/ui/        primitive tự viết trên Radix
   components/           component dùng chung: StatusBadge, DataTable, FilterBar, EmptyState, TripLockBanner, ConfirmDialog,
-                        VehicleName (tên xe không bẻ biển số)...
+                        VehicleName (tên xe không bẻ biển số), PageHero (thanh tiêu đề màn), KpiTile (ô số liệu)...
   features/
     auth/               đăng nhập, phiên, RequireAuth
     trips/              danh sách, chi tiết, form chuyến, so sánh phương án
@@ -222,6 +222,8 @@ Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-tex
   /* thang mực bốn cấp (V2, 23/09/2026): tiêu đề và số quan trọng → dữ liệu vận hành
      → thông tin phụ → chú thích. Trước đó ba cấp nằm quá gần nhau nên màn trông nhạt */
   --ink-strong: #131F34;  --ink-1: #1F2C3E;  --ink-2: #4A5C75;  --ink-3: #71829A;
+  /* --ink-3 chỉ đạt 3,9:1 trên trắng (3,5:1 trên trường nền): KHÔNG dùng cho chữ — mục 10 cần 4,5:1.
+     Chữ phụ nhỏ nhất dùng --ink-2 (6,8:1). --ink-3 để dành cho viền, icon trang trí, vạch chia. */
 
   /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
      blue = vận hành · green = sẵn sàng/xong · amber = cần chú ý
@@ -275,7 +277,7 @@ Spacing bội số 4px.
 
 **Token cỡ chữ và `cn()`** *(bổ sung 15/09/2026, LM-055)*: `cn()` trong `lib/utils.ts` dùng
 tailwind-merge đã khai báo các cỡ chữ của `@theme` (`display`, `h1`, `h2`, `h3`, `body-lg`, `body`,
-`caption`). Thiếu khai báo thì tailwind-merge coi `text-body` là màu chữ và **bỏ mất `text-white`**
+`caption`, `micro`). Thiếu khai báo thì tailwind-merge coi `text-body` là màu chữ và **bỏ mất `text-white`**
 của nút. Thêm token `--text-*` mới vào `@theme` thì phải thêm tên vào `THEME_FONT_SIZES`.
 
 **Nguồn quét class của Tailwind** *(bổ sung 15/09/2026, LM-005)*: `src/index.css` khai báo
@@ -315,6 +317,23 @@ Planner dùng `PlannerSelect` (Select Radix); ô chọn kiện (tới 1.000 dòn
 Cao **72px** cho mọi màn có thanh điều hướng. Chỉ **56px** cho màn xem phương án 3D, vì ở đó
 chiều cao nhường cho khung 3D. Không tự chọn chiều cao khác — lệch là nội dung nhảy
 khi chuyển màn.
+
+*(bổ sung 23/09/2026, V2)* Màn trong khung ứng dụng dùng `components/PageHero.tsx`: icon màn trên nền `--tint-blue`, tiêu đề h1
+24 px `--ink-strong`, `meta` (số đếm, mã) mono, một câu mô tả từ nhánh `pageHero` của từ điển, hành động ở phải. Ba luật của nó:
+icon là `<span aria-hidden>` **ngoài** `<h1>` (tên truy cập của tiêu đề giữ đúng chữ, test đọc `exact: true`); hành động nằm trong
+**cùng** `<header>` với tiêu đề; mô tả ẩn dưới 768 px để thanh giữ đúng 72 px. Mô tả nói màn dùng để làm gì — không số, không
+trạng thái. **Không** dùng `PageHero` khi tiêu đề là dữ liệu (mã chuyến ở Chi tiết chuyến, tên xe ở form xe) hay cho thanh 56 px
+của Planner; những màn đó giữ header riêng nhưng vẫn theo lề `px-shell`. Màn mới trong khung ứng dụng dùng `PageHero`.
+Bản V2 gốc có hoạ tiết đường nét phía sau tiêu đề — **không** đưa vào: màn vận hành không có hình minh hoạ (mục 5, Bố cục).
+
+*(bổ sung 23/09/2026, V2)* Lề ngang của thanh tiêu đề và vùng cuộn dùng utility `px-shell` (`index.css`): 24 px, và khi cột rộng hơn
+`--shell-max` thì nội dung dừng ở `--shell-max`, căn giữa. Là padding chứ không phải một div `max-w` bọc ngoài, để vùng cuộn vẫn rộng
+hết cột (thanh cuộn ở mép) và nền chrome vẫn tràn ngang. Không đặt lại `px-6`/`px-8` cho màn trong khung ứng dụng.
+
+*(bổ sung 23/09/2026, V2)* Ô số liệu là `components/KpiTile.tsx` (lên `components/` từ `features/manager`): kính `.glass-tile` (có
+nền đặc dự phòng), icon trên nền tint theo nghĩa cố định (mục 4), số 28 px mono `--ink-strong`, nhãn, ghi chú nguồn cỡ micro. Mọi số
+cùng màu mực — màu chỉ ở icon, không nói số tốt hay xấu. Vỏ ngoài `role="group"` + `aria-label` = nhãn; `value` và `unit` là hai
+text node liền nhau, không khoảng trắng JSX ở giữa. Không dùng bóng đổ ra ngoài (card), chỉ viền sáng bên trong.
 
 ### Thử nghiệm visual V2 (21/09/2026)
 

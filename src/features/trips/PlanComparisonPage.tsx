@@ -1,7 +1,8 @@
-import { ArrowRight, ChevronLeft } from 'lucide-react'
+import { ArrowRight, Columns3 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { EmptyState } from '@/components/EmptyState'
+import { PageHero } from '@/components/PageHero'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useT } from '@/lib/i18n'
@@ -25,29 +26,20 @@ export function PlanComparisonPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-8">
-        <Link
-          to={`/chuyen/${tripId}`}
-          aria-label={t('trips.compare.back')}
-          className="grid size-9 place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
-        </Link>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <h1 className="text-h1 font-semibold">{t('trips.compare.title')}</h1>
-          <span className="truncate text-caption text-text-3">
-            <span className="font-mono">{tripId}</span>
-            {query.data ? ` · ${query.data.trip.name} · ${t('trips.compare.subtitle', { count: cards.length })}` : null}
-          </span>
-        </div>
-      </header>
+      <PageHero
+        icon={Columns3}
+        title={t('trips.compare.title')}
+        meta={tripId}
+        description={query.data ? `${query.data.trip.name} · ${t('trips.compare.subtitle', { count: cards.length })}` : undefined}
+        back={{ to: `/chuyen/${tripId}`, label: t('trips.compare.back') }}
+      />
 
       {query.isPending ? (
         <div role="status" aria-label={t('trips.compare.loading')} className="grid flex-1 place-items-center">
           <Spinner />
         </div>
       ) : query.isError ? (
-        <div className="flex flex-col items-start gap-4 px-8 py-6">
+        <div className="flex flex-col items-start gap-4 px-shell py-6">
           <span className="text-body-lg font-semibold">{t('trips.compare.errorTitle')}</span>
           <Button variant="secondary" asChild>
             <Link to="/chuyen">{t('trips.compare.backToTrips')}</Link>
@@ -66,7 +58,7 @@ function NotEnoughRevisions({ tripId, cards, canRun }: { tripId: string; cards: 
   const t = useT()
   const only = cards[0]
   return (
-    <div className="px-8 py-6">
+    <div className="px-shell py-6">
       <EmptyState
         title={t('trips.compare.emptyTitle')}
         description={t('trips.compare.emptyDescription', { count: cards.length })}
@@ -97,7 +89,7 @@ function Comparison({ tripId, cards, canRun }: { tripId: string; cards: readonly
 
   return (
     <>
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-8 py-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-shell py-6">
         {Object.keys(best).length > 0 ? (
           <span className="inline-flex items-center gap-2 self-end text-caption text-text-3">
             <span aria-hidden className="size-3 rounded-[3px] border border-badge-info-border bg-primary-bg" />
@@ -111,7 +103,7 @@ function Comparison({ tripId, cards, canRun }: { tripId: string; cards: readonly
         </div>
       </div>
 
-      <div className="flex h-16 flex-none items-center justify-between gap-4 border-t border-border bg-chrome px-8">
+      <div className="flex h-16 flex-none items-center justify-between gap-4 border-t border-border bg-chrome px-shell">
         <span className="truncate text-caption text-text-3">
           {selected ? t('trips.compare.selectedLabel', { id: selected.id }) : null}
         </span>

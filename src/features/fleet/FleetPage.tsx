@@ -1,10 +1,11 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { Plus, RotateCcw } from 'lucide-react'
+import { Plus, RotateCcw, Warehouse } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { DataTable, type BaseTableFeatures, type ColumnMeta } from '@/components/DataTable'
 import { EmptyState } from '@/components/EmptyState'
 import { FilterBar } from '@/components/FilterBar'
+import { PageHero } from '@/components/PageHero'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useListUrlState } from '@/components/useListUrlState'
@@ -113,16 +114,12 @@ export function FleetPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-chrome px-6">
-        <div className="flex items-baseline gap-2">
-          <h1 className="text-h2 font-semibold">{t('fleet.title')}</h1>
-          {vehiclesQuery.isSuccess ? (
-            <span className="font-mono text-caption text-text-3">
-              {t('fleet.count', { count: vehicles.length })}
-            </span>
-          ) : null}
-        </div>
-        {vehicles.length > 0 && canEdit ? (
+      <PageHero
+        icon={Warehouse}
+        title={t('fleet.title')}
+        meta={vehiclesQuery.isSuccess ? t('fleet.count', { count: vehicles.length }) : undefined}
+        description={t('pageHero.fleet')}
+        actions={vehicles.length > 0 && canEdit ? (
           <Button variant="primary" asChild>
             <Link to="/doi-xe/moi">
               <Plus strokeWidth={1.5} />
@@ -130,9 +127,9 @@ export function FleetPage() {
             </Link>
           </Button>
         ) : null}
-      </header>
+      />
 
-      <div className="min-h-0 flex-1 overflow-auto p-6">
+      <div className="min-h-0 flex-1 overflow-auto px-shell py-6">
         {isPending ? (
           <div className="flex items-center justify-center py-16" role="status" aria-label={t('fleet.loading')}>
             <Spinner />

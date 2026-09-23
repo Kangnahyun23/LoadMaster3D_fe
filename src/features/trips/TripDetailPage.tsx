@@ -93,12 +93,12 @@ export function TripDetailPage() {
       {query.isPending ? (
         <div role="status" aria-label={t('trips.detail.loading')} className="grid flex-1 place-items-center"><Spinner /></div>
       ) : !trip || !vehicle || !summary ? (
-        <div className="flex flex-1 flex-col items-start gap-3 p-8">
+        <div className="flex flex-1 flex-col items-start gap-3 px-shell py-8">
           <h2 className="text-h2 font-semibold">{t('trips.detail.notFound', { id: tripId })}</h2>
           <Button variant="secondary" asChild><Link to="/chuyen">{t('common.backToTrips')}</Link></Button>
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-8 pt-6 pb-8">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-shell pt-6 pb-8">
           <TripLockBanner trip={trip} />
           {/* Dấu đã giao chỉ khi chuyến đang giao hoặc đã hoàn thành (LM-097) */}
           <RouteDiagram stops={stops} delivery={trip.phase === 'delivering' || trip.phase === 'completed' ? trip.delivery : undefined} />

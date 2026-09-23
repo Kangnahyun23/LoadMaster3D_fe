@@ -1,6 +1,7 @@
-import { Plus } from 'lucide-react'
+import { Plus, Users as UsersIcon } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { EmptyState } from '@/components/EmptyState'
+import { PageHero } from '@/components/PageHero'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
@@ -29,25 +30,25 @@ export function UsersPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-chrome px-6">
-        <div className="flex items-baseline gap-2">
-          <h1 className="text-h2 font-semibold">{t('admin.users.title')}</h1>
-          {query.data ? (
-            <span className="font-mono text-caption text-text-3">{t('admin.users.count', { count: users.length })}</span>
-          ) : null}
-        </div>
-        <Button variant="primary" onClick={actions.openCreate}>
-          <Plus strokeWidth={1.5} aria-hidden />
-          {t('admin.users.form.createTitle')}
-        </Button>
-      </header>
+      <PageHero
+        icon={UsersIcon}
+        title={t('admin.users.title')}
+        meta={query.data ? t('admin.users.count', { count: users.length }) : undefined}
+        description={t('pageHero.users')}
+        actions={
+          <Button variant="primary" onClick={actions.openCreate}>
+            <Plus strokeWidth={1.5} aria-hidden />
+            {t('admin.users.form.createTitle')}
+          </Button>
+        }
+      />
 
       <Tabs defaultValue="accounts" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="flex-none bg-chrome px-6">
+        <TabsList className="flex-none bg-chrome px-shell">
           <TabsTrigger value="accounts">{t('admin.users.tabs.accounts')}</TabsTrigger>
           <TabsTrigger value="permissions">{t('admin.users.tabs.permissions')}</TabsTrigger>
         </TabsList>
-        <TabsContent value="accounts" className="min-h-0 flex-1 overflow-auto p-6">
+        <TabsContent value="accounts" className="min-h-0 flex-1 overflow-auto px-shell py-6">
           {query.isPending ? (
             <div role="status" aria-label={t('admin.users.loading')} className="flex h-24 items-center justify-center"><Spinner /></div>
           ) : query.isError ? (
@@ -60,7 +61,7 @@ export function UsersPage() {
             <UsersTable users={users} currentUserId={currentUser?.id ?? null} onAction={actions.handleAction} />
           )}
         </TabsContent>
-        <TabsContent value="permissions" className="min-h-0 flex-1 overflow-auto p-6">
+        <TabsContent value="permissions" className="min-h-0 flex-1 overflow-auto px-shell py-6">
           <PermissionMatrix />
         </TabsContent>
       </Tabs>

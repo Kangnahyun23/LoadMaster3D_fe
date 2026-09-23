@@ -22,6 +22,7 @@ import { profile } from './vi/profile'
 import { notifications } from './vi/notifications'
 import { search } from './vi/search'
 import { titles } from './vi/titles'
+import { pageHero } from './vi/pageHero'
 
 /**
  * Từ điển nguồn. Mọi ngôn ngữ khác khai báo `satisfies Dictionary<typeof vi>`,
@@ -57,4 +58,5 @@ export const vi = {
   notifications,
   search,
   titles,
+  pageHero,
 } as const

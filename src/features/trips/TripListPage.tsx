@@ -1,9 +1,10 @@
-import { Plus } from 'lucide-react'
+import { Plus, Truck } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { DataTable } from '@/components/DataTable'
 import { EmptyState } from '@/components/EmptyState'
 import { FilterBar, type FilterField } from '@/components/FilterBar'
+import { PageHero } from '@/components/PageHero'
 import { Button } from '@/components/ui/Button'
 import { useListUrlState } from '@/components/useListUrlState'
 import { useCan } from '@/features/auth/useCan'
@@ -43,19 +44,21 @@ export function TripListPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center justify-between gap-4 border-b border-border bg-chrome px-6">
-        <h1 className="text-h2 font-semibold">{t('trips.list.title')}</h1>
-        {hasTrips && canCreate ? (
-          <Button variant="primary" className="h-9 px-3.5" asChild>
+      <PageHero
+        icon={Truck}
+        title={t('trips.list.title')}
+        description={t('pageHero.trips')}
+        actions={hasTrips && canCreate ? (
+          <Button variant="primary" asChild>
             <Link to="/chuyen/moi">
               <Plus strokeWidth={1.5} />
               {t('trips.list.create')}
             </Link>
           </Button>
         ) : null}
-      </header>
+      />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-shell py-6">
         {query.isPending ? (
           <TripListSkeleton />
         ) : query.isError ? (

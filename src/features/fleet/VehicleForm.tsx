@@ -97,7 +97,7 @@ export function VehicleForm({ vehicle, readOnly = false, status, actions, notice
 
   return (
     <form noValidate onSubmit={form.handleSubmit(handleSave)} className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-6">
+      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-shell">
         <Button variant="ghost" size="icon" aria-label={t('fleet.detail.back')} asChild>
           <Link to={FLEET_PATH}>
             <ChevronLeft strokeWidth={1.5} />
@@ -123,7 +123,7 @@ export function VehicleForm({ vehicle, readOnly = false, status, actions, notice
         )}
       </header>
 
-      <div className="min-h-0 flex-1 overflow-auto p-6">
+      <div className="min-h-0 flex-1 overflow-auto px-shell py-6">
         {notice ? <div className="mb-5">{notice}</div> : null}
         {/* Màn rộng: xem trước 3D là cột phải dính khi cuộn; màn hẹp: nằm cuối form (LM-042) */}
         <div className="grid max-w-400 grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">

@@ -1,7 +1,9 @@
+import { ScrollText } from 'lucide-react'
 import { useMemo } from 'react'
 import { DataTable } from '@/components/DataTable'
 import { EmptyState } from '@/components/EmptyState'
 import { FilterBar } from '@/components/FilterBar'
+import { PageHero } from '@/components/PageHero'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useListUrlState } from '@/components/useListUrlState'
@@ -67,14 +69,14 @@ export function AuditLogPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-2 border-b border-border bg-chrome px-6">
-        <h1 className="text-h2 font-semibold">{t('audit.log.title')}</h1>
-        {events.data ? (
-          <span className="font-mono text-caption text-text-3">{t('audit.log.count', { count: rows.length })}</span>
-        ) : null}
-      </header>
+      <PageHero
+        icon={ScrollText}
+        title={t('audit.log.title')}
+        meta={events.data ? t('audit.log.count', { count: rows.length }) : undefined}
+        description={t('pageHero.audit')}
+      />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-shell py-6">
         <FilterBar
           query={list.query}
           onQueryChange={list.setQuery}

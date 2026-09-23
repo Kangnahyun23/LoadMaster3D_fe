@@ -1,7 +1,8 @@
-import { Download, Plus } from 'lucide-react'
+import { Download, LayoutDashboard, Plus } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 import { Link } from 'react-router'
 import { EmptyState } from '@/components/EmptyState'
+import { PageHero } from '@/components/PageHero'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -36,33 +37,38 @@ export function DashboardPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-3 border-b border-border bg-chrome px-8">
-        <h1 className="text-h2 font-semibold tracking-[-0.01em]">{t('manager.title')}</h1>
-        <div className="flex-1" />
-        {canExport ? (
-          <Button
-            variant={canCreate ? 'secondary' : 'primary'}
-            loading={exportReport.isPending}
-            disabled={!summary || exportReport.isPending}
-            onClick={() => {
-              if (summary) exportReport.mutate(summary)
-            }}
-          >
-            {exportReport.isPending ? null : <Download strokeWidth={1.5} aria-hidden />}
-            {t('manager.export.button')}
-          </Button>
-        ) : null}
-        {canCreate ? (
-          <Button asChild>
-            <Link to="/chuyen/moi">
-              <Plus strokeWidth={1.5} aria-hidden />
-              {t('manager.createPlan')}
-            </Link>
-          </Button>
-        ) : null}
-      </header>
+      <PageHero
+        icon={LayoutDashboard}
+        title={t('manager.title')}
+        description={t('pageHero.dashboard')}
+        actions={
+          <>
+            {canExport ? (
+              <Button
+                variant={canCreate ? 'secondary' : 'primary'}
+                loading={exportReport.isPending}
+                disabled={!summary || exportReport.isPending}
+                onClick={() => {
+                  if (summary) exportReport.mutate(summary)
+                }}
+              >
+                {exportReport.isPending ? null : <Download strokeWidth={1.5} aria-hidden />}
+                {t('manager.export.button')}
+              </Button>
+            ) : null}
+            {canCreate ? (
+              <Button asChild>
+                <Link to="/chuyen/moi">
+                  <Plus strokeWidth={1.5} aria-hidden />
+                  {t('manager.createPlan')}
+                </Link>
+              </Button>
+            ) : null}
+          </>
+        }
+      />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto p-6 px-8">
+      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto px-shell py-6">
         <PeriodFilter
           selection={period.selection}
           range={summary?.period}

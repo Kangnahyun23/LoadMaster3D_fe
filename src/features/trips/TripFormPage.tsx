@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Save } from 'lucide-react'
+import { Route, Save } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Link, useBlocker, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { PageHero } from '@/components/PageHero'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
@@ -57,17 +58,13 @@ function FormShell({ title, backTo, children }: { title: string; backTo: string;
   const t = useT()
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-6">
-        <Link
-          to={backTo}
-          aria-label={t('trips.create.back')}
-          className="grid size-9 place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
-        </Link>
-        <h1 className="text-h2 font-semibold">{title}</h1>
-      </header>
-      <div className="min-h-0 flex-1 overflow-auto p-6">{children}</div>
+      <PageHero
+        icon={Route}
+        title={title}
+        description={t('pageHero.tripForm')}
+        back={{ to: backTo, label: t('trips.create.back') }}
+      />
+      <div className="min-h-0 flex-1 overflow-auto px-shell py-6">{children}</div>
     </div>
   )
 }

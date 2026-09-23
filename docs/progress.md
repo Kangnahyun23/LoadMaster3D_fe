@@ -34,6 +34,32 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
+### 23/09/2026 — V2 vào production, bước 4: thanh tiêu đề màn và ô số liệu dùng chung
+
+**Đã làm**
+- `components/PageHero.tsx`: icon màn trên nền tint, tiêu đề h1 24 px, `meta` mono, một câu mô tả (nhánh từ điển mới `pageHero`),
+  hành động ở phải, nút quay lại tuỳ chọn. Áp cho 9 màn: danh sách chuyến, tạo/sửa chuyến, thiết lập tối ưu, so sánh, đội xe,
+  bảng điều khiển, người dùng, nhật ký, hồ sơ. Chi tiết chuyến, form xe và Planner giữ header riêng (tiêu đề là dữ liệu / thanh 56 px).
+  Tiêu đề thống nhất về h1 24 px — trước đó 7 màn dùng h2 20 px, 2 màn h1.
+- `KpiTile` lên `components/` và theo V2: kính `.glass-tile` (nền đặc dự phòng khi thiếu `backdrop-filter` hoặc
+  `prefers-reduced-transparency`), icon tint theo nghĩa, số 28 px mono, ghi chú cỡ micro. Bảng điều khiển gán icon/tông cho 5 ô.
+- `--shell-max` nay được dùng: utility `px-shell` cho thanh tiêu đề và vùng cuộn của 11 màn — thống nhất năm kiểu padding ngang
+  (`p-6`, `p-6 px-8`, `px-8 py-6`, `px-8 pt-6 pb-8`, `p-4 sm:p-6`) về 24 px; cột rộng hơn 1.680 px thì khối nội dung (kể cả lề) dừng ở 1.680 px, căn giữa.
+- Token cỡ chữ `micro` 11/14 vào `@theme` và `THEME_FONT_SIZES`. AGENTS mục 3, 4, 5 cập nhật.
+
+**Lệch khỏi bản V2, có chủ ý**
+- Không đưa hoạ tiết đường nét sau tiêu đề: màn vận hành không có hình minh hoạ (AGENTS mục 5).
+- Nền icon tint phẳng, không gradient/bóng như bản V2; ô số liệu không đổ bóng ra ngoài (card).
+- Số 26 px sans → 28 px JetBrains Mono; ghi chú 11,5 → 11 px; bo 15 → 12 px — về thang của AGENTS mục 4.
+- Chữ `--ink-3` của V2 đổi sang `--ink-2`: `--ink-3` chỉ đạt 3,9:1 trên trắng (3,5:1 trên trường nền), dưới ngưỡng 4,5:1.
+
+**Kiểm tra**
+- Trình duyệt thật 1.366 × 768 (admin, 11 màn): header đúng 72 px; không cuộn ngang; `getComputedStyle` xác nhận kính, h1 24 px,
+  ghi chú 11 px, số mono. 2.560 px: nội dung từ x=464 tới 2.096 (1.632 = 1.680 − 2 × 24). 390 px (hồ sơ): header 72 px, mô tả ẩn.
+- Phép kiểm "chữ bị cắt" báo ô bảng ở `/chuyen` (tên tuyến dài) và `/doi-xe` (ghi chú bảo dưỡng) — bề rộng ở 1.366 px không đổi so
+  với trước bước này (lề 24 px cả hai), nên đây là tồn đọng có sẵn; `layout-1366.spec` không phủ hai màn này. Xem lại ở bước 5.
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · `pnpm test:e2e` **80/80** ✅ (16,1 phút)
+
 ### 23/09/2026 — V2 vào production, bước 0–3: luật, token, thanh điều hướng ngang, trường nền
 
 Nhánh `feat/v2-production-nav` (tách từ `developer`). Hướng B đã duyệt; chuyển ngôn ngữ thị giác của `design/v2` vào `src/` theo
