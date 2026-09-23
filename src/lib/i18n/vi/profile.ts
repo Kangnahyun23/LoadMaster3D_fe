@@ -1,14 +1,18 @@
 /** Màn Hồ sơ cá nhân `/ho-so` (LM-096, D-42): sửa họ tên, số điện thoại của chính mình và đổi mật khẩu. */
 export const profile = {
   title: 'Hồ sơ cá nhân',
+  /** Cột nhận diện (V2): tên, vai trò và những thông tin chỉ quản trị viên đổi được. */
+  identity: {
+    label: 'Tài khoản',
+    email: 'Email',
+    depot: 'Kho trực thuộc',
+    note: 'Email, vai trò và kho trực thuộc do quản trị viên thay đổi.',
+  },
   details: {
     title: 'Thông tin cá nhân',
-    description: 'Họ tên và số điện thoại bạn tự sửa được. Email, vai trò và kho trực thuộc do quản trị viên thay đổi.',
+    description: 'Họ tên và số điện thoại bạn tự sửa được.',
     fullName: 'Họ và tên',
     phone: 'Số điện thoại',
-    email: 'Email',
-    role: 'Vai trò',
-    depot: 'Kho trực thuộc',
     save: 'Lưu thay đổi',
     saved: 'Đã lưu hồ sơ',
   },
