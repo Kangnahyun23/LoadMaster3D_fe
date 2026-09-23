@@ -1,10 +1,12 @@
 import { Truck } from 'lucide-react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/Card'
+import { ProgressBar } from '@/components/ui/ProgressBar'
 import { VehicleName } from '@/components/VehicleName'
 import type { VehicleConfig } from '@/domain/models'
 import { useFormat, useT } from '@/lib/i18n'
 import type { User } from '@/types/user'
+import type { CargoSummary } from './trip-summary'
 
 /**
  * Thẻ phương tiện ở cột trái, kèm tài xế chạy chuyến (LM-088).
@@ -12,18 +14,20 @@ import type { User } from '@/types/user'
  * Lệch có chủ ý khỏi design: nhãn mục trong bản design viết hoa toàn bộ
  * kèm letter-spacing, AGENTS.md mục 5 cấm cả hai — ở đây viết thường.
  */
-export function VehicleCard({ vehicle, tripId, driverId = null, driver = null, canChange = true }: {
+export function VehicleCard({ vehicle, tripId, driverId = null, driver = null, canChange = true, usage }: {
   vehicle: VehicleConfig
   tripId: string
   driverId?: string | null
   /** Tài khoản của `driverId`; `null` khi chưa gán hoặc tài khoản không còn trong kho (khi đó hiện mã). */
   driver?: Pick<User, 'fullName' | 'phone'> | null
   canChange?: boolean
+  /** Tỷ lệ tải trọng và thể tích hàng so với xe này (LM-044). */
+  usage?: CargoSummary
 }) {
   const t = useT()
   const format = useFormat()
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <Card className="flex flex-col gap-4 rounded-lg p-5">
       <div className="flex items-center justify-between gap-3">
         <span className="text-caption font-medium text-text-3">{t('trips.vehicle')}</span>
         {canChange ? (
@@ -79,6 +83,15 @@ export function VehicleCard({ vehicle, tripId, driverId = null, driver = null, c
           <dd className="font-mono text-body font-medium">{format.integer(vehicle.obstacles.length)}</dd>
         </div>
       </dl>
+
+      {/* V2: tỷ lệ sử dụng thùng nằm cạnh tải trọng và lòng thùng mà nó so sánh */}
+      {usage ? (
+        <div className="flex flex-col gap-3 border-t border-border pt-3">
+          <ProgressBar label={t('trips.payloadUsage')} value={usage.payloadPercent} tone={usage.overPayload ? 'danger' : 'primary'} />
+          <ProgressBar label={t('trips.volumeUsage')} value={usage.volumePercent} />
+          {usage.overPayload ? <p className="text-caption text-badge-danger-fg">{t('trips.overPayload')}</p> : null}
+        </div>
+      ) : null}
     </Card>
   )
 }

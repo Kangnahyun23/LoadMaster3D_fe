@@ -54,6 +54,7 @@ export function TripDetailPage() {
   const editable = can('trips.edit') && trip?.phase === 'planning'
   const stops = useMemo<StopRow[]>(() => (trip ? stopRows(trip.stops, trip.packages) : []), [trip])
   const summary = useMemo(() => (trip && vehicle ? cargoSummary(trip.packages, vehicle) : null), [trip, vehicle])
+  const delivered = trip?.phase === 'delivering' || trip?.phase === 'completed'
   // `?kien=<mã>` mở panel của kiện đó — liên kết từ validation summary của Thiết lập tối ưu (LM-047).
   const linkedId = searchParams.get('kien')
   const editing = draft ?? trip?.packages.find((pkg) => pkg.id === linkedId) ?? null
@@ -100,8 +101,15 @@ export function TripDetailPage() {
       ) : (
         <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-shell pt-6 pb-8">
           <TripLockBanner trip={trip} />
-          {/* Dấu đã giao chỉ khi chuyến đang giao hoặc đã hoàn thành (LM-097) */}
-          <RouteDiagram stops={stops} delivery={trip.phase === 'delivering' || trip.phase === 'completed' ? trip.delivery : undefined} />
+          {/* V2: tiến trình ngang chiếm cả hàng (tới 7 mốc); sơ đồ tuyến gập được để bảng kiện lên cao */}
+          <TripProgressCard trip={trip} />
+          {/* Dấu đã giao chỉ khi chuyến đang giao hoặc đã hoàn thành (LM-097) — khi đó sơ đồ mở sẵn */}
+          <RouteDiagram
+            collapsible
+            defaultOpen={delivered}
+            stops={stops}
+            delivery={delivered ? trip.delivery : undefined}
+          />
 
           {/*
             Từ 1.280 px (LM-095): cột thông tin co giãn (xe, thứ tự điểm giao, tóm tắt hàng, tiến trình) cạnh bảng kiện chiếm phần
@@ -111,15 +119,14 @@ export function TripDetailPage() {
             ? 'xl:grid-cols-[minmax(272px,1fr)_minmax(0,3.2fr)_360px]'
             : 'xl:grid-cols-[minmax(272px,1fr)_minmax(0,3.2fr)]')}>
             <div className="flex min-w-0 flex-col gap-4">
-              <VehicleCard vehicle={vehicle} tripId={tripId} driverId={trip.driverId} driver={query.data?.driver} canChange={editable} />
+              <CargoSummaryCard summary={summary} />
+              <VehicleCard vehicle={vehicle} tripId={tripId} driverId={trip.driverId} driver={query.data?.driver} canChange={editable} usage={summary} />
               <StopList
                 stops={stops}
                 readOnly={!editable}
                 onReorder={(next) => stopsMutation.mutate(next)}
                 onRemove={handleRemoveStop}
               />
-              <CargoSummaryCard summary={summary} />
-              <TripProgressCard trip={trip} />
             </div>
 
             <div className="flex min-w-0 flex-col gap-3">

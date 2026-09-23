@@ -1,4 +1,4 @@
-import { Warehouse } from 'lucide-react'
+import { ChevronRight, Warehouse } from 'lucide-react'
 import { useId } from 'react'
 import type { Formatter } from '@/lib/format'
 import type { DeliveryProgress } from '@/lib/mock-db'
@@ -29,7 +29,16 @@ function stopStates(stops: readonly StopRow[], delivery: DeliveryProgress | unde
  * kèm số, tên, số kiện và khối lượng. `delivery` chỉ truyền khi chuyến đang giao hoặc đã hoàn thành: điểm đã giao có dấu hoàn tất và
  * đoạn đường tới nó liền nét. SVG tự vẽ, không địa lý, không thư viện bản đồ. Trình đọc màn hình đọc từng điểm theo thứ tự kèm trạng thái.
  */
-export function RouteDiagram({ stops, delivery }: { stops: readonly StopRow[]; delivery?: DeliveryProgress }) {
+export function RouteDiagram({ stops, delivery, collapsible = false, defaultOpen = false }: {
+  stops: readonly StopRow[]
+  delivery?: DeliveryProgress
+  /**
+   * Chi tiết chuyến (V2): sơ đồ nằm trong một mục gập được để bảng kiện lên cao; cột điểm giao bên trái đã có thứ tự. Tiêu đề là
+   * `<summary>` nên bàn phím mở/đóng được; `defaultOpen` cho chuyến đang giao / đã hoàn thành, khi dấu đã giao là thông tin chính.
+   */
+  collapsible?: boolean
+  defaultOpen?: boolean
+}) {
   const t = useT()
   const format = useFormat()
   const titleId = useId()
@@ -38,10 +47,8 @@ export function RouteDiagram({ stops, delivery }: { stops: readonly StopRow[]; d
   // Ô không có đệm ngang để đoạn đường nối liền giữa hai ô; chữ tự lùi vào bằng `px-1`
   const item = cn('flex flex-col items-center gap-1.5 text-center', wide ? 'w-36 flex-none' : 'min-w-24 flex-1')
 
-  return (
-    <section aria-labelledby={titleId} className="flex flex-col gap-3">
-      <h2 id={titleId} className="px-1 text-h3 font-semibold">{t('trips.route.title')}</h2>
-      <div className="overflow-x-auto rounded-md border border-border bg-bg">
+  const list = (
+      <div className={cn('overflow-x-auto bg-bg', collapsible ? 'border-t border-border' : 'rounded-md border border-border')}>
         <ol aria-label={t('trips.route.label', { count: stops.length })} className={cn('m-0 flex list-none px-2 py-4', wide ? 'w-max' : 'w-full')}>
           <li className={item}>
             <div aria-hidden className="flex w-full flex-col items-center gap-1.5">
@@ -97,6 +104,26 @@ export function RouteDiagram({ stops, delivery }: { stops: readonly StopRow[]; d
           })}
         </ol>
       </div>
+  )
+
+  if (collapsible) {
+    return (
+      // flex-none: con overflow-hidden của cột flex bị co về 0 (AGENTS mục 5, "Cuộn trong khung ứng dụng")
+      <details open={defaultOpen} className="group relative flex-none overflow-hidden rounded-lg border border-border bg-bg">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+          <ChevronRight aria-hidden className="size-4 flex-none text-ink-3 transition-transform duration-(--dur-fast) group-open:rotate-90" strokeWidth={1.5} />
+          <h2 id={titleId} className="text-h3 font-semibold text-ink-strong">{t('trips.route.title')}</h2>
+          <span className="text-caption text-ink-3">{t('trips.route.count', { count: stops.length })}</span>
+        </summary>
+        {list}
+      </details>
+    )
+  }
+
+  return (
+    <section aria-labelledby={titleId} className="flex flex-col gap-3">
+      <h2 id={titleId} className="px-1 text-h3 font-semibold">{t('trips.route.title')}</h2>
+      {list}
     </section>
   )
 }

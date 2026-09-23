@@ -165,6 +165,7 @@ export const trips = {
   },
   route: {
     title: 'Route',
+    count: { one: 'Depot and {count} stop', other: 'Depot and {count} stops' },
     label: {
       one: 'Depot, then {count} delivery stop in delivery order',
       other: 'Depot, then {count} delivery stops in delivery order',

@@ -174,6 +174,7 @@ export const trips = {
   /** Sơ đồ tuyến ở Chi tiết chuyến (LM-097, D-50): kho → các điểm giao theo thứ tự, không bản đồ địa lý. */
   route: {
     title: 'Sơ đồ tuyến',
+    count: { one: 'Kho xuất phát và {count} điểm giao', other: 'Kho xuất phát và {count} điểm giao' },
     label: {
       one: 'Kho xuất phát rồi {count} điểm giao theo thứ tự giao',
       other: 'Kho xuất phát rồi {count} điểm giao theo thứ tự giao',
