@@ -39,16 +39,16 @@ export function PageHero({
         </Button>
       ) : null}
 
-      <span aria-hidden className="grid size-10 flex-none place-items-center rounded-lg bg-tint-blue text-tint-blue-fg max-sm:hidden">
+      <span aria-hidden className="hero-icon grid size-11 flex-none place-items-center rounded-lg text-tint-blue-fg max-sm:hidden">
         <Icon className="size-5" strokeWidth={1.5} />
       </span>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex min-w-0 items-baseline gap-2">
-          <h1 className="text-h1 font-semibold tracking-[-0.01em] whitespace-nowrap text-ink-strong">{title}</h1>
-          {meta ? <span className="truncate font-mono text-caption text-ink-2">{meta}</span> : null}
+          <h1 className="text-h1 font-semibold tracking-[-0.35px] whitespace-nowrap text-ink-strong">{title}</h1>
+          {meta ? <span className="truncate font-mono text-caption text-ink-3">{meta}</span> : null}
         </div>
-        {description ? <p className="hidden truncate text-body text-ink-2 md:block">{description}</p> : null}
+        {description ? <p className="hidden truncate text-lede text-ink-2 md:block">{description}</p> : null}
       </div>
 
       {actions ? <div className="flex flex-none items-center gap-3">{actions}</div> : null}

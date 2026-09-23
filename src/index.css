@@ -86,7 +86,9 @@
   --ink-strong: #131f34;
   --ink-1: #1f2c3e;
   --ink-2: #4a5c75;
-  --ink-3: #71829a;
+  /* V2 gốc là #71829a — chỉ 3,9:1 trên trắng, 3,5:1 trên trường nền. Tối lại cùng sắc
+     độ để qua 4,5:1 (AGENTS mục 10): 5,2:1 trên trắng, 4,7:1 trên trường nền. */
+  --ink-3: #5e6e84;
 
   /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
      blue = vận hành · green = sẵn sàng/xong · amber = cần chú ý
@@ -122,6 +124,16 @@
   --nav-glass-shadow: 0 8px 20px #33517a10, inset 0 1px 0 #fff;
   --follow-glass: linear-gradient(125deg, #ffffffe0, #ffffff55 60%, #ffffffad);
   --follow-shadow: 0 5px 10px #46658721, inset 0 1px 0 #fff, inset 0 -1px 1px #aec1d950;
+  /* bề mặt kính của khối tổng hợp số liệu (ô KPI): viền sáng trong + bóng nâng rất nhẹ.
+     Kính không phải card phẳng nên được bóng nâng (AGENTS mục 5). */
+  --tile-glass: 118deg, #ffffffc4, #ffffff5c;
+  --glass-edge: inset 0 2px 1px #fff, inset 0 -1px 2px #ffffffaa;
+  --tile-lift: 0 7px 18px #4e79a51c;
+  /* ô icon nhận diện màn trên thanh tiêu đề */
+  --hero-icon: 140deg, #e2edfd, #cbdefa;
+  --hero-icon-shadow: inset 0 1px 0 #fff, inset 0 -1px 2px #b7cdec80, 0 2px 6px #4e79a51f;
+  /* vòng sáng mảnh quanh ô icon tint trên nền kính */
+  --icon-ring: inset 0 0 0 1px #ffffff9c;
   /* chuyển động lò xo của chỉ báo: vượt nhẹ rồi lắng lại */
   --spring: linear(0, .0069 1.15%, .1135 5.18%, .5977 15.84%, .9676 28.8%, 1.0352 36.29%, 1.046 42.05%, 1.0118 61.63%, .9981 80.35%, 1);
 
@@ -129,6 +141,8 @@
   --r-sm: 6px;
   --r-md: 8px;
   --r-lg: 12px;
+  /* bề mặt kính (ô số liệu, khối tổng hợp) — V2; nút, input, bảng giữ ba bậc trên */
+  --r-xl: 16px;
 
   /* đổ bóng, chỉ cho lớp nổi */
   --e1: 0 1px 2px rgba(16, 24, 40, 0.06);
@@ -222,6 +236,7 @@
   --radius-sm: var(--r-sm);
   --radius-md: var(--r-md);
   --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
 
   --shadow-e1: var(--e1);
   --shadow-e2: var(--e2);
@@ -253,6 +268,11 @@
   /* micro 11/14 — ghi chú nguồn của ô số liệu, nhãn trục, nhãn trong panel nổi */
   --text-micro: 11px;
   --text-micro--line-height: 14px;
+  /* hai bậc lẻ của V2: note 11,5 — ghi chú nguồn của ô số liệu; lede 13,5 — mô tả dưới tiêu đề màn */
+  --text-note: 11.5px;
+  --text-note--line-height: 17px;
+  --text-lede: 13.5px;
+  --text-lede--line-height: 22px;
 }
 
 /* Lề ngang của vùng làm việc (V2): 24px, và từ khi cột rộng hơn --shell-max thì nội dung
@@ -481,13 +501,19 @@
     height 1s var(--spring);
 }
 /* Ô số liệu (`components/KpiTile.tsx`) — "khối tổng hợp số liệu" của luật kính, mục 5.
-   Cùng công thức vật liệu với thanh điều hướng; không đổ bóng ra ngoài vì là card (chỉ
-   viền sáng bên trong), không lồng thêm kính nào bên trong. */
+   Viền sáng trong + bóng nâng nhẹ theo V2; không lồng thêm kính nào bên trong. */
 .glass-tile {
   border: 1px solid #fff;
-  background: linear-gradient(var(--nav-glass));
-  box-shadow: inset 0 1px 0 #fff;
+  background: linear-gradient(var(--tile-glass));
+  box-shadow: var(--glass-edge), var(--tile-lift);
   backdrop-filter: blur(10px) saturate(1.45);
+}
+/* Ô icon nhận diện màn trên thanh tiêu đề (`components/PageHero.tsx`). Không dùng
+   backdrop-filter nên chỉ cần nhánh bớt trong suốt ở dưới. */
+.hero-icon {
+  border: 1px solid #fff;
+  background: linear-gradient(var(--hero-icon));
+  box-shadow: var(--hero-icon-shadow);
 }
 /* Trình duyệt thiếu backdrop-filter, hoặc người dùng xin bớt trong suốt: nền đặc. */
 @supports not (backdrop-filter: blur(5px)) {
@@ -513,6 +539,9 @@
     border-color: var(--border);
     background: var(--bg);
     backdrop-filter: none;
+  }
+  .hero-icon {
+    background: var(--bg);
   }
 }
 /* Không cần rule prefers-reduced-motion riêng: khối toàn cục phía trên đã ép

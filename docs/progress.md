@@ -34,6 +34,26 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
+### 23/09/2026 — V2 bước 4b: theo sát bản V2, sửa luật cũ cho khớp
+
+Người dùng chốt: làm theo V2, luật viết cho giao diện phẳng V1 thì sửa theo thực tế. Hỏi từng điểm lệch trước khi sửa.
+
+**Đã làm**
+- Kính ô số liệu theo V2: gradient kính, viền sáng trong + bóng nâng nhẹ, bo 16 px (token mới `--r-xl`, chỉ cho bề mặt kính).
+- Ô icon tiêu đề 44 px gradient xanh nhạt, viền trắng, bóng nhẹ (`.hero-icon`); icon ô số liệu có vòng sáng mảnh.
+- Số KPI 26 px **sans** `tabular-nums` như V2 (brief V2: mono chỉ cho mã/số đo), thay 28 px mono.
+- Hai bậc chữ lẻ của V2 thành token: `note` 11,5/17 (ghi chú ô số liệu), `lede` 13,5/22 (mô tả dưới tiêu đề).
+- `--ink-3` tối lại `#71829A` → `#5E6E84`: 5,2:1 trên trắng, 4,7:1 trên trường nền (bản V2 trượt 4,5:1). Chú thích dùng lại được `--ink-3`.
+- Thanh điều hướng trên màn 2K canh theo cột như V2 (`xl:px-shell`): logo, tiêu đề, nội dung cùng thẳng x=464 ở 2.560 px.
+- Không đưa hoạ tiết sau tiêu đề — người dùng không chọn.
+- AGENTS mục 4 (token, thang chữ, số KPI) và mục 5 (gradient và bóng cho vật liệu kính) sửa theo.
+
+**Kiểm tra**
+- Trình duyệt 1.366: `getComputedStyle` xác nhận bo 16 px, bóng kính, số Be Vietnam Pro 26 px, ghi chú `#5E6E84`, hero icon gradient
+  44 px, mô tả 13,5 px, header 72 px, không chữ bị cắt.
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · E2E liên quan **23/23** ✅ (manager-dashboard, layout-1366, spec-flow,
+  fleet-status, i18n-en, rbac, profile, quick-search, planner-compact).
+
 ### 23/09/2026 — V2 vào production, bước 4: thanh tiêu đề màn và ô số liệu dùng chung
 
 **Đã làm**

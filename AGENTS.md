@@ -221,9 +221,10 @@ Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-tex
 
   /* thang mực bốn cấp (V2, 23/09/2026): tiêu đề và số quan trọng → dữ liệu vận hành
      → thông tin phụ → chú thích. Trước đó ba cấp nằm quá gần nhau nên màn trông nhạt */
-  --ink-strong: #131F34;  --ink-1: #1F2C3E;  --ink-2: #4A5C75;  --ink-3: #71829A;
-  /* --ink-3 chỉ đạt 3,9:1 trên trắng (3,5:1 trên trường nền): KHÔNG dùng cho chữ — mục 10 cần 4,5:1.
-     Chữ phụ nhỏ nhất dùng --ink-2 (6,8:1). --ink-3 để dành cho viền, icon trang trí, vạch chia. */
+  --ink-strong: #131F34;  --ink-1: #1F2C3E;  --ink-2: #4A5C75;  --ink-3: #5E6E84;
+  /* --ink-3 của bản V2 là #71829A — chỉ 3,9:1 trên trắng, 3,5:1 trên trường nền, trượt mục 10.
+     Tối lại cùng sắc độ (23/09/2026): 5,2:1 trên trắng, 4,7:1 trên trường nền. Đổi token này
+     thì đo lại cả hai nền. */
 
   /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
      blue = vận hành · green = sẵn sàng/xong · amber = cần chú ý
@@ -240,6 +241,10 @@ Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-tex
 
   /* bo góc */
   --r-sm: 6px;  --r-md: 8px;  --r-lg: 12px;
+  --r-xl: 16px;   /* chỉ bề mặt kính (ô số liệu, khối tổng hợp) — V2 */
+
+  /* vật liệu kính V2: --nav-glass, --follow-glass, --tile-glass, --glass-edge, --tile-lift,
+     --hero-icon, --hero-icon-shadow, --icon-ring — xem src/index.css và mục 5 "Cấm tuyệt đối" */
 
   /* đổ bóng, chỉ cho lớp nổi */
   --e1: 0 1px 2px rgba(16,24,40,.06);
@@ -267,17 +272,20 @@ Font: **Be Vietnam Pro** cho giao diện, **JetBrains Mono** cho số, mã kiệ
 | body-lg | 16/24 | chữ thân trên tablet và điện thoại |
 | body | 14/20 | chữ thân trên desktop |
 | caption | 12/16 | nhãn phụ, tiêu đề cột bảng |
+| lede | 13,5/22 | câu mô tả dưới tiêu đề màn (`PageHero`) *(V2, 23/09/2026)* |
 | micro | 11/14 | nhãn trục biểu đồ, nhãn trong panel nổi *(bổ sung)* |
+| note | 11,5/17 | ghi chú nguồn của ô số liệu (`KpiTile`) *(V2, 23/09/2026)* |
 
 **Số liệu lớn** không nằm trong thang trên vì chúng là hình khối chứ không phải chữ đọc:
-`18px` mã kiện trên header · `22px` mã chuyến · `28px` số KPI · `40px` tỷ lệ lấp đầy
-trong hộp thoại. Luôn dùng JetBrains Mono. Không phát sinh thêm cỡ ngoài danh sách này.
+`18px` mã kiện trên header · `22px` mã chuyến · `40px` tỷ lệ lấp đầy trong hộp thoại — JetBrains Mono.
+*(đã điều chỉnh 23/09/2026, V2)* Số KPI `26px` dùng **Be Vietnam Pro** `tabular-nums`, không mono: mono dành cho mã và số
+đo đọc trong bảng, số tổng hợp là nội dung thông thường (brief V2). Không phát sinh thêm cỡ ngoài danh sách này.
 
 Spacing bội số 4px.
 
 **Token cỡ chữ và `cn()`** *(bổ sung 15/09/2026, LM-055)*: `cn()` trong `lib/utils.ts` dùng
 tailwind-merge đã khai báo các cỡ chữ của `@theme` (`display`, `h1`, `h2`, `h3`, `body-lg`, `body`,
-`caption`, `micro`). Thiếu khai báo thì tailwind-merge coi `text-body` là màu chữ và **bỏ mất `text-white`**
+`caption`, `micro`, `note`, `lede`). Thiếu khai báo thì tailwind-merge coi `text-body` là màu chữ và **bỏ mất `text-white`**
 của nút. Thêm token `--text-*` mới vào `@theme` thì phải thêm tên vào `THEME_FONT_SIZES`.
 
 **Nguồn quét class của Tailwind** *(bổ sung 15/09/2026, LM-005)*: `src/index.css` khai báo
@@ -318,22 +326,25 @@ Cao **72px** cho mọi màn có thanh điều hướng. Chỉ **56px** cho màn 
 chiều cao nhường cho khung 3D. Không tự chọn chiều cao khác — lệch là nội dung nhảy
 khi chuyển màn.
 
-*(bổ sung 23/09/2026, V2)* Màn trong khung ứng dụng dùng `components/PageHero.tsx`: icon màn trên nền `--tint-blue`, tiêu đề h1
-24 px `--ink-strong`, `meta` (số đếm, mã) mono, một câu mô tả từ nhánh `pageHero` của từ điển, hành động ở phải. Ba luật của nó:
+*(bổ sung 23/09/2026, V2)* Màn trong khung ứng dụng dùng `components/PageHero.tsx`: ô icon 44 px `.hero-icon` (gradient xanh nhạt,
+viền trắng, bóng nhẹ), tiêu đề h1 24 px `--ink-strong`, `meta` (số đếm, mã) mono `--ink-3`, một câu mô tả cỡ `lede` từ nhánh
+`pageHero` của từ điển, hành động ở phải. Ba luật của nó:
 icon là `<span aria-hidden>` **ngoài** `<h1>` (tên truy cập của tiêu đề giữ đúng chữ, test đọc `exact: true`); hành động nằm trong
 **cùng** `<header>` với tiêu đề; mô tả ẩn dưới 768 px để thanh giữ đúng 72 px. Mô tả nói màn dùng để làm gì — không số, không
 trạng thái. **Không** dùng `PageHero` khi tiêu đề là dữ liệu (mã chuyến ở Chi tiết chuyến, tên xe ở form xe) hay cho thanh 56 px
 của Planner; những màn đó giữ header riêng nhưng vẫn theo lề `px-shell`. Màn mới trong khung ứng dụng dùng `PageHero`.
-Bản V2 gốc có hoạ tiết đường nét phía sau tiêu đề — **không** đưa vào: màn vận hành không có hình minh hoạ (mục 5, Bố cục).
+Bản V2 gốc có hoạ tiết đường nét phía sau tiêu đề — người dùng chọn **không** đưa vào production (23/09/2026).
 
-*(bổ sung 23/09/2026, V2)* Lề ngang của thanh tiêu đề và vùng cuộn dùng utility `px-shell` (`index.css`): 24 px, và khi cột rộng hơn
-`--shell-max` thì nội dung dừng ở `--shell-max`, căn giữa. Là padding chứ không phải một div `max-w` bọc ngoài, để vùng cuộn vẫn rộng
-hết cột (thanh cuộn ở mép) và nền chrome vẫn tràn ngang. Không đặt lại `px-6`/`px-8` cho màn trong khung ứng dụng.
+*(bổ sung 23/09/2026, V2)* Lề ngang của thanh điều hướng, thanh tiêu đề và vùng cuộn dùng utility `px-shell` (`index.css`): 24 px,
+và khi cột rộng hơn `--shell-max` thì nội dung dừng ở `--shell-max`, căn giữa. Là padding chứ không phải một div `max-w` bọc ngoài,
+để vùng cuộn vẫn rộng hết cột (thanh cuộn ở mép) và nền chrome vẫn tràn ngang — trên màn 2K logo, mục điều hướng, tiêu đề và nội
+dung cùng thẳng một cột. Không đặt lại `px-6`/`px-8` cho màn trong khung ứng dụng.
 
-*(bổ sung 23/09/2026, V2)* Ô số liệu là `components/KpiTile.tsx` (lên `components/` từ `features/manager`): kính `.glass-tile` (có
-nền đặc dự phòng), icon trên nền tint theo nghĩa cố định (mục 4), số 28 px mono `--ink-strong`, nhãn, ghi chú nguồn cỡ micro. Mọi số
-cùng màu mực — màu chỉ ở icon, không nói số tốt hay xấu. Vỏ ngoài `role="group"` + `aria-label` = nhãn; `value` và `unit` là hai
-text node liền nhau, không khoảng trắng JSX ở giữa. Không dùng bóng đổ ra ngoài (card), chỉ viền sáng bên trong.
+*(bổ sung 23/09/2026, V2)* Ô số liệu là `components/KpiTile.tsx` (lên `components/` từ `features/manager`): kính `.glass-tile` bo
+`--r-xl`, viền sáng trong + bóng nâng nhẹ (`--glass-edge`, `--tile-lift`), nền đặc dự phòng; icon trên nền tint theo nghĩa cố định
+(mục 4); số 26 px **sans** `tabular-nums` `--ink-strong` (không mono — mono dành cho mã và số đo trong bảng, theo brief V2); nhãn
+`--ink-2`; ghi chú nguồn cỡ `note` `--ink-3`. Mọi số cùng màu mực — màu chỉ ở icon, không nói số tốt hay xấu. Vỏ ngoài
+`role="group"` + `aria-label` = nhãn; `value` và `unit` là hai text node liền nhau, không khoảng trắng JSX ở giữa.
 
 ### Thử nghiệm visual V2 (21/09/2026)
 
@@ -352,7 +363,8 @@ phản và FPS. Đây đúng hai vai trò cần tương phản nhất. Phải đ
 - Không dùng chữ gạch chân làm nút hành động. Gạch chân chỉ cho link trong đoạn văn.
 - Không gradient trên nút, card hay thanh tiêu đề. *(đã điều chỉnh 23/09/2026)* **Nền trang** được dùng trường màu rất nhạt
   (`--field`): hai vệt radial xanh trên nền `#edf4fb`, biên độ dưới 5% độ sáng. Đây là lớp khí quyển để bề mặt đọc màu trắng
-  nổi lên khỏi nó — không phải trang trí, và không áp cho bất kỳ bề mặt nào khác.
+  nổi lên khỏi nó. Ngoài nền trang, gradient chỉ có trong **vật liệu kính** (chỉ báo điều hướng, ô số liệu) và ô icon nhận diện
+  màn (`.hero-icon`) — đều là gradient trắng/xanh rất nhạt khai trong token, không phải màu trang trí.
 - *(đã điều chỉnh 23/09/2026)* Kính (blur nền, viền sáng) dùng **theo lớp**, không rải tuỳ ý.
   **Được** ở chrome điều hướng, khối tổng hợp số liệu, và panel điều khiển nổi đè lên khung 3D nền tối.
   **Không** ở bảng, form, inspector và mọi bề mặt người dùng đọc lâu — những chỗ đó giữ nền đặc, phân tách bằng viền 1px.
@@ -362,6 +374,8 @@ phản và FPS. Đây đúng hai vai trò cần tương phản nhất. Phải đ
 - Toast nằm dưới thanh tiêu đề (`offset` trên 80 px): không che nút hành động ở góc phải header — rê chuột lên toast làm nó dừng đếm giờ
   (LM-101 phát hiện toast che nút Duyệt của Planner).
 - Không đổ bóng lên card. Card phân tách bằng viền 1px `--border`. Bóng chỉ dùng cho dropdown, modal, toast, popover, và **thẻ đang được kéo** (lúc đó nó là lớp đang nhấc khỏi mặt phẳng).
+  *(đã điều chỉnh 23/09/2026)* Bề mặt **kính** không phải card phẳng: được viền sáng trong và bóng nâng rất nhẹ bằng token
+  (`--nav-glass-shadow`, `--glass-edge`, `--tile-lift`, `--hero-icon-shadow`). Card nền đặc vẫn không có bóng.
 - Không emoji trong giao diện. Icon dùng Lucide, nét 1,5px, cỡ 16/20/24.
 - Không viết hoa toàn bộ, không giãn chữ trang trí.
 - Không bo góc tròn hoàn toàn cho nút hành động. Dạng viên thuốc chỉ cho badge, chip lọc và thanh tiến độ.

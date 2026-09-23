@@ -68,7 +68,7 @@ export function NavRail() {
   }
 
   return (
-    <header className="flex h-14 flex-none items-center gap-5 border-b border-border bg-chrome px-4 xl:gap-7 xl:px-6">
+    <header className="flex h-14 flex-none items-center gap-5 border-b border-border bg-chrome px-4 xl:gap-7 xl:px-shell">
       <Link to="/" aria-label={t('nav.home')} className="flex flex-none items-center gap-2.5 rounded-md outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
         <span aria-hidden className="grid size-9 place-items-center rounded-md bg-primary">
           <span className="h-2.5 w-4 rounded-xs border-2 border-t-4 border-white" />
