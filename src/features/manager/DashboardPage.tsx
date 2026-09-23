@@ -12,14 +12,18 @@ import { FleetStatusCard } from './FleetStatusCard'
 import { KpiRow } from './KpiRow'
 import { PeriodFilter } from './PeriodFilter'
 import { RecentTripsTable } from './RecentTripsTable'
-import { TripsByStatusChart } from './TripsByStatusChart'
 import { useDashboardPeriod } from './useDashboardPeriod'
 import { useDashboardQuery } from './useDashboardQuery'
 import { useExportReport } from './useExportReport'
-import { WeightByVehicleChart } from './WeightByVehicleChart'
 
-/** `recharts` nằm ở chunk riêng: phần còn lại của màn hiện ngay, biểu đồ lấp đầy theo sau (AGENTS mục 9 "Chia chunk"). */
-const DashboardCharts = lazy(() => import('./DashboardCharts').then((m) => ({ default: m.DashboardCharts })))
+/**
+ * `recharts` nằm ở chunk riêng: phần còn lại của màn hiện ngay, ba biểu đồ theo sau (AGENTS mục 9 "Chia chunk"). Cả ba cùng một
+ * module `DashboardCharts`, nên chỉ tải một lần.
+ */
+const loadCharts = () => import('./DashboardCharts')
+const TripsByStatusChart = lazy(() => loadCharts().then((m) => ({ default: m.TripsByStatusChart })))
+const FillByDayChart = lazy(() => loadCharts().then((m) => ({ default: m.FillByDayChart })))
+const WeightByVehicleChart = lazy(() => loadCharts().then((m) => ({ default: m.WeightByVehicleChart })))
 
 /**
  * Bảng điều khiển (LM-052, LM-090, V2): lọc kỳ trên URL, 5 KPI theo kỳ, 3 biểu đồ, thẻ đội xe, chuyến trong kỳ và xuất báo cáo
@@ -120,19 +124,23 @@ function DashboardContent({ summary }: { summary: DashboardSummary }) {
     <>
       <KpiRow summary={summary} />
       <div className={INSIGHTS_GRID}>
-        <TripsByStatusChart entries={summary.tripsByStatus} total={summary.tripCount} />
+        <Suspense fallback={<ChartSkeleton />}>
+          <TripsByStatusChart entries={summary.tripsByStatus} total={summary.tripCount} />
+        </Suspense>
         <FleetStatusCard vehicles={summary.vehicles} />
         <Suspense fallback={<ChartSkeleton />}>
-          <DashboardCharts summary={summary} />
+          <FillByDayChart days={summary.fillByDay} isMockResult={summary.fill.isMockResult} />
         </Suspense>
-        <WeightByVehicleChart vehicles={summary.byVehicle} />
+        <Suspense fallback={<ChartSkeleton />}>
+          <WeightByVehicleChart vehicles={summary.byVehicle} />
+        </Suspense>
       </div>
       <RecentTripsTable trips={summary.trips} />
     </>
   )
 }
 
-/** Giữ chỗ đúng khung biểu đồ lấp đầy trong lúc tải chunk `recharts`, để bảng bên dưới không nhảy. */
+/** Giữ chỗ đúng khung một biểu đồ trong lúc tải chunk `recharts`, để bảng bên dưới không nhảy. */
 function ChartSkeleton() {
   return (
     <div className="flex flex-col gap-5 rounded-lg border border-border bg-bg p-5">

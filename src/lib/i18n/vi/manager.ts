@@ -78,7 +78,7 @@ export const manager = {
       note: 'Chuyến có ngày chạy trong kỳ',
       status: 'Trạng thái',
       count: 'Số chuyến',
-      /** Tỷ lệ trên tổng chuyến của kỳ, cột cuối mỗi hàng. */
+      /** Tỷ lệ trên tổng chuyến của kỳ: cột cuối bảng số (dòng phụ của tooltip không có nhãn). */
       share: 'Tỷ lệ',
       total: { one: '{count} chuyến', other: '{count} chuyến' },
     },
