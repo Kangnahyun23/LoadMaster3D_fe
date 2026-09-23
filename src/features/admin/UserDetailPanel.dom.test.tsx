@@ -6,12 +6,14 @@ import { Toaster } from 'sonner'
 import { expect, test } from 'vitest'
 import { AuthProvider } from '@/features/auth/AuthProvider'
 import { I18nProvider } from '@/lib/i18n'
+import { getMockDb } from '@/lib/mock-db'
 import { signedInAs } from '@/test/signed-in'
 import { UsersPage } from './UsersPage'
 
 /**
  * Panel chi tiết người dùng (V2) qua màn Người dùng: kho dùng chung (12 người dùng seed) → hook → màn. Người xem là quản trị viên demo
- * Võ Minh Khoa (US-0005). Các test trong file dùng chung kho; chỉ một chỗ ghi (khoá rồi mở lại Ngô Văn Bảo), trả về như cũ.
+ * Võ Minh Khoa (US-0005). Các test trong file dùng chung kho; ghi vào kho chỉ ở kho của Đặng Hoài Nam và khoá/mở lại Ngô Văn Bảo —
+ * không test nào khác đọc hai chỗ đó.
  */
 const SLOW = { timeout: 5000 }
 
@@ -30,6 +32,7 @@ function renderUsers() {
       </I18nProvider>
     </QueryClientProvider>,
   )
+  return client
 }
 
 async function rowOf(name: string) {
@@ -43,6 +46,23 @@ async function openMenu(user: UserEvent, name: string) {
   await user.click(within(await rowOf(name)).getByRole('button', { name: `Thao tác cho ${name}` }))
   return screen.findByRole('menu')
 }
+
+test('danh sách về lại từ kho không gắn lại ô: menu thao tác đang mở giữ nguyên', async () => {
+  // Hồi quy E2E "Khoá tài khoản" chập chờn: TanStack Table v9 dựng hàm `cell` như component, cột dựng lại theo dữ liệu là gỡ cả
+  // menu đang mở khỏi DOM. Mở màn là đọc lại kho (staleTime 0) nên lần đọc lại rơi đúng lúc người dùng vừa mở menu.
+  const user = userEvent.setup()
+  const client = renderUsers()
+  const menu = await openMenu(user, 'Ngô Văn Bảo')
+  const lock = within(menu).getByRole('menuitem', { name: 'Khoá tài khoản' })
+
+  await getMockDb().updateUser('US-0007', { depot: 'Kho Bình Dương' })
+  await client.invalidateQueries({ queryKey: ['users'] })
+  // Menu Radix là modal: phần còn lại bị aria-hidden nên tìm theo chữ, không theo vai trò
+  expect(await screen.findByText('Kho Bình Dương', {}, SLOW)).toBeInTheDocument()
+  expect(lock.isConnected).toBe(true)
+  expect(screen.getByRole('menuitem', { name: 'Khoá tài khoản' })).toBe(lock)
+  await user.keyboard('{Escape}')
+})
 
 /** Tiêu đề cột của bảng tài khoản, để biết cột Điện thoại đang hiện hay ẩn. */
 function columnHeaders() {

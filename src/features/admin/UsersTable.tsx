@@ -11,6 +11,7 @@ import { userColumns, userOpenButtonId } from './user-columns'
 import { UserDetailPanel } from './UserDetailPanel'
 import type { UserAction } from './UserRowMenu'
 import { UsersSummary } from './UsersSummary'
+import { UsersTableContext } from './users-table-context'
 
 /** Bộ lọc trên URL (D-52), tiếng Việt không dấu. */
 const ROLE_FILTER = 'vai-tro'
@@ -38,8 +39,7 @@ export function UsersTable({ users, currentUserId, onAction }: {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const selected = users.find((user) => user.id === selectedId) ?? null
   const openId = selected?.id ?? null
-  // Đóng panel thì con trỏ về nút tên của dòng đó. Đổi lựa chọn dựng lại cột nên ô tên được dựng lại — phải trả con trỏ sau khi
-  // React đã vẽ xong, không trước đó.
+  // Đóng panel thì con trỏ về nút tên của dòng đó — sau khi React đã vẽ xong bảng có lại cột Điện thoại.
   const focusAfterClose = useRef<string | null>(null)
   useEffect(() => {
     if (openId !== null || focusAfterClose.current === null) return
@@ -53,9 +53,12 @@ export function UsersTable({ users, currentUserId, onAction }: {
   // Bấm lại dòng đang chọn thì đóng, như bảng kiện ở Chi tiết chuyến
   const toggle = useCallback((user: User) => (user.id === openId ? close(user.id) : setSelectedId(user.id)), [openId, close])
 
-  const columns = useMemo(
-    () => userColumns(t, { users, currentUserId, onAction, selectedId: openId, onSelect: toggle, panelId }),
-    [t, users, currentUserId, onAction, openId, toggle, panelId],
+  // Cột chỉ theo ngôn ngữ và panel đóng/mở — không theo dữ liệu: dựng lại cột là gắn lại mọi ô (users-table-context.ts)
+  const panelOpen = openId !== null
+  const columns = useMemo(() => userColumns(t, { panelOpen }), [t, panelOpen])
+  const cellContext = useMemo(
+    () => ({ users, currentUserId, onAction, selectedId: openId, onSelect: toggle, panelId }),
+    [users, currentUserId, onAction, openId, toggle, panelId],
   )
   const rows = useMemo(() => users.filter((user) =>
     matchesQuery([user.fullName, user.email, user.phone, user.phone.replace(/\s/g, ''), user.id, user.depot], list.query)
@@ -101,22 +104,24 @@ export function UsersTable({ users, currentUserId, onAction }: {
             onValueChange={list.setFilter}
             onClear={list.clearAll}
           />
-          <DataTable
-            data={rows}
-            columns={columns}
-            getRowId={(user) => user.id}
-            density="spacious"
-            appearance="paper"
-            onRowClick={toggle}
-            isRowSelected={(user) => user.id === openId}
-            sorting={list.sorting}
-            onSortingChange={list.setSorting}
-            pagination={{ pageIndex: list.pageIndex, pageSize: list.pageSize, onPageChange: list.setPage, onPageSizeChange: list.setPageSize }}
-            emptyMessage={t('admin.users.empty')}
-            isFiltering={list.isFiltering}
-            onClearFilters={list.clearAll}
-            noMatchMessage={t('admin.users.noMatch')}
-          />
+          <UsersTableContext value={cellContext}>
+            <DataTable
+              data={rows}
+              columns={columns}
+              getRowId={(user) => user.id}
+              density="spacious"
+              appearance="paper"
+              onRowClick={toggle}
+              isRowSelected={(user) => user.id === openId}
+              sorting={list.sorting}
+              onSortingChange={list.setSorting}
+              pagination={{ pageIndex: list.pageIndex, pageSize: list.pageSize, onPageChange: list.setPage, onPageSizeChange: list.setPageSize }}
+              emptyMessage={t('admin.users.empty')}
+              isFiltering={list.isFiltering}
+              onClearFilters={list.clearAll}
+              noMatchMessage={t('admin.users.noMatch')}
+            />
+          </UsersTableContext>
         </section>
         {selected ? (
           <UserDetailPanel
