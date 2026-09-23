@@ -54,7 +54,7 @@ for (const device of ['desktop', 'tablet'] as const) {
     // Kiện PKG-001 × 4, rồi nhân bản
     const panel = await addPackage(page, { name: 'Thùng sơn', lengthCm: 120, widthCm: 100, heightCm: 100, weightKg: 200, quantity: 4 })
     // §15 "Mọi field hiển thị đơn vị": form kiện
-    await expect(page.getByRole('row', { name: /PKG-001 Thùng sơn 120 × 100 × 100 cm 200 kg 4/ })).toBeVisible()
+    await expect(page.getByRole('row', { name: /Thùng sơn PKG-001 · 120 × 100 × 100 cm 200 kg 4/ })).toBeVisible()
     await expect(page.getByText('Đã lưu kiện PKG-001')).toBeVisible()
     // §15 "Tự tính tổng khối lượng và thể tích": 4 × 1,2 m³ và 4 × 200 kg
     await expect(page.getByText(/Kiện\s*4\s*Thể tích\s*4,8 m³\s*Khối lượng\s*800 kg/)).toBeVisible()
@@ -65,7 +65,7 @@ for (const device of ['desktop', 'tablet'] as const) {
     // §15 "Thêm/sửa/xóa/nhân bản kiện": nhân bản
     await editPanel.getByRole('button', { name: 'Nhân bản', exact: true }).click()
     await expect(page.getByText('Đã tạo bản sao PKG-002')).toBeVisible()
-    await expect(page.getByRole('row', { name: /PKG-002 Thùng sơn 120 × 100 × 100 cm 200 kg 4/ })).toBeVisible()
+    await expect(page.getByRole('row', { name: /Thùng sơn PKG-002 · 120 × 100 × 100 cm 200 kg 4/ })).toBeVisible()
     await expect(page.getByText(/Kiện\s*8\s*Thể tích\s*9,6 m³\s*Khối lượng\s*1\.600 kg/)).toBeVisible()
     await expect(panel).toHaveCount(0)
 

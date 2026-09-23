@@ -10,6 +10,7 @@ import { isUpright } from '@/domain/geometry'
 import { cargoPackageSchema, type CargoPackage, type VehicleConfig } from '@/domain/models'
 import { formatIssue, useFormat, useT } from '@/lib/i18n'
 import { PackageFormFields } from './PackageFormFields'
+import { PackagePreview } from './PackagePreview'
 import type { StopRow } from './trip-summary'
 
 /**
@@ -60,7 +61,7 @@ export function PackageFormPanel({ value, vehicle, stops, onSave, onDelete, onDu
   return (
     <aside
       aria-label={isNew ? t('trips.form.titleNew') : t('trips.form.title', { id: value.id })}
-      className="flex w-full flex-col overflow-hidden border-border bg-bg max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-20 max-md:max-h-[70dvh] max-md:rounded-t-lg max-md:border-t max-md:shadow-e3 md:w-90 md:rounded-md md:border xl:sticky xl:top-0 xl:max-h-[calc(100dvh-8rem)]"
+      className="flex w-full flex-col overflow-hidden border-border bg-bg max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:z-20 max-md:max-h-[70dvh] max-md:rounded-t-lg max-md:border-t max-md:shadow-e3 md:rounded-lg md:border xl:sticky xl:top-0 xl:max-h-[calc(100dvh-8rem)]"
     >
       <div className="flex h-14 flex-none items-center justify-between gap-2 border-b border-border pr-2 pl-4">
         <h2 className="font-mono text-body-lg font-semibold">
@@ -93,9 +94,13 @@ export function PackageFormPanel({ value, vehicle, stops, onSave, onDelete, onDu
           </p>
         ))}
 
-        <fieldset disabled={readOnly} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
-          <PackageFormFields form={form} stops={stops} onKeepUprightChange={handleKeepUpright} onStackableChange={handleStackable} />
-        </fieldset>
+        {/* V2: kiện đã có thì phần xem ở đầu panel; người chỉ xem (quản lý, chuyến đã khoá) chỉ thấy phần này, không có form */}
+        {isNew ? null : <PackagePreview pkg={value} stop={stops[value.deliveryStop - 1]} />}
+        {readOnly ? null : (
+          <fieldset className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
+            <PackageFormFields form={form} stops={stops} onKeepUprightChange={handleKeepUpright} onStackableChange={handleStackable} />
+          </fieldset>
+        )}
       </form>
 
       {readOnly ? null : <div className="flex flex-none flex-wrap gap-2 border-t border-border p-4">
