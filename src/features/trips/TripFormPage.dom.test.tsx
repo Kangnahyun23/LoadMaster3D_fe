@@ -71,6 +71,21 @@ test('creating a trip writes run date, driver and stop contacts to the repositor
   expect(created?.stops[1]).not.toHaveProperty('phone')
 })
 
+test('while creating, the up/down buttons reorder stops; the first cannot move up and the last cannot move down', async () => {
+  const { user } = renderForm('/chuyen/moi')
+  await user.type(await screen.findByLabelText('Tên điểm giao 1'), 'Q.9')
+  await user.click(screen.getByRole('button', { name: 'Thêm điểm giao' }))
+  await user.type(screen.getByLabelText('Tên điểm giao 2'), 'Thủ Đức')
+  expect(screen.getByRole('button', { name: 'Đưa điểm giao 1 lên trước' })).toBeDisabled()
+  expect(screen.getByRole('button', { name: 'Đưa điểm giao 2 xuống sau' })).toBeDisabled()
+
+  await user.click(screen.getByRole('button', { name: 'Đưa điểm giao 2 lên trước' }))
+  expect(screen.getByLabelText('Tên điểm giao 1')).toHaveValue('Thủ Đức')
+  expect(screen.getByLabelText('Tên điểm giao 2')).toHaveValue('Q.9')
+  // Tóm tắt bên phải đếm điểm giao theo form đang nhập
+  expect(within(screen.getByRole('region', { name: 'Tóm tắt chuyến' })).getByText('2')).toBeInTheDocument()
+})
+
 test('a phone number with letters is rejected at its field', async () => {
   const { user } = renderForm('/chuyen/moi')
   await user.type(await screen.findByLabelText('Số điện thoại điểm giao 1'), 'gọi sau')
