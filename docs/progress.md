@@ -34,6 +34,44 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
+### 23/09/2026 — V2 bước 6, nhóm 1: năm màn điều phối
+
+Làm theo nhóm, một commit mỗi màn, người dùng chốt từng điểm lệch với bản V2 trước khi làm (quyết định ghi lại trong phiên).
+Số nào bản V2 bịa (132 kiện lúc tạo chuyến mới, "không đo" thời gian chạy) đều thay bằng số truy được về kho.
+
+**Đã làm**
+- **Danh sách chuyến:** ba ô số liệu (tổng · đang thực hiện · cần xem phương án), hai ô nhóm là công tắc lọc qua cùng tham số
+  `trang-thai` (thêm slug nhóm `dang-thuc-hien`, `can-xem-phuong-an`). Thanh tìm/lọc chung thẻ với bảng, hàng lọc thứ hai
+  (`secondary`) cho ngày, xe, tài xế. Cột Kiện kèm số điểm giao → mật độ mới `roomy` 56px. Không làm panel "Cần xử lý" và bộ chọn mật
+  độ của V2 (ô số liệu đã lọc được nhóm đó; bộ chọn mật độ trong V2 không có chức năng).
+- **Form tạo/sửa chuyến:** một thẻ, các phần đánh số (`FormSection`, dùng chung với Thiết lập tối ưu); điểm giao có chip màu định
+  danh, nút ↑/↓ đổi thứ tự khi tạo mới; cột phải là danh sách tự kiểm và khối tổng hợp kính.
+- **Thiết lập tối ưu:** phần 1 Kiểm tra đầu vào, phần 2 Yêu cầu xếp hàng (mỗi công tắc một câu giải thích qua `aria-describedby`),
+  Thiết lập nâng cao gập trong `<details>` và tự mở khi có lỗi. Cột phải: "Hai giới hạn khác nhau" (khối lượng / tải, thể tích / lòng
+  thùng). Nút Tối ưu giữ ở thanh tiêu đề — một nút primary mỗi màn.
+- **Chi tiết chuyến** (hai lượt): tiến trình thành dải ngang 7 mốc; sơ đồ tuyến gập được; tóm tắt hàng thành khối kính; ba cột từ
+  1.536px, 1.280–1.535px thẻ phương tiện xuống dưới cột trái (`grid-template-areas`) để bảng kiện giữ ~1.030px. Bấm điểm giao lọc bảng
+  kiện. Bảng kiện một thẻ: tìm, lọc điểm giao, chip "Chỉ hàng dễ vỡ" / "Chỉ kiện có lỗi", ô tên gộp tên / mã · kích thước, cột Yêu
+  cầu thay cột số hướng đặt. "Dễ vỡ" = mức Cao — seed có đúng 22 kiện như bản V2 ghi. Panel kiện có phần xem kiểu V2 (hình đẳng cự
+  theo tỉ lệ kích thước) trên form; người chỉ xem chỉ thấy phần xem.
+- **So sánh phương án:** ma trận chỉ số × bản lưu thay các thẻ; đầu cột có radio chọn bản mở trong 3D, MOCK RESULT và trạng thái; ô
+  tốt nhất tô nền kèm dấu tích, không đánh dấu khi mọi bản bằng nhau; "Chỉ hiện khác biệt"; chân bảng ghi bản duyệt kế thừa từ bản
+  nào. Gỡ `PlanCard`.
+
+**Test**
+- Mới: nhóm trạng thái và số điểm giao (TDD), ô số liệu lọc qua URL; nút ↑/↓ điểm giao; chip yêu cầu và định nghĩa dễ vỡ (TDD, số
+  từ seed), lọc bảng kiện theo điểm giao / dễ vỡ / tìm, phần xem kiện cho người chỉ xem; ma trận so sánh (số theo cột, radio chọn,
+  "Chỉ hiện khác biệt").
+- Sửa: `spec-flow` (regex dòng kiện theo ô tên gộp), `plan-compare-404` (radio thay nút chọn thẻ).
+- Lượt E2E đầy đủ đầu tiên: 75/81 xanh. Sáu test đỏ: bốn selector theo giao diện cũ (dòng kiện nay tên trước mã; "9.500 kg" có
+  thêm ở khối tổng hợp; chữ đầu tiên khớp nằm trong sơ đồ tuyến đang gập; số kiện ở Thiết lập tối ưu tách số và đơn vị), hai lỗi thật
+  ở `layout-1366`: thẻ điểm giao ở cột trái 272px chỉ còn 130px cho chữ, tên và địa chỉ vượt hai dòng — thu khoảng cách và chip số,
+  nay 152px. Chạy lại mọi file E2E liên quan: xanh.
+- Kết quả: `pnpm lint`, `pnpm build` sạch; 788 unit/DOM; 81/81 E2E.
+
+**Còn lại:** nhóm 2 (bảng điều khiển, người dùng, nhật ký, hồ sơ), nhóm 3 (panel Planner; kho và tài xế theo V2 mobile — cần nghiên
+cứu nghiệp vụ và hỏi trước; đăng nhập/403/404 chỉ token).
+
 ### 23/09/2026 — V2 bước 5: màn Đội xe theo V2
 
 Nghiên cứu bản V2 (`design/v2/desktop-fleet.js`, ảnh `screen-fleet.png`), code hiện tại và các test ràng buộc; người dùng chốt từng
