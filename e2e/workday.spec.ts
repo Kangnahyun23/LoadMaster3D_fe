@@ -47,7 +47,7 @@ test('one working day: plan, load, deliver, report and audit a trip across the f
   await page.getByRole('button', { name: 'Tạo chuyến', exact: true }).click()
   await page.waitForURL(new RegExp(`/chuyen/${TRIP}$`))
   await addPackage(page, { name: 'Thùng nước suối 24 chai', lengthCm: 50, widthCm: 35, heightCm: 25, weightKg: 13, quantity: 6 })
-  await expect(page.getByText('6 kiện', { exact: false }).first()).toBeVisible()
+  await expect(page.getByRole('row', { name: /Thùng nước suối 24 chai PKG-\d+ · 50 × 35 × 25 cm 13 kg 6\b/ })).toBeVisible()
 
   await page.getByRole('link', { name: 'Chạy tối ưu', exact: true }).click()
   await optimizeAndOpenPlanner(page)

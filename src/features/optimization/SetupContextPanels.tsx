@@ -37,7 +37,8 @@ export function SetupContextPanels({ tripId, setup, locked = false }: { tripId: 
             <dt className="text-caption text-ink-2">{stat.label}</dt>
             <dd className="m-0 text-[26px] leading-[1.1] font-semibold text-ink-strong tabular-nums">
               {stat.value}
-              {stat.unit ? <span className="ml-1 text-body font-normal text-ink-2">{stat.unit}</span> : null}
+              {/* Khoảng trắng thật thay cho lề: tên truy cập đọc "192 / 7 dòng", không dính "192/" */}
+              {stat.unit ? <>{' '}<span className="text-body font-normal text-ink-2">{stat.unit}</span></> : null}
             </dd>
           </div>
         ))}

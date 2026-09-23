@@ -43,7 +43,7 @@ export function StopCard({ stop, onRemove, readOnly = false, selected = false, o
         transition: transition ?? undefined,
       }}
       className={cn(
-        'relative flex items-start gap-3 rounded-md border bg-bg py-3 pr-2 pl-3',
+        'relative flex items-start gap-2 rounded-md border bg-bg py-3 pr-1.5 pl-2',
         isDragging
           ? 'z-2 border-primary shadow-e3'
           : selected ? 'z-1 border-primary bg-primary-bg shadow-none' : 'z-1 border-border shadow-none',
@@ -70,12 +70,12 @@ export function StopCard({ stop, onRemove, readOnly = false, selected = false, o
           aria-pressed={selected}
           aria-label={t('trips.stops.filter', { number: stopNumber, name: stop.name })}
           onClick={onSelect}
-          className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-md text-left outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="flex min-w-0 flex-1 cursor-pointer items-start gap-2 rounded-md text-left outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <StopBody stop={stop} />
         </button>
       ) : (
-        <span className="flex min-w-0 flex-1 items-start gap-3"><StopBody stop={stop} /></span>
+        <span className="flex min-w-0 flex-1 items-start gap-2"><StopBody stop={stop} /></span>
       )}
 
       {readOnly ? null : <button
@@ -103,7 +103,7 @@ function StopBody({ stop }: { stop: StopRow }) {
     <>
       <span
         aria-hidden
-        className="grid size-8 flex-none place-items-center rounded-full font-mono text-body font-semibold leading-none"
+        className="grid size-7 flex-none place-items-center rounded-full font-mono text-body font-semibold leading-none"
         style={{
           background: stopColor(stopNumber),
           color: stopForeground(stopNumber),
