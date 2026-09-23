@@ -14,6 +14,15 @@ export const admin = {
     empty: 'Chưa có tài khoản nào.',
     noMatch: 'Không có tài khoản khớp bộ lọc.',
     tabs: { accounts: 'Tài khoản', permissions: 'Ma trận quyền' },
+    /** Ba ô số liệu trên đầu tab Tài khoản (V2): đếm trên toàn bộ danh sách; nhãn hai ô trạng thái lấy từ `status`. */
+    summary: {
+      total: 'Tổng tài khoản',
+      totalNote: 'Mọi vai trò, kể cả tài khoản đã khoá',
+      note: {
+        active: 'Đăng nhập được vào hệ thống',
+        suspended: 'Không đăng nhập được cho tới khi mở khoá',
+      },
+    },
     search: 'Tìm theo tên, email, số điện thoại, mã',
     filters: { role: 'Vai trò', allRoles: 'Mọi vai trò', status: 'Trạng thái', allStatuses: 'Mọi trạng thái' },
     updated: 'Đã cập nhật {name}',

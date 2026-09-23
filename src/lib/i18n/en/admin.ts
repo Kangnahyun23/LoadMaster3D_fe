@@ -13,6 +13,14 @@ export const admin = {
     empty: 'No accounts yet.',
     noMatch: 'No account matches the filters.',
     tabs: { accounts: 'Accounts', permissions: 'Permission matrix' },
+    summary: {
+      total: 'Total accounts',
+      totalNote: 'All roles, locked accounts included',
+      note: {
+        active: 'Can sign in to the system',
+        suspended: 'Cannot sign in until unlocked',
+      },
+    },
     search: 'Search by name, email, phone, ID',
     filters: { role: 'Role', allRoles: 'All roles', status: 'Status', allStatuses: 'All statuses' },
     updated: 'Updated {name}',

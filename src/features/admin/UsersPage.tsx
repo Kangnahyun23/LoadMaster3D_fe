@@ -18,6 +18,7 @@ import { useUsersQuery } from './useUsersQuery'
 /**
  * Quản trị người dùng (LM-092, D-41, D-42): danh sách đọc từ kho qua `useUsersQuery` (tìm, lọc, sắp xếp, phân trang trên URL), menu
  * thao tác mỗi dòng, mật khẩu tạm hiện một lần, và tab "Ma trận quyền" chỉ đọc. Hành động chính duy nhất: thêm người dùng.
+ * Bố cục V2: tab Tài khoản có ba ô số liệu trên một thẻ gồm thanh tìm/lọc và bảng; mỗi tab tự cuộn dưới thanh tab.
  */
 export function UsersPage() {
   const t = useT()
