@@ -34,6 +34,38 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
+### 23/09/2026 — V2 bước 6, nhóm 2: bảng điều khiển, người dùng, nhật ký, hồ sơ
+
+Bốn màn làm song song, mỗi màn một agent trong git worktree riêng (không chung file: mỗi màn một thư mục feature, một nhánh từ
+điển, một file E2E), người điều phối gộp và chạy kiểm tra trên nhánh gộp. Điểm V2 cần quyết định mới được hỏi người dùng sau lượt
+đầu rồi làm bù. Bài học quy trình: worktree của agent được tạo từ commit cũ, phải bảo agent đặt lại về đầu nhánh trước khi làm.
+
+**Đã làm**
+- **Bảng điều khiển:** lưới hai cột V2 (chuyến theo trạng thái + thẻ đội xe; lấp đầy theo ngày + khối lượng đã giao theo xe), bảng
+  chuyến gần đây kiểu paper. Thẻ đội xe mới: sẵn sàng / đang phục vụ chuyến / bảo dưỡng, đếm trên cả đội xe theo cùng luật với Đội
+  xe. Giữ 5 ô số liệu (người dùng chọn giữ cả ô và số lớn trên thẻ đội xe), chọn kỳ ở đầu nội dung. Lượt đầu agent chuyển hai biểu đồ
+  sang thanh HTML — người dùng chọn giữ recharts, đã đưa về; tên xe kèm biển số xuống tối đa ba dòng trên trục, không cắt biển số.
+- **Người dùng:** ba ô số liệu (tổng · đang hoạt động · đã khoá), hai ô trạng thái lọc qua `trang-thai`; thanh tìm/lọc và bảng chung
+  thẻ; avatar chữ cái vuông bo góc. Bấm dòng mở panel chi tiết (thông tin, chip "Công việc được phép" từ `ROLE_PERMISSIONS`, nút sửa /
+  khoá / đặt lại mật khẩu / xoá cùng luật chặn với menu dòng); panel mở thì ẩn cột Điện thoại. Giữ tab Ma trận quyền (nay kiểu paper).
+- **Nhật ký:** ba ô số liệu trên cả nhật ký (tổng sự kiện · sự kiện ngày gần nhất — bấm để lọc ngày đó · ghi nhận gần nhất); dòng có
+  avatar người làm + vai trò hiện tại (người dùng chọn giữ; kho chưa lưu vai trò lúc xảy ra), icon hành động trên nền tint theo nghĩa
+  cố định (hổ phách chỉ cho việc cần chú ý); giữ đủ cột, bộ lọc, tham số URL.
+- **Hồ sơ:** hai cột — cột nhận diện (avatar, tên, vai trò, email, kho) và thẻ gồm hai phần form; email chỉ hiện một lần. Không hiện
+  "đăng nhập gần nhất": với chính mình đó chỉ là giờ của phiên này.
+
+**Lỗi tìm ra khi gộp**
+- `admin-users` E2E đỏ 1/4 lần: menu "Khoá tài khoản" bị gỡ khỏi DOM giữa cú bấm. Nguyên nhân: TanStack Table v9 dựng hàm `cell` thành
+  component, cột memo theo `users` nên dữ liệu về lại (sau đăng nhập) dựng lại cột và gắn lại mọi ô. Sửa: hàm ô cấp module, giá trị
+  đổi qua context; test hồi quy giữ nguyên phần tử menu khi dữ liệu về lại. Luật mới ở AGENTS mục 5 "Bảng dữ liệu".
+- `plan-approval` đỏ một lần khi máy chạy song song các agent, chạy riêng xanh.
+
+**Kết quả:** `pnpm lint`, `pnpm build` sạch; 812 unit/DOM; 82/82 E2E trên nhánh gộp (chạy khi không còn agent song song).
+
+**Còn lại:** nhóm 3 (panel Planner; kho và tài xế theo V2 mobile — cần nghiên cứu nghiệp vụ và hỏi trước; đăng nhập/403/404 chỉ
+token). Bảng khác có hàm ô viết trong memo theo dữ liệu (danh sách chuyến, đội xe, chuyến gần đây) chưa có menu trong ô nên chưa lỗi,
+nhưng nên đưa về cùng lối khi thêm trạng thái vào ô.
+
 ### 23/09/2026 — V2 bước 6, nhóm 1: năm màn điều phối
 
 Làm theo nhóm, một commit mỗi màn, người dùng chốt từng điểm lệch với bản V2 trước khi làm (quyết định ghi lại trong phiên).

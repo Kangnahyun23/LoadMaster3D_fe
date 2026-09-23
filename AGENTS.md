@@ -419,6 +419,15 @@ Không phải thứ gì cũng cần card. Nhóm nội dung bằng khoảng trắ
 (menu biến mất) hoặc menu nhảy sang người khác và thao tác chạy nhầm đối tượng. Chỉ truyền khi mã chắc chắn duy nhất — kiện có thể
 trùng mã khi dữ liệu còn lỗi, bảng kiện giữ khoá theo vị trí.
 
+*(bổ sung 23/09/2026, V2 bước 6)* TanStack Table v9 dựng mỗi hàm `cell`/`header` thành **một component** (`createElement(columnDef.cell)`):
+dựng lại mảng cột là mọi ô gỡ ra gắn lại — menu Radix đang mở trong ô bị rời khỏi DOM giữa cú bấm. Màn Người dùng từng gặp: cột
+memo theo `users`, truy vấn `staleTime: 0` về lại sau đăng nhập, menu "Khoá tài khoản" biến mất (E2E đỏ 1/4 lần). Bảng có trạng thái
+trong ô (menu, hộp thoại, ô nhập): khai hàm ô **một lần ở cấp module**, giá trị thay đổi (dữ liệu, người đang chọn, callback) đưa
+qua context hoặc `meta` của bảng; chỉ dựng lại cột khi đổi ngôn ngữ hay đổi tập cột (`features/admin/users-table-context.ts`).
+
+*(bổ sung 23/09/2026, V2)* Ảnh đại diện chữ cái đầu trong nội dung (bảng người dùng, nhật ký, hồ sơ, panel) là **ô vuông bo góc**
+theo V2; hình tròn chỉ ở nút tài khoản trên thanh điều hướng và menu tài khoản.
+
 Chiều cao dòng cố định (48px thoáng, 36px gọn, 56px cảm ứng). Cột số căn phải, JetBrains Mono. Tiêu đề cột 12px weight 500 màu `--text-3`, không viết hoa, dính khi cuộn. Bảng hẹp (cột phụ ≤ 360px) dùng padding ngang 10px thay vì 12px để tiêu đề không xuống dòng.
 
 *(bổ sung 23/09/2026, V2 bước 5–6)* Kiểu bảng V2 cho màn danh sách: bảng và thanh tìm/lọc nằm **chung một thẻ**
