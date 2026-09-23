@@ -48,7 +48,7 @@ bằng tiếng Anh.
 | Tài xế (điện thoại) | `/tai-xe`, `/tai-xe/diem-giao?chuyen=TRIP-010` |
 | Người dùng / nhật ký | `/nguoi-dung`, `/nhat-ky` |
 | Hồ sơ cá nhân | `/ho-so` |
-| Tìm nhanh | Ctrl+K / ⌘K ở màn có nav rail |
+| Tìm nhanh | Ctrl+K / ⌘K ở màn có thanh điều hướng |
 | Đo hiệu năng 3D | `/chuyen/TRIP-2026-0914/phuong-an?debug&packages=1000&quality=low` |
 | Tài liệu UI | `/kieu-dang`, `/thanh-phan` |
 

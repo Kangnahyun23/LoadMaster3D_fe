@@ -1,7 +1,8 @@
 # V2 — Phạm vi phác thảo màn hình
 
 Cập nhật 22/09/2026, vòng 08. **Desktop trước, mobile sau** theo yêu cầu mới nhất.
-Đây là prototype trong `design/v2`, chưa thay production React hoặc triển khai Flutter.
+Đây là prototype trong `design/v2`, chưa triển khai Flutter. Từ 23/09/2026 hướng B đang chuyển dần vào production React
+(thanh điều hướng ngang và trường nền đã vào; tiến độ ở [progress.md](progress.md)).
 
 ## Đối chiếu desktop với router / feature hiện tại
 

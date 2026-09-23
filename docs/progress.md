@@ -1,6 +1,6 @@
 # Theo dõi tiến độ — LoadMaster FE MVP
 
-Cập nhật lần cuối: **22/09/2026**
+Cập nhật lần cuối: **23/09/2026**
 
 Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](build-spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](handoff.md)
 
@@ -33,6 +33,36 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 ---
 
 ## 2. Nhật ký
+
+### 23/09/2026 — V2 vào production, bước 0–3: luật, token, thanh điều hướng ngang, trường nền
+
+Nhánh `feat/v2-production-nav` (tách từ `developer`). Hướng B đã duyệt; chuyển ngôn ngữ thị giác của `design/v2` vào `src/` theo
+từng bước, mỗi bước một commit.
+
+**Đã làm**
+- **Bước 0 — luật.** AGENTS mục 5: bỏ lệnh cấm kính, thay bằng luật phân lớp (kính ở chrome điều hướng, khối tổng hợp số liệu, panel
+  nổi trên khung 3D; bảng, form, inspector giữ nền đặc; không lồng kính; luôn có nền đặc dự phòng). Nền trang được dùng trường màu
+  biên độ dưới 5% độ sáng. Điều hướng rail dọc 96 px → thanh ngang 56 px.
+- **Bước 1 — token** (`src/index.css`): thang mực `--ink-strong/1/2/3`, năm cặp `--tint-*`, `--shell-max`, `--field`, `--chrome`,
+  nối vào `@theme inline`. Bổ sung thuần, chưa đổi giao diện.
+- **Bước 2 — thanh điều hướng ngang** (`app/NavRail.tsx`, `app/useGlassFollow.ts`): chỉ báo kính bám mục đang hover/focus, trả về
+  mục đang mở khi rời thanh. Dưới 1.340 px chỉ còn icon, tên vào `aria-label`. Ba lỗi thanh ngang gây ra đã sửa: toast đè nút ở góc
+  phải header (offset 80 → 136 px), màn 403 bị cắt 56 px trong `AppShell`, nav không vừa ở 1.024/390 px (nay co và cuộn).
+- **Bước 3 — trường nền**: `AppShell` dùng `--field`; 11 thanh tiêu đề 72 px, thanh tab Người dùng và thanh chân So sánh đổi sang
+  `bg-chrome`; `EmptyState`, `ErrorScreen` bỏ nền xám.
+
+**Vướng mắc**
+- `background-image` có lớp cuối là màu là CSS không hợp lệ: trình duyệt bỏ cả khai báo, không báo lỗi. Prototype dùng shorthand
+  `background` nên không gặp. Lớp cuối của `--field` nay là `linear-gradient` đặc. Kiểm nền bằng `getComputedStyle`.
+
+**Kiểm tra**
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · `pnpm test:e2e` **80/80** ✅ (bước 2); bước 3 chạy lại
+  `layout-1366`, `rbac`, `profile` ✅.
+
+**Việc tiếp theo**
+- Bước 4: tiêu đề màn dùng chung (`PageHero`) và ô số liệu dùng chung (`KpiTile` lên `components/`), áp `--shell-max`.
+- Bước 5: màn Đội xe trọn vẹn. Bước 6: đo rồi mới mở rộng sang các màn còn lại.
+- Blur ở màn kho/tài xế chưa đo trên thiết bị thật — phải đo trước khi coi là chốt.
 
 ### 22/09/2026 — V2 Mobile 03: đăng nhập, cài đặt và bàn giao
 
