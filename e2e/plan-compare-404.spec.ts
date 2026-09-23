@@ -1,26 +1,26 @@
 import { expect, test } from './fixtures'
 
 /**
- * LM-100: So sánh phương án `/chuyen/:tripId/so-sanh` (LM-051) — mọi thẻ revision mang MOCK RESULT, mở revision đang chọn vào
+ * LM-100: So sánh phương án `/chuyen/:tripId/so-sanh` (LM-051) — mọi cột revision mang MOCK RESULT, mở revision đang chọn vào
  * Planner; tiêu đề tab theo màn. Đường dẫn lạ ra màn 404, nút về màn chính mở đúng màn của vai trò.
  */
 test.use({ collectConsoleErrors: true })
 
 const TRIP_ID = 'TRIP-2026-0914'
 
-test('compare plans: every revision card is MOCK RESULT and the chosen one opens in the Planner', async ({ page, login, browserErrors }) => {
+test('compare plans: every revision column is MOCK RESULT and the chosen one opens in the Planner', async ({ page, login, browserErrors }) => {
   await login(`/chuyen/${TRIP_ID}/so-sanh`)
   await expect(page.getByRole('heading', { level: 1, name: 'So sánh phương án', exact: true })).toBeVisible()
   await expect(page).toHaveTitle(`So sánh phương án ${TRIP_ID} · LoadMaster`)
 
-  // Seed: bản tối ưu REV-001 và bản đã duyệt REV-002 tạo từ nó
-  const cards = page.getByRole('article')
-  await expect(cards).toHaveCount(2)
-  for (const card of await cards.all()) await expect(card.getByText('MOCK RESULT', { exact: true })).toBeVisible()
+  // Seed: bản tối ưu REV-001 và bản đã duyệt REV-002 tạo từ nó — mỗi bản một cột, đầu cột có radio chọn bản
+  const radios = page.getByRole('radio')
+  await expect(radios).toHaveCount(2)
+  await expect(page.getByRole('columnheader').filter({ hasText: 'MOCK RESULT' })).toHaveCount(2)
+  await expect(page.getByRole('radio', { name: 'REV-002', exact: true })).toBeChecked()
 
-  const source = page.getByRole('article', { name: 'REV-001', exact: true })
-  await source.getByRole('button', { name: 'Chọn phương án này', exact: true }).click()
-  await expect(source.getByRole('button', { name: 'Đang chọn', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('radio', { name: 'REV-001', exact: true }).check()
+  await expect(page.getByRole('radio', { name: 'REV-001', exact: true })).toBeChecked()
   await expect(page.getByText('Đang chọn: REV-001', { exact: true })).toBeVisible()
 
   await page.getByRole('link', { name: 'Mở REV-001 trong 3D', exact: true }).click()

@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { useT } from '@/lib/i18n'
 import { plannerPath } from '@/lib/planner-path'
-import { PlanCard } from './PlanCard'
+import { ComparisonMatrix } from './ComparisonMatrix'
 import { bestValues, defaultRevisionId, revisionCards, type RevisionCardModel } from './revision-comparison'
 import { useTripRevisionsQuery } from './useTripsQuery'
 
 /**
- * So sánh các revision đã lưu của chuyến (LM-051, D-37): mỗi thẻ đọc thiết lập và metrics thật của một revision.
+ * So sánh các revision đã lưu của chuyến (LM-051, D-37, V2): ma trận chỉ số × bản lưu, đọc thiết lập và metrics thật của từng revision.
  * Hành động chính duy nhất: mở revision đang chọn trong Planner (`?revision=<mã revision>`). Chưa đủ hai revision thì hiện
  * trạng thái rỗng dẫn tới Thiết lập tối ưu.
  */
@@ -90,17 +90,7 @@ function Comparison({ tripId, cards, canRun }: { tripId: string; cards: readonly
   return (
     <>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-shell py-6">
-        {Object.keys(best).length > 0 ? (
-          <span className="inline-flex items-center gap-2 self-end text-caption text-text-3">
-            <span aria-hidden className="size-3 rounded-[3px] border border-badge-info-border bg-primary-bg" />
-            {t('trips.compare.bestHint')}
-          </span>
-        ) : null}
-        <div className="grid auto-cols-[minmax(300px,1fr)] grid-flow-col items-stretch gap-4">
-          {cards.map((card) => (
-            <PlanCard key={card.id} card={card} best={best} selected={card.id === selected?.id} onSelect={setChosenId} />
-          ))}
-        </div>
+        <ComparisonMatrix cards={cards} best={best} selectedId={selected?.id} onSelect={setChosenId} />
       </div>
 
       <div className="flex h-16 flex-none items-center justify-between gap-4 border-t border-border bg-chrome px-shell">
