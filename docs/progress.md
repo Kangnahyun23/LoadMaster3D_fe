@@ -34,6 +34,29 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 
 ## 2. Nhật ký
 
+### 23/09/2026 — Sửa: màn trong khung ứng dụng không lăn chuột được
+
+Người dùng báo bảng điều khiển "bị cố định", không lướt xuống được.
+
+**Nguyên nhân** (ba lỗi, tái hiện bằng `mouse.wheel` ở 1.366 × 768 trước khi sửa)
+- Bước 2 của V2 đổi `AppShell` từ hàng (rail dọc) sang cột (thanh ngang) nhưng đặt màn thẳng vào cột: gốc màn cao theo nội dung
+  (bảng điều khiển 1.645 px trong cửa sổ 768 px), `overflow-hidden` của khung cắt phần dưới, vùng cuộn không có gì để cuộn.
+- Bảng `sr-only` của biểu đồ là `absolute` không có tổ tiên định vị: kéo tài liệu dài tới 959 px, bánh xe cuộn cả trang và đẩy thanh
+  điều hướng khỏi mép trên — đúng ảnh người dùng gửi.
+- Có từ trước V2: khung bo góc quanh bảng nhật ký là con `overflow-hidden` của cột flex nên bị co còn 516 px, 50 dòng chỉ thấy khoảng 10.
+
+**Đã làm**
+- `AppShell`: màn nằm trong hàng flex `relative min-h-0` — trả lại đúng bối cảnh mọi màn được viết cho, và giữ phần tử `absolute` trong khung.
+- Nhật ký: khung bảng `flex-none`. Quét tự động 12 màn ở 1.366 × 768 tìm con của cột flex bị co thấp hơn nội dung: chỉ còn nhật ký.
+- E2E mới trong `layout-1366.spec.ts`: lăn chuột thật tới cuối ở bảng điều khiển, chi tiết chuyến, chi tiết xe, nhật ký; trang không cuộn,
+  thanh điều hướng ở mép trên. Bỏ hai chỗ sửa thì test đỏ, có thì xanh.
+- AGENTS mục 5 (cuộn trong khung ứng dụng) và mục 9 (Playwright cuộn được `overflow-hidden` bằng code — kiểm bằng bánh xe).
+
+**Vì sao E2E không bắt được:** Playwright tự `scrollIntoView` trước mỗi thao tác, và cách đó cuộn được cả vùng `overflow-hidden`.
+
+**Kiểm tra**
+- `pnpm lint` · `pnpm build` · `pnpm test` · `pnpm test:e2e` ✅ — lint, build, **776/776** unit, **81/81** E2E (80 cũ + 1 mới, 16,3 phút).
+
 ### 23/09/2026 — V2 bước 4b: theo sát bản V2, sửa luật cũ cho khớp
 
 Người dùng chốt: làm theo V2, luật viết cho giao diện phẳng V1 thì sửa theo thực tế. Hỏi từng điểm lệch trước khi sửa.

@@ -108,7 +108,8 @@ export function AuditLogPage() {
         ) : (
           <div
             aria-busy={events.isFetching || undefined}
-            className={cn('overflow-hidden rounded-md border border-border bg-bg', events.isPlaceholderData && 'opacity-60')}
+            // flex-none: con `overflow-hidden` của cột flex được co về 0 — thiếu nó bảng bị cắt còn chiều cao khung, vùng cuộn không có gì để cuộn
+            className={cn('flex-none overflow-hidden rounded-md border border-border bg-bg', events.isPlaceholderData && 'opacity-60')}
           >
             <DataTable
               data={rows}

@@ -393,6 +393,15 @@ bám mép trên thì nội dung trôi lạc giữa vùng trống, nhìn như tra
 - **Màn vận hành** (có dữ liệu): nội dung căn trái, bám mép trên, không tiêu đề khổng lồ căn giữa, không hình minh hoạ lớn. Đây là mặc định.
 - **Màn không có dữ liệu**: được phép bố cục hai cột, căn giữa theo chiều dọc, và có hình minh hoạ. Hình minh hoạ phải dựng từ chính sản phẩm (phép chiếu đẳng cự ở `lib/isometric.ts`, bảng màu điểm giao), không mượn ảnh trang trí bên ngoài.
 
+**Cuộn trong khung ứng dụng** *(bổ sung 23/09/2026)*: trang không bao giờ cuộn; mỗi màn tự cuộn vùng nội dung của nó. `AppShell` đặt màn
+trong một **hàng** flex `relative min-h-0` dưới thanh điều hướng. Gốc màn `flex min-w-0 flex-1 flex-col`, vùng cuộn
+`min-h-0 flex-1 overflow-auto`. Ba lỗi đã gặp, cả ba chỉ lộ khi lăn chuột thật:
+- Đặt màn thẳng vào cột flex (bước 2 của V2): gốc màn cao theo nội dung (`min-height: auto`), `overflow-hidden` của khung cắt phần dưới.
+- Con `overflow-hidden` trực tiếp của cột flex (khung bo góc quanh bảng) được **co về 0** — phải `flex-none`, không thì bảng bị
+  cắt còn chiều cao khung và vùng cuộn không có gì để cuộn (nhật ký 50 dòng chỉ thấy 10).
+- Phần tử `absolute` không có tổ tiên định vị (`sr-only` của biểu đồ, ô ẩn của Radix) kéo cả tài liệu dài ra, trang cuộn và đẩy thanh
+  điều hướng khỏi màn — hàng chứa màn phải `relative`.
+
 ### Phân cấp thị giác
 
 Mỗi màn hình chỉ có **đúng một** hành động chính dùng nút primary. Mọi hành động khác dùng nút phụ hoặc ghost.
@@ -732,6 +741,9 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
   - Cửa sổ lấy mẫu animation tính từ lúc animation **hiện ra**, không từ lúc bấm: máy chậm tiêu hết cửa sổ cho quãng bấm → React
     render → spring chạy.
   - Root R3F lấy theo canvas **đang có mặt** và chờ nó xuất hiện (`_roots.get(canvas)`), vì canvas có thể vừa được dựng lại.
+- *(bổ sung 23/09/2026)* Playwright **cuộn được cả vùng `overflow-hidden` bằng code** (`scrollIntoView` trước mỗi thao tác), nên màn
+  người dùng không lăn được vẫn xanh. Kiểm cuộn bằng `page.mouse.wheel` (`layout-1366.spec.ts`, test "mouse wheel"); thêm màn cuộn
+  dài mới thì thêm vào danh sách của test đó.
 
 ### Chia chunk theo route
 
