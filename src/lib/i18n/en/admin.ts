@@ -55,8 +55,17 @@ export const admin = {
       resetPassword: 'Reset password',
       delete: 'Delete account',
     },
+    detail: {
+      region: 'Account details for {name}',
+      close: 'Close account details',
+      info: 'Personal details',
+      id: 'Account ID',
+      permissions: 'Allowed work',
+      permissionsNote: 'Permissions come with the {role} role, from the same configuration as the Permission matrix tab. These are labels, not buttons.',
+      actions: 'Actions',
+    },
     blocked: {
-      self: 'Not available for the account you are signed in with',
+      self:'Not available for the account you are signed in with',
       lastAdmin: 'The system needs at least one active administrator',
     },
     form: {

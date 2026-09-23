@@ -11,9 +11,13 @@ import {
 import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { User } from '@/types/user'
-import type { AccountBlock, AccountGuards } from './account-guards'
+import { toggleLockBlock, type AccountBlock, type AccountGuards } from './account-guards'
 
 export type UserAction = 'edit' | 'toggleLock' | 'resetPassword' | 'delete'
+
+function stopPropagation(event: { stopPropagation: () => void }) {
+  event.stopPropagation()
+}
 
 /**
  * Menu thao tác ở cuối mỗi dòng người dùng (LM-092): Sửa, Khoá/Mở khoá, Đặt lại mật khẩu, Xoá. Thao tác kho sẽ từ chối (tự khoá/xoá
@@ -26,17 +30,17 @@ export function UserRowMenu({ user, guards, onAction }: {
 }) {
   const t = useT()
   const suspended = user.status === 'suspended'
-  // Mở khoá chỉ bị chặn với chính mình; khoá thì theo cả luật quản trị viên cuối
-  const lockBlock = suspended ? (guards.lock === 'self' ? 'self' : null) : guards.lock
+  const lockBlock = toggleLockBlock(user, guards)
 
+  // Bấm dòng mở panel chi tiết: nút menu và các mục của nó (portal, nhưng sự kiện React vẫn nổi theo cây) không được nổi lên dòng.
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={t('admin.users.menu.open', { name: user.fullName })}>
+        <Button variant="ghost" size="icon" aria-label={t('admin.users.menu.open', { name: user.fullName })} onClick={stopPropagation}>
           <MoreHorizontal strokeWidth={1.5} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72">
+      <DropdownMenuContent align="end" className="w-72" onClick={stopPropagation}>
         <DropdownMenuItem onSelect={() => onAction('edit', user)}>
           <Pencil strokeWidth={1.5} aria-hidden />
           {t('admin.users.menu.edit')}

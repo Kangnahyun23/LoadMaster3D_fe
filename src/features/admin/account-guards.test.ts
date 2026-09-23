@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import type { User } from '@/types/user'
-import { accountGuards } from './account-guards'
+import { accountGuards, toggleLockBlock } from './account-guards'
 
 /** Thao tác bị chặn trước khi gửi kho, kèm lý do (LM-092): tự khoá/xoá/đổi vai trò mình, quản trị viên hoạt động cuối cùng. */
 type Account = Pick<User, 'id' | 'role' | 'status'>
@@ -27,4 +27,12 @@ test('còn quản trị viên hoạt động khác, hoặc tài khoản thườn
   // Quản trị viên đã khoá không phải "đang hoạt động cuối cùng"
   expect(accountGuards(admin('US-0020', 'suspended'), 'US-0005', [first, admin('US-0020', 'suspended')]))
     .toStrictEqual({ lock: null, remove: null, role: null })
+})
+
+test('mở khoá chỉ bị chặn với chính mình; khoá theo cả luật quản trị viên cuối', () => {
+  const lastAdmin = { lock: 'lastAdmin', remove: 'lastAdmin', role: 'lastAdmin' } as const
+  const self = { lock: 'self', remove: 'self', role: 'self' } as const
+  expect(toggleLockBlock({ status: 'active' }, lastAdmin)).toBe('lastAdmin')
+  expect(toggleLockBlock({ status: 'suspended' }, lastAdmin)).toBeNull()
+  expect(toggleLockBlock({ status: 'suspended' }, self)).toBe('self')
 })

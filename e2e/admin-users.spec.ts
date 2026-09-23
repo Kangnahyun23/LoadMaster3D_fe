@@ -67,3 +67,38 @@ test('a driver account the admin creates signs in with its one-time password; lo
   await expect(page).toHaveURL(/\/dang-nhap$/)
   expect(browserErrors).toStrictEqual([])
 })
+
+test('row click opens the user detail panel beside the table at 1366 px; the phone column steps aside and Esc closes it', async ({ page, login, browserErrors }) => {
+  await page.setViewportSize({ width: 1366, height: 768 })
+  await login('/nguoi-dung', 'admin')
+  const table = page.getByRole('table')
+  const phoneHeader = table.getByRole('columnheader', { name: 'Điện thoại', exact: true })
+  await expect(phoneHeader).toBeVisible()
+
+  await page.getByRole('row', { name: /Nguyễn Thanh Tùng/ }).getByText('Kho Long Bình').click()
+  const panel = page.getByRole('complementary', { name: 'Chi tiết tài khoản Nguyễn Thanh Tùng', exact: true })
+  await expect(panel.getByRole('heading', { level: 2, name: 'Nguyễn Thanh Tùng', exact: true })).toBeFocused()
+  await expect(panel).toContainText('0901 234 567')
+  await expect(panel.getByRole('listitem')).toHaveCount(8)
+  await expect(phoneHeader).toHaveCount(0)
+
+  // Panel nằm cạnh bảng, không xuống dưới; không có gì cuộn ngang
+  const [tableBox, panelBox] = await Promise.all([table.boundingBox(), panel.boundingBox()])
+  expect(panelBox!.x).toBeGreaterThan(tableBox!.x + tableBox!.width)
+  expect(panelBox!.x + panelBox!.width).toBeLessThanOrEqual(1366)
+  const overflowing = await page.evaluate(() => [...document.querySelectorAll('html, [role="tabpanel"], table')]
+    .filter((element) => element.scrollWidth > element.clientWidth + 1).length)
+  expect(overflowing).toBe(0)
+
+  // Lăn chuột trên bảng: tab cuộn, panel dính lại trong khung nhìn
+  await page.mouse.move(tableBox!.x + 200, 600)
+  await page.mouse.wheel(0, 2000)
+  await expect.poll(() => page.getByRole('tabpanel').evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+  await expect(panel).toBeInViewport()
+
+  await page.keyboard.press('Escape')
+  await expect(panel).toHaveCount(0)
+  await expect(phoneHeader).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Nguyễn Thanh Tùng', exact: true })).toBeFocused()
+  expect(browserErrors).toStrictEqual([])
+})

@@ -59,6 +59,19 @@ export const admin = {
       resetPassword: 'Đặt lại mật khẩu',
       delete: 'Xoá tài khoản',
     },
+    /**
+     * Panel chi tiết bên phải (V2), mở khi bấm một dòng. Nhãn trường dùng lại `columns`, nhãn nút dùng lại `menu`, tên quyền dùng
+     * lại `admin.permissions.labels`.
+     */
+    detail: {
+      region: 'Chi tiết tài khoản {name}',
+      close: 'Đóng chi tiết tài khoản',
+      info: 'Thông tin cá nhân',
+      id: 'Mã tài khoản',
+      permissions: 'Công việc được phép',
+      permissionsNote: 'Quyền đi theo vai trò {role}, cùng cấu hình với tab Ma trận quyền. Đây là nhãn, không phải nút bấm.',
+      actions: 'Thao tác',
+    },
     /** Lý do một thao tác bị chặn trước khi gửi kho (`account-guards.ts`). */
     blocked: {
       self: 'Không áp dụng cho tài khoản bạn đang đăng nhập',
