@@ -36,7 +36,7 @@ export function FillByDayChart({ days, isMockResult, className }: {
         />
       }
     >
-      <ResponsiveContainer width="100%" height={240} initialDimension={INITIAL_SIZE}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={240} initialDimension={INITIAL_SIZE}>
         <BarChart data={[...days]} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} accessibilityLayer={false}>
           <CartesianGrid vertical={false} stroke={GRID_STROKE} />
           <XAxis

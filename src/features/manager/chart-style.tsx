@@ -1,7 +1,7 @@
 import type { TooltipContentProps } from 'recharts'
 
 /**
- * Nét chung của ba biểu đồ bảng điều khiển (LM-090). Màu lấy token qua `var()` (AGENTS mục 4); tám màu điểm giao không dùng ở
+ * Nét chung của biểu đồ recharts trên bảng điều khiển (LM-090, lấp đầy theo ngày). Màu lấy token qua `var()` (AGENTS mục 4); tám màu điểm giao không dùng ở
  * đây vì chúng chỉ để định danh điểm giao. Một chuỗi mỗi biểu đồ nên một màu `--primary`, không cần chú giải — tiêu đề nói hình
  * vẽ gì. Cột ≤ 24 px, đầu dữ liệu bo 4 px, lưới là đường mảnh 1 px liền, nhãn trục cỡ micro (11 px).
  */
@@ -12,20 +12,14 @@ export const GRID_STROKE = 'var(--border)'
 /** Dải nền khi rê chuột qua một cột. */
 export const HOVER_CURSOR = { fill: 'var(--surface)' }
 
-/** Chữ trục và nhãn đầu cột: micro 11 px, màu chữ phụ; số dùng JetBrains Mono. */
-export const TICK = { fontSize: 11, fill: 'var(--text-3)' }
+/** Chữ trục: micro 11 px, màu chữ phụ; số dùng JetBrains Mono. */
+const TICK = { fontSize: 11, fill: 'var(--text-3)' }
 export const MONO_TICK = { ...TICK, className: 'font-mono' }
-export const VALUE_LABEL = { fontSize: 11, fill: 'var(--text-2)', className: 'font-mono' }
 
 export const AXIS_LINE = { stroke: 'var(--border)' }
 
 /** Kích thước ban đầu trước khi đo khung: trình duyệt đo lại ngay, jsdom (không có layout) giữ nguyên để vẫn vẽ được. */
 export const INITIAL_SIZE = { width: 640, height: 240 }
-
-/** Chiều cao biểu đồ cột ngang: mỗi hàng 36 px. */
-export function rowsHeight(rows: number): number {
-  return Math.max(3, rows) * 36 + 8
-}
 
 /**
  * Tooltip theo token: giá trị đậm đứng trước, nhãn phụ phía dưới (người đọc đã biết chuỗi, cần con số). Là lớp nổi nên

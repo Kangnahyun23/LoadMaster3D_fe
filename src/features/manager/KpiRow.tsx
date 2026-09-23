@@ -24,14 +24,14 @@ export function KpiRow({ summary }: { summary: DashboardSummary }) {
         label={t('manager.kpi.trips')}
         value={format.integer(summary.completedCount)}
         unit={t('manager.kpi.tripsUnit', { total: format.integer(summary.tripCount) })}
-        note={t('manager.kpi.tripsNote')}
+        note={t('manager.kpi.tile.trips')}
       />
       <KpiTile
         icon={Boxes}
         tone="violet"
         label={t('manager.kpi.fill')}
         value={fill.averagePercent === null ? t('manager.noValue') : format.percent(fill.averagePercent)}
-        note={fill.averagePercent === null ? t('manager.kpi.fillEmpty') : t('manager.kpi.fillNote', { count: fill.planCount })}
+        note={fill.averagePercent === null ? t('manager.kpi.tile.fillEmpty') : t('manager.kpi.tile.fill', { count: fill.planCount })}
         badge={fill.isMockResult ? <Badge tone="warning">MOCK RESULT</Badge> : null}
       />
       <KpiTile
@@ -40,7 +40,7 @@ export function KpiRow({ summary }: { summary: DashboardSummary }) {
         label={t('manager.kpi.delivered')}
         value={format.integer(Math.round(summary.deliveredWeightKg))}
         unit={t('manager.kpi.deliveredUnit')}
-        note={t('manager.kpi.deliveredNote')}
+        note={t('manager.kpi.tile.delivered')}
       />
       <KpiTile
         icon={PackageCheck}
@@ -49,8 +49,8 @@ export function KpiRow({ summary }: { summary: DashboardSummary }) {
         value={delivery.cleanPercent === null ? t('manager.noValue') : format.percent(delivery.cleanPercent)}
         note={
           delivery.cleanPercent === null
-            ? t('manager.kpi.cleanEmpty')
-            : t('manager.kpi.cleanNote', { clean: format.integer(delivery.cleanItems), total: format.integer(delivery.finishedItems) })
+            ? t('manager.kpi.tile.cleanEmpty')
+            : t('manager.kpi.tile.clean', { clean: format.integer(delivery.cleanItems), total: format.integer(delivery.finishedItems) })
         }
       />
       <KpiTile
@@ -59,7 +59,7 @@ export function KpiRow({ summary }: { summary: DashboardSummary }) {
         label={t('manager.kpi.vehicles')}
         value={format.integer(vehicles.inUse)}
         unit={t('manager.kpi.vehiclesUnit', { total: format.integer(vehicles.total) })}
-        note={t('manager.kpi.vehiclesNote')}
+        note={t('manager.kpi.tile.vehicles')}
       />
     </div>
   )
