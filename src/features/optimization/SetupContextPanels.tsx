@@ -4,9 +4,12 @@ import { dataErrorMessage, useFormat, useT } from '@/lib/i18n'
 import type { OptimizationSetup } from './optimization-api'
 import { useChangeVehicleMutation } from './useOptimizationSetup'
 
+const LINK = 'self-start rounded-sm text-body font-medium text-primary hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+
 /**
- * Xe và hàng của chuyến trên màn Thiết lập tối ưu: đổi xe tại chỗ, còn sửa chi tiết thì đi tới trang xe / chi tiết chuyến.
- * Xe bảo dưỡng hiện kèm lý do nhưng không chọn được (D-53); chuyến đã khoá (`locked`, D-45) thì không đổi xe.
+ * Phần "Kiểm tra đầu vào" của Thiết lập tối ưu (V2): ba số lớn của hàng (kiện, khối lượng, điểm giao — từ chuyến), xe chở chuyến
+ * đổi được tại chỗ, còn sửa chi tiết thì đi tới trang xe / chi tiết chuyến. Xe bảo dưỡng hiện kèm lý do nhưng không chọn được
+ * (D-53); chuyến đã khoá (`locked`, D-45) thì không đổi xe. Nằm trong một `FormSection` nên không tự dựng thẻ.
  */
 export function SetupContextPanels({ tripId, setup, locked = false }: { tripId: string; setup: OptimizationSetup; locked?: boolean }) {
   const t = useT()
@@ -15,16 +18,33 @@ export function SetupContextPanels({ tripId, setup, locked = false }: { tripId: 
   const { vehicle, trip } = setup
   const instances = trip.packages.reduce((sum, pkg) => sum + pkg.quantity, 0)
   const weightKg = trip.packages.reduce((sum, pkg) => sum + pkg.weightKg * pkg.quantity, 0)
-  const volumeCm3 = trip.packages.reduce((sum, pkg) => sum + pkg.lengthCm * pkg.widthCm * pkg.heightCm * pkg.quantity, 0)
+  const stats = [
+    { label: t('optimization.stats.packages'), value: format.integer(instances), unit: t('optimization.stats.packagesUnit', { lines: format.integer(trip.packages.length) }) },
+    // Số lớn làm tròn kg như ô số liệu của bảng điều khiển; khối lượng chính xác nằm ở panel "Hai giới hạn"
+    { label: t('optimization.stats.weight'), value: format.integer(Math.round(weightKg)), unit: 'kg' },
+    { label: t('optimization.stats.stops'), value: format.integer(trip.stops.length) },
+  ]
 
   function handleVehicleChange(vehicleId: string) {
     changeVehicle.mutate(vehicleId, { onError: (error) => toast.error(dataErrorMessage(error, t)) })
   }
 
   return (
-    <>
-      <section className="flex flex-col gap-2 rounded-md border border-border p-4">
-        <label className="flex flex-col gap-1.5 text-caption font-medium text-text-3">
+    <div className="flex flex-col gap-5">
+      <dl className="m-0 grid grid-cols-3 gap-4">
+        {stats.map((stat) => (
+          <div key={stat.label} className="flex flex-col gap-1 border-b border-border pb-3">
+            <dt className="text-caption text-ink-2">{stat.label}</dt>
+            <dd className="m-0 text-[26px] leading-[1.1] font-semibold text-ink-strong tabular-nums">
+              {stat.value}
+              {stat.unit ? <span className="ml-1 text-body font-normal text-ink-2">{stat.unit}</span> : null}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className="flex flex-col gap-2">
+        <label className="flex flex-col gap-1.5 text-caption font-medium text-ink-2">
           {t('optimization.vehicle')}
           <select
             value={vehicle.id}
@@ -42,7 +62,7 @@ export function SetupContextPanels({ tripId, setup, locked = false }: { tripId: 
             })}
           </select>
         </label>
-        <p className="font-mono text-caption text-text-2">
+        <p className="font-mono text-caption text-ink-2">
           {t('optimization.vehicleSummary', {
             size: format.dimensions(vehicle.innerLengthCm, vehicle.innerWidthCm, vehicle.innerHeightCm),
             payload: format.weight(vehicle.maxPayloadKg),
@@ -50,21 +70,11 @@ export function SetupContextPanels({ tripId, setup, locked = false }: { tripId: 
             obstacles: format.integer(vehicle.obstacles.length),
           })}
         </p>
-        <Link to={`/doi-xe/${vehicle.id}`} className="self-start text-body text-primary">{t('optimization.editVehicle')}</Link>
-      </section>
-
-      <section className="flex flex-col gap-2 rounded-md border border-border p-4">
-        <h2 className="text-h3 font-semibold">{t('optimization.packages')}</h2>
-        <p className="font-mono text-caption text-text-2">
-          {t('optimization.packagesSummary', {
-            lines: format.integer(trip.packages.length),
-            instances: format.integer(instances),
-            weight: format.weight(weightKg),
-            volume: format.volumeM3(volumeCm3),
-          })}
-        </p>
-        <Link to={`/chuyen/${tripId}`} className="self-start text-body text-primary">{t('optimization.editPackages')}</Link>
-      </section>
-    </>
+        <div className="flex flex-wrap gap-x-5 gap-y-1">
+          <Link to={`/doi-xe/${vehicle.id}`} className={LINK}>{t('optimization.editVehicle')}</Link>
+          <Link to={`/chuyen/${tripId}`} className={LINK}>{t('optimization.editPackages')}</Link>
+        </div>
+      </div>
+    </div>
   )
 }

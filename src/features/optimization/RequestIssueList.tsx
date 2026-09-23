@@ -13,7 +13,7 @@ export function RequestIssueList({ summary }: { summary: RequestIssueSummary }) 
   const total = GROUPS.reduce((sum, group) => sum + summary.groups[group].length, 0)
 
   return (
-    <section aria-labelledby="request-issues" className="flex flex-col gap-3 rounded-md border border-border p-4">
+    <section aria-labelledby="request-issues" className="flex flex-col gap-3 rounded-lg border border-border bg-bg p-4">
       <h2 id="request-issues" className="text-h3 font-semibold">{t('optimization.summaryTitle')}</h2>
       {total === 0 ? (
         <p className="flex items-center gap-2 text-body text-badge-success-fg">
