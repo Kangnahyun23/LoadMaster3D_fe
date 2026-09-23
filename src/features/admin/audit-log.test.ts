@@ -2,7 +2,7 @@ import { expect, test } from 'vitest'
 import { createFormatter } from '@/lib/format'
 import { createTranslator } from '@/lib/i18n'
 import type { AuditAction, AuditEvent, AuditTargetType } from '@/lib/mock-db'
-import { describeEvent, type AuditDirectory } from './audit-log'
+import { describeEvent, describeLogRow, type AuditDirectory } from './audit-log'
 
 /** Cách đọc một sự kiện nhật ký (LM-091, D-43): kho chỉ lưu mã và tham số, màn dịch và format theo ngôn ngữ. */
 const vi = { t: createTranslator('vi'), format: createFormatter('vi-VN') }
@@ -87,4 +87,23 @@ test('đối tượng đã xoá khỏi kho: giữ tên trong tham số, không d
     .toStrictEqual({ id: 'US-0013', label: 'Mai Văn Phúc', href: null })
   // Tham số chưa có nhãn vẫn hiện, theo đúng tên kho ghi
   expect(describe(event('trip.created', { type: 'trip', id: 'TRIP-004' }, { source: 'csv' })).details).toBe('source: csv')
+})
+
+test('dòng của màn nhật ký: mã hành động, chữ tắt và vai trò hiện tại của người làm; không còn tài khoản thì không có hai thứ đó', () => {
+  const directory: AuditDirectory = { ...DIRECTORY, roles: new Map([['US-0001', 'dispatcher']]) }
+  const cancelled = event('trip.cancelled', { type: 'trip', id: 'TRIP-004' }, { reason: 'Khách hoãn nhận hàng' })
+  expect(describeLogRow(cancelled, directory, vi.t, vi.format)).toStrictEqual({
+    ...describe(cancelled),
+    actionCode: 'trip.cancelled',
+    actorInitials: 'TT',
+    actorRole: 'Điều phối viên',
+  })
+  expect(describeLogRow(cancelled, directory, en.t, en.format)).toMatchObject({ actorInitials: 'TT', actorRole: 'Dispatcher' })
+  // Có tên nhưng kho không trả vai trò: chữ tắt vẫn có, vai trò thì không
+  expect(describeLogRow(event('auth.signedIn', { type: 'user', id: 'US-0010' }, {}, 'US-0010'), directory, vi.t, vi.format))
+    .toMatchObject({ actor: 'Trương Văn Lộc', actorInitials: 'VL', actorRole: null })
+  expect(describeLogRow(event('vehicle.maintenanceOff', { type: 'vehicle', id: 'VEHICLE-008' }, {}, null), directory, vi.t, vi.format))
+    .toMatchObject({ actor: 'Hệ thống', actorInitials: null, actorRole: null })
+  expect(describeLogRow(event('user.created', { type: 'user', id: 'US-0010' }, {}, 'US-0005'), directory, vi.t, vi.format))
+    .toMatchObject({ actor: 'Tài khoản đã xoá (US-0005)', actorInitials: null, actorRole: null })
 })

@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { DEMO_EMAILS, DEMO_PASSWORD, expect, test } from './fixtures'
 import { MOCK_DB } from './spec-flow-helpers'
 
@@ -7,10 +7,21 @@ import { MOCK_DB } from './spec-flow-helpers'
  * sự kiện ở đầu nhật ký, lọc theo người làm ra đúng. Không `page.goto` sau khi ghi: tải lại là mất kho.
  */
 
-/** Chữ các ô của hàng dữ liệu thứ `index` (0 là hàng đầu dưới tiêu đề), bỏ cột thời điểm. */
+/**
+ * Chữ các ô của hàng dữ liệu thứ `index` (0 là hàng đầu dưới tiêu đề), bỏ cột thời điểm — như trình đọc màn hình đọc: ô chữ tắt
+ * và icon hành động (`aria-hidden`) chỉ để nhìn. Ô người làm đọc "tên vai trò".
+ */
 async function rowCells(page: Page, index: number) {
-  const cells = await page.locator('tbody tr').nth(index).locator('td').allInnerTexts()
-  return cells.slice(1).map((cell) => cell.replace(/\s+/g, ' ').trim())
+  return (await readableTexts(page.locator('tbody tr').nth(index).locator('td'))).slice(1)
+}
+
+async function readableTexts(cells: Locator) {
+  const texts = await cells.evaluateAll((tds) => tds.map((td) => {
+    const copy = td.cloneNode(true) as HTMLElement
+    for (const hidden of copy.querySelectorAll('[aria-hidden="true"]')) hidden.remove()
+    return copy.textContent ?? ''
+  }))
+  return texts.map((text) => text.replace(/\s+/g, ' ').trim())
 }
 
 async function signOutFromMenu(page: Page, name: string) {
@@ -48,18 +59,21 @@ test('a trip the dispatcher cancels tops the admin log, and filtering by who did
   await expect(page.getByRole('heading', { name: 'Nhật ký hệ thống', exact: true })).toBeVisible()
 
   // Mới nhất trước: quản trị đăng nhập, điều phối đăng xuất, rồi lần huỷ chuyến
-  const cancelled = ['Nguyễn Thanh Tùng', 'Huỷ chuyến', 'Tuyến Bình Chánh – Biên Hoà TRIP-012', 'Lý do: Khách đổi lịch nhận hàng']
+  const cancelled = ['Nguyễn Thanh Tùng Điều phối viên', 'Huỷ chuyến', 'Tuyến Bình Chánh – Biên Hoà TRIP-012', 'Lý do: Khách đổi lịch nhận hàng']
   await expect(page.locator('tbody tr').first()).toContainText('Võ Minh Khoa')
-  expect(await rowCells(page, 0)).toStrictEqual(['Võ Minh Khoa', 'Đăng nhập', 'Võ Minh Khoa US-0005', ''])
-  expect(await rowCells(page, 1)).toStrictEqual(['Nguyễn Thanh Tùng', 'Đăng xuất', 'Nguyễn Thanh Tùng US-0001', ''])
+  expect(await rowCells(page, 0)).toStrictEqual(['Võ Minh Khoa Quản trị hệ thống', 'Đăng nhập', 'Võ Minh Khoa US-0005', ''])
+  expect(await rowCells(page, 1)).toStrictEqual(['Nguyễn Thanh Tùng Điều phối viên', 'Đăng xuất', 'Nguyễn Thanh Tùng US-0001', ''])
   expect(await rowCells(page, 2)).toStrictEqual(cancelled)
+  // Ba ô tóm tắt (V2): lần ghi gần nhất là lần quản trị vừa đăng nhập — cùng giờ với dòng đầu bảng (giờ theo múi giờ máy)
+  const [latestTime] = (await readableTexts(page.locator('tbody tr').first().locator('td'))).map((text) => text.split(' ')[0])
+  await expect(page.getByRole('group', { name: 'Ghi nhận gần nhất', exact: true })).toContainText(latestTime!)
 
   await page.getByRole('combobox', { name: 'Người làm', exact: true }).click()
   await page.getByRole('option', { name: 'Nguyễn Thanh Tùng', exact: true }).click()
   await expect(page).toHaveURL(/\/nhat-ky\?nguoi-lam=US-0001$/)
   await expect(page.locator('tbody tr').first()).toContainText('Đăng xuất')
-  const actors = await page.locator('tbody tr td:nth-child(2)').allInnerTexts()
-  expect(new Set(actors)).toStrictEqual(new Set(['Nguyễn Thanh Tùng']))
+  const actors = await readableTexts(page.locator('tbody tr td:nth-child(2)'))
+  expect(new Set(actors)).toStrictEqual(new Set(['Nguyễn Thanh Tùng Điều phối viên']))
   expect(await rowCells(page, 1)).toStrictEqual(cancelled)
 
   // Nhóm "Chuyến": lần huỷ đứng đầu, bấm đối tượng mở đúng chuyến

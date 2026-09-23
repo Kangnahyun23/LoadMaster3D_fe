@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { fetchAuditDirectory, fetchAuditEvents, type AuditLogFilter } from './audit-api'
+import { summarizeAuditLog } from './audit-summary'
 
 /**
  * Nhật ký qua TanStack Query (mục 9). Đổi bộ lọc giữ bảng cũ trong lúc đọc lại (`keepPreviousData`) nên không nhấp nháy.
@@ -10,6 +11,21 @@ export function useAuditEventsQuery(filter: AuditLogFilter) {
     queryKey: ['audit', 'events', filter],
     queryFn: () => fetchAuditEvents(filter),
     placeholderData: keepPreviousData,
+    staleTime: 0,
+  })
+}
+
+const WHOLE_LOG: AuditLogFilter = {}
+
+/**
+ * Ba ô số liệu đếm trên cả nhật ký: cùng khoá với bảng khi chưa lọc gì, nên màn mở không lọc chỉ đọc kho một lần.
+ * Backend thật nên có điểm tóm tắt riêng thay vì trả cả nhật ký — lúc đó chỉ thay `queryFn`.
+ */
+export function useAuditSummaryQuery() {
+  return useQuery({
+    queryKey: ['audit', 'events', WHOLE_LOG],
+    queryFn: () => fetchAuditEvents(WHOLE_LOG),
+    select: summarizeAuditLog,
     staleTime: 0,
   })
 }

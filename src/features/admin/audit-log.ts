@@ -1,13 +1,16 @@
 import type { Formatter } from '@/lib/format'
 import type { TFunction } from '@/lib/i18n'
-import { DELIVERY_ISSUE_KINDS, type AuditEvent } from '@/lib/mock-db'
-import { ROLES } from '@/types/user'
+import { DELIVERY_ISSUE_KINDS, type AuditAction, type AuditEvent } from '@/lib/mock-db'
+import { ROLES, type Role } from '@/types/user'
+import { actorInitials } from './audit-look'
 
 /** Tên hiện của đối tượng trong kho lúc đọc nhật ký: mã → tên. Đối tượng đã xoá không có ở đây. */
 export type AuditDirectory = {
   readonly users: ReadonlyMap<string, string>
   readonly trips: ReadonlyMap<string, string>
   readonly vehicles: ReadonlyMap<string, string>
+  /** Vai trò hiện tại theo mã người dùng — chỉ màn `/nhat-ky` cần (dòng phụ dưới tên người làm); chuông thông báo bỏ trống. */
+  readonly roles?: ReadonlyMap<string, Role>
 }
 
 /** Một dòng nhật ký đã dịch cho bảng `/nhat-ky` (LM-091). */
@@ -21,6 +24,15 @@ export type AuditRow = {
   /** `label` vắng khi kho không còn tên (email lạ khi đăng nhập sai); `href` vắng khi đối tượng không còn trang để mở. */
   readonly target: { readonly id: string; readonly label: string | null; readonly href: string | null }
   readonly details: string
+}
+
+/** Dòng của bảng `/nhat-ky` (V2): thêm mã hành động (icon + tint) và ô đại diện của người làm. */
+export type AuditLogRow = AuditRow & {
+  readonly actionCode: AuditAction
+  /** Vắng khi người làm không còn là một tài khoản trong kho (hệ thống, chưa đăng nhập, đã xoá). */
+  readonly actorInitials: string | null
+  /** Vai trò **hiện tại** của người làm, đã dịch; vắng khi kho không trả vai trò. */
+  readonly actorRole: string | null
 }
 
 /** Tham số kho ghi (`ctx.log`) có nhãn trong từ điển `audit.log.params`. */
@@ -54,6 +66,18 @@ export function describeEvent(event: AuditEvent, directory: AuditDirectory, t: T
     details: Object.entries(event.params)
       .map(([key, value]) => t('audit.log.detail', { label: paramLabel(key, t), value: paramValue(event, key, value, t, format) }))
       .join(' · '),
+  }
+}
+
+/** Một dòng của bảng `/nhat-ky`: `describeEvent` cộng những gì chỉ bảng cần. Hàm thuần như `describeEvent`. */
+export function describeLogRow(event: AuditEvent, directory: AuditDirectory, t: TFunction, format: Formatter): AuditLogRow {
+  const name = event.actorId === null ? undefined : directory.users.get(event.actorId)
+  const role = event.actorId === null ? undefined : directory.roles?.get(event.actorId)
+  return {
+    ...describeEvent(event, directory, t, format),
+    actionCode: event.action,
+    actorInitials: name === undefined ? null : actorInitials(name),
+    actorRole: role === undefined ? null : t(`roles.${role}`),
   }
 }
 
