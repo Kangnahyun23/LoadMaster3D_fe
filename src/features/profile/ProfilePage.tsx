@@ -16,9 +16,8 @@ export function ProfilePage() {
   const user = useCurrentUser()
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <PageHero
-        overlap title={t('profile.title')} description={t('pageHero.profile')} />
-      <main className="sky-overlap min-h-0 flex-1 overflow-y-auto px-shell pb-6 max-sm:px-4 max-sm:pb-4">
+      <PageHero title={t('profile.title')} description={t('pageHero.profile')} />
+      <main className="min-h-0 flex-1 overflow-y-auto px-shell py-6 max-sm:p-4">
         <div className="grid max-w-300 grid-cols-1 items-start gap-6 pointer-coarse:text-body-lg lg:grid-cols-[272px_minmax(0,1fr)] lg:gap-8">
           <ProfileIdentity user={user} />
           <div className="flex min-w-0 flex-col gap-6 rounded-lg border border-border bg-bg p-6 max-sm:p-4">

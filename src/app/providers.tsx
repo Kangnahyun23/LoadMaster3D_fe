@@ -54,11 +54,11 @@ export function Providers({ children }: { children: ReactNode }) {
           position="top-right"
           closeButton
           gap={12}
-          // Dưới cả hai dải chrome: thanh điều hướng ngang 56 px + thanh tiêu đề màn 72 px = 128. Trước đây là 80 vì
-          // điều hướng nằm dọc bên trái nên chỉ phải tránh thanh tiêu đề. Rê chuột lên toast làm nó dừng đếm giờ, nên
-          // toast đè nút hành động góc phải header thì người dùng không bấm được nút cho tới khi đóng toast (LM-101).
-          offset={{ top: 136, right: 16 }}
-          mobileOffset={{ top: 136, right: 16, left: 16 }}
+          // Dưới nút hành động của dải trời (V2.3): thanh điều hướng 60 px + tiêu đề 32 px + mô tả, nút chính kết thúc ở
+          // khoảng 139 px. Rê chuột lên toast làm nó dừng đếm giờ, nên toast đè nút hành động góc phải thì người dùng không
+          // bấm được nút cho tới khi đóng toast (LM-101). Trước V2.3 là 136 (thanh ngang 56 + tiêu đề 72).
+          offset={{ top: 152, right: 16 }}
+          mobileOffset={{ top: 152, right: 16, left: 16 }}
           icons={{
             success: <ToastIcon tone="bg-green-50 text-green-700"><CircleCheck strokeWidth={1.75} /></ToastIcon>,
             warning: <ToastIcon tone="bg-amber-50 text-amber-700"><TriangleAlert strokeWidth={1.75} /></ToastIcon>,
