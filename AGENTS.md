@@ -175,6 +175,15 @@ thêm mock riêng lên `lib/` (LM-062 đã gỡ `lib/load-plan.mock.ts` mm).
 Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-text-2`,
 `rounded-md`… trỏ thẳng vào `var()` chứ không sao chép giá trị. Sửa token chỉ ở một chỗ.
 
+### V2.3 "Cyan kính" là đích *(bổ sung 25/09/2026)*
+
+Bản thiết kế đã chốt nằm ở `design/v2.3/` (`README.md` thứ tự làm, `SCREENS.md` màn → route, `CHANGES.md` việc cần làm).
+Giá trị token đích: `design/v2.3/tokens/index.v2.3.css` — **giữ tên token cũ**, đổi giá trị sang cyan, thêm thang `--cyan-*`,
+`--n-*`, `--amber/violet/green/red-*`, `--sky`, `--card-shadow`, `--glass-dark*`, `--primary-fill-*`, `--on-primary`, `--font-display`.
+Cho tới khi PR token (đợt 1) gộp, khối code dưới đây là trạng thái **hiện tại**; PR đó phải thay khối này bằng giá trị mới trong
+cùng commit. Chỗ nào luật cũ ở mục 4–5 khác V2.3 thì theo các dòng *(đã điều chỉnh 25/09/2026, V2.3)*.
+`design/v2.3/tokens/v3.css` chỉ để tham chiếu, không import vào `src/`.
+
 ```css
 :root {
   /* nền và chữ */
@@ -260,6 +269,8 @@ Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-tex
 ```
 
 Font: **Be Vietnam Pro** cho giao diện, **JetBrains Mono** cho số, mã kiện, kích thước, khối lượng. Mono luôn kèm `font-variant-numeric: tabular-nums`.
+*(đã điều chỉnh 25/09/2026, V2.3)* Thêm **Archivo** (variable, `--font-display`, độ rộng 106–112 %) cho tiêu đề màn, tiêu đề card /
+hộp thoại và số tổng hợp lớn; file font trong `design/v2.3/tokens/fonts/` (có dải tiếng Việt). Không dùng Archivo cho chữ thân.
 
 ### Type scale
 
@@ -299,6 +310,9 @@ trong `src/`; muốn dùng class từ nơi khác thì thêm `@source` tường m
 ### Nút
 
 - Nút chính: cao 40px desktop, **56px tablet và điện thoại**. Padding ngang 16px. Bo góc 8px. Nền đặc `--primary`. Chữ trắng 14px weight 600. Không viền, không bóng lúc nghỉ.
+  *(đã điều chỉnh 25/09/2026, V2.3)* Nền gradient dọc `--primary-fill-from → --primary-fill-to`, viền 1 px `--primary-fill-border`,
+  **chữ tối `--on-primary`** (7,7:1), bo `--r-md` (10 px), phản sáng trong 1 px và quầng cyan nhẹ. `--primary` (cyan-700) dành cho
+  link, vòng focus, ô đã chọn và biểu đồ — không tô nền nút bằng nó. Vẫn một nút chính mỗi màn.
 - *(quyết định 16/09/2026)* Màn **điều phối** (danh sách/chi tiết/form chuyến, kiện, thiết lập tối ưu, so sánh, đội xe, dashboard) tạm thời
   **chỉ hỗ trợ desktop**: nút giữ 40px, không bắt buộc 56px. Luật 56px áp cho màn cảm ứng: kho, tài xế, Planner 3D.
 - Hover chỉ đổi nền sang `--primary-hover`. **Không** phóng to, **không** nhấc lên.
@@ -352,6 +366,10 @@ to; đang lọc: viền `--primary` đậm gấp đôi. Số của ô đếm tr�
 
 ### Thử nghiệm visual V2 (21/09/2026)
 
+*(đã điều chỉnh 25/09/2026)* V2.3 "Cyan kính" (`design/v2.3/`) **thay** phần hình ảnh của V2 dưới đây: kính sáng, `PageHero` nền
+sáng, `--field` và năm cặp tint xanh dương chuyển sang dải trời tối, kính tối và bảng cyan. Cấu trúc V2 (thang mực bốn cấp, nghĩa
+cố định của tint, `px-shell`, `KpiTile`, cuộn trong khung) giữ nguyên.
+
 Vòng ý tưởng 02: người dùng cho phép **thay đổi mạnh** trong prototype, thử nền sáng xanh chuyển nhẹ, gradient, kính lồi, phản sáng, bóng và thang bo góc ngoài luật V1. Chỉ áp dụng `design/v2`, chưa là chuẩn production; duy trì khả năng đọc, focus và reduced-motion. Xem brief V2 để biết đánh đổi và các mục chưa kiểm trên thiết bị thật.
 
 *(đã điều chỉnh 23/09/2026)* Hướng V2 **đã được duyệt** và đang chuyển dần vào `src/`: kính theo lớp (xem "Cấm tuyệt đối" bên dưới),
@@ -365,25 +383,31 @@ phản và FPS. Đây đúng hai vai trò cần tương phản nhất. Phải đ
 ### Cấm tuyệt đối
 
 - Không dùng chữ gạch chân làm nút hành động. Gạch chân chỉ cho link trong đoạn văn.
-- Không gradient trên nút, card hay thanh tiêu đề. *(đã điều chỉnh 23/09/2026)* **Nền trang** được dùng trường màu rất nhạt
+- Không gradient trên nút, card hay thanh tiêu đề. *(đã điều chỉnh 25/09/2026, V2.3)* Ngoại lệ, đều khai trong token: nền **nút
+  chính** (`--primary-fill-*`), **dải trời** `--sky` đầu màn (thanh điều hướng + tiêu đề + tab) và thanh tiến độ/thước đo. Card,
+  bảng, form, hộp thoại vẫn nền đặc. *(đã điều chỉnh 23/09/2026)* **Nền trang** được dùng trường màu rất nhạt
   (`--field`): hai vệt radial xanh trên nền `#edf4fb`, biên độ dưới 5% độ sáng. Đây là lớp khí quyển để bề mặt đọc màu trắng
   nổi lên khỏi nó. Ngoài nền trang, gradient chỉ có trong **vật liệu kính** (chỉ báo điều hướng, ô số liệu) và ô icon nhận diện
-  màn (`.hero-icon`) — đều là gradient trắng/xanh rất nhạt khai trong token, không phải màu trang trí.
+  màn (`.hero-icon`) — đều là gradient trắng/xanh rất nhạt khai trong token, không phải màu trang trí. V2.3: nền trang là `--app` phẳng, bỏ `--field` và `.hero-icon`.
 - *(đã điều chỉnh 23/09/2026)* Kính (blur nền, viền sáng) dùng **theo lớp**, không rải tuỳ ý.
   **Được** ở chrome điều hướng, khối tổng hợp số liệu, và panel điều khiển nổi đè lên khung 3D nền tối.
+  *(đã điều chỉnh 25/09/2026, V2.3)* Kính là kính **tối**: `.glass-nav` trên dải trời và `.glass-dark` trên khung 3D. Ô số liệu
+  chuyển sang card nền đặc. Màn kho và tài xế vẫn phải đo tương phản ngoài thực tế trước khi chốt kính.
   **Không** ở bảng, form, inspector và mọi bề mặt người dùng đọc lâu — những chỗ đó giữ nền đặc, phân tách bằng viền 1px.
   Không lồng kính trong kính. Luôn có nền đặc dự phòng khi trình duyệt thiếu `backdrop-filter`, và tôn trọng
   `prefers-reduced-transparency`. Trước 23/09/2026 luật này cấm kính hoàn toàn; đổi sau khi duyệt hướng V2. Viền phát sáng
   vẫn không dùng ngoài ba chỗ kể trên.
 - Toast nằm dưới thanh tiêu đề (`offset` trên 80 px): không che nút hành động ở góc phải header — rê chuột lên toast làm nó dừng đếm giờ
   (LM-101 phát hiện toast che nút Duyệt của Planner).
-- Không đổ bóng lên card. Card phân tách bằng viền 1px `--border`. Bóng chỉ dùng cho dropdown, modal, toast, popover, và **thẻ đang được kéo** (lúc đó nó là lớp đang nhấc khỏi mặt phẳng).
+- Không đổ bóng lên card. *(đã điều chỉnh 25/09/2026, V2.3)* Trừ `--card-shadow` rất nhẹ (bo `--r-lg` 14 px) như `design/v2.3`;
+  không thêm bóng nào khác, không nâng card khi rê chuột. Card phân tách bằng viền 1px `--border`. Bóng chỉ dùng cho dropdown, modal, toast, popover, và **thẻ đang được kéo** (lúc đó nó là lớp đang nhấc khỏi mặt phẳng).
   *(đã điều chỉnh 23/09/2026)* Bề mặt **kính** không phải card phẳng: được viền sáng trong và bóng nâng rất nhẹ bằng token
-  (`--nav-glass-shadow`, `--glass-edge`, `--tile-lift`, `--hero-icon-shadow`). Card nền đặc vẫn không có bóng.
+  (`--nav-glass-shadow`, `--glass-edge`, `--tile-lift`, `--hero-icon-shadow`). Card nền đặc: chỉ `--card-shadow` (V2.3).
 - Không emoji trong giao diện. Icon dùng Lucide, nét 1,5px, cỡ 16/20/24.
 - Không viết hoa toàn bộ, không giãn chữ trang trí.
 - Không bo góc tròn hoàn toàn cho nút hành động. Dạng viên thuốc chỉ cho badge, chip lọc và thanh tiến độ.
-- Chỉ dùng ba độ đậm chữ: 400, 500, 600.
+- Chỉ dùng ba độ đậm chữ: 400, 500, 600. *(đã điều chỉnh 25/09/2026, V2.3)* Riêng Archivo (`--font-display`) được 650 và 700 cho
+  tiêu đề và số lớn.
 - Không dùng màu ngoài bảng token. Tám màu điểm giao **chỉ** để định danh điểm giao, không dùng trang trí.
 - Không kẻ sọc xen kẽ cho bảng. Dùng đường phân cách 1px.
 - Không dữ liệu giả kiểu Lorem hay "Sample Item 1". Dùng dữ liệu tiếng Việt thật khi làm mẫu.
@@ -783,6 +807,11 @@ Thêm màn mới thì thêm theo đúng lối này.
 - Mọi màn toàn màn hình (kho, tài xế, 3D) phải có lối thoát nhìn thấy được. Màn kiosk không có nghĩa là không có đường ra.
 
 ## 11. Khi dựng lại màn hình từ mockup
+
+*(bổ sung 25/09/2026)* Mockup hiện hành là `design/v2.3/screens/` (ảnh `.jpg` là đích, `.html` để đo). Làm theo từng đợt ở
+`design/v2.3/README.md`. Trước khi sửa một màn: chụp màn hiện tại bằng Playwright **cùng kích thước khung**, so với ảnh đích và
+ghi danh sách lệch vào issue (`design/v2.3/CHANGES.md` mục 5). Sau khi sửa: chụp lại và so lần nữa; lệch có chủ ý ghi vào bảng
+cuối mục này. Chữ trong mockup không phải chuẩn — chuẩn là `lib/i18n`; số trong mockup lấy từ seed, lệch thì tin `lib/mock-db`.
 
 1. Xác định trước những component **đã tồn tại** trong repo có thể dùng lại. Không tạo component mới trùng chức năng.
 2. Lấy màu và khoảng cách từ token, không đo từ ảnh.

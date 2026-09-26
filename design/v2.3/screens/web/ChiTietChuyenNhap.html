@@ -1,0 +1,212 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Chi tiết chuyến · nháp vừa tạo · 1536×864 --><title>Chi tiết chuyến TRIP-015 — nháp</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+
+body { width: 1536px; position: relative; }
+/* ---- dải trời (theo detail.png, bản g1b) */
+.hero { padding: 14px 28px 0; }
+.crumb a { color: rgba(203,247,249,.82); }
+.crumb .sep { color: rgba(203,247,249,.45); }
+.title-row { display: flex; align-items: flex-start; gap: 18px; margin-top: 8px; }
+.title-row h1 { margin: 0; font: 700 30px/1.15 var(--display); font-stretch: 110%; letter-spacing: -0.5px; color: #fff; white-space: nowrap; }
+.st-glass { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px; border-radius: 9px; font: 600 13px/1 var(--text);
+  white-space: nowrap; margin-top: 3px; flex: none; }
+.st-glass i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.st-glass.draft { background: rgba(255,255,255,.08); color: rgba(231,252,253,.9); border: 1px solid rgba(255,255,255,.2); }
+.st-glass.draft i { background: var(--n-300); }
+.st-glass.attn { background: rgba(250,171,53,.16); color: #fde2ae; border: 1px solid rgba(250,171,53,.5); }
+.st-glass.attn i { background: var(--amber-500); box-shadow: 0 0 0 3px rgba(250,171,53,.25), 0 0 10px rgba(250,171,53,.8); }
+.st-glass.run { background: rgba(130,100,231,.22); color: #e9e4ff; border: 1px solid rgba(169,150,240,.5); }
+.st-glass.run i { background: #b3a3f5; box-shadow: 0 0 0 3px rgba(179,163,245,.22), 0 0 10px rgba(179,163,245,.9); }
+.st-glass.done { background: rgba(54,172,98,.18); color: #c9f3d6; border: 1px solid rgba(95,208,138,.45); }
+.st-glass.done i { background: #5fd08a; }
+.hmeta { margin-top: 8px; display: flex; gap: 12px; color: rgba(203,247,249,.8); font-size: 14px; line-height: 20px; white-space: nowrap; }
+.hmeta b { color: #fff; font-weight: 600; }
+.hmeta .code { color: var(--cyan-200); }
+.title-row .actions { margin-left: auto; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; }
+.title-row .actions .row { display: flex; gap: 10px; }
+.btn-glass.btn-icon { width: 40px; padding: 0; justify-content: center; }
+.sky .btn.is-dis { opacity: .45; box-shadow: none; cursor: not-allowed; }
+.why { display: flex; align-items: center; gap: 6px; font-size: 12.5px; line-height: 18px; color: rgba(203,247,249,.84); white-space: nowrap; }
+.why svg { color: rgba(203,247,249,.7); flex: none; }
+.why b { color: #fff; font-weight: 600; }
+
+/* ---- Tiến trình trong dải: giờ + người làm theo TripProgressCard */
+.steps { display: flex; align-items: flex-start; margin: 0; padding: 22px 28px 76px; list-style: none; }
+.step { display: flex; align-items: flex-start; gap: 10px; white-space: nowrap; flex: none; }
+.step .dot { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid rgba(203,247,249,.28);
+  color: var(--cyan-950); flex: none; margin-top: -2px; }
+.step .sn { font: 600 13.5px/18px var(--text); color: rgba(231,252,253,.55); }
+.step .sc { font: 500 12px/16px var(--text); color: rgba(231,252,253,.88); margin-top: 3px; }
+.step .sc .num { font-weight: 650; }
+.step .sw { font: 500 12px/16px var(--display); font-variant-numeric: tabular-nums; color: rgba(203,247,249,.62); margin-top: 3px; }
+.step .sa { font-size: 12px; line-height: 16px; color: rgba(203,247,249,.62); }
+.step .snote { font: 600 12px/16px var(--text); margin-top: 3px; }
+.step.done .dot { background: var(--cyan-400); border-color: var(--cyan-400); box-shadow: 0 0 14px -2px rgba(0,195,212,.8); }
+.step.done .sn, .step.final .sn, .step.stale .sn, .step.current .sn { color: #fff; }
+.step.next .dot { border: 2px solid var(--cyan-300); box-shadow: 0 0 0 5px rgba(0,195,212,.18); }
+.step.next .sn { color: var(--cyan-200); }
+.step.next .snote { color: var(--cyan-300); }
+.step.wait .snote { color: #fbd98f; }
+.step.current .dot { border: 2px solid #b3a3f5; background: rgba(130,100,231,.3); box-shadow: 0 0 0 5px rgba(130,100,231,.22), 0 0 16px -2px rgba(179,163,245,.9); }
+.step.current .dot i { width: 8px; height: 8px; border-radius: 50%; background: #e9e4ff; }
+.step.current .sc { color: #e9e4ff; }
+.sbar { width: 124px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.14); margin: 5px 0 1px; overflow: hidden; }
+.sbar i { display: block; height: 100%; border-radius: 2px; background: linear-gradient(90deg, #d6cefd, #9b84f0); }
+.step.stale .dot { background: rgba(250,171,53,.2); border-color: var(--amber-500); color: #fbd98f; }
+.tag.gl-amber { height: 18px; padding: 0 6px; background: rgba(250,171,53,.18); color: #fde2ae; box-shadow: inset 0 0 0 1px rgba(250,171,53,.45); margin-left: 7px; vertical-align: top; }
+.step.final .dot { background: #4cc27a; border-color: #4cc27a; color: #032616; box-shadow: 0 0 14px -2px rgba(76,194,122,.85); }
+.steps.closed .step.done .dot { background: rgba(155,237,242,.85); border-color: transparent; box-shadow: none; }
+.conn { flex: 1; height: 2px; margin: 10px 14px 0; background: rgba(203,247,249,.16); border-radius: 1px; min-width: 20px; }
+.conn.done { background: linear-gradient(90deg, var(--cyan-400), var(--cyan-300)); box-shadow: 0 0 10px rgba(0,195,212,.5); }
+.conn.cur { background: linear-gradient(90deg, var(--cyan-400), #b3a3f5); box-shadow: 0 0 10px rgba(130,100,231,.5); }
+.steps.closed .conn.done { background: rgba(155,237,242,.55); box-shadow: none; }
+.steps.closed .conn.fin { background: linear-gradient(90deg, rgba(155,237,242,.55), #4cc27a); }
+
+/* ---- nội dung */
+.main { padding: 0 28px 16px; margin-top: -56px; position: relative; display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 16px;
+  align-items: start; }
+.full { grid-column: 1 / -1; }
+.main .banner { box-shadow: 0 1px 2px rgba(2,34,45,.05), 0 10px 28px -14px rgba(2,34,45,.3); }
+.banner a.act { display: inline-flex; align-items: center; gap: 6px; }
+.banner .l2 { margin-top: 4px; font-size: 13px; line-height: 19px; }
+
+/* ---- thẻ tuyến gọn (pha lập kế hoạch / xếp hàng) */
+.route { display: flex; align-items: stretch; gap: 3px; padding: 12px; }
+.origin { display: flex; flex-direction: column; justify-content: center; padding: 4px 14px 4px 8px; border-right: 1px dashed var(--line); min-width: 132px; flex: none; }
+.origin .lbl { font-size: 12px; line-height: 16px; color: var(--ink-3); }
+.origin .nm { font: 650 15px/1.3 var(--display); font-stretch: 105%; margin-top: 2px; }
+.stop { flex: 1; min-width: 0; display: flex; gap: 10px; padding: 10px 10px 10px 12px; border-radius: 10px; }
+.stop .mk { width: 26px; height: 26px; border-radius: 8px; font-size: 13px; }
+.sbody { min-width: 0; }
+.sname { font-weight: 600; line-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saddr { font-size: 12.5px; line-height: 17px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+.sload { font-size: 13px; line-height: 18px; color: var(--ink-2); margin-top: 4px; font-weight: 500; }
+.sload.zero { color: var(--ink-3); font-weight: 400; }
+.sarrow { align-self: center; color: var(--n-600); flex: none; }
+.route.dense .sname { font-size: 13.5px; }
+
+/* ---- bảng kiện */
+.pkgs { overflow: hidden; }
+.pkgs .card-head { padding: 13px 16px; min-height: 58px; }
+.pkgs .card-head .meta { font-family: var(--mono); font-size: 12.5px; }
+.pkgs .card-head .tag { margin-left: 2px; }
+.pkgs .card-head .end .field { height: 34px; width: 232px; }
+.pkgs .card-head .end .ctl.sm { width: 208px; }
+.tbar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line-soft); }
+.tbar .field { height: 34px; flex: 1; min-width: 0; max-width: 300px; }
+.tbar .ctl.sm { width: 224px; flex: none; }
+table.grid { table-layout: fixed; }
+table.grid td { overflow: hidden; height: 58px; }
+.pk-name { font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pk-sub { margin-top: 3px; font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
+.pk-sub .code { font-size: 12px; }
+.stopcell { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.stopcell span:last-child { white-space: normal; line-height: 18px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.req { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; background: var(--n-100); color: var(--ink-2);
+  font-size: 12px; font-weight: 500; margin-right: 4px; white-space: nowrap; }
+.req.frag { background: var(--amber-50); color: var(--amber-700); }
+.okay { color: var(--ink-3); font-size: 12.5px; }
+.tfoot { display: flex; justify-content: space-between; padding: 10px 16px; font-size: 12.5px; color: var(--ink-3); border-top: 1px solid var(--line-soft); }
+/* số lượng đổi sau khi duyệt: trước → sau (như Nhật ký) */
+.ba { display: inline-flex; align-items: center; gap: 5px; padding: 1px 7px; border-radius: 6px; background: var(--amber-50);
+  box-shadow: inset 0 0 0 1px var(--amber-200); font-size: 13.5px; }
+.ba s { color: var(--ink-3); }
+.ba b { color: var(--ink); font-weight: 650; }
+.ba svg { color: var(--amber-700); }
+.banner .ba { background: #fff; font-size: 13px; }
+/* cột tiến độ theo pha: Xếp ở kho / Giao hàng */
+.pc { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.pc .l1 { display: flex; align-items: center; gap: 8px; }
+.pst { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px 0 7px; border-radius: 7px; font: 600 12px/1 var(--text); white-space: nowrap; }
+.pst i { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+.pst.ok { background: var(--green-50); color: var(--green-700); } .pst.ok i { background: var(--green-500); }
+.pst.run { background: var(--violet-50); color: var(--violet-700); } .pst.run i { background: var(--violet-500); box-shadow: 0 0 0 3px rgba(130,100,231,.22); }
+.pst.wait { background: var(--n-100); color: var(--n-700); } .pst.wait i { background: #fff; box-shadow: inset 0 0 0 1.5px var(--n-500); }
+.pc .cnt { font: 500 13px/1 var(--display); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.pc .cnt b { color: var(--ink); font-weight: 650; }
+.pc .iss-l { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; line-height: 16px; color: var(--amber-700); font-weight: 600; }
+.pc .iss-l .code { font-size: 11.5px; color: var(--amber-700); }
+
+/* ---- cột phải (Tóm tắt hàng hoá + Phương tiện) */
+.side .sec { padding: 14px 18px; border-bottom: 1px solid var(--line-soft); }
+.side .sec:last-child { border-bottom: 0; }
+.side h3 { margin: 0 0 10px; font: 650 15px/20px var(--display); font-stretch: 106%; display: flex; align-items: center; }
+.side h3 .link { margin-left: auto; font: 600 13px/18px var(--text); }
+.gauge { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gauge .g { padding: 11px 12px; border-radius: 12px; background: var(--n-25); border: 1px solid var(--line-soft); }
+.gauge .lbl { font-size: 12.5px; color: var(--ink-3); }
+.gauge .big { font: 700 24px/1 var(--display); font-stretch: 108%; font-variant-numeric: tabular-nums; margin-top: 6px; }
+.gauge .big small { font-size: 14px; color: var(--ink-3); font-weight: 500; margin-left: 2px; }
+.gauge .of { font-size: 12.5px; color: var(--ink-3); margin-top: 6px; }
+.gauge .track { height: 6px; border-radius: 3px; background: var(--n-100); margin-top: 8px; overflow: hidden; }
+.gauge .track i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--cyan-300), var(--cyan-600)); }
+.vkv { display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; line-height: 19px; margin: 0; }
+.vkv > div { display: flex; justify-content: space-between; gap: 12px; }
+.vkv dt { color: var(--ink-3); white-space: nowrap; }
+.vkv dd { margin: 0; text-align: right; font-weight: 500; white-space: nowrap; }
+.vkv dd .code { font-size: 12px; }
+
+
+body { min-height: 864px; }
+/* cột phải chạy suốt từ đầu nội dung (như panel kiện) để toast "dưới dải" chỉ đè phần tóm tắt 0 % */
+.main.dr { grid-template-rows: auto auto; }
+.main.dr .route { grid-column: 1; grid-row: 1; }
+.main.dr .pkgs { grid-column: 1; grid-row: 2; }
+.main.dr .side { grid-column: 2; grid-row: 1 / span 2; }
+.pkgs .empty { padding: 40px 24px 44px; }
+.pkgs .empty .acts { margin-top: 20px; }
+.pkgs .empty .help { margin-top: 14px; max-width: 460px; text-align: center; }
+.gauge .big.z { color: var(--ink-3); }
+.toast-layer { position: absolute; right: 16px; top: 244px; z-index: 5; }
+.main.dr .sname { white-space: normal; font-size: 13.5px; line-height: 18px; }
+.toast b .code { color: var(--ink); font-size: 13px; font-weight: 600; }
+
+</style></head><body>
+<section class="sky">
+<header class="topbar">
+  <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 20.6 7.3v9.4L12 21.4 3.4 16.7V7.3z" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/><path d="M3.4 7.3 12 12l8.6-4.7M12 12v9.4" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/></svg></span><span class="word">Load<span>Master</span></span></div>
+  <nav class="glass-nav"><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Bảng điều khiển</a><a class="on"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>Chuyến hàng</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>Đội xe</a></nav>
+  <div class="right">
+    <div class="glass-search"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm chuyến, kiện, xe…<kbd>Ctrl K</kbd></div>
+    <div class="icon-glass lang">VI</div>
+    <div class="icon-glass bell"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b></b></div>
+    <div class="avatar">TT</div>
+  </div>
+</header>
+<div class="hero">
+  <div class="crumb"><a href="#">Chuyến hàng</a> <span class="sep">/</span> <span class="code">TRIP-015</span></div>
+  <div class="title-row">
+    <div style="min-width:0">
+      <div style="display:flex;align-items:center;gap:14px"><h1>Thủ Đức → Sóng Thần → Thủ Dầu Một</h1><span class="st-glass draft"><i></i>Nháp</span></div>
+      <div class="hmeta"><span>Ngày chạy <b>Thứ Sáu, 25/09/2026</b></span><span>·</span><span>Hyundai HD210 <span class="code">60C-446.32</span></span><span>·</span><span>Tài xế <b>Ngô Văn Bảo</b></span></div>
+    </div>
+    <div class="actions"><div class="row"><button type="button" class="btn btn-glass btn-icon" aria-label="Thao tác" aria-haspopup="menu"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button><button type="button" class="btn btn-primary is-dis" disabled aria-describedby="why"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg>Chạy tối ưu</button></div><div class="why" id="why"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>Chưa chạy được: chuyến chưa có kiện nào.</div></div>
+  </div>
+</div>
+<ol class="steps" aria-label="Tiến trình"><li class="step done"><span class="dot" aria-hidden="true"><svg class="" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><div><div class="sn">Tạo chuyến<span class="sr">, đã xong</span></div><div class="sw">11:52 24/09/2026</div><div class="sa">Nguyễn Thanh Tùng</div></div></li><li class="conn done" aria-hidden="true"></li><li class="step next"><span class="dot" aria-hidden="true"></span><div><div class="sn">Tối ưu<span class="sr">, chưa tới</span></div><div class="snote">Tiếp theo</div></div></li><li class="conn " aria-hidden="true"></li><li class="step "><span class="dot" aria-hidden="true"></span><div><div class="sn">Duyệt phương án<span class="sr">, chưa tới</span></div></div></li><li class="conn " aria-hidden="true"></li><li class="step "><span class="dot" aria-hidden="true"></span><div><div class="sn">Xếp hàng<span class="sr">, chưa tới</span></div></div></li><li class="conn " aria-hidden="true"></li><li class="step "><span class="dot" aria-hidden="true"></span><div><div class="sn">Xếp xong<span class="sr">, chưa tới</span></div></div></li><li class="conn " aria-hidden="true"></li><li class="step "><span class="dot" aria-hidden="true"></span><div><div class="sn">Giao hàng<span class="sr">, chưa tới</span></div></div></li><li class="conn " aria-hidden="true"></li><li class="step "><span class="dot" aria-hidden="true"></span><div><div class="sn">Hoàn thành<span class="sr">, chưa tới</span></div></div></li></ol>
+</section>
+<div class="main dr">
+  <section class="card route " aria-label="Sơ đồ tuyến"><div class="origin"><span class="lbl">Kho xuất phát</span><span class="nm">Kho Long Bình</span></div><div class="stop"><span class="mk s1">1</span><div class="sbody"><div class="sname">Cửa hàng Bách Hoá Xanh Thủ Đức</div><div class="saddr" title="96 Võ Văn Ngân, P. Bình Thọ, Thủ Đức">96 Võ Văn Ngân, P. Bình Thọ, Thủ Đức</div><div class="sload num zero">0 kiện · 0 kg</div></div></div><div class="sarrow"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div><div class="stop"><span class="mk s2">2</span><div class="sbody"><div class="sname">Bếp ăn công nghiệp KCN Sóng Thần</div><div class="saddr" title="12 Đường số 6, KCN Sóng Thần 1, Dĩ An">12 Đường số 6, KCN Sóng Thần 1, Dĩ An</div><div class="sload num zero">0 kiện · 0 kg</div></div></div><div class="sarrow"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div><div class="stop"><span class="mk s3">3</span><div class="sbody"><div class="sname">Nhà sách Phương Nam Thủ Dầu Một</div><div class="saddr" title="52 Bạch Đằng, P. Phú Cường, Thủ Dầu Một">52 Bạch Đằng, P. Phú Cường, Thủ Dầu Một</div><div class="sload num zero">0 kiện · 0 kg</div></div></div></section>
+  <section class="card pkgs" aria-label="Kiện hàng"><div class="card-head"><h2>Kiện hàng</h2><span class="meta">0 dòng kiện</span></div><div class="empty"><div class="art"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg></div>
+  <h3>Chuyến chưa có kiện nào</h3><p>Thêm kiện để chạy tối ưu xếp hàng cho chuyến này.</p>
+  <div class="acts"><button type="button" class="btn btn-secondary"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Thêm kiện</button><button type="button" class="btn btn-secondary"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>Nhập từ file</button></div>
+  <p class="help">Nhập từ file: chọn file .csv hoặc .xlsx — mỗi dòng một kiện, dòng đầu là tiêu đề cột như file mẫu.</p></div></section>
+  <aside class="card side">
+  <div class="sec"><h3>Tóm tắt hàng hoá</h3>
+    <div class="gauge">
+      <div class="g"><div class="lbl">Tải trọng sử dụng</div><div class="big z">0<small>%</small></div><div class="of num">0 / 9.500 kg</div><div class="track"><i style="width:0.0%"></i></div></div>
+      <div class="g"><div class="lbl">Thể tích sử dụng</div><div class="big z">0<small>%</small></div><div class="of num">0 / 40,6 m³</div><div class="track"><i style="width:0.0%"></i></div></div>
+    </div></div>
+  <div class="sec"><h3>Phương tiện<a href="#" class="link">Đổi xe</a></h3>
+    <dl class="vkv">
+      <div><dt>Xe</dt><dd>Hyundai HD210 · <span class="code">60C-446.32</span></dd></div>
+      <div><dt>Tài xế</dt><dd>Ngô Văn Bảo · <span class="num">0906 789 012</span></dd></div>
+      <div><dt>Lòng thùng (D × R × C)</dt><dd class="num">720 × 235 × 240 cm</dd></div>
+      <div><dt>Cửa (R × C)</dt><dd class="num">225 × 230 cm</dd></div>
+      <div><dt>Vật cản</dt><dd class="num">2</dd></div>
+    </dl></div>
+</aside>
+</div>
+<div class="toast-layer" role="status" aria-live="polite"><div class="toast ok"><span class="ic"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span><div><b>Đã tạo chuyến <span class="code">TRIP-015</span></b></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div></div>
+</body></html>

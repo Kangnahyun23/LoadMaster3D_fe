@@ -1,0 +1,122 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Kho · trạng thái danh sách và phiên · 2128×1724 --><title>Kho — trạng thái còn thiếu</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 2128px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+body { background: #dfe8eb; font-size: 16px; line-height: 24px; }
+/* thanh trên trên dải trời: nút đặc cỡ chạm, không kính */
+.tb { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; flex: none; color: #e7fcfd;
+  background: #0b3945; border: 1px solid #235a69; }
+.lng { height: 56px; min-width: 56px; padding: 0 14px 0 12px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; flex: none; color: #e7fcfd; background: #0b3945; border: 1px solid #235a69; font: 600 16px/1 var(--text); letter-spacing: .04em; }
+.lng svg { color: var(--cyan-200); }
+.lng.sq { padding: 0; width: 56px; }
+.me { width: 56px; height: 56px; display: grid; place-items: center; flex: none; border-radius: 50%; }
+.me .avatar { width: 46px; height: 46px; font-size: 16px; }
+/* nút cỡ chạm */
+.btn.t56 { height: 56px; padding: 0 20px; border-radius: 14px; font-size: 17px; gap: 10px; justify-content: center; }
+.btn.t60 { height: 60px; padding: 0 22px; border-radius: 16px; font-size: 18px; gap: 10px; justify-content: center; }
+.btn.t64 { height: 64px; padding: 0 26px; border-radius: 16px; font-size: 19px; gap: 12px; justify-content: center; }
+.btn.is-dis { opacity: 1; box-shadow: none; background: var(--n-100); border-color: var(--n-200); color: var(--n-600); }
+/* trạng thái cỡ hiện trường */
+.st { height: 32px; padding: 0 12px 0 11px; font-size: 16px; gap: 8px; border-radius: 9px; }
+.st i { width: 8px; height: 8px; }
+.code.pl { font-size: 16px; color: var(--ink-2); }
+.help { font-size: 16px; line-height: 21px; }
+.ftag { height: 26px; padding: 0 9px; font-size: 14px; border-radius: 7px; }
+
+.tab { width: 1024px; height: 768px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: var(--app); }
+.thd { flex: none; height: 74px; display: flex; align-items: center; gap: 14px; padding: 0 12px 0 10px; color: #fff; }
+.thd .ttl { flex: 1; min-width: 0; }
+.thd h1 { margin: 0; font: 700 26px/1.1 var(--display); font-stretch: 108%; letter-spacing: -.3px; }
+.thd .sub { margin-top: 5px; font-size: 16px; line-height: 20px; color: rgba(203,247,249,.8); }
+.thd .sub b { color: #fff; font-weight: 600; }
+
+.band { position: absolute; left: 0; right: 0; top: 0; height: 150px; }
+.thd.lst { position: relative; z-index: 1; }
+.thd .ttl.trip { display: flex; align-items: center; gap: 12px; }
+.thd .code.hid { font: 600 20px/1 var(--mono); color: #fff; }
+.stl { position: relative; z-index: 1; margin: 14px 16px 16px; flex: 1; min-height: 0; border-radius: 20px; display: grid; place-items: center; }
+.stl .empty { padding: 20px 40px; }
+.stl .empty .art { width: 88px; height: 88px; border-radius: 24px; }
+.stl .empty .art.neutral { background: var(--n-100); color: var(--n-700); box-shadow: inset 0 0 0 1px var(--n-200); }
+.stl .empty h3 { font-size: 28px; line-height: 34px; margin-top: 22px; }
+.stl .empty p { font-size: 18px; line-height: 27px; max-width: 600px; margin-top: 10px; text-wrap: pretty; }
+.stl .empty p .code { font: 600 17px/1 var(--mono); color: var(--ink); }
+.stl .empty .acts { margin-top: 28px; gap: 12px; }
+.stl .ctx { margin: 22px auto 0; width: max-content; display: flex; align-items: center; gap: 22px; padding: 14px 20px; border-radius: 14px; border: 1px solid var(--line);
+  background: var(--n-25); font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.stl .ctx b { color: var(--ink); font-weight: 600; }
+.stl .ctx .sep { width: 1px; height: 22px; background: var(--line); }
+
+body { background: #4a626a; }
+.sheet { padding: 22px 24px 28px; }
+.fgrid { display: grid; gap: 28px 32px; align-items: start; }
+.cell { margin: 0; }
+.cell figcaption { display: flex; flex-direction: column; gap: 3px; margin: 0 4px 12px; }
+.cell figcaption b { font: 600 15px/21px var(--text); color: #fff; display: flex; align-items: center; gap: 9px; }
+.cell figcaption b .no { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font: 700 12px/1 var(--display);
+  background: rgba(255,255,255,.14); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); flex: none; }
+.cell figcaption span.m { font-size: 13px; line-height: 18px; color: rgba(255,255,255,.88); }
+.cell figcaption span.m .code { font-size: 12px; color: #cbf7f9; }
+.frame { position: relative; overflow: hidden; box-shadow: 0 22px 50px -22px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08); }
+
+.fgrid { grid-template-columns: repeat(2, 1024px); }
+.stl .empty p .nw { white-space: nowrap; }   /* lý do huỷ xuống dòng nguyên cụm */
+
+</style></head><body>
+<div class="sheet"><div class="fgrid"><figure class="cell"><figcaption><b><span class="no">1</span>Không có chuyến cần xếp</b><span class="m"><span class="code">/kho</span> · danh sách rỗng · chưa chuyến nào có phương án đã duyệt</span></figcaption><div class="frame tabf" style="border-radius:12px"><div class="tab"><div class="sky band" aria-hidden="true"></div>
+<header class="thd lst">
+  <button type="button" class="tb" aria-label="Đăng xuất"><svg class="" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
+  <div class="ttl"><h1>Chuyến cần xếp</h1><div class="sub"><b class="num">0</b> chuyến · Thứ Năm, 24/09/2026</div></div>
+  <button type="button" class="lng" aria-label="Ngôn ngữ giao diện: Tiếng Việt"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>VI</button>
+  <button type="button" class="me" aria-label="Tài khoản Lê Văn Hải"><span class="avatar">VH</span></button>
+</header><section class="card stl">
+  <div class="empty">
+    <div class="art "><svg class="" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg></div>
+    <h3>Không có chuyến cần xếp</h3>
+    <p>Chuyến có phương án đã duyệt sẽ hiện ở đây để kho bắt đầu xếp.</p>
+    
+  </div>
+</section></div></div></figure><figure class="cell"><figcaption><b><span class="no">2</span>Chưa bắt đầu được phiên xếp hàng</b><span class="m"><span class="code">/kho?chuyen=TRIP-2026-0914</span> · bấm Bắt đầu xếp nhưng không ghi được vào kho dữ liệu</span></figcaption><div class="frame tabf" style="border-radius:12px"><div class="tab"><div class="sky band" aria-hidden="true"></div>
+<header class="thd lst">
+  <button type="button" class="tb" aria-label="Thoát phiên xếp hàng"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <div class="ttl trip"><span class="code hid">TRIP-2026-0914</span><span class="st st-ready"><i></i>Đã duyệt</span></div>
+  <button type="button" class="lng" aria-label="Ngôn ngữ giao diện: Tiếng Việt"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>VI</button>
+  <button type="button" class="me" aria-label="Tài khoản Lê Văn Hải"><span class="avatar">VH</span></button>
+</header><section class="card stl">
+  <div class="empty">
+    <div class="art danger"><svg class="" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg></div>
+    <h3>Chưa bắt đầu được phiên xếp hàng</h3>
+    <p>Có lỗi xảy ra. Thử lại sau.</p>
+    <div class="ctx"><span><b>Q.7 → Thủ Dầu Một → Dĩ An → Biên Hoà</b></span><span class="sep"></span><span>Ngày chạy <b class="num">24/09/2026</b></span><span class="sep"></span><span>Xe <b>Hyundai HD210</b></span><span class="sep"></span><span>Số kiện <b class="num">132</b></span></div><div class="acts"><span class="btn btn-secondary t64">Về danh sách chuyến</span><span class="btn btn-primary t64"><svg class="" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>Thử lại</span></div>
+  </div>
+</section></div></div></figure><figure class="cell"><figcaption><b><span class="no">3</span>Chuyến chưa có phương án đã duyệt</b><span class="m"><span class="code">/kho?chuyen=TRIP-012</span> · Đã tối ưu, điều phối viên chưa duyệt</span></figcaption><div class="frame tabf" style="border-radius:12px"><div class="tab"><div class="sky band" aria-hidden="true"></div>
+<header class="thd lst">
+  <button type="button" class="tb" aria-label="Thoát phiên xếp hàng"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <div class="ttl trip"><span class="code hid">TRIP-012</span><span class="st st-review"><i></i>Đã tối ưu</span></div>
+  <button type="button" class="lng" aria-label="Ngôn ngữ giao diện: Tiếng Việt"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>VI</button>
+  <button type="button" class="me" aria-label="Tài khoản Lê Văn Hải"><span class="avatar">VH</span></button>
+</header><section class="card stl">
+  <div class="empty">
+    <div class="art warn"><svg class="" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg></div>
+    <h3>Chưa có phương án đã duyệt</h3>
+    <p>Chuyến <span class="code">TRIP-012</span> chưa có phương án đã duyệt. Điều phối viên cần duyệt phương án trước khi kho xếp.</p>
+    <div class="ctx"><span><b>Bình Chánh → Biên Hoà</b></span><span class="sep"></span><span>Ngày chạy <b class="num">25/09/2026</b></span><span class="sep"></span><span>Xe <b>Hino XZU720</b></span><span class="sep"></span><span>Số kiện <b class="num">70</b></span></div><div class="acts"><span class="btn btn-primary t64">Về danh sách chuyến</span></div>
+  </div>
+</section></div></div></figure><figure class="cell"><figcaption><b><span class="no">4</span>Chuyến đã huỷ</b><span class="m"><span class="code">/kho?chuyen=TRIP-004</span> · huỷ lúc 18:05 06/09/2026, lý do từ hộp thoại Huỷ chuyến</span></figcaption><div class="frame tabf" style="border-radius:12px"><div class="tab"><div class="sky band" aria-hidden="true"></div>
+<header class="thd lst">
+  <button type="button" class="tb" aria-label="Thoát phiên xếp hàng"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <div class="ttl trip"><span class="code hid">TRIP-004</span><span class="st st-cancel"><i></i>Đã huỷ</span></div>
+  <button type="button" class="lng" aria-label="Ngôn ngữ giao diện: Tiếng Việt"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>VI</button>
+  <button type="button" class="me" aria-label="Tài khoản Lê Văn Hải"><span class="avatar">VH</span></button>
+</header><section class="card stl">
+  <div class="empty">
+    <div class="art neutral"><svg class="" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg></div>
+    <h3>Chuyến đã huỷ</h3>
+    <p>Chuyến <span class="code">TRIP-004</span> đã huỷ: <span class="nw">Khách hoãn nhận hàng do kiểm kê kho cuối tháng</span></p>
+    <div class="ctx"><span><b>Tân An → Biên Hoà</b></span><span class="sep"></span><span>Ngày chạy <b class="num">07/09/2026</b></span><span class="sep"></span><span>Xe <b>Thaco Ollin 720</b></span><span class="sep"></span><span>Số kiện <b class="num">170</b></span></div><div class="acts"><span class="btn btn-primary t64">Về danh sách chuyến</span></div>
+  </div>
+</section></div></div></figure></div></div>
+</body></html>

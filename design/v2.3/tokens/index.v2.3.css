@@ -1,0 +1,133 @@
+/* ============================================================================
+   LoadMaster V2.3 "Cyan kính" — khối :root thay cho src/index.css
+   ----------------------------------------------------------------------------
+   Giữ NGUYÊN TÊN token đang dùng trong src/ (để component không phải đổi class),
+   chỉ đổi giá trị sang bảng V2.3, rồi thêm các thang và token mới V2.3 cần.
+   Nguồn giá trị: tokens/v3.css (bản mẫu). Đổi token nào thì đo lại tương phản ở
+   cả nền trắng và nền --app (AGENTS.md mục 10).
+   Đây là đề xuất để PR "đợt 1 — token" dùng; đối chiếu từng dòng với index.css
+   hiện tại trước khi thay, đừng chép mù.
+   ============================================================================ */
+:root {
+  /* ---------- thang gốc V2.3 (mới) */
+  --cyan-50: #e7fcfd;  --cyan-100: #cbf7f9;  --cyan-200: #9bedf2;  --cyan-300: #5cdbe6;
+  --cyan-400: #00c3d4; --cyan-500: #00a9bb;  --cyan-600: #008a9d;  --cyan-700: #006f81;
+  --cyan-800: #005464; --cyan-900: #063a48;  --cyan-950: #02222d;
+  --n-0: #ffffff;  --n-25: #f8fcfd; --n-50: #f2f8f9;  --n-100: #e7eff1; --n-200: #d9e4e7;
+  --n-300: #c6d4d8; --n-400: #9badb3; --n-500: #70848b; --n-600: #52676f; --n-700: #394d54;
+  --n-800: #213239; --n-900: #0e1c21;
+  --amber-50: #fff6e1; --amber-200: #fbd98f; --amber-500: #faab35; --amber-700: #9d580c;
+  --violet-50: #f3f1ff; --violet-200: #d6cefd; --violet-500: #8264e7; --violet-700: #613ebe;
+  --green-50: #e5faeb; --green-200: #b2ebc3; --green-500: #36ac62; --green-700: #156f41;
+  --red-50: #ffefed; --red-200: #f8c3be; --red-500: #db4241; --red-700: #b02a2d;
+
+  /* ---------- nền và chữ (tên cũ, giá trị V2.3) */
+  --bg: #ffffff;
+  --surface: var(--n-25);
+  --app: var(--n-50);                 /* nền vùng làm việc dưới dải trời */
+  --border: var(--n-200);
+  --line-soft: var(--n-100);          /* đường chia trong card, dòng bảng */
+  --line-strong: #8398a0;             /* viền ô nhập: 3,0:1 trên trắng (WCAG 1.4.11) */
+  --text: var(--n-900);
+  --text-2: var(--n-700);
+  --text-3: var(--n-600);
+  --text-disabled: var(--n-400);
+
+  /* ---------- thương hiệu
+     --primary dùng cho CHỮ và ĐƯỜNG (link, vòng focus, ô chọn đã tích, chuỗi biểu đồ): cyan-700 đạt 5,9:1 trên trắng.
+     Nút chính KHÔNG tô --primary: nền gradient --primary-fill-*, chữ --on-primary (tối), xem AGENTS.md mục 5. */
+  --primary: var(--cyan-700);
+  --primary-hover: var(--cyan-800);
+  --primary-bg: var(--cyan-50);
+  --primary-fill-from: #2ed6e4;
+  --primary-fill-to: var(--cyan-400);
+  --primary-fill-border: #00b5c6;
+  --on-primary: var(--cyan-950);
+
+  /* ---------- ngữ nghĩa */
+  --success: var(--green-700);
+  --warning: var(--amber-700);
+  --danger: var(--red-700);
+  --danger-hover: #8e2224;
+  --info: var(--cyan-700);
+
+  /* ---------- điều khiển */
+  --switch-off: var(--n-500);
+  --highlight: #f7cf40;               /* kiện "Hiện tại" trên nền 3D */
+
+  /* ---------- badge: 6 tông cũ + violet (đang chạy / đang tối ưu / đã xếp xong) */
+  --badge-neutral-bg: var(--n-100);  --badge-neutral-fg: var(--n-700);  --badge-neutral-border: var(--n-200);
+  --badge-info-bg: var(--cyan-50);   --badge-info-fg: var(--cyan-800);  --badge-info-border: var(--cyan-100);
+  --badge-cyan-bg: var(--cyan-50);   --badge-cyan-fg: var(--cyan-800);  --badge-cyan-border: var(--cyan-100);
+  --badge-success-bg: var(--green-50); --badge-success-fg: var(--green-700); --badge-success-border: var(--green-200);
+  --badge-warning-bg: var(--amber-50); --badge-warning-fg: var(--amber-700); --badge-warning-border: var(--amber-200);
+  --badge-danger-bg: var(--red-50);  --badge-danger-fg: var(--red-700); --badge-danger-border: var(--red-200);
+  --badge-violet-bg: var(--violet-50); --badge-violet-fg: var(--violet-700); --badge-violet-border: var(--violet-200);
+
+  /* ---------- vùng 3D, luôn tối (theme dầu) */
+  --canvas-1: #031f29;
+  --canvas-2: #021c25;
+  --panel-dark: var(--cyan-950);
+  --border-dark: #1f4a55;             /* ≈ rgba(155,237,242,.16) trên nền tối */
+  --glass-dark: linear-gradient(180deg, rgba(10, 44, 55, .62), rgba(4, 30, 39, .55));
+  --glass-dark-border: rgba(155, 237, 242, .16);
+  --glass-dark-text: #e7fcfd;
+  --glass-dark-muted: rgba(203, 247, 249, .7);
+
+  /* vật cản: giữ nguyên */
+  --obstacle: #64748b;
+  --obstacle-bearing: #a3b1c2;
+
+  /* điểm giao Okabe–Ito: giữ nguyên, chữ trên mốc luôn tối (#101828) */
+  --stop-1: #e69f00; --stop-2: #56b4e9; --stop-3: #009e73; --stop-4: #f0e442;
+  --stop-5: #0072b2; --stop-6: #d55e00; --stop-7: #cc79a7; --stop-8: #555555;
+
+  /* ---------- thang mực bốn cấp (tên cũ) */
+  --ink-strong: var(--n-900);
+  --ink-1: var(--n-800);
+  --ink-2: var(--n-700);
+  --ink-3: var(--n-600);
+
+  /* ---------- tint: nghĩa giữ nguyên, "blue = vận hành" nay là cyan */
+  --tint-blue: var(--cyan-50);    --tint-blue-fg: var(--cyan-800);
+  --tint-green: var(--green-50);  --tint-green-fg: var(--green-700);
+  --tint-amber: var(--amber-50);  --tint-amber-fg: var(--amber-700);
+  --tint-violet: var(--violet-50); --tint-violet-fg: var(--violet-700);
+  --tint-slate: var(--n-100);     --tint-slate-fg: var(--n-700);
+
+  /* ---------- dải trời đầu trang (thanh điều hướng + tiêu đề màn nằm trên nền này) */
+  --sky: radial-gradient(1100px 380px at 12% -60%, rgba(0, 195, 212, 0.42), transparent 62%),
+    radial-gradient(900px 340px at 92% -50%, rgba(0, 138, 157, 0.45), transparent 60%),
+    linear-gradient(180deg, #02222d 0%, #053341 100%);
+  /* --field cũ (vệt xanh nhạt) thay bằng nền phẳng --app */
+  --field: linear-gradient(var(--n-50), var(--n-50));
+
+  --shell-max: 1680px;
+
+  /* ---------- bo góc V2.3 */
+  --r-sm: 6px;    /* tag, mốc điểm giao */
+  --r-md: 10px;   /* nút, ô nhập, chip */
+  --r-lg: 14px;   /* card, toast */
+  --r-xl: 18px;   /* hộp thoại, bề mặt kính lớn */
+
+  /* ---------- bóng: card được phép bóng rất nhẹ (V2.3), lớp nổi giữ e2/e3 */
+  --card-shadow: 0 1px 2px rgba(2, 34, 45, 0.05), 0 10px 28px -14px rgba(2, 34, 45, 0.18);
+  --e1: 0 1px 2px rgba(2, 34, 45, 0.06);
+  --e2: 0 18px 40px -16px rgba(2, 34, 45, 0.35), 0 0 0 1px rgba(2, 34, 45, 0.07);
+  --e3: 0 30px 80px -24px rgba(2, 34, 45, 0.6), 0 0 0 1px rgba(2, 34, 45, 0.06);
+
+  /* ---------- chữ */
+  --font-display: 'Archivo Variable', 'Archivo', 'Be Vietnam Pro', sans-serif;  /* tiêu đề, số lớn */
+  --font-text: 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;                       /* mã, số đo */
+
+  /* chuyển động: giữ nguyên */
+  --dur-fast: 120ms; --dur-md: 250ms; --dur-slow: 500ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+}
+
+/* Các token vật liệu kính V2 cũ (--nav-glass, --follow-glass, --tile-glass, --glass-edge, --tile-lift, --hero-icon…)
+   được thay bằng kính TỐI trên dải trời (.glass-nav) và trên khung 3D (.glass-dark) — xem tokens/v3.css. Xoá token
+   cũ khi không còn component nào dùng, không để song song hai hệ kính. */
