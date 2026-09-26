@@ -63,6 +63,34 @@ hộp thoại; nội dung từng hộp thoại thuộc đợt của màn chứa 
 - Bố cục từng màn (bảng chuyến nhóm theo ngày, tab trạng thái, chi tiết chuyến…): đợt 3–7.
 - Header riêng của Chi tiết chuyến, form xe, Planner 3D: giữ nền trắng tới đợt của màn đó.
 
-## Kết quả
+## Kết quả (26/09/2026)
 
-*(điền khi xong)*
+Đã làm K1–K12, T1–T17. Ảnh trước / sau / đích (1536 px): [`docs/screenshots/v2.3/dot2-thanh-phan/`](../screenshots/v2.3/dot2-thanh-phan/).
+Luật mới ghi ở AGENTS mục 1, 4, 5 ("Thành phần V2.3", "Thanh tiêu đề màn").
+
+**Lệch có chủ ý so với mockup**
+
+- `/kieu-dang`, `/thanh-phan` vẫn công khai (không đăng nhập) nên dải trời không có mục điều hướng, chỉ logo và ngôn ngữ.
+- Tiêu đề `/kieu-dang` 32 px (mockup 44 px) theo thang chữ; hàng "Số trong bảng" giữ JetBrains Mono vì AGENTS vẫn yêu cầu mono cho số
+  đo trong bảng. `/thanh-phan` cao 2.949 px (mockup 2.716) vì câu tiếng Việt thật dài hơn.
+- Thước đo "104 % · vượt 380 kg" bỏ vì seed không có chuyến quá tải; thay bằng chuyến tải cao nhất TRIP-008 (79,1 %). Toast "Kết quả một
+  phần" bỏ vì không có số trong seed.
+- Nút chính vô hiệu hoá nền xám (luật mục 5), không phải cyan mờ 45 %.
+- Ảnh đại diện trong nội dung giữ ô vuông bo góc (luật V2); tròn chỉ ở thanh điều hướng.
+- Tìm nhanh hiện chữ "Tìm nhanh · Ctrl K" từ 1.440 px (không phải 1.340): ở 1.366 px nút rộng đẩy "Nhật ký" khỏi thanh của quản trị.
+  Hộp tìm nhanh tối hơn `.glass-dark` một lớp cho giống mockup; dòng đang chọn không có gradient và quầng (luật "Cấm tuyệt đối").
+- Popover chuông không có mũi nhọn (wrapper DropdownMenu chưa có Arrow).
+- Bảng điều khiển và Hồ sơ **chưa** đè card lên dải trời: thứ đầu tiên của vùng cuộn là chữ trần (dòng chọn kỳ, cột thông tin cá nhân),
+  đặt lên nền trời thì không đọc được. Bảng điều khiển đưa bộ chọn kỳ vào dải ở đợt của màn đó.
+- Vòng focus trên dải trời là `--cyan-300`, không phải `--primary`: cyan-700 không đủ tương phản trên nền tối.
+- Hover nút chính: gradient trượt một bậc cyan (mockup không vẽ).
+
+**Phát hiện thêm:** bảng tương phản của `/kieu-dang` (tính từ token lúc mở trang) cho thấy chữ trắng trên mốc điểm giao 3, 6, 7 chỉ
+3,1–3,9:1. Đã sửa `lib/stops.ts` chọn chữ tối cho các mốc đó (4,6–5,8:1), test khoá ngưỡng 4,5:1 cho cả tám mốc.
+
+**Còn lại cho đợt sau**
+
+- Token kính tối đặc hơn cho hộp tìm nhanh (`--glass-dark-strong`), `DropdownMenuArrow`, thành phần phím tắt (`kbd`) dùng chung.
+- Button biến thể nguy hiểm nhẹ (`.btn-danger-soft`), chip lọc (`.chip`) dùng chung, vạch cyan cho dòng đang chọn của `DataTable`.
+- `features/admin/audit-look.ts` còn tô "Xếp xong" xanh lá; V2.3 dùng tím cho "đã xếp xong" (chuông đã theo V2.3).
+- Header trắng của Chi tiết chuyến, form xe, So sánh; bộ chọn kỳ của Bảng điều khiển: lên dải trời ở đợt của màn.
