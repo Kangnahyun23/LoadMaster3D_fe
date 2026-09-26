@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Nút theo mục 3 style sheet + mục 5 AGENTS.md.
- * Hover chỉ đổi nền — không phóng to, không nhấc lên, không bóng.
+ * Hover chỉ đổi nền — không phóng to, không nhấc lên, không thêm bóng.
  */
 const buttonVariants = cva(
   [
@@ -20,8 +20,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:
-          'border-none bg-primary text-white hover:bg-primary-hover disabled:bg-border disabled:text-text-disabled',
+        // V2.3: gradient dọc + viền cyan + chữ tối --on-primary (7,7:1), phản sáng trong và quầng nhẹ (AGENTS mục 5).
+        // Rê chuột chỉ trượt gradient xuống một bậc cyan. Vô hiệu hoá thì bỏ gradient, về nền --border như mọi nút.
+        primary: [
+          'border border-primary-fill-border bg-linear-to-b from-primary-fill-from to-primary-fill-to text-on-primary shadow-primary-fill',
+          'hover:from-primary-fill-hover-from hover:to-primary-fill-hover-to',
+          'disabled:border-transparent disabled:bg-none disabled:bg-border disabled:text-text-disabled disabled:shadow-none',
+        ],
         secondary:
           'border border-border bg-bg text-text hover:bg-surface disabled:border-none disabled:bg-border disabled:text-text-disabled',
         ghost:
@@ -70,7 +75,8 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const isLight = variant === 'primary' || variant === 'danger'
+  // Nút chính V2.3 chữ tối nên spinner tối; chỉ nút nguy hiểm còn chữ trắng
+  const isLight = variant === 'danger'
   const classes = cn(buttonVariants({ variant, size, block }), className)
 
   // Slot của Radix yêu cầu đúng một phần tử con, nên khi asChild không chèn spinner.

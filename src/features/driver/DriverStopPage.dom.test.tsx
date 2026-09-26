@@ -58,7 +58,7 @@ test('a trip the warehouse has not loaded: preview of stop 1 in the approved unl
   expect(screen.getByText('Chị Hương · 0283 775 1122')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Chỉ đường tới Công ty TNHH Thực phẩm Sài Gòn' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Xem vị trí hàng' })).toBeInTheDocument()
-  expect(container.querySelectorAll('a.bg-primary, button.bg-primary')).toHaveLength(0)
+  expect(container.querySelectorAll('a.text-on-primary, button.text-on-primary')).toHaveLength(0)
   expect(screen.getByRole('link', { name: 'Về danh sách chuyến' })).toHaveAttribute('href', '/tai-xe')
 }, 15_000)
 

@@ -8,69 +8,170 @@
    Không hardcode hex trong component.
    --------------------------------------------------------------------------- */
 
+/* Archivo (V2.3): tiêu đề màn, tiêu đề card / hộp thoại, số tổng hợp lớn — không dùng cho chữ thân.
+   Font variable (độ đậm 100–900, độ rộng 62–125 %), ba dải như @fontsource: tiếng Việt, latin mở rộng, latin.
+   Be Vietnam Pro và JetBrains Mono vẫn nạp từ Google Fonts ở index.html. */
+@font-face {
+  font-family: 'Archivo Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url('./assets/fonts/archivo-vietnamese-wdth-normal.woff2') format('woff2-variations');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304,
+    U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Archivo Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url('./assets/fonts/archivo-latin-ext-wdth-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Archivo Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url('./assets/fonts/archivo-latin-wdth-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* V2.3 "Cyan kính" (design/v2.3/tokens/index.v2.3.css). Giữ nguyên tên token cũ để component không phải đổi class;
+   giá trị đổi sang bảng cyan + xám ánh cyan. Đổi token nào thì đo lại tương phản trên nền trắng và nền --app (mục 10). */
 :root {
+  /* thang gốc V2.3 */
+  --cyan-50: #e7fcfd;
+  --cyan-100: #cbf7f9;
+  --cyan-200: #9bedf2;
+  --cyan-300: #5cdbe6;
+  --cyan-400: #00c3d4;
+  --cyan-500: #00a9bb;
+  --cyan-600: #008a9d;
+  --cyan-700: #006f81;
+  --cyan-800: #005464;
+  --cyan-900: #063a48;
+  --cyan-950: #02222d;
+  /* xám ánh cyan */
+  --n-0: #ffffff;
+  --n-25: #f8fcfd;
+  --n-50: #f2f8f9;
+  --n-100: #e7eff1;
+  --n-200: #d9e4e7;
+  --n-300: #c6d4d8;
+  --n-400: #9badb3;
+  --n-500: #70848b;
+  --n-600: #52676f;
+  --n-700: #394d54;
+  --n-800: #213239;
+  --n-900: #0e1c21;
+  /* ngữ nghĩa theo vòng đời chuyến */
+  --amber-50: #fff6e1;
+  --amber-200: #fbd98f;
+  --amber-500: #faab35;
+  --amber-700: #9d580c;
+  --violet-50: #f3f1ff;
+  --violet-200: #d6cefd;
+  --violet-500: #8264e7;
+  --violet-700: #613ebe;
+  --green-50: #e5faeb;
+  --green-200: #b2ebc3;
+  --green-500: #36ac62;
+  --green-700: #156f41;
+  --red-50: #ffefed;
+  --red-200: #f8c3be;
+  --red-500: #db4241;
+  --red-700: #b02a2d;
+
   /* nền và chữ */
   --bg: #ffffff;
-  --surface: #f7f8fa;
-  --border: #e5e7eb;
-  --text: #111827;
-  --text-2: #4b5563;
-  --text-3: #6b7280;
+  --surface: var(--n-25);
+  /* nền vùng làm việc dưới dải trời */
+  --app: var(--n-50);
+  --border: var(--n-200);
+  /* đường chia trong card, dòng bảng */
+  --line-soft: var(--n-100);
+  /* viền ô nhập: 3,0:1 trên trắng (WCAG 1.4.11) */
+  --line-strong: #8398a0;
+  --text: var(--n-900);
+  --text-2: var(--n-700);
+  --text-3: var(--n-600);
+  /* chữ trên nền vô hiệu hoá */
+  --text-disabled: var(--n-400);
 
-  /* thương hiệu */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-bg: #eff6ff;
-
-  /* chữ trên nền vô hiệu hoá — style sheet gọi là --text-disabled */
-  --text-disabled: #9ca3af;
+  /* thương hiệu. --primary (cyan-700, 5,9:1 trên trắng) chỉ cho CHỮ và ĐƯỜNG: link, vòng focus, ô đã chọn, chuỗi biểu đồ.
+     Nút chính không tô --primary: nền gradient --primary-fill-*, chữ tối --on-primary (AGENTS mục 5). */
+  --primary: var(--cyan-700);
+  --primary-hover: var(--cyan-800);
+  --primary-bg: var(--cyan-50);
+  --primary-fill-from: #2ed6e4;
+  --primary-fill-to: var(--cyan-400);
+  --primary-fill-border: #00b5c6;
+  /* rê chuột lên nút chính: gradient trượt xuống một bậc cyan. Bản mẫu V2.3 không vẽ trạng thái này. */
+  --primary-fill-hover-from: var(--cyan-400);
+  --primary-fill-hover-to: var(--cyan-500);
+  /* phản sáng trong 1px + quầng cyan nhẹ của nút chính */
+  --primary-fill-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 22px -10px rgba(0, 195, 212, 0.9);
+  --on-primary: var(--cyan-950);
 
   /* rãnh switch khi tắt */
-  --switch-off: #d1d5db;
-
-  /* kiện đang thao tác trên nền canvas tối (màn máy tính bảng kho) */
-  --highlight: #facc15;
+  --switch-off: var(--n-500);
+  /* kiện "Hiện tại" trên nền 3D */
+  --highlight: #f7cf40;
 
   /* ngữ nghĩa */
-  --success: #16a34a;
-  --warning: #d97706;
-  --danger: #dc2626;
-  --danger-hover: #b91c1c;
-  --info: #0891b2;
+  --success: var(--green-700);
+  --warning: var(--amber-700);
+  --danger: var(--red-700);
+  --danger-hover: #8e2224;
+  --info: var(--cyan-700);
 
-  /* tông badge trạng thái: nền nhạt + chữ đậm + viền cùng tông.
-     Lấy từ mục 4 style sheet, khai báo ở đây để component không hardcode hex. */
-  --badge-neutral-bg: #f7f8fa;
-  --badge-neutral-fg: #4b5563;
-  --badge-neutral-border: #e5e7eb;
-  --badge-info-bg: #eff6ff;
-  --badge-info-fg: #1d4ed8;
-  --badge-info-border: #bfdbfe;
-  --badge-cyan-bg: #ecfeff;
-  --badge-cyan-fg: #0e7490;
-  --badge-cyan-border: #a5f3fc;
-  --badge-success-bg: #ecfdf3;
-  --badge-success-fg: #15803d;
-  --badge-success-border: #bbf7d0;
-  --badge-warning-bg: #fff7ed;
-  --badge-warning-fg: #b45309;
-  --badge-warning-border: #fed7aa;
-  --badge-danger-bg: #fef2f2;
-  --badge-danger-fg: #b91c1c;
-  --badge-danger-border: #fecaca;
+  /* tông badge: nền nhạt + chữ đậm + viền cùng tông. 6 tông cũ + violet (đang chạy / đang tối ưu / đã xếp xong) */
+  --badge-neutral-bg: var(--n-100);
+  --badge-neutral-fg: var(--n-700);
+  --badge-neutral-border: var(--n-200);
+  --badge-info-bg: var(--cyan-50);
+  --badge-info-fg: var(--cyan-800);
+  --badge-info-border: var(--cyan-100);
+  --badge-cyan-bg: var(--cyan-50);
+  --badge-cyan-fg: var(--cyan-800);
+  --badge-cyan-border: var(--cyan-100);
+  --badge-success-bg: var(--green-50);
+  --badge-success-fg: var(--green-700);
+  --badge-success-border: var(--green-200);
+  --badge-warning-bg: var(--amber-50);
+  --badge-warning-fg: var(--amber-700);
+  --badge-warning-border: var(--amber-200);
+  --badge-danger-bg: var(--red-50);
+  --badge-danger-fg: var(--red-700);
+  --badge-danger-border: var(--red-200);
+  --badge-violet-bg: var(--violet-50);
+  --badge-violet-fg: var(--violet-700);
+  --badge-violet-border: var(--violet-200);
 
-  /* vùng 3D, luôn tối */
-  --canvas-1: #1a1d23;
-  --canvas-2: #0f1115;
-  --panel-dark: #1e2228;
-  --border-dark: #2d323b;
+  /* vùng 3D, luôn tối (theme dầu) */
+  --canvas-1: #031f29;
+  --canvas-2: #021c25;
+  --panel-dark: var(--cyan-950);
+  /* ≈ rgba(155,237,242,.16) trên nền tối */
+  --border-dark: #1f4a55;
+  /* kính tối trên khung 3D (.glass-dark của bản mẫu) */
+  --glass-dark: linear-gradient(180deg, rgba(10, 44, 55, 0.62), rgba(4, 30, 39, 0.55));
+  --glass-dark-border: rgba(155, 237, 242, 0.16);
+  --glass-dark-text: #e7fcfd;
+  --glass-dark-muted: rgba(203, 247, 249, 0.7);
 
   /* vật cản trong thùng (hốc bánh, dàn lạnh, vách ngăn, vùng dành riêng) trên canvas tối —
      xám lam, không trùng tám màu điểm giao; nhạt hơn khi vật cản chịu tải (LM-033) */
   --obstacle: #64748b;
   --obstacle-bearing: #a3b1c2;
 
-  /* màu định danh điểm giao, an toàn cho người mù màu */
+  /* màu định danh điểm giao Okabe–Ito, an toàn cho người mù màu; chữ trên mốc luôn tối */
   --stop-1: #e69f00;
   --stop-2: #56b4e9;
   --stop-3: #009e73;
@@ -80,79 +181,76 @@
   --stop-7: #cc79a7;
   --stop-8: #555555;
 
-  /* thang mực bốn cấp (V2): tiêu đề và số quan trọng → dữ liệu vận hành → thông tin
-     phụ → chú thích. Ba cấp --text/--text-2/--text-3 cũ nằm quá gần nhau nên màn
-     trông nhạt; thang này giãn hai đầu ra. Vẫn giữ thang cũ cho code chưa chuyển. */
-  --ink-strong: #131f34;
-  --ink-1: #1f2c3e;
-  --ink-2: #4a5c75;
-  /* V2 gốc là #71829a — chỉ 3,9:1 trên trắng, 3,5:1 trên trường nền. Tối lại cùng sắc
-     độ để qua 4,5:1 (AGENTS mục 10): 5,2:1 trên trắng, 4,7:1 trên trường nền. */
-  --ink-3: #5e6e84;
+  /* thang mực bốn cấp (V2): tiêu đề và số quan trọng → dữ liệu vận hành → thông tin phụ → chú thích */
+  --ink-strong: var(--n-900);
+  --ink-1: var(--n-800);
+  --ink-2: var(--n-700);
+  --ink-3: var(--n-600);
 
   /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
-     blue = vận hành · green = sẵn sàng/xong · amber = cần chú ý
+     blue = vận hành (V2.3: nay là cyan) · green = sẵn sàng/xong · amber = cần chú ý
      violet = phân tích phụ · slate = ngữ cảnh (không phải số đo) */
-  --tint-blue: #dce8fb;
-  --tint-blue-fg: #1a4da3;
-  --tint-green: #d1ecde;
-  --tint-green-fg: #0c6b4c;
-  --tint-amber: #fce6c2;
-  --tint-amber-fg: #85500a;
-  --tint-violet: #e2e0fa;
-  --tint-violet-fg: #443e9e;
-  --tint-slate: #e1e8f1;
-  --tint-slate-fg: #4e6681;
+  --tint-blue: var(--cyan-50);
+  --tint-blue-fg: var(--cyan-800);
+  --tint-green: var(--green-50);
+  --tint-green-fg: var(--green-700);
+  --tint-amber: var(--amber-50);
+  --tint-amber-fg: var(--amber-700);
+  --tint-violet: var(--violet-50);
+  --tint-violet-fg: var(--violet-700);
+  --tint-slate: var(--n-100);
+  --tint-slate-fg: var(--n-700);
+
+  /* dải trời đầu trang: thanh điều hướng + tiêu đề màn nằm trên nền này (đợt 2 mới dùng) */
+  --sky: radial-gradient(1100px 380px at 12% -60%, rgba(0, 195, 212, 0.42), transparent 62%),
+    radial-gradient(900px 340px at 92% -50%, rgba(0, 138, 157, 0.45), transparent 60%),
+    linear-gradient(180deg, #02222d 0%, #053341 100%);
+  /* trường nền của trang. V2.3 bỏ hai vệt xanh của V2, còn nền phẳng --app. Vẫn là ảnh (không phải màu)
+     vì AppShell đọc nó qua bg-(image:--field). */
+  --field: linear-gradient(var(--n-50), var(--n-50));
 
   /* bề rộng tối đa vùng làm việc. Màn 2K trở lên không kéo giãn nội dung:
      điều phối cần thêm dòng, không cần thêm chiều ngang */
   --shell-max: 1680px;
 
-  /* trường nền của trang (V2). Bề mặt đọc giữ --bg trắng để nổi lên khỏi trường này;
-     KHÔNG đổi --bg, vì 110 chỗ dùng bg-bg là card, input và hộp thoại. */
-  /* Mọi lớp phải là ảnh: background-image có lớp cuối là màu là CSS không hợp lệ và
-     bị bỏ cả khai báo. Prototype dùng shorthand background nên không gặp. */
-  --field: radial-gradient(ellipse at 18% -12%, #c9e7ff, transparent 56%),
-    radial-gradient(ellipse at 102% 46%, #dbe8ff, transparent 52%),
-    linear-gradient(#edf4fb, #edf4fb);
-  /* nền của dải chrome đè lên trường: đủ đục để chữ đọc rõ, đủ trong để thấy trường */
+  /* ---- vật liệu kính sáng của V2 (thanh điều hướng, ô số liệu, ô icon tiêu đề). V2.3 thay bằng kính TỐI trên dải trời
+     (.glass-nav) và trên khung 3D (.glass-dark); đợt 1 chưa đổi component nên vẫn giữ, chỉ chuyển sắc xanh dương sang
+     cyan / xám ánh cyan. Xoá khi component cuối cùng thôi dùng — không để song song hai hệ kính. */
+  /* nền của dải chrome đè lên trường: đủ đục để chữ đọc rõ */
   --chrome: #ffffffd9;
-
-  /* vật liệu kính của lớp chrome (V2). Chỉ dùng ở thanh điều hướng và khối tổng
-     hợp số liệu — bảng, form, inspector giữ nền đặc. Xem AGENTS mục 5. */
   --nav-glass: 130deg, #ffffffc2, #ffffff45;
-  --nav-glass-shadow: 0 8px 20px #33517a10, inset 0 1px 0 #fff;
+  --nav-glass-shadow: 0 8px 20px rgba(2, 34, 45, 0.06), inset 0 1px 0 #fff;
   --follow-glass: linear-gradient(125deg, #ffffffe0, #ffffff55 60%, #ffffffad);
-  --follow-shadow: 0 5px 10px #46658721, inset 0 1px 0 #fff, inset 0 -1px 1px #aec1d950;
-  /* bề mặt kính của khối tổng hợp số liệu (ô KPI): viền sáng trong + bóng nâng rất nhẹ.
-     Kính không phải card phẳng nên được bóng nâng (AGENTS mục 5). */
+  --follow-shadow: 0 5px 10px rgba(2, 34, 45, 0.13), inset 0 1px 0 #fff, inset 0 -1px 1px rgba(155, 237, 242, 0.3);
   --tile-glass: 118deg, #ffffffc4, #ffffff5c;
   --glass-edge: inset 0 2px 1px #fff, inset 0 -1px 2px #ffffffaa;
-  --tile-lift: 0 7px 18px #4e79a51c;
-  /* ô icon nhận diện màn trên thanh tiêu đề */
-  --hero-icon: 140deg, #e2edfd, #cbdefa;
-  --hero-icon-shadow: inset 0 1px 0 #fff, inset 0 -1px 2px #b7cdec80, 0 2px 6px #4e79a51f;
-  /* vòng sáng mảnh quanh ô icon tint trên nền kính */
+  --tile-lift: 0 7px 18px rgba(2, 34, 45, 0.08);
+  --hero-icon: 140deg, var(--cyan-50), var(--cyan-100);
+  --hero-icon-shadow: inset 0 1px 0 #fff, inset 0 -1px 2px rgba(92, 219, 230, 0.35), 0 2px 6px rgba(2, 34, 45, 0.1);
   --icon-ring: inset 0 0 0 1px #ffffff9c;
-  /* ô số liệu bấm được (lọc): viền và bóng nâng khi rê chuột — V2 */
-  --tile-hover-border: #b6cff2;
-  --tile-lift-hover: 0 10px 24px #4e79a52e;
-  /* nền tiêu đề cột của bảng kiểu V2 (DataTable appearance="paper") */
-  --table-head: #f2f6fc;
+  --tile-hover-border: var(--cyan-200);
+  --tile-lift-hover: 0 10px 24px rgba(2, 34, 45, 0.14);
+  /* nền tiêu đề cột của bảng kiểu V2 (DataTable appearance="paper") — V2.3 dùng --n-25 */
+  --table-head: var(--n-25);
   /* chuyển động lò xo của chỉ báo: vượt nhẹ rồi lắng lại */
   --spring: linear(0, .0069 1.15%, .1135 5.18%, .5977 15.84%, .9676 28.8%, 1.0352 36.29%, 1.046 42.05%, 1.0118 61.63%, .9981 80.35%, 1);
 
-  /* bo góc */
-  --r-sm: 6px;
-  --r-md: 8px;
-  --r-lg: 12px;
-  /* bề mặt kính (ô số liệu, khối tổng hợp) — V2; nút, input, bảng giữ ba bậc trên */
-  --r-xl: 16px;
+  /* bo góc V2.3 */
+  --r-sm: 6px; /* tag, mốc điểm giao */
+  --r-md: 10px; /* nút, ô nhập, chip */
+  --r-lg: 14px; /* card, toast */
+  --r-xl: 18px; /* hộp thoại, bề mặt kính lớn */
 
-  /* đổ bóng, chỉ cho lớp nổi */
-  --e1: 0 1px 2px rgba(16, 24, 40, 0.06);
-  --e2: 0 4px 12px rgba(16, 24, 40, 0.1);
-  --e3: 0 12px 32px rgba(16, 24, 40, 0.16);
+  /* bóng: card được bóng rất nhẹ (V2.3, AGENTS mục 5); lớp nổi giữ e1–e3 */
+  --card-shadow: 0 1px 2px rgba(2, 34, 45, 0.05), 0 10px 28px -14px rgba(2, 34, 45, 0.18);
+  --e1: 0 1px 2px rgba(2, 34, 45, 0.06);
+  --e2: 0 18px 40px -16px rgba(2, 34, 45, 0.35), 0 0 0 1px rgba(2, 34, 45, 0.07);
+  --e3: 0 30px 80px -24px rgba(2, 34, 45, 0.6), 0 0 0 1px rgba(2, 34, 45, 0.06);
+
+  /* chữ */
+  --font-display: 'Archivo Variable', 'Archivo', 'Be Vietnam Pro', sans-serif; /* tiêu đề, số lớn */
+  --font-text: 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace; /* mã, số đo */
 
   /* chuyển động */
   --dur-fast: 120ms;
@@ -162,6 +260,7 @@
   --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
   --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
 }
+
 
 /* ---------------------------------------------------------------------------
    Cầu nối sang Tailwind. `inline` = utility trỏ thẳng vào var() ở trên,
@@ -195,10 +294,66 @@
   --color-table-head: var(--table-head);
   --color-switch-off: var(--switch-off);
   --color-highlight: var(--highlight);
+  --color-app: var(--app);
+  --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
 
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-bg: var(--primary-bg);
+  --color-primary-fill-from: var(--primary-fill-from);
+  --color-primary-fill-to: var(--primary-fill-to);
+  --color-primary-fill-border: var(--primary-fill-border);
+  --color-primary-fill-hover-from: var(--primary-fill-hover-from);
+  --color-primary-fill-hover-to: var(--primary-fill-hover-to);
+  --color-on-primary: var(--on-primary);
+
+  /* thang V2.3. Xoá thang mặc định cùng tên của Tailwind trước: `bg-cyan-600`, `text-red-300`… chỉ được là màu của
+     bảng token, không lẫn màu Tailwind (mục 5 "Không dùng màu ngoài bảng token"). */
+  --color-cyan-*: initial;
+  --color-amber-*: initial;
+  --color-violet-*: initial;
+  --color-green-*: initial;
+  --color-red-*: initial;
+  --color-cyan-50: var(--cyan-50);
+  --color-cyan-100: var(--cyan-100);
+  --color-cyan-200: var(--cyan-200);
+  --color-cyan-300: var(--cyan-300);
+  --color-cyan-400: var(--cyan-400);
+  --color-cyan-500: var(--cyan-500);
+  --color-cyan-600: var(--cyan-600);
+  --color-cyan-700: var(--cyan-700);
+  --color-cyan-800: var(--cyan-800);
+  --color-cyan-900: var(--cyan-900);
+  --color-cyan-950: var(--cyan-950);
+  --color-n-0: var(--n-0);
+  --color-n-25: var(--n-25);
+  --color-n-50: var(--n-50);
+  --color-n-100: var(--n-100);
+  --color-n-200: var(--n-200);
+  --color-n-300: var(--n-300);
+  --color-n-400: var(--n-400);
+  --color-n-500: var(--n-500);
+  --color-n-600: var(--n-600);
+  --color-n-700: var(--n-700);
+  --color-n-800: var(--n-800);
+  --color-n-900: var(--n-900);
+  --color-amber-50: var(--amber-50);
+  --color-amber-200: var(--amber-200);
+  --color-amber-500: var(--amber-500);
+  --color-amber-700: var(--amber-700);
+  --color-violet-50: var(--violet-50);
+  --color-violet-200: var(--violet-200);
+  --color-violet-500: var(--violet-500);
+  --color-violet-700: var(--violet-700);
+  --color-green-50: var(--green-50);
+  --color-green-200: var(--green-200);
+  --color-green-500: var(--green-500);
+  --color-green-700: var(--green-700);
+  --color-red-50: var(--red-50);
+  --color-red-200: var(--red-200);
+  --color-red-500: var(--red-500);
+  --color-red-700: var(--red-700);
 
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -224,11 +379,17 @@
   --color-badge-danger-bg: var(--badge-danger-bg);
   --color-badge-danger-fg: var(--badge-danger-fg);
   --color-badge-danger-border: var(--badge-danger-border);
+  --color-badge-violet-bg: var(--badge-violet-bg);
+  --color-badge-violet-fg: var(--badge-violet-fg);
+  --color-badge-violet-border: var(--badge-violet-border);
 
   --color-canvas-1: var(--canvas-1);
   --color-canvas-2: var(--canvas-2);
   --color-panel-dark: var(--panel-dark);
   --color-border-dark: var(--border-dark);
+  --color-glass-dark-border: var(--glass-dark-border);
+  --color-glass-dark-text: var(--glass-dark-text);
+  --color-glass-dark-muted: var(--glass-dark-muted);
 
   --color-stop-1: var(--stop-1);
   --color-stop-2: var(--stop-2);
@@ -247,13 +408,18 @@
   --shadow-e1: var(--e1);
   --shadow-e2: var(--e2);
   --shadow-e3: var(--e3);
+  --shadow-card: var(--card-shadow);
+  --shadow-primary-fill: var(--primary-fill-shadow);
 
   --ease-standard: var(--ease-standard);
   --ease-decelerate: var(--ease-decelerate);
   --ease-accelerate: var(--ease-accelerate);
 
-  --font-sans: 'Be Vietnam Pro', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* `font-display` (Archivo), `font-sans`, `font-mono`. `--font-mono`/`--font-display` trùng tên biến ở :root: khối :root
+     không nằm trong layer nên thắng bản Tailwind sinh ra trong layer theme — không thành vòng tham chiếu. */
+  --font-sans: var(--font-text);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
 
   /* type scale — display 32/40 · h1 24/32 · h2 20/28 · h3 16/24
      body 14/20 · body-lg 16/24 · caption 12/16 */

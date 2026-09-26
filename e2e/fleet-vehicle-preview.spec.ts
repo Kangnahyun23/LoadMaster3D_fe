@@ -124,16 +124,18 @@ test('a new vehicle without obstacles: every intermediate length is valid, the d
 test('clicking an obstacle in 3D highlights its row, and clicking a row highlights the obstacle', async ({ page, login, browserErrors }) => {
   await openPreview(page, login)
   const normal = await obstacleColor(page, 1)
+  // Màu làm nổi là token --highlight, đọc từ trang để đổi bảng màu không phải sửa test (V2.3 đổi #FACC15 → #F7CF40)
+  const highlight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--highlight').trim().slice(1).toLowerCase())
 
   // OBS-002 sát vách phải, phía gần camera ở góc chéo
   const point = await instancePoint(page, 1, 'obstacle-body')
   await page.mouse.click(point.x, point.y)
   await expect(page.locator('tbody[aria-current="true"]')).toContainText('OBS-002')
-  await expect.poll(() => obstacleColor(page, 1)).toBe('facc15')
+  await expect.poll(() => obstacleColor(page, 1)).toBe(highlight)
 
   await page.getByRole('cell', { name: 'OBS-001', exact: true }).click()
   await expect(page.locator('tbody[aria-current="true"]')).toContainText('OBS-001')
-  await expect.poll(() => obstacleColor(page, 0)).toBe('facc15')
+  await expect.poll(() => obstacleColor(page, 0)).toBe(highlight)
   expect(await obstacleColor(page, 1)).toBe(normal)
   expect(browserErrors).toEqual([])
 })

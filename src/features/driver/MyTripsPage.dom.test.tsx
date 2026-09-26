@@ -32,8 +32,8 @@ test('the demo driver: the loaded trip to open, the main trip still at the wareh
   expect(card(recent, 'TRIP-007').getByRole('link', { name: 'Xem tổng kết' })).toHaveAttribute('href', '/tai-xe/diem-giao?chuyen=TRIP-007')
 
   // Một nút primary: chuyến nên giao trước
-  expect(container.querySelectorAll('a.bg-primary, button.bg-primary')).toHaveLength(1)
-  expect(loaded.getByRole('link', { name: 'Mở chuyến' })).toHaveClass('bg-primary')
+  expect(container.querySelectorAll('a.text-on-primary, button.text-on-primary')).toHaveLength(1)
+  expect(loaded.getByRole('link', { name: 'Mở chuyến' })).toHaveClass('text-on-primary')
   expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument()
   // LM-096: nút tài khoản 56px mở hồ sơ cá nhân
   expect(screen.getByRole('button', { name: 'Tài khoản Phạm Quốc Dũng' })).toHaveClass('size-14')
@@ -44,7 +44,7 @@ test('an admin sees every trip: delivering first with its current stop, loading 
   const ready = within(await screen.findByRole('region', { name: 'Sẵn sàng giao' }, LOAD))
   expect(ready.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent)).toStrictEqual(['TRIP-009', 'TRIP-010'])
   expect(card(ready, 'TRIP-009').getByText('Đang giao điểm 2 / 3')).toBeInTheDocument()
-  expect(card(ready, 'TRIP-009').getByRole('link', { name: 'Tiếp tục giao' })).toHaveClass('bg-primary')
+  expect(card(ready, 'TRIP-009').getByRole('link', { name: 'Tiếp tục giao' })).toHaveClass('text-on-primary')
 
   const preparing = within(screen.getByRole('region', { name: 'Kho đang chuẩn bị' }))
   expect(preparing.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent)).toStrictEqual(['TRIP-011', 'TRIP-2026-0914'])

@@ -175,47 +175,66 @@ thêm mock riêng lên `lib/` (LM-062 đã gỡ `lib/load-plan.mock.ts` mm).
 Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-text-2`,
 `rounded-md`… trỏ thẳng vào `var()` chứ không sao chép giá trị. Sửa token chỉ ở một chỗ.
 
-### V2.3 "Cyan kính" là đích *(bổ sung 25/09/2026)*
+### V2.3 "Cyan kính" *(bổ sung 25/09/2026, token đã áp 26/09/2026)*
 
 Bản thiết kế đã chốt nằm ở `design/v2.3/` (`README.md` thứ tự làm, `SCREENS.md` màn → route, `CHANGES.md` việc cần làm).
-Giá trị token đích: `design/v2.3/tokens/index.v2.3.css` — **giữ tên token cũ**, đổi giá trị sang cyan, thêm thang `--cyan-*`,
-`--n-*`, `--amber/violet/green/red-*`, `--sky`, `--card-shadow`, `--glass-dark*`, `--primary-fill-*`, `--on-primary`, `--font-display`.
-Cho tới khi PR token (đợt 1) gộp, khối code dưới đây là trạng thái **hiện tại**; PR đó phải thay khối này bằng giá trị mới trong
-cùng commit. Chỗ nào luật cũ ở mục 4–5 khác V2.3 thì theo các dòng *(đã điều chỉnh 25/09/2026, V2.3)*.
-`design/v2.3/tokens/v3.css` chỉ để tham chiếu, không import vào `src/`.
+Đợt 1 (token) đã thay khối `:root` theo `design/v2.3/tokens/index.v2.3.css`: **giữ tên token cũ**, đổi giá trị sang cyan, thêm thang
+`--cyan-*`, `--n-*`, `--amber/violet/green/red-*`, `--sky`, `--card-shadow`, `--glass-dark*`, `--primary-fill-*`, `--on-primary`,
+`--font-display`. Khối dưới đây là trạng thái hiện tại. Chỗ nào luật cũ ở mục 4–5 khác V2.3 thì theo các dòng
+*(đã điều chỉnh 25/09/2026, V2.3)*. `design/v2.3/tokens/v3.css` chỉ để tham chiếu, không import vào `src/`.
+
+- `@theme` xoá thang mặc định `cyan/amber/violet/green/red` của Tailwind rồi khai lại bằng token: `bg-cyan-600`, `text-red-700`… là màu
+  của bảng này, không có bậc nào ngoài bảng (`bg-red-300` không sinh class).
+- `font-display` là họ chữ trong `cn()` (`THEME_FONT_FAMILIES` của `lib/utils.ts`); thêm họ chữ mới vào `@theme` thì thêm tên vào đó.
+- Vật liệu kính **sáng** của V2 (`--nav-glass`, `--follow-glass`, `--tile-glass`, `--glass-edge`, `--tile-lift`, `--hero-icon`,
+  `--icon-ring`, `--chrome`, `--table-head`…) còn giữ cho tới khi đợt 2 chuyển component sang kính tối; đợt 1 chỉ đổi sắc của chúng
+  sang cyan. Component cuối cùng thôi dùng token nào thì xoá token đó — không để song song hai hệ kính.
 
 ```css
 :root {
+  /* thang gốc: --cyan-50 … --cyan-950 (#E7FCFD → #02222D), --n-0 … --n-900 xám ánh cyan (#FFFFFF → #0E1C21),
+     --{amber|violet|green|red}-{50|200|500|700} — giá trị đầy đủ ở src/index.css */
+
   /* nền và chữ */
   --bg: #FFFFFF;
-  --surface: #F7F8FA;
-  --border: #E5E7EB;
-  --text: #111827;
-  --text-2: #4B5563;
-  --text-3: #6B7280;
-  --text-disabled: #9CA3AF;   /* chữ trên nền vô hiệu hoá */
+  --surface: var(--n-25);        /* #F8FCFD */
+  --app: var(--n-50);            /* #F2F8F9 — nền vùng làm việc dưới dải trời */
+  --border: var(--n-200);        /* #D9E4E7 */
+  --line-soft: var(--n-100);     /* #E7EFF1 — đường chia trong card, dòng bảng */
+  --line-strong: #8398A0;        /* viền ô nhập, 3,0:1 trên trắng */
+  --text: var(--n-900);          /* #0E1C21 */
+  --text-2: var(--n-700);        /* #394D54 */
+  --text-3: var(--n-600);        /* #52676F */
+  --text-disabled: var(--n-400); /* #9BADB3 — chữ trên nền vô hiệu hoá */
 
-  /* thương hiệu */
-  --primary: #2563EB;
-  --primary-hover: #1D4ED8;
-  --primary-bg: #EFF6FF;
+  /* thương hiệu: --primary cho chữ và đường (link, focus, ô đã chọn, biểu đồ); nút chính dùng --primary-fill-* */
+  --primary: var(--cyan-700);    /* #006F81 */
+  --primary-hover: var(--cyan-800);
+  --primary-bg: var(--cyan-50);
+  --primary-fill-from: #2ED6E4;  --primary-fill-to: var(--cyan-400);  --primary-fill-border: #00B5C6;
+  --primary-fill-hover-from: var(--cyan-400);  --primary-fill-hover-to: var(--cyan-500);
+  --primary-fill-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 8px 22px -10px rgba(0,195,212,.9);
+  --on-primary: var(--cyan-950); /* #02222D — chữ trên nút chính */
 
   /* ngữ nghĩa */
-  --success: #16A34A;
-  --warning: #D97706;
-  --danger: #DC2626;
-  --danger-hover: #B91C1C;
-  --info: #0891B2;
+  --success: var(--green-700);   /* #156F41 */
+  --warning: var(--amber-700);   /* #9D580C */
+  --danger: var(--red-700);      /* #B02A2D */
+  --danger-hover: #8E2224;
+  --info: var(--cyan-700);
 
   /* điều khiển */
-  --switch-off: #D1D5DB;      /* rãnh switch khi tắt */
-  --highlight: #FACC15;       /* kiện đang thao tác trên nền canvas tối */
+  --switch-off: var(--n-500);    /* #70848B — rãnh switch khi tắt */
+  --highlight: #F7CF40;          /* kiện "Hiện tại" trên nền 3D */
 
-  /* vùng 3D, luôn tối */
-  --canvas-1: #1A1D23;
-  --canvas-2: #0F1115;
-  --panel-dark: #1E2228;
-  --border-dark: #2D323B;
+  /* vùng 3D, luôn tối (theme dầu) */
+  --canvas-1: #031F29;
+  --canvas-2: #021C25;
+  --panel-dark: var(--cyan-950);
+  --border-dark: #1F4A55;
+  --glass-dark: linear-gradient(180deg, rgba(10,44,55,.62), rgba(4,30,39,.55));
+  --glass-dark-border: rgba(155,237,242,.16);
+  --glass-dark-text: #E7FCFD;  --glass-dark-muted: rgba(203,247,249,.7);
 
   /* vật cản trong thùng trên canvas tối (LM-033), không trùng màu điểm giao */
   --obstacle: #64748B;          /* không chịu tải */
@@ -225,40 +244,47 @@ cùng commit. Chỗ nào luật cũ ở mục 4–5 khác V2.3 thì theo các d�
   --stop-1: #E69F00;  --stop-2: #56B4E9;  --stop-3: #009E73;  --stop-4: #F0E442;
   --stop-5: #0072B2;  --stop-6: #D55E00;  --stop-7: #CC79A7;  --stop-8: #555555;
 
-  /* 6 tông badge, mỗi tông 3 biến bg/fg/border:
-     --badge-{neutral|info|cyan|success|warning|danger}-{bg|fg|border} */
+  /* 7 tông badge, mỗi tông 3 biến bg/fg/border:
+     --badge-{neutral|info|cyan|success|warning|danger|violet}-{bg|fg|border}
+     violet (V2.3) = đang chạy / đang tối ưu / đã xếp xong */
 
-  /* thang mực bốn cấp (V2, 23/09/2026): tiêu đề và số quan trọng → dữ liệu vận hành
-     → thông tin phụ → chú thích. Trước đó ba cấp nằm quá gần nhau nên màn trông nhạt */
-  --ink-strong: #131F34;  --ink-1: #1F2C3E;  --ink-2: #4A5C75;  --ink-3: #5E6E84;
-  /* --ink-3 của bản V2 là #71829A — chỉ 3,9:1 trên trắng, 3,5:1 trên trường nền, trượt mục 10.
-     Tối lại cùng sắc độ (23/09/2026): 5,2:1 trên trắng, 4,7:1 trên trường nền. Đổi token này
-     thì đo lại cả hai nền. */
+  /* thang mực bốn cấp (V2): tiêu đề và số quan trọng → dữ liệu vận hành → thông tin phụ → chú thích */
+  --ink-strong: var(--n-900);  --ink-1: var(--n-800);  --ink-2: var(--n-700);  --ink-3: var(--n-600);
+  /* --ink-3 #52676F: 5,9:1 trên trắng, 5,5:1 trên --app (đo 26/09/2026). Đổi token này thì đo lại cả hai nền. */
 
   /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
-     blue = vận hành · green = sẵn sàng/xong · amber = cần chú ý
+     blue = vận hành (V2.3: sắc cyan, giữ tên) · green = sẵn sàng/xong · amber = cần chú ý
      violet = phân tích phụ · slate = ngữ cảnh (không phải số đo) */
-  --tint-blue: #DCE8FB;    --tint-blue-fg: #1A4DA3;
-  --tint-green: #D1ECDE;   --tint-green-fg: #0C6B4C;
-  --tint-amber: #FCE6C2;   --tint-amber-fg: #85500A;
-  --tint-violet: #E2E0FA;  --tint-violet-fg: #443E9E;
-  --tint-slate: #E1E8F1;   --tint-slate-fg: #4E6681;
+  --tint-blue: var(--cyan-50);     --tint-blue-fg: var(--cyan-800);
+  --tint-green: var(--green-50);   --tint-green-fg: var(--green-700);
+  --tint-amber: var(--amber-50);   --tint-amber-fg: var(--amber-700);
+  --tint-violet: var(--violet-50); --tint-violet-fg: var(--violet-700);
+  --tint-slate: var(--n-100);      --tint-slate-fg: var(--n-700);
+
+  /* dải trời đầu trang (thanh điều hướng + tiêu đề + tab), hai vệt cyan trên nền #02222D → #053341 */
+  --sky: radial-gradient(…), radial-gradient(…), linear-gradient(180deg, #02222D 0%, #053341 100%);
+  --field: linear-gradient(var(--n-50), var(--n-50));  /* V2.3: nền trang phẳng */
 
   /* bề rộng tối đa vùng làm việc. Màn 2K trở lên không kéo giãn nội dung:
      điều phối cần thêm dòng, không cần thêm chiều ngang */
   --shell-max: 1680px;
 
-  /* bo góc */
-  --r-sm: 6px;  --r-md: 8px;  --r-lg: 12px;
-  --r-xl: 16px;   /* chỉ bề mặt kính (ô số liệu, khối tổng hợp) — V2 */
+  /* bo góc V2.3 */
+  --r-sm: 6px;   /* tag, mốc điểm giao */
+  --r-md: 10px;  /* nút, ô nhập, chip */
+  --r-lg: 14px;  /* card, toast */
+  --r-xl: 18px;  /* hộp thoại, bề mặt kính lớn */
 
-  /* vật liệu kính V2: --nav-glass, --follow-glass, --tile-glass, --glass-edge, --tile-lift,
-     --hero-icon, --hero-icon-shadow, --icon-ring — xem src/index.css và mục 5 "Cấm tuyệt đối" */
+  /* đổ bóng: card chỉ --card-shadow rất nhẹ; e1–e3 cho lớp nổi */
+  --card-shadow: 0 1px 2px rgba(2,34,45,.05), 0 10px 28px -14px rgba(2,34,45,.18);
+  --e1: 0 1px 2px rgba(2,34,45,.06);
+  --e2: 0 18px 40px -16px rgba(2,34,45,.35), 0 0 0 1px rgba(2,34,45,.07);
+  --e3: 0 30px 80px -24px rgba(2,34,45,.6), 0 0 0 1px rgba(2,34,45,.06);
 
-  /* đổ bóng, chỉ cho lớp nổi */
-  --e1: 0 1px 2px rgba(16,24,40,.06);
-  --e2: 0 4px 12px rgba(16,24,40,.10);
-  --e3: 0 12px 32px rgba(16,24,40,.16);
+  /* chữ */
+  --font-display: 'Archivo Variable', 'Archivo', 'Be Vietnam Pro', sans-serif;
+  --font-text: 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* chuyển động */
   --dur-fast: 120ms;  --dur-md: 250ms;  --dur-slow: 500ms;
@@ -271,6 +297,8 @@ cùng commit. Chỗ nào luật cũ ở mục 4–5 khác V2.3 thì theo các d�
 Font: **Be Vietnam Pro** cho giao diện, **JetBrains Mono** cho số, mã kiện, kích thước, khối lượng. Mono luôn kèm `font-variant-numeric: tabular-nums`.
 *(đã điều chỉnh 25/09/2026, V2.3)* Thêm **Archivo** (variable, `--font-display`, độ rộng 106–112 %) cho tiêu đề màn, tiêu đề card /
 hộp thoại và số tổng hợp lớn; file font trong `design/v2.3/tokens/fonts/` (có dải tiếng Việt). Không dùng Archivo cho chữ thân.
+Ba file Archivo (tiếng Việt, latin mở rộng, latin) chép vào `src/assets/fonts/`, khai `@font-face` đầu `src/index.css` để Vite đóng
+gói cùng app; Be Vietnam Pro và JetBrains Mono vẫn nạp từ Google Fonts ở `index.html`.
 
 ### Type scale
 
@@ -315,7 +343,9 @@ trong `src/`; muốn dùng class từ nơi khác thì thêm `@source` tường m
   link, vòng focus, ô đã chọn và biểu đồ — không tô nền nút bằng nó. Vẫn một nút chính mỗi màn.
 - *(quyết định 16/09/2026)* Màn **điều phối** (danh sách/chi tiết/form chuyến, kiện, thiết lập tối ưu, so sánh, đội xe, dashboard) tạm thời
   **chỉ hỗ trợ desktop**: nút giữ 40px, không bắt buộc 56px. Luật 56px áp cho màn cảm ứng: kho, tài xế, Planner 3D.
-- Hover chỉ đổi nền sang `--primary-hover`. **Không** phóng to, **không** nhấc lên.
+- Hover chỉ đổi nền sang `--primary-hover`. **Không** phóng to, **không** nhấc lên. *(đã điều chỉnh 26/09/2026, V2.3)* Nút chính:
+  gradient trượt xuống một bậc cyan (`--primary-fill-hover-from → --primary-fill-hover-to`, chữ tối vẫn 5,8:1) — bản mẫu V2.3 không
+  vẽ trạng thái hover, đây là lựa chọn của đợt 1. Vô hiệu hoá: bỏ gradient, nền `--border`, chữ `--text-disabled`, không bóng.
 - Focus: vòng 2px `--primary` cách 2px. *(bổ sung 19/09/2026, LM-085)* Tailwind v4: `outline-none` tắt biến `--tw-outline-style`,
   nên `index.css` đặt lại `solid` cho `:focus-visible` ngoài `@layer` để `focus-visible:outline-2` vẽ được vòng — không bỏ rule đó.
 - Loading: giữ nguyên chiều rộng, thêm spinner 16px bên trái chữ.

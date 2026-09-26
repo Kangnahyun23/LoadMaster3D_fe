@@ -38,7 +38,7 @@ function renderDetail(tripId: string, role: Role = 'dispatcher') {
 }
 
 /** Nút hoặc link mang nền primary của `Button` — mỗi màn đúng một (AGENTS mục 5). */
-const primaryActions = (container: HTMLElement) => container.querySelectorAll('a.bg-primary, button.bg-primary')
+const primaryActions = (container: HTMLElement) => container.querySelectorAll('a.text-on-primary, button.text-on-primary')
 
 test('a trip being loaded is locked: the banner says why, edit actions are gone, progress shows packages loaded so far', async () => {
   const { container } = renderDetail('TRIP-011')
