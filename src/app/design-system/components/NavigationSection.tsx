@@ -1,4 +1,4 @@
-import { ChevronLeft, Plus, Warehouse } from 'lucide-react'
+import { ChevronLeft, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { NavRail } from '@/app/NavRail'
 import { PageHero } from '@/components/PageHero'
@@ -39,7 +39,6 @@ export function NavigationSection() {
           {/* Mẫu chỉ để nhìn: PageHero dựng <h1>, trang tài liệu đã có h1 của nó */}
           <div inert aria-hidden className="overflow-hidden rounded-md border border-border bg-(image:--field)">
             <PageHero
-              icon={Warehouse}
               title={t('fleet.title')}
               meta={t('fleet.count', { count: 8 })}
               description={t('pageHero.fleet')}

@@ -53,7 +53,6 @@ export function QuickSearch() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <NavRailButton
-          orientation="horizontal"
           icon={Search}
           label={t('search.button')}
           aria-keyshortcuts="Control+K Meta+K"
