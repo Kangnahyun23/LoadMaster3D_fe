@@ -34,7 +34,7 @@ function renderComparison(tripId: string) {
 
 /** Nút hoặc link mang lớp nền primary của `Button` — màn chỉ được có đúng một (AGENTS.md mục 5). */
 function primaryActions(container: HTMLElement) {
-  return container.querySelectorAll('a.bg-primary, button.bg-primary')
+  return container.querySelectorAll('a.text-on-primary, button.text-on-primary')
 }
 
 /** Chữ của mọi ô trong cột một bản lưu — cột xác định bằng radio mang mã bản ở đầu cột (ma trận V2). */

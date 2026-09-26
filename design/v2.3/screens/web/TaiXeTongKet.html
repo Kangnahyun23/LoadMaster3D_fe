@@ -1,0 +1,134 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Tài xế · tổng kết chuyến · 390×844 --><title>Tổng kết chuyến</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 390px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+body { background: #dfe8eb; font-size: 16px; line-height: 24px; }
+/* thanh trên trên dải trời: nút đặc cỡ chạm, không kính */
+.tb { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; flex: none; color: #e7fcfd;
+  background: #0b3945; border: 1px solid #235a69; }
+.lng { height: 56px; min-width: 56px; padding: 0 14px 0 12px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; flex: none; color: #e7fcfd; background: #0b3945; border: 1px solid #235a69; font: 600 16px/1 var(--text); letter-spacing: .04em; }
+.lng svg { color: var(--cyan-200); }
+.lng.sq { padding: 0; width: 56px; }
+.me { width: 56px; height: 56px; display: grid; place-items: center; flex: none; border-radius: 50%; }
+.me .avatar { width: 46px; height: 46px; font-size: 16px; }
+/* nút cỡ chạm */
+.btn.t56 { height: 56px; padding: 0 20px; border-radius: 14px; font-size: 17px; gap: 10px; justify-content: center; }
+.btn.t60 { height: 60px; padding: 0 22px; border-radius: 16px; font-size: 18px; gap: 10px; justify-content: center; }
+.btn.t64 { height: 64px; padding: 0 26px; border-radius: 16px; font-size: 19px; gap: 12px; justify-content: center; }
+.btn.is-dis { opacity: 1; box-shadow: none; background: var(--n-100); border-color: var(--n-200); color: var(--n-600); }
+/* trạng thái cỡ hiện trường */
+.st { height: 32px; padding: 0 12px 0 11px; font-size: 16px; gap: 8px; border-radius: 9px; }
+.st i { width: 8px; height: 8px; }
+.code.pl { font-size: 16px; color: var(--ink-2); }
+.help { font-size: 16px; line-height: 21px; }
+.ftag { height: 26px; padding: 0 9px; font-size: 14px; border-radius: 7px; }
+
+.phone { width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--app); display: flex; flex-direction: column; }
+.phd { flex: none; padding: 8px 12px 12px; color: #fff; }
+.phd .row { display: flex; align-items: center; gap: 8px; height: 56px; }
+.phd .ttl { flex: 1; min-width: 0; }
+.phd h1 { margin: 0; font: 700 22px/26px var(--display); font-stretch: 104%; letter-spacing: -.3px; white-space: nowrap; }
+.phd .sub { font-size: 16px; line-height: 20px; color: rgba(203,247,249,.8); margin-top: 1px; white-space: nowrap; }
+.strip { display: flex; gap: 6px; margin: 10px 4px 0; }
+.strip i { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.2); }
+.strip i.cur { background: var(--s1); box-shadow: 0 0 10px rgba(230,159,0,.55); }
+.strip i.done { background: var(--green-500); }
+.smk { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; font: 700 17px/1 var(--display); color: #101828; }
+.smk.s1 { background: var(--s1); } .smk.s2 { background: var(--s2); } .smk.s3 { background: var(--s3); }
+.pbody { flex: 1; min-height: 0; overflow: hidden; padding: 12px 16px 0; display: flex; flex-direction: column; gap: 12px; }
+.pbody > * { flex: none; }
+.pfoot { flex: none; background: #fff; border-top: 1px solid var(--line); padding: 10px 16px 14px; box-shadow: 0 -10px 24px -18px rgba(2,34,45,.35); }
+.pfoot .btn { width: 100%; }
+
+.cc { padding: 14px 16px 16px; border-radius: 18px; }
+.cc h2 { margin: 0; font: 700 19px/25px var(--display); font-stretch: 100%; letter-spacing: -.2px; }
+.cc p { margin: 2px 0 0; font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.cc .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.cc .acts .btn { color: var(--cyan-900); }
+.cc .acts .btn svg { color: var(--cyan-700); }
+.cnt .l1 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 16px; line-height: 22px; font-weight: 500; }
+.cnt .l1 b { font: 700 17px/1 var(--display); font-variant-numeric: tabular-nums; }
+.cnt .pct { font: 650 16px/1 var(--display); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.cnt .trk { height: 8px; border-radius: 4px; background: var(--n-100); margin-top: 8px; overflow: hidden; }
+.cnt .trk i { display: block; height: 100%; border-radius: 4px; background: var(--green-500); }
+.btn.wide { width: 100%; }
+.rows { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; flex: none; }
+.it { display: flex; align-items: center; gap: 12px; min-height: 80px; padding: 9px 12px 9px 16px; border-bottom: 1px solid var(--line-soft); }
+.it:last-child { border-bottom: 0; }
+.it.done { background: var(--green-50); border-bottom-color: var(--green-200); }
+.it.iss { background: var(--amber-50); border-bottom-color: var(--amber-200); }
+.it .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; font-size: 16px; line-height: 22px; }
+.it .l1 { display: flex; align-items: baseline; gap: 10px; }
+.it .l1 .code { font: 600 16px/22px var(--mono); color: var(--ink); }
+.it .ord { color: var(--ink-3); }
+.it .l2 { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.it .l3 { color: var(--ink-3); display: flex; align-items: center; gap: 7px; }
+.it .l4 { display: flex; align-items: center; gap: 7px; font-weight: 600; }
+.it .l4.ok { color: var(--green-700); }
+.it .l4.warn { color: var(--amber-700); }
+.tg { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; flex: none; background: #fff;
+  border: 2px solid var(--green-700); color: var(--green-700); font: 600 16px/1 var(--text); text-align: center; letter-spacing: -.45px; white-space: nowrap; }
+.tg.on { background: var(--green-700); color: #fff; box-shadow: 0 6px 14px -8px rgba(21,111,65,.8); }
+.rem { margin: 0 0 10px; text-align: center; font-size: 16px; line-height: 22px; color: var(--ink-3); }
+.rem b { color: var(--ink-2); font-weight: 600; }
+.fr { display: grid; grid-template-columns: 60px 1fr; gap: 10px; }
+.issb { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; background: #fff; border: 1.5px solid var(--amber-200); color: var(--amber-700); }
+.ntc { margin: 0; }
+.ntc.banner { font-size: 16px; line-height: 22px; padding: 12px 14px; }
+
+.hero { display: flex; gap: 12px; align-items: flex-start; }
+.hero .ok { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--green-50); color: var(--green-700);
+  box-shadow: inset 0 0 0 1px var(--green-200); }
+.hero h2 { margin: 0; font: 700 20px/26px var(--display); font-stretch: 104%; letter-spacing: -.2px; }
+.hero h2 .code { font: 600 19px/26px var(--mono); color: var(--ink); letter-spacing: -.01em; }
+.hero p { margin: 2px 0 0; font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fc { border: 1px solid var(--line); border-radius: 16px; background: #fff; padding: 11px 14px 12px; }
+.fc .k { font-size: 16px; line-height: 20px; color: var(--ink-3); }
+.fc .v { margin-top: 4px; font: 700 30px/34px var(--display); font-stretch: 106%; letter-spacing: -.4px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fc.warn { background: var(--amber-50); border-color: var(--amber-200); }
+.fc.warn .v { color: var(--amber-700); }
+.fc .t { margin-top: 5px; font: 650 18px/23px var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.fc .t small { display: block; font: 500 16px/21px var(--text); color: var(--ink-2); }
+.sh { margin: 4px 2px -4px; font: 650 18px/22px var(--display); font-stretch: 106%; }
+.iss { border: 1px solid var(--amber-200); background: var(--amber-50); border-radius: 16px; padding: 12px 14px; font-size: 16px; line-height: 22px; }
+.iss .kd { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--amber-700); }
+.iss .code { font: 600 16px/22px var(--mono); color: var(--ink); }
+.iss .nm { color: var(--ink-2); }
+.iss .nt { color: var(--ink); margin-top: 2px; }
+.sts { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 16px; background: #fff; overflow: hidden; }
+.sts li { display: flex; align-items: center; gap: 11px; padding: 9px 14px; border-bottom: 1px solid var(--line-soft); }
+.sts li:last-child { border-bottom: 0; }
+.sts .mk { width: 26px; height: 26px; font-size: 15px; border-radius: 8px; }
+.sts .tx { flex: 1; min-width: 0; font-size: 16px; line-height: 21px; }
+.sts .tx b { display: block; font-weight: 600; }
+.sts .tx span { color: var(--ink-3); }
+.sts .tx .w { color: var(--amber-700); font-weight: 600; }
+.sts .ck { color: var(--green-700); flex: none; display: flex; }
+
+</style></head><body>
+<div class="phone"><header class="sky phd">
+  <div class="row">
+    <button type="button" class="tb" aria-label="Về danh sách chuyến"><svg class="" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+    <div class="ttl"><h1>Tổng kết chuyến</h1></div>
+    <button type="button" class="lng sq" aria-label="Ngôn ngữ giao diện: Tiếng Việt">VI</button>
+  </div>
+</header>
+<div class="pbody">
+  <div class="hero"><span class="ok"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg></span><div><h2>Đã giao xong chuyến <span class="code">TRIP-007</span></h2><p>Vật tư y tế Biên Hoà → Bình Chánh</p></div></div>
+  <div class="facts">
+    <div class="fc"><div class="k">Số điểm giao</div><div class="v">3</div></div>
+    <div class="fc"><div class="k">Kiện đã giao</div><div class="v">84</div></div>
+    <div class="fc warn"><div class="k">Sự cố</div><div class="v">1</div></div>
+    <div class="fc"><div class="k">Thời gian</div><div class="t">06:33 – 10:03<small>17/09/2026</small></div></div>
+  </div>
+  <h3 class="sh">Sự cố</h3>
+  <div class="iss"><div class="kd"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Khách từ chối</div><div><span class="code">PKG-002-01</span> · Điểm 2</div><div class="nm">Kiện thuốc và vật tư y tế</div><div class="nt">Nhà thuốc từ chối nhận vì sai số lô</div></div>
+  <h3 class="sh">Điểm giao</h3>
+  <ul class="sts"><li><span class="mk s1">1</span><div class="tx"><b>Bệnh viện Đa khoa Đồng Nai – kho vật tư</b><span>Đã giao <span class="num">07:43</span> · <span class="num">30</span> kiện</span></div><span class="ck"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span></li><li><span class="mk s2">2</span><div class="tx"><b>Nhà thuốc Long Châu Biên Hoà</b><span>Đã giao <span class="num">08:53</span> · <span class="num">14</span> kiện · <span class="w">1 sự cố</span></span></div><span class="ck"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span></li><li><span class="mk s3">3</span><div class="tx"><b>Kho dược Lê Minh Xuân</b><span>Đã giao <span class="num">10:03</span> · <span class="num">40</span> kiện</span></div><span class="ck"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span></li></ul>
+</div>
+<footer class="pfoot"><span class="btn btn-primary t60">Về danh sách chuyến</span></footer></div>
+</body></html>

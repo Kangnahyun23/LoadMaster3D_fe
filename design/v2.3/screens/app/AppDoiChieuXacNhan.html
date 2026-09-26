@@ -1,0 +1,343 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- App · Xác nhận đã dỡ · ConfirmUnloadSheet · 390×844 --><title>App · Tài xế · Xác nhận đã dỡ</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 390px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+body { background: #dfe8eb; font-size: 16px; line-height: 24px; }
+/* thanh trên trên dải trời: nút đặc cỡ chạm, không kính */
+.tb { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; flex: none; color: #e7fcfd;
+  background: #0b3945; border: 1px solid #235a69; }
+.lng { height: 56px; min-width: 56px; padding: 0 14px 0 12px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; flex: none; color: #e7fcfd; background: #0b3945; border: 1px solid #235a69; font: 600 16px/1 var(--text); letter-spacing: .04em; }
+.lng svg { color: var(--cyan-200); }
+.lng.sq { padding: 0; width: 56px; }
+.me { width: 56px; height: 56px; display: grid; place-items: center; flex: none; border-radius: 50%; }
+.me .avatar { width: 46px; height: 46px; font-size: 16px; }
+/* nút cỡ chạm */
+.btn.t56 { height: 56px; padding: 0 20px; border-radius: 14px; font-size: 17px; gap: 10px; justify-content: center; }
+.btn.t60 { height: 60px; padding: 0 22px; border-radius: 16px; font-size: 18px; gap: 10px; justify-content: center; }
+.btn.t64 { height: 64px; padding: 0 26px; border-radius: 16px; font-size: 19px; gap: 12px; justify-content: center; }
+.btn.is-dis { opacity: 1; box-shadow: none; background: var(--n-100); border-color: var(--n-200); color: var(--n-600); }
+/* trạng thái cỡ hiện trường */
+.st { height: 32px; padding: 0 12px 0 11px; font-size: 16px; gap: 8px; border-radius: 9px; }
+.st i { width: 8px; height: 8px; }
+.code.pl { font-size: 16px; color: var(--ink-2); }
+.help { font-size: 16px; line-height: 21px; }
+.ftag { height: 26px; padding: 0 9px; font-size: 14px; border-radius: 7px; }
+
+body { background: #dfe8eb; }
+.mapp { width: 390px; height: 844px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: var(--app); color: var(--ink); }
+
+/* ---- app bar: dải trời dầu, nút 56 px đặc (không kính) */
+.mbar { flex: none; padding: 8px 12px 10px; color: #fff; z-index: 2; }
+.mbar .row { display: flex; align-items: center; gap: 10px; height: 56px; }
+.mbar .ttl { flex: 1; min-width: 0; }
+.mbar h1 { margin: 0; font: 700 21px/26px var(--display); font-stretch: 104%; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mbar .sub { font-size: 15px; line-height: 20px; color: rgba(203,247,249,.84); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.mbar .sub .code { font: 500 15px/20px var(--mono); color: var(--cyan-200); }
+.mbar .row + .row { height: auto; }
+.brandm { display: flex; align-items: center; gap: 11px; flex: 1; min-width: 0; padding-left: 4px; }
+.brandm .mark { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex: none;
+  background: linear-gradient(145deg, #5cdbe6, #00a9bb); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 8px 20px -10px rgba(0,195,212,.9); }
+.brandm .mark svg { width: 22px; height: 22px; }
+.brandm b { display: block; font: 700 19px/22px var(--display); font-stretch: 108%; letter-spacing: -.2px; }
+.brandm small { display: block; font-size: 15px; line-height: 20px; color: rgba(203,247,249,.84); margin-top: 1px; white-space: nowrap; }
+.me .avatar { width: 44px; height: 44px; font-size: 16px; }
+.tb.lt { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); }
+
+/* phần chào đầu trang Công việc (nằm trong dải; thẻ đầu tiên đè lên dải 44 px như web) */
+.mhero { display: flex; align-items: flex-end; gap: 12px; padding: 10px 6px 56px; }
+.mhero.flat { padding-bottom: 14px; }
+.mhero .tx { flex: 1; min-width: 0; }
+.mhero .dt { font-size: 15px; line-height: 20px; color: rgba(203,247,249,.84); }
+.mhero h2 { margin: 3px 0 0; font: 700 29px/34px var(--display); font-stretch: 112%; letter-spacing: -.5px; }
+.mhero .cnt { text-align: right; flex: none; }
+.mhero .cnt b { display: block; font: 700 34px/34px var(--display); font-variant-numeric: tabular-nums; color: var(--cyan-300); }
+.mhero .cnt small { font-size: 15px; line-height: 20px; color: rgba(203,247,249,.84); }
+
+/* ---- thân, chân, điều hướng */
+.mbody { flex: 1; min-height: 0; overflow: hidden; padding: 16px 16px 0; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; }
+.mbody > * { flex: none; }
+.mbody.lift { margin-top: -44px; z-index: 3; }
+.mbody.nav-pad { padding-bottom: 92px; }
+.mfoot { flex: none; background: #fff; border-top: 1px solid var(--line); padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 -10px 24px -18px rgba(2,34,45,.35); z-index: 2; }
+.mfoot .btn { width: 100%; }
+.mfoot .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mnav { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px 10px 12px; z-index: 3;
+  background: rgba(248,252,253,.86); border-top: 1px solid rgba(2,34,45,.08);
+  box-shadow: 0 -12px 30px -18px rgba(2,34,45,.35), inset 0 1px 0 rgba(255,255,255,.9); backdrop-filter: blur(24px) saturate(1.6); }
+.mnav.n4 { grid-template-columns: repeat(4, 1fr); }
+.mapp.solid .mnav { background: #fff; backdrop-filter: none; }
+.mnav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--n-700); font: 500 14px/18px var(--text); white-space: nowrap; }
+.mnav .pill { position: relative; width: 64px; height: 34px; border-radius: 17px; display: grid; place-items: center; color: var(--n-600); }
+.mnav a.on { color: var(--ink); font-weight: 700; }
+.mnav a.on .pill { background: var(--cyan-100); color: var(--cyan-900); box-shadow: inset 0 0 0 1px var(--cyan-200); }
+.mnav .badge { position: absolute; top: -4px; left: 38px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--cyan-950); color: #fff;
+  font: 700 13px/22px var(--display); text-align: center; font-variant-numeric: tabular-nums; box-shadow: 0 0 0 2px #fff; }
+.mnav .badge.warn { background: var(--amber-500); color: #3b2300; }
+.mnav .badge.dot { min-width: 12px; width: 12px; height: 12px; padding: 0; top: 2px; left: 40px; background: var(--amber-500); }
+
+/* ---- chữ */
+.mh2 { margin: 0; font: 700 20px/26px var(--display); font-stretch: 104%; letter-spacing: -.2px; color: var(--ink); }
+.msec { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.msec h2 { margin: 0; font: 650 18px/24px var(--display); font-stretch: 104%; color: var(--ink); }
+.msec span { font-size: 15px; color: var(--ink-3); white-space: nowrap; }
+.mp { margin: 0; font-size: 16px; line-height: 24px; color: var(--ink-2); }
+.mnote { margin: 0; font-size: 15px; line-height: 21px; color: var(--ink-3); }
+.mnote .tag { vertical-align: 1px; margin-right: 4px; }
+.mono16 { font: 600 16px/22px var(--mono); color: var(--ink); }
+
+/* ---- thẻ, danh sách */
+.mcard { background: #fff; border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--card-shadow); padding: 16px; }
+.mlist { background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: var(--card-shadow); }
+.mrow { display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 12px 12px 12px 16px; border-bottom: 1px solid var(--line-soft); }
+.mrow:last-child { border-bottom: 0; }
+.mrow .ic { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; flex: none; background: var(--n-50); color: var(--ink-2); border: 1px solid var(--line); }
+.mrow .ic.cy { background: var(--cyan-50); color: var(--cyan-700); border-color: var(--cyan-100); }
+.mrow .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mrow .t { font: 600 16px/22px var(--text); color: var(--ink); }
+.mrow .s { font-size: 15px; line-height: 21px; color: var(--ink-3); }
+.mrow .go { color: var(--n-600); flex: none; display: flex; width: 32px; justify-content: center; }
+.mrow .end { flex: none; }
+
+/* ---- điểm giao (Okabe–Ito, luôn kèm số) */
+.smk { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; font: 700 17px/1 var(--display); color: #101828; }
+.smk.s1 { background: var(--s1); } .smk.s2 { background: var(--s2); } .smk.s3 { background: var(--s3); } .smk.s4 { background: var(--s4); }
+.smk.sm { width: 28px; height: 28px; font-size: 15px; }
+.ribbon { display: grid; grid-template-columns: repeat(4, 1fr); position: relative; }
+.ribbon.r3 { grid-template-columns: repeat(3, 1fr); }
+.ribbon.r2 { grid-template-columns: repeat(2, 1fr); }
+.ribbon::before { content: ''; position: absolute; left: 12.5%; right: 12.5%; top: 16px; height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--s1), var(--s2), var(--s3), var(--s4)); opacity: .55; }
+.ribbon.r3::before { left: 16.7%; right: 16.7%; background: linear-gradient(90deg, var(--s1), var(--s2), var(--s3)); }
+.ribbon.r2::before { left: 25%; right: 25%; background: linear-gradient(90deg, var(--s1), var(--s2)); }
+.ribbon > div { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; min-width: 0; }
+.ribbon .smk { box-shadow: 0 0 0 4px #fff; }
+.ribbon small { font-size: 15px; line-height: 19px; color: var(--ink-2); text-align: center; }
+
+/* ---- số liệu 3 cột */
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); }
+.facts > div { padding: 11px 0 12px; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.facts > div + div { padding-left: 14px; border-left: 1px solid var(--line-soft); }
+.facts b { font: 700 24px/28px var(--display); font-variant-numeric: tabular-nums; color: var(--ink); }
+.facts b small { font-size: 16px; font-weight: 600; color: var(--ink-2); }
+.facts span { font-size: 15px; line-height: 20px; color: var(--ink-3); }
+
+/* ---- trạng thái trống / lỗi / hết phiên */
+.mstate { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 12px; }
+.mstate .art { width: 76px; height: 76px; border-radius: 24px; display: grid; place-items: center; background: var(--cyan-50); color: var(--cyan-700); box-shadow: inset 0 0 0 1px var(--cyan-100); }
+.mstate .art.warn { background: var(--amber-50); color: var(--amber-700); box-shadow: inset 0 0 0 1px var(--amber-200); }
+.mstate .art.danger { background: var(--red-50); color: var(--red-700); box-shadow: inset 0 0 0 1px var(--red-200); }
+.mstate .art.ok { background: var(--green-50); color: var(--green-700); box-shadow: inset 0 0 0 1px var(--green-200); }
+.mstate h2 { margin: 18px 0 0; font: 700 23px/29px var(--display); font-stretch: 106%; letter-spacing: -.3px; color: var(--ink); }
+.mstate p { margin: 8px 0 0; font-size: 16px; line-height: 24px; color: var(--ink-2); }
+.mstate .acts { align-self: stretch; display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+
+/* ---- nút & ô nhập cỡ app (bổ sung FIELD_CSS) */
+.btn.wide { width: 100%; }
+.btn.t56.btn-ghost, .btn.t60.btn-ghost { color: var(--cyan-800); }
+.btn-dark { background: var(--cyan-950); color: #fff; border-color: var(--cyan-950); }
+.mapp .fld { gap: 8px; }
+.mapp .fld > .lb { font: 600 16px/22px var(--text); color: var(--ink-2); }
+.mapp .ctl { height: 56px; border-radius: 14px; font-size: 17px; padding: 0 16px; gap: 10px; }
+.mapp .ctl.ta { height: auto; min-height: 120px; padding: 14px 16px; line-height: 24px; }
+.mapp .ctl .unit, .mapp .ctl .chev { font-size: 16px; }
+.mapp .help, .mapp .msg-err { font-size: 15px; line-height: 21px; }
+.mapp .cbx { font-size: 16px; line-height: 22px; gap: 14px; min-height: 56px; }
+.mapp .cbx .bx { width: 24px; height: 24px; border-radius: 7px; border-width: 2px; }
+.mapp .cbx.rdo.on .bx { border-width: 7px; }
+.mapp .cbx small { font-size: 15px; line-height: 21px; }
+.mapp .tgl { width: 52px; height: 32px; border-radius: 16px; }
+.mapp .tgl::after { width: 26px; height: 26px; top: 3px; left: 3px; }
+.mapp .tgl.on::after { left: 23px; }
+.mapp .banner { font-size: 16px; line-height: 23px; padding: 12px 14px; border-radius: 16px; }
+.mapp .tag { height: 26px; padding: 0 9px; font-size: 14px; border-radius: 8px; }
+.mapp .tag.mock { font-size: 12.5px; }
+
+/* ---- sheet đáy, hộp thoại, snackbar */
+.mscrim { position: absolute; inset: 0; background: rgba(2,34,45,.52); z-index: 8; }
+.msheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; background: #fff; border-radius: 28px 28px 0 0; padding: 8px 20px 20px;
+  box-shadow: 0 -24px 60px -24px rgba(2,34,45,.6); display: flex; flex-direction: column; gap: 14px; }
+.msheet .hdl { width: 44px; height: 5px; border-radius: 3px; background: var(--n-300); margin: 2px auto 0; flex: none; }
+.msheet .sh { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.msheet .sh h2 { flex: 1; margin: 0; font: 700 21px/27px var(--display); font-stretch: 104%; letter-spacing: -.2px; color: var(--ink); }
+.xb { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; flex: none; color: var(--ink-2); background: var(--n-50); border: 1px solid var(--line); }
+.mdlg { position: absolute; left: 20px; right: 20px; top: 50%; transform: translateY(-50%); z-index: 9; background: #fff; border-radius: 26px; padding: 22px 20px 18px;
+  box-shadow: 0 30px 80px -24px rgba(2,34,45,.7); display: flex; flex-direction: column; gap: 10px; }
+.mdlg .ic { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: var(--cyan-50); color: var(--cyan-700); }
+.mdlg .ic.warn { background: var(--amber-50); color: var(--amber-700); }
+.mdlg .ic.danger { background: var(--red-50); color: var(--red-700); }
+.mdlg h2 { margin: 6px 0 0; font: 700 22px/28px var(--display); font-stretch: 106%; letter-spacing: -.3px; color: var(--ink); }
+.mdlg p { margin: 0; font-size: 16px; line-height: 24px; color: var(--ink-2); }
+.mdlg .acts { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.msnack { position: absolute; left: 12px; right: 12px; bottom: 96px; z-index: 7; display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px;
+  background: #0b2f3a; color: #e7fcfd; border-radius: 16px; font-size: 16px; line-height: 22px; box-shadow: 0 16px 40px -16px rgba(2,34,45,.8); }
+.msnack .ic { flex: none; display: flex; color: var(--cyan-300); }
+.msnack .act { margin-left: auto; flex: none; height: 44px; padding: 0 12px; display: flex; align-items: center; border-radius: 12px; color: var(--cyan-300); font-weight: 700; }
+
+/* ---- sân khấu 3D (ảnh cảnh thật từ engine, nhãn & nút nổi là kính tối) */
+.mstage { position: relative; flex: none; overflow: hidden; background-color: #021c25; }
+.mstage .lab { position: absolute; border-radius: 14px; padding: 9px 12px; font-size: 15px; line-height: 20px; color: #e7fcfd; }
+.mstage .lab b { display: block; color: #fff; font-weight: 600; font-size: 16px; line-height: 22px; }
+.mstage .gbtn { position: absolute; width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; color: #e7fcfd; }
+.mstage .ring { position: absolute; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--cyan-300);
+  box-shadow: 0 0 0 4px rgba(0,195,212,.28), 0 0 18px rgba(0,195,212,.7); }
+
+/* ---- thanh bước (phát lại hướng dẫn) */
+.pb { display: flex; align-items: center; gap: 8px; }
+.pb .ib { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; flex: none; background: #fff; border: 1px solid var(--line); color: var(--ink-2); }
+.pb .ib.is-dis { color: var(--n-400); background: var(--n-50); }
+.pb .ib.play { background: var(--cyan-950); border-color: var(--cyan-950); color: #fff; }
+.pb .rng { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; padding-left: 6px; }
+.pb .trk { position: relative; height: 6px; border-radius: 3px; background: var(--n-200); }
+.pb .trk i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--cyan-600); }
+.pb .trk b { position: absolute; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; background: #fff; border: 2px solid var(--cyan-600);
+  box-shadow: 0 2px 6px rgba(2,34,45,.25); }
+.pb .rng small { font: 600 15px/1 var(--display); font-variant-numeric: tabular-nums; color: var(--ink-3); text-align: right; }
+
+/* ---- thân không đệm (màn có sân khấu 3D) + panel trắng đè lên cảnh */
+.mbody.flush { padding: 0; gap: 0; }
+.mpanel { flex: 1 1 auto !important; min-height: 0; margin-top: -20px; position: relative; z-index: 2; background: #fff; border-radius: 24px 24px 0 0;
+  padding: 6px 16px 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -14px 30px -16px rgba(0,0,0,.55); }
+.mpanel > * { flex: none; }
+.mpanel .hdl { width: 44px; height: 5px; border-radius: 3px; background: var(--n-300); margin: 0 auto -2px; }
+
+/* ---- thẻ chuyến (trang Công việc) */
+.trip .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.trip .top .code { font: 600 16px/22px var(--mono); color: var(--ink-2); }
+.trip h3 { margin: 12px 0 0; font: 700 24px/29px var(--display); font-stretch: 106%; letter-spacing: -.4px; color: var(--ink); }
+.trip h3 .ar { color: var(--cyan-700); font-weight: 600; }
+.trip .via { margin-top: 4px; font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.trip .ribbon { margin: 16px 0 14px; }
+.trip .veh { display: flex; align-items: center; gap: 12px; margin: 14px 0 16px; }
+.trip .veh .ic { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; flex: none; background: var(--n-50); border: 1px solid var(--line); color: var(--ink-2); }
+.trip .veh .pl { display: block; font: 600 17px/22px var(--mono); color: var(--ink); }
+.trip .veh .md { display: block; font-size: 15px; line-height: 20px; color: var(--ink-3); }
+.trip.compact h3 { font-size: 19px; line-height: 25px; margin-top: 10px; }
+.trip.compact .via { font-size: 15px; }
+
+/* ---- thẻ kiện đang chọn (hướng dẫn xếp/dỡ, đối chiếu) */
+.pkrow { display: flex; align-items: center; gap: 12px; }
+.pkrow .pic { width: 52px; height: 52px; border-radius: 15px; display: grid; place-items: center; flex: none; background: var(--cyan-50); color: var(--cyan-700); border: 1px solid var(--cyan-100); }
+.pkrow .tx { flex: 1; min-width: 0; }
+.pkrow .k { font-size: 15px; line-height: 20px; color: var(--ink-3); }
+.pkrow .id { font: 600 25px/30px var(--mono); letter-spacing: -.02em; color: var(--ink); white-space: nowrap; }
+.pkrow .nm { font-size: 16px; line-height: 22px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spec { display: flex; flex-wrap: wrap; gap: 8px; }
+.spec span { height: 34px; display: inline-flex; align-items: center; gap: 7px; padding: 0 11px; border-radius: 10px; background: var(--n-50); border: 1px solid var(--line);
+  font-size: 15px; color: var(--ink-2); white-space: nowrap; }
+.spec span svg { color: var(--ink-3); }
+.spec .num { font-size: 15px; font-weight: 600; color: var(--ink); }
+.rowbtn { height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 14px 0 16px; border-radius: 14px; background: #fff; border: 1px solid var(--line);
+  font: 600 16px/1 var(--text); color: var(--ink); box-shadow: 0 1px 2px rgba(2,34,45,.05); width: 100%; }
+.rowbtn > svg:first-child { color: var(--cyan-700); }
+.rowbtn .go { margin-left: auto; color: var(--n-600); display: flex; }
+
+/* ---- ô số liệu khoá–giá trị trong thẻ */
+.mkv { margin: 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.mkv > div { border-radius: 14px; background: var(--n-25); border: 1px solid var(--line); padding: 8px 12px 10px; min-width: 0; }
+.mkv dt { font-size: 15px; line-height: 20px; color: var(--ink-3); white-space: nowrap; }
+.mkv dd { margin: 2px 0 0; font: 650 18px/24px var(--display); font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+
+/* ui.toggle có dòng phụ inline 12,5px — trong app nâng lên 15px */
+.mapp .cbx small { font-size: 15px !important; line-height: 21px !important; color: var(--ink-3) !important; font-weight: 400; }
+.mapp .cbx.rdo .bx { border-radius: 50%; }
+.banner.ok { background: var(--green-50); border-color: var(--green-200); color: #0f4a2c; }
+.banner.ok .ic { color: var(--green-700); }
+.mapp .banner b { font-weight: 650; }
+.msheet .sub { margin: -10px 0 0; font-size: 15px; line-height: 21px; color: var(--ink-3); }
+.msheet .sub .code { font: 500 15px/21px var(--mono); color: var(--ink-2); }
+.code.ink { font: 600 16px/22px var(--mono); color: var(--ink); }
+
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 10px 0 6px; border-radius: 12px; font-size: 15px; font-weight: 500; color: var(--ink-3); background: var(--n-100); white-space: nowrap; }
+.steps .n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; flex: none; font: 700 14px/1 var(--display); background: #fff; color: var(--ink-3); box-shadow: inset 0 0 0 1.5px var(--n-300); }
+.steps li.done { color: var(--ink-2); background: var(--n-50); box-shadow: inset 0 0 0 1px var(--line); }
+.steps li.done .n { background: var(--cyan-700); color: #fff; box-shadow: none; }
+.steps li.on { color: var(--cyan-900); background: var(--cyan-50); font-weight: 650; box-shadow: inset 0 0 0 1.5px var(--cyan-500); }
+.steps li.on .n { background: var(--cyan-950); color: #fff; box-shadow: none; }
+.tgt { display: flex; align-items: center; gap: 14px; padding: 12px 14px; }
+.tgt .smk { width: 44px; height: 44px; border-radius: 14px; font-size: 21px; }
+.tgt .tx { flex: 1; min-width: 0; }
+.tgt .k { font-size: 15px; line-height: 20px; color: var(--ink-3); }
+.tgt .id { font: 600 26px/32px var(--mono); letter-spacing: -.02em; color: var(--ink); }
+.tgt .nm { font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.tgt .nm2 { font-size: 15px; line-height: 21px; color: var(--ink-3); white-space: nowrap; }
+.cam { position: relative; height: 206px; border-radius: 20px; overflow: hidden; background: #0d1a1f; flex: none; box-shadow: 0 0 0 1px rgba(2,34,45,.1); }
+.cam .camsvg { position: absolute; inset: 0; }
+.lbt { font: 700 11px/1 var(--text); letter-spacing: .08em; }
+.lbt.w, .lbs.w, .lbn.w { fill: #f3f0e8; }
+.lbs { font: 600 9.5px/1 var(--text); letter-spacing: .03em; fill: #222; }
+.lbn { font: 800 17px/1 var(--display); }
+.lbc { font: 700 15px/1 var(--mono); fill: #101010; letter-spacing: .04em; }
+.cam .hint { position: absolute; left: 12px; top: 12px; height: 36px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 12px;
+  background: rgba(3,18,23,.78); color: #e7fcfd; font-size: 15px; font-weight: 500; }
+.cam .hint svg { color: var(--cyan-300); }
+.cam .hint.ok svg { color: #4cd07d; } .cam .hint.bad svg { color: #ff8a82; }
+.cam .hint .code { font: 600 15px/1 var(--mono); color: #fff; }
+.cam .torch { position: absolute; right: 10px; bottom: 10px; width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center;
+  background: rgba(3,18,23,.78); color: #e7fcfd; border: 1px solid rgba(155,237,242,.22); }
+.cam .auto { position: absolute; left: 12px; bottom: 12px; font-size: 15px; line-height: 20px; color: rgba(231,252,253,.92); max-width: 240px;
+  background: rgba(3,18,23,.72); padding: 7px 10px; border-radius: 10px; }
+.mapp .fld .ctl .code { font: 600 18px/1 var(--mono); color: var(--ink); letter-spacing: .01em; }
+.mapp .fld .ctl > svg { color: var(--ink-3); flex: none; }
+.ctl.ok { border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(54,172,98,.16); }
+.ctl .okm { margin-left: auto; color: var(--green-700); display: flex; flex: none; }
+.ctl .caret { display: inline-block; width: 2px; height: 24px; background: var(--cyan-600); margin-left: -6px; }
+.mfoot .btn-ghost { color: var(--ink-2); }
+.mfoot .btn-ghost svg { color: var(--amber-700); }
+.mapp .msg-err { font-weight: 500; }
+.note2 { margin: -4px 2px 0; font-size: 15px; line-height: 21px; color: var(--ink-3); }
+.note2 .code { font: 500 15px/21px var(--mono); color: var(--ink-2); }
+/* camera chưa được cấp quyền */
+.cam.off { background: #0f2a33; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 22px; gap: 6px; }
+.cam.off .art { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: rgba(250,171,53,.14); color: var(--amber-500); box-shadow: inset 0 0 0 1px rgba(250,171,53,.35); }
+.cam.off b { font: 650 18px/24px var(--display); color: #fff; margin-top: 2px; }
+.cam.off p { margin: 0; font-size: 15px; line-height: 21px; color: rgba(231,252,253,.86); }
+.cam.off .btn { margin-top: 6px; background: #fff; }
+
+.csum { display: flex; gap: 14px; align-items: center; padding: 12px 14px; border-radius: 16px; background: var(--n-25); border: 1px solid var(--line); }
+.csum .smk { width: 44px; height: 44px; border-radius: 14px; font-size: 21px; }
+.csum .id { font: 600 24px/30px var(--mono); letter-spacing: -.02em; color: var(--ink); }
+.csum .nm { font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.csum .mt { font-size: 15px; line-height: 21px; color: var(--ink-3); }
+.cok { display: flex; align-items: center; gap: 8px; font-size: 15px; line-height: 21px; color: var(--green-700); font-weight: 600; margin-top: -2px; }
+.chk { min-height: 64px; display: flex; align-items: center; padding: 4px 14px; border-radius: 16px; border: 1.5px solid var(--cyan-600); background: var(--cyan-50); }
+.chk .cbx { font-size: 17px; font-weight: 600; gap: 14px; }
+.chk .cbx .bx { width: 28px; height: 28px; border-radius: 8px; }
+.cnote { margin: 0; font-size: 15px; line-height: 21px; color: var(--ink-3); }
+.cfoot { display: grid; grid-template-columns: 1fr 1.55fr; gap: 10px; }
+
+</style></head><body>
+<div class="mapp"><header class="sky mbar ">
+  <div class="row"><button type="button" class="tb" aria-label="Quay lại hướng dẫn"><svg class="" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><div class="ttl"><h1>Đối chiếu mã kiện</h1><div class="sub"><span class="code">TRIP-010</span> · Điểm 1 / 3 · Kiện 1 / 120</div></div></div>
+</header><main class="mbody "><ol class="steps" aria-label="Các bước"><li class="done"><span class="n"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>Vị trí</li><li class="done"><span class="n"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>Đối chiếu</li><li class="on"><span class="n">3</span>Xác nhận</li></ol><section class="mcard tgt" aria-label="Kiện cần dỡ"><span class="smk s1" aria-hidden="true">1</span>
+  <div class="tx"><div class="k">Kiện cần dỡ · Điểm 1 · Dỡ thứ 1</div><div class="id">PKG-002-20</div><div class="nm">Thùng dầu ăn 12 chai</div>
+  <div class="nm2">45 × 32 × 30 cm · 12 kg</div></div></section><section class="cam" aria-label="Camera đã đọc mã PKG-002-20"><svg class="camsvg" width="358" height="206" viewBox="0 0 358 206" aria-hidden="true">
+  <rect width="358" height="206" fill="#2a2119"/>
+  <path d="M0 22 L358 6 L358 206 L0 206Z" fill="#6f5334"/><path d="M0 22 L358 6" stroke="#8a6a44" stroke-width="2"/>
+  <rect x="150" y="8" width="58" height="198" fill="#7d6040" opacity=".55"/>
+  <g transform="rotate(-2.5 179 116)">
+    <rect x="70" y="46" width="218" height="142" rx="7" fill="#f3f0e8"/>
+    <rect x="70" y="46" width="218" height="24" rx="7" fill="#101010"/><rect x="70" y="62" width="218" height="8" fill="#101010"/>
+    <text x="82" y="63" class="lbt w">LOADMASTER</text><text x="276" y="63" class="lbt w" text-anchor="end">TRIP-010</text>
+    <rect x="84.00" y="80" width="2.62" height="40" fill="#101010"/><rect x="87.93" y="80" width="1.31" height="40" fill="#101010"/><rect x="91.86" y="80" width="1.31" height="40" fill="#101010"/><rect x="98.41" y="80" width="3.93" height="40" fill="#101010"/><rect x="103.66" y="80" width="3.93" height="40" fill="#101010"/><rect x="108.90" y="80" width="2.62" height="40" fill="#101010"/><rect x="112.83" y="80" width="1.31" height="40" fill="#101010"/><rect x="115.45" y="80" width="2.62" height="40" fill="#101010"/><rect x="122.00" y="80" width="3.93" height="40" fill="#101010"/><rect x="127.24" y="80" width="2.62" height="40" fill="#101010"/><rect x="131.17" y="80" width="1.31" height="40" fill="#101010"/><rect x="136.41" y="80" width="1.31" height="40" fill="#101010"/><rect x="141.66" y="80" width="1.31" height="40" fill="#101010"/><rect x="145.59" y="80" width="2.62" height="40" fill="#101010"/><rect x="149.52" y="80" width="3.93" height="40" fill="#101010"/><rect x="156.07" y="80" width="1.31" height="40" fill="#101010"/><rect x="160.00" y="80" width="3.93" height="40" fill="#101010"/><rect x="165.24" y="80" width="2.62" height="40" fill="#101010"/><rect x="170.48" y="80" width="1.31" height="40" fill="#101010"/><rect x="174.41" y="80" width="3.93" height="40" fill="#101010"/><rect x="179.66" y="80" width="2.62" height="40" fill="#101010"/><rect x="184.90" y="80" width="2.62" height="40" fill="#101010"/><rect x="190.14" y="80" width="3.93" height="40" fill="#101010"/><rect x="196.69" y="80" width="1.31" height="40" fill="#101010"/><rect x="199.31" y="80" width="1.31" height="40" fill="#101010"/><rect x="203.24" y="80" width="2.62" height="40" fill="#101010"/><rect x="207.17" y="80" width="3.93" height="40" fill="#101010"/><rect x="213.72" y="80" width="2.62" height="40" fill="#101010"/><rect x="218.97" y="80" width="3.93" height="40" fill="#101010"/><rect x="225.52" y="80" width="1.31" height="40" fill="#101010"/><rect x="228.14" y="80" width="1.31" height="40" fill="#101010"/><rect x="232.07" y="80" width="3.93" height="40" fill="#101010"/><rect x="237.31" y="80" width="2.62" height="40" fill="#101010"/><rect x="242.55" y="80" width="2.62" height="40" fill="#101010"/><rect x="247.79" y="80" width="2.62" height="40" fill="#101010"/><rect x="253.03" y="80" width="2.62" height="40" fill="#101010"/><rect x="256.97" y="80" width="2.62" height="40" fill="#101010"/><rect x="263.52" y="80" width="3.93" height="40" fill="#101010"/><rect x="268.76" y="80" width="1.31" height="40" fill="#101010"/><rect x="271.38" y="80" width="2.62" height="40" fill="#101010"/>
+    <text x="179" y="138" class="lbc" text-anchor="middle">PKG-002-20</text>
+    <text x="84" y="160" class="lbs">DỠ THỨ 1</text><text x="84" y="176" class="lbs">DẦU ĂN 12 CHAI · 12 KG</text>
+    <rect x="236" y="146" width="42" height="36" rx="4" fill="#101010"/><text x="257" y="161" class="lbs w" text-anchor="middle">ĐIỂM</text>
+    <text x="257" y="178" class="lbn w" text-anchor="middle">1</text>
+  </g><path fill="rgba(3,12,15,.55)" fill-rule="evenodd" d="M0 0H358V206H0Z M70 72H288Q298 72 298 82V140Q298 150 288 150H70Q60 150 60 140V82Q60 72 70 72Z"/><path d="M60 94V78Q60 72 66 72H82" fill="none" stroke="#4cd07d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M276 72H292Q298 72 298 78V94" fill="none" stroke="#4cd07d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M298 128V144Q298 150 292 150H276" fill="none" stroke="#4cd07d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M82 150H66Q60 150 60 144V128" fill="none" stroke="#4cd07d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+  <span class="hint ok"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Đã đọc <span class="code">PKG-002-20</span></span><button type="button" class="torch" aria-label="Bật đèn"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6c0 2-2 2-2 4v10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V10c0-2-2-2-2-4V2h12z"/><line x1="6" x2="18" y1="6" y2="6"/><line x1="12" x2="12" y1="12" y2="12"/></svg></button></section><div class="fld"><span class="lb">Mã trên kiện</span><div class="ctl ok"><svg class="" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 8h.01"/><path d="M12 12h.01"/><path d="M14 8h.01"/><path d="M16 12h.01"/><path d="M18 8h.01"/><path d="M6 8h.01"/><path d="M7 16h10"/><path d="M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></svg><span><span class="code">PKG-002-20</span></span><span class="okm"><svg class="" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span></div></div><div class="banner ok"><span class="ic"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span><div><b>Mã kiện khớp.</b> Kiểm tra thao tác thực tế trước khi xác nhận.</div></div></main><footer class="mfoot"><span class="btn btn-primary t60 wide"><svg class="" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 16 2 2 4-4"/><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg>Xác nhận đã dỡ</span><span class="btn btn-ghost t56 wide"><svg class="" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Có vấn đề với kiện này</span></footer><div class="mscrim"></div><section class="msheet" role="dialog" aria-modal="true" aria-label="Xác nhận thao tác">
+  <div class="hdl" aria-hidden="true"></div>
+  <div class="sh"><h2>Xác nhận thao tác</h2></div>
+  <p class="sub">Đánh dấu đã dỡ kiện này tại điểm giao hiện tại.</p>
+<div class="csum"><span class="smk s1" aria-hidden="true">1</span><div><div class="id">PKG-002-20</div><div class="nm">Thùng dầu ăn 12 chai</div>
+  <div class="mt">Điểm 1 · Cửa hàng Bách Hoá Xanh Thủ Đức</div></div></div>
+<div class="cok"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Mã kiện khớp · 45 × 32 × 30 cm · 12 kg</div>
+<div class="chk"><span class="cbx on"><span class="bx"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><span>Tôi đã dỡ đúng kiện tại điểm này</span></span></div>
+<p class="cnote">Ghi Đã dỡ cho điểm 1. Mất mạng thì thao tác vào hàng Chờ gửi, app tự gửi lại.</p><div class="cfoot"><span class="btn btn-secondary t56">Quay lại</span><span class="btn btn-primary t56"><svg class="" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 16 2 2 4-4"/><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></svg>Xác nhận đã dỡ</span></div>
+</section></div>
+</body></html>

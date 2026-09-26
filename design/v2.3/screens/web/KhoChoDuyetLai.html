@@ -1,0 +1,72 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Kho · chờ duyệt lại · 1024×768 --><title>Kho — chờ duyệt lại</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1024px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+body { background: #dfe8eb; font-size: 16px; line-height: 24px; }
+/* thanh trên trên dải trời: nút đặc cỡ chạm, không kính */
+.tb { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; flex: none; color: #e7fcfd;
+  background: #0b3945; border: 1px solid #235a69; }
+.lng { height: 56px; min-width: 56px; padding: 0 14px 0 12px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; flex: none; color: #e7fcfd; background: #0b3945; border: 1px solid #235a69; font: 600 16px/1 var(--text); letter-spacing: .04em; }
+.lng svg { color: var(--cyan-200); }
+.lng.sq { padding: 0; width: 56px; }
+.me { width: 56px; height: 56px; display: grid; place-items: center; flex: none; border-radius: 50%; }
+.me .avatar { width: 46px; height: 46px; font-size: 16px; }
+/* nút cỡ chạm */
+.btn.t56 { height: 56px; padding: 0 20px; border-radius: 14px; font-size: 17px; gap: 10px; justify-content: center; }
+.btn.t60 { height: 60px; padding: 0 22px; border-radius: 16px; font-size: 18px; gap: 10px; justify-content: center; }
+.btn.t64 { height: 64px; padding: 0 26px; border-radius: 16px; font-size: 19px; gap: 12px; justify-content: center; }
+.btn.is-dis { opacity: 1; box-shadow: none; background: var(--n-100); border-color: var(--n-200); color: var(--n-600); }
+/* trạng thái cỡ hiện trường */
+.st { height: 32px; padding: 0 12px 0 11px; font-size: 16px; gap: 8px; border-radius: 9px; }
+.st i { width: 8px; height: 8px; }
+.code.pl { font-size: 16px; color: var(--ink-2); }
+.help { font-size: 16px; line-height: 21px; }
+.ftag { height: 26px; padding: 0 9px; font-size: 14px; border-radius: 7px; }
+
+.tab { width: 1024px; height: 768px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: var(--app); }
+.thd { flex: none; height: 74px; display: flex; align-items: center; gap: 14px; padding: 0 12px 0 10px; color: #fff; }
+.thd .ttl { flex: 1; min-width: 0; }
+.thd h1 { margin: 0; font: 700 26px/1.1 var(--display); font-stretch: 108%; letter-spacing: -.3px; }
+.thd .sub { margin-top: 5px; font-size: 16px; line-height: 20px; color: rgba(203,247,249,.8); }
+.thd .sub b { color: #fff; font-weight: 600; }
+.trp { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; padding: 0 6px 0 16px; border-left: 1px solid rgba(155,237,242,.2); flex: none; }
+.trp .k { font-size: 16px; line-height: 1; color: rgba(203,247,249,.78); }
+.trp .code { font: 600 18px/1 var(--mono); color: #fff; }
+
+.band { position: absolute; left: 0; right: 0; top: 0; height: 150px; }
+.thd.lst { position: relative; z-index: 1; }
+.thd .ttl { display: flex; align-items: center; gap: 12px; }
+.thd .code.hid { font: 600 20px/1 var(--mono); color: #fff; }
+.stl { position: relative; z-index: 1; margin: 14px 16px 16px; flex: 1; min-height: 0; border-radius: 20px; display: grid; place-items: center; }
+.stl .empty { padding: 20px 40px; }
+.stl .empty .art { width: 88px; height: 88px; border-radius: 24px; }
+.stl .empty h3 { font-size: 28px; line-height: 34px; margin-top: 22px; }
+.stl .empty p { font-size: 18px; line-height: 27px; max-width: 600px; margin-top: 10px; }
+.stl .empty p .code { font: 600 17px/1 var(--mono); color: var(--ink); }
+.stl .empty .acts { margin-top: 28px; }
+.stl .ctx { margin: 22px auto 0; width: max-content; display: flex; align-items: center; gap: 22px; padding: 14px 20px; border-radius: 14px; border: 1px solid var(--line);
+  background: var(--n-25); font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.stl .ctx b { color: var(--ink); font-weight: 600; }
+.stl .ctx .sep { width: 1px; height: 22px; background: var(--line); }
+
+</style></head><body>
+<div class="tab"><div class="sky band" aria-hidden="true"></div>
+<header class="thd lst">
+  <button type="button" class="tb" aria-label="Thoát phiên xếp hàng"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <div class="ttl"><span class="code hid">TRIP-013</span><span class="st st-attn"><i></i>Cần xem lại</span></div>
+  <button type="button" class="lng" aria-label="Ngôn ngữ giao diện: Tiếng Việt"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>VI</button>
+  <button type="button" class="me" aria-label="Tài khoản Lê Văn Hải"><span class="avatar">VH</span></button>
+</header>
+<section class="card stl">
+  <div class="empty">
+    <div class="art warn"><svg class="" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+    <h3>Chờ điều phối viên duyệt lại</h3>
+    <p>Phương án đã duyệt của chuyến <span class="code">TRIP-013</span> lỗi thời: xe hoặc kiện đã đổi sau lần tối ưu. Kho chỉ xếp được khi điều phối viên duyệt lại.</p>
+    <div class="ctx"><span><b>Biên Hoà → Long Bình Tân</b></span><span class="sep"></span><span>Ngày chạy <b class="num">25/09/2026</b></span><span class="sep"></span><span>Xe <b>Truck 6m</b></span><span class="sep"></span><span>Số kiện <b class="num">200</b></span></div>
+    <div class="acts"><span class="btn btn-primary t64">Về danh sách chuyến</span></div>
+  </div>
+</section></div>
+</body></html>

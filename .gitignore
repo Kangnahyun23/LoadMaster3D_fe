@@ -41,5 +41,6 @@ blob-report/
 .claude/
 CLAUDE.md
 
-# gói bàn giao nén
+# gói bàn giao nén (nội dung đã giải nén vào design/, docs/)
 docs/*.zip
+/*.zip

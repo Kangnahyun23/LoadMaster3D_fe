@@ -162,7 +162,7 @@ test('kỳ không có chuyến vẫn hiện thẻ đội xe', async () => {
 test('một nút primary theo quyền: quản lý xuất báo cáo; điều phối tạo kế hoạch; quản trị có cả hai', async () => {
   renderDashboard('manager')
   const exportButton = await screen.findByRole('button', { name: 'Xuất báo cáo' }, SLOW)
-  expect(exportButton).toHaveClass('bg-primary')
+  expect(exportButton).toHaveClass('text-on-primary')
   expect(screen.queryByRole('link', { name: 'Tạo kế hoạch xếp' })).not.toBeInTheDocument()
 })
 
@@ -176,6 +176,6 @@ test('điều phối viên không có quyền xuất báo cáo: chỉ còn "Tạ
 test('quản trị: "Tạo kế hoạch xếp" là primary, "Xuất báo cáo" là nút phụ', async () => {
   renderDashboard('admin')
   await kpi('Chuyến hoàn thành')
-  expect(screen.getByRole('link', { name: 'Tạo kế hoạch xếp' })).toHaveClass('bg-primary')
-  expect(screen.getByRole('button', { name: 'Xuất báo cáo' })).not.toHaveClass('bg-primary')
+  expect(screen.getByRole('link', { name: 'Tạo kế hoạch xếp' })).toHaveClass('text-on-primary')
+  expect(screen.getByRole('button', { name: 'Xuất báo cáo' })).not.toHaveClass('text-on-primary')
 })

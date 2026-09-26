@@ -1,0 +1,62 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Hộp thoại · quản trị và đội xe · 1536×1227 --><title>Hộp thoại quản trị</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1536px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+.icon-glass.open { background: rgba(255,255,255,.16); border-color: rgba(92,219,230,.55); color: #fff; box-shadow: 0 0 0 3px rgba(0,195,212,.16); }
+.avatar.open { box-shadow: 0 0 0 2px #053341, 0 0 0 4px var(--cyan-300); }
+.mono { font-family: var(--mono); font-size: .92em; letter-spacing: 0; }
+
+body { background: #4a626a; }
+.sheet { padding: 30px 24px 48px; }
+.sheet-h { display: flex; align-items: flex-end; gap: 18px; padding: 0 4px 26px; color: #fff; }
+.sheet-h h1 { margin: 0; font: 700 28px/1.1 var(--display); font-stretch: 110%; letter-spacing: -.4px; }
+.sheet-h p { margin: 0 0 3px; font-size: 13.5px; color: rgba(255,255,255,.88); }
+.grp-l { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin: 6px 4px -10px; color: #fff; font: 650 13px/1 var(--display);
+  font-stretch: 106%; letter-spacing: .06em; text-transform: uppercase; }
+.grp-l::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.22); }
+.dgrid { display: grid; grid-template-columns: repeat(3, 480px); column-gap: 24px; row-gap: 40px; align-items: start; }
+.span2 { grid-column: span 2; }
+.stack { display: flex; flex-direction: column; gap: 40px; }
+.cell { margin: 0; }
+.cell figcaption { display: flex; flex-direction: column; gap: 3px; height: 41px; margin: 0 4px 12px; }
+.cell figcaption b { font: 600 14px/20px var(--text); color: #fff; }
+.cell figcaption span { font-size: 12.5px; line-height: 18px; color: rgba(255,255,255,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlg-h h3 { text-wrap: balance; }
+.dlg-h p { text-wrap: pretty; }
+.nw { white-space: nowrap; }
+.dlg-h .x { width: 32px; height: 32px; margin: -4px -6px 0 auto; border-radius: 8px; display: grid; place-items: center; flex: none; }
+.fmeta { display: flex; align-items: center; gap: 10px; }
+.fmeta .count { margin-left: auto; font-size: 12.5px; color: var(--ink-3); }
+.fmeta .count.err { color: var(--red-700); }
+.caret { display: inline-block; width: 1.5px; height: 18px; background: var(--ink); vertical-align: -4px; margin-left: 1px; }
+.pwv { font-family: var(--mono); font-size: 15px; letter-spacing: .08em; color: var(--ink); }
+.dlg-f .skip { font-size: 13px; color: var(--ink-3); }
+
+</style></head><body>
+<div class="sheet">
+  <header class="sheet-h"><h1>Hộp thoại · Quản trị và đội xe</h1><p>Nền trắng đặc trên lớp tối, không làm mờ · mỗi hộp thoại một nút chính · thao tác phá huỷ dùng nút đỏ</p></header>
+  <div class="dgrid">
+    <div class="grp-l">Người dùng</div>
+    <figure class="cell "><figcaption><b>Thêm người dùng</b><span>Người dùng › Thêm người dùng · mọi trường bắt buộc</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><div style="min-width:0;flex:1"><h3>Thêm người dùng</h3><p>Hệ thống cấp mật khẩu tạm và chỉ hiện một lần sau khi tạo.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="dlg-b"><div class="frow" style="grid-template-columns:1fr 1fr">
+  <div class="fld"><span class="lb">Họ và tên <span class="rq" aria-hidden="true">*</span></span><div class="ctl"><span>Phan Thị Yến</span></div></div>
+  <div class="fld"><span class="lb">Số điện thoại <span class="rq" aria-hidden="true">*</span></span><div class="ctl"><span>0915 678 903</span></div></div>
+  <div class="fld"><span class="lb">Email <span class="rq" aria-hidden="true">*</span></span><div class="ctl"><span>yen.phan@loadmaster.vn</span></div></div>
+  <div class="fld"><span class="lb">Kho / chi nhánh <span class="rq" aria-hidden="true">*</span></span><div class="ctl"><span>Kho Long Bình</span><span class="chev"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div></div>
+  <div class="fld"><span class="lb">Vai trò <span class="rq" aria-hidden="true">*</span></span><div class="ctl focus"><span>Tài xế</span><span class="chev"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><span class="help">Thiết bị chính: Điện thoại</span></div>
+</div></div><div class="dlg-f"><span class="btn btn-secondary ">Huỷ</span><span class="btn btn-primary ">Thêm người dùng</span></div></div></figure>
+    <figure class="cell "><figcaption><b>Mật khẩu tạm</b><span>Sau khi thêm hoặc đặt lại · chỉ hiện một lần, không có nút đóng</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic ok"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg></span><div style="min-width:0;flex:1"><h3>Đã tạo tài khoản Phan Thị Yến</h3><p>Mật khẩu tạm chỉ hiện một lần. Sao chép và gửi cho người dùng; họ đăng nhập bằng email yen.phan@loadmaster.vn và mật khẩu này.</p></div></div><div class="dlg-b"><div style="display:flex;align-items:flex-end;gap:10px">
+  <div class="fld" style="flex:1"><span class="lb">Mật khẩu tạm</span><div class="ctl ro"><span><span class="pwv">k7XpR2mdT9</span></span></div></div>
+  <span class="btn btn-secondary "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Sao chép</span>
+</div></div><div class="dlg-f"><span class="btn btn-primary ">Xong</span></div></div></figure>
+    <div class="stack">
+      <figure class="cell "><figcaption><b>Đặt lại mật khẩu</b><span>Menu dòng hoặc panel chi tiết tài khoản</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic warn"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg></span><div style="min-width:0;flex:1"><h3>Đặt lại mật khẩu cho Đỗ Thị Hạnh?</h3><p>Mật khẩu hiện tại sẽ không dùng được nữa. Hệ thống cấp một mật khẩu tạm mới và chỉ hiện một lần.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div style="height:18px"></div><div class="dlg-f"><span class="btn btn-secondary ">Huỷ</span><span class="btn btn-primary ">Đặt lại mật khẩu</span></div></div></figure>
+      <figure class="cell "><figcaption><b>Xoá tài khoản</b><span>Menu dòng · chặn với chính mình và quản trị viên cuối cùng</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic danger"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></span><div style="min-width:0;flex:1"><h3>Xoá tài khoản Bùi Thị Lan?</h3><p>Tài khoản bị xoá khỏi hệ thống và không đăng nhập được nữa. Nhật ký vẫn giữ các thao tác người này đã làm.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div style="height:18px"></div><div class="dlg-f"><span class="btn btn-secondary ">Huỷ</span><span class="btn btn-danger ">Xoá tài khoản</span></div></div></figure>
+    </div>
+    <div class="grp-l">Đội xe</div>
+    <figure class="cell "><figcaption><b>Bảo dưỡng</b><span>Chi tiết xe › Đưa vào bảo dưỡng · ghi chú bắt buộc, ≤ 200 ký tự</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic warn"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><div style="min-width:0;flex:1"><h3>Đưa xe Hino&nbsp;FC9J&nbsp;đông&nbsp;lạnh&nbsp;· <span class="nw">51C-190.07</span> vào bảo dưỡng?</h3><p>Xe bảo dưỡng không gán được cho chuyến cho tới khi kết thúc bảo dưỡng.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="dlg-b"><div class="fld"><span class="lb">Ghi chú bảo dưỡng <span class="rq" aria-hidden="true">*</span></span><div class="ctl ta err" role="textbox" aria-multiline="true"><span class="ph">Thay dầu, kiểm tra phanh</span></div><div class="fmeta"><span class="msg-err"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Ghi lý do bảo dưỡng.</span><span class="count num err">0 / 200</span></div></div></div><div class="dlg-f"><span class="btn btn-secondary ">Huỷ</span><span class="btn btn-primary "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Đưa vào bảo dưỡng</span></div></div></figure>
+    <figure class="cell "><figcaption><b>Xoá xe</b><span>Chi tiết xe › Xoá xe · chỉ khi xe chưa gắn chuyến nào</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic danger"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></span><div style="min-width:0;flex:1"><h3>Xoá xe Hyundai&nbsp;Mighty&nbsp;EX8&nbsp;· <span class="nw">50H-118.29?</span></h3><p>Xe bị xoá khỏi đội. Không hoàn tác được.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div style="height:18px"></div><div class="dlg-f"><span class="btn btn-secondary ">Huỷ</span><span class="btn btn-danger ">Xoá xe</span></div></div></figure>
+  </div>
+</div>
+</body></html>

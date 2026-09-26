@@ -1,0 +1,96 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Hộp thoại · chuyến · 1536×1265 --><title>Hộp thoại chuyến</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1536px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+.icon-glass.open { background: rgba(255,255,255,.16); border-color: rgba(92,219,230,.55); color: #fff; box-shadow: 0 0 0 3px rgba(0,195,212,.16); }
+.avatar.open { box-shadow: 0 0 0 2px #053341, 0 0 0 4px var(--cyan-300); }
+.mono { font-family: var(--mono); font-size: .92em; letter-spacing: 0; }
+
+body { background: #4a626a; }
+.sheet { padding: 30px 24px 48px; }
+.sheet-h { display: flex; align-items: flex-end; gap: 18px; padding: 0 4px 26px; color: #fff; }
+.sheet-h h1 { margin: 0; font: 700 28px/1.1 var(--display); font-stretch: 110%; letter-spacing: -.4px; }
+.sheet-h p { margin: 0 0 3px; font-size: 13.5px; color: rgba(255,255,255,.88); }
+.grp-l { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin: 6px 4px -10px; color: #fff; font: 650 13px/1 var(--display);
+  font-stretch: 106%; letter-spacing: .06em; text-transform: uppercase; }
+.grp-l::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.22); }
+.dgrid { display: grid; grid-template-columns: repeat(3, 480px); column-gap: 24px; row-gap: 40px; align-items: start; }
+.span2 { grid-column: span 2; }
+.stack { display: flex; flex-direction: column; gap: 40px; }
+.cell { margin: 0; }
+.cell figcaption { display: flex; flex-direction: column; gap: 3px; height: 41px; margin: 0 4px 12px; }
+.cell figcaption b { font: 600 14px/20px var(--text); color: #fff; }
+.cell figcaption span { font-size: 12.5px; line-height: 18px; color: rgba(255,255,255,.88); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlg-h h3 { text-wrap: balance; }
+.dlg-h p { text-wrap: pretty; }
+.nw { white-space: nowrap; }
+.dlg-h .x { width: 32px; height: 32px; margin: -4px -6px 0 auto; border-radius: 8px; display: grid; place-items: center; flex: none; }
+.fmeta { display: flex; align-items: center; gap: 10px; }
+.fmeta .count { margin-left: auto; font-size: 12.5px; color: var(--ink-3); }
+.fmeta .count.err { color: var(--red-700); }
+.caret { display: inline-block; width: 1.5px; height: 18px; background: var(--ink); vertical-align: -4px; margin-left: 1px; }
+.pwv { font-family: var(--mono); font-size: 15px; letter-spacing: .08em; color: var(--ink); }
+.dlg-f .skip { font-size: 13px; color: var(--ink-3); }
+
+.imp { display: flex; flex-direction: column; gap: 14px; }
+.imp-row { display: flex; align-items: center; gap: 10px; }
+.fchip { height: 40px; display: inline-flex; align-items: center; gap: 10px; padding: 0 14px 0 10px; border-radius: 10px; background: var(--n-50);
+  border: 1px solid var(--line); font-weight: 500; color: var(--ink); }
+.fchip .fi { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; background: var(--green-50); color: var(--green-700); }
+.fchip .fm { color: var(--ink-3); font-weight: 400; font-size: 13px; }
+.imp-row .link { font-size: 13.5px; }
+.imp-sum { margin: 0; font-size: 14px; color: var(--ink); }
+.imp-sum b { font-weight: 650; }
+.imp h4 { margin: 0 0 8px; display: flex; align-items: center; gap: 7px; font: 600 13px/18px var(--text); }
+.imp .e h4 { color: var(--red-700); }
+.imp .o h4 { color: var(--green-700); }
+table.it { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; table-layout: fixed; }
+table.it th { height: 32px; padding: 0 12px; text-align: left; font: 600 12px/1 var(--text); color: var(--ink-3); background: var(--n-25); border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.it td { height: 36px; padding: 0 12px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+table.it .r { text-align: right; }
+table.it .code { font-size: 12px; color: var(--ink-2); }
+.tbox { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.tbox.e { border-color: var(--red-200); }
+.tbox.e th { background: var(--red-50); color: #7c1d1f; border-bottom-color: var(--red-200); }
+.tbox.e td { white-space: normal; height: auto; padding-top: 9px; padding-bottom: 9px; line-height: 18px; vertical-align: top; }
+.tbox.e tr:last-child td { border-bottom: 0; }
+.tbox.e .msg { color: var(--red-700); }
+.tbox.e .nm { color: var(--ink-2); }
+.scrollbox { position: relative; height: 213px; }
+.scrollbox::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 30px; background: linear-gradient(180deg, rgba(255,255,255,0), #fff); }
+.scrollbox .thumb { position: absolute; right: 3px; top: 36px; width: 5px; height: 96px; border-radius: 3px; background: var(--n-300); z-index: 2; }
+.mk.sm { width: 20px; height: 20px; border-radius: 6px; font-size: 11px; }
+
+</style></head><body>
+<div class="sheet">
+  <header class="sheet-h"><h1>Hộp thoại · Chuyến</h1><p>Nền trắng đặc trên lớp tối, không làm mờ · mỗi hộp thoại một nút chính · thao tác phá huỷ dùng nút đỏ</p></header>
+  <div class="dgrid">
+    <div class="grp-l">Chi tiết chuyến</div>
+    <figure class="cell span2"><figcaption><b>Nhập kiện từ file</b><span>Bảng kiện › Nhập từ file · .csv hoặc .xlsx, tối đa 2.000 dòng · dòng lỗi bị bỏ qua</span></figcaption><div class="dlg" role="dialog" style="width:984px;"><div class="dlg-h"><div style="min-width:0;flex:1"><h3>Nhập kiện từ file</h3><p>Mỗi dòng một kiện, dòng đầu là tiêu đề cột như file mẫu (tiếng Việt, tiếng Anh hoặc tên trường). Kiện nhập được thêm sau các kiện đang có.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="dlg-b"><div class="imp">
+  <div class="imp-row">
+    <div class="fchip"><span class="fi"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></svg></span>mau-nhap-kien-TRIP-2026-0914.xlsx</div>
+    <span class="btn btn-secondary "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>Chọn file khác</span>
+    <span style="flex:1"></span>
+    <a href="#" class="link"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>Tải mẫu .csv</a><a href="#" class="link" style="margin-left:14px"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>Tải mẫu .xlsx</a>
+  </div>
+  <p class="imp-sum" role="status">Đọc được <b class="num">12</b> dòng: <b class="num">9</b> hợp lệ, <b class="num">3</b> lỗi.</p>
+  <section class="e"><h4><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>3 dòng lỗi, sẽ bỏ qua</h4>
+    <div class="tbox e"><table class="it"><colgroup><col style="width:64px"><col style="width:300px"><col></colgroup>
+      <thead><tr><th class="r">Dòng</th><th>Kiện</th><th>Lỗi</th></tr></thead><tbody><tr><td class="r num">6</td><td><span class="code">PKG-011</span> <span class="nm">· Thùng ly thuỷ tinh</span></td><td class="msg">Mức dễ vỡ: "Rất cao" không phải mức dễ vỡ (NONE, LOW, MEDIUM, HIGH).</td></tr><tr><td class="r num">9</td><td><span class="code">PKG-014</span> <span class="nm">· Thùng sữa hộp 48 hộp</span></td><td class="msg">Khối lượng (kg): "52kg" không phải là số.</td></tr><tr><td class="r num">11</td><td><span class="code">PKG-016</span> <span class="nm">· Kiện thuốc và vật tư y tế</span></td><td class="msg">Chuyến không có điểm giao 5 (chuyến có 4 điểm).</td></tr></tbody></table></div></section>
+  <section class="o"><h4><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>9 dòng hợp lệ</h4>
+    <div class="tbox scrollbox"><span class="thumb" aria-hidden="true"></span><table class="it"><colgroup><col style="width:64px"><col style="width:110px"><col><col style="width:140px"><col style="width:110px"><col style="width:64px"><col style="width:70px"></colgroup>
+      <thead><tr><th class="r">Dòng</th><th>Mã kiện</th><th>Tên</th><th class="r">D × R × C</th><th class="r">Khối lượng</th><th class="r">SL</th><th>Điểm</th></tr></thead>
+      <tbody><tr><td class="r num">2</td><td><span class="code">PKG-007</span></td><td>Thùng nước suối 24 chai</td><td class="r num">50 × 35 × 25</td><td class="r num">13 kg</td><td class="r num">40</td><td><span class="mk sm s1">1</span></td></tr><tr><td class="r num">3</td><td><span class="code">PKG-008</span></td><td>Thùng mì ăn liền 30 gói</td><td class="r num">55 × 40 × 30</td><td class="r num">3,5 kg</td><td class="r num">30</td><td><span class="mk sm s1">1</span></td></tr><tr><td class="r num">4</td><td><span class="code">PKG-009</span></td><td>Thùng dầu ăn 12 chai</td><td class="r num">45 × 32 × 30</td><td class="r num">12 kg</td><td class="r num">24</td><td><span class="mk sm s2">2</span></td></tr><tr><td class="r num">5</td><td><span class="code">PKG-010</span></td><td>Kiện nước giặt 4 can</td><td class="r num">50 × 40 × 35</td><td class="r num">16 kg</td><td class="r num">20</td><td><span class="mk sm s2">2</span></td></tr><tr><td class="r num">7</td><td><span class="code">PKG-012</span></td><td>Thùng bánh quy</td><td class="r num">60 × 40 × 35</td><td class="r num">6 kg</td><td class="r num">18</td><td><span class="mk sm s3">3</span></td></tr><tr><td class="r num">8</td><td><span class="code">PKG-013</span></td><td>Bao gạo 25 kg</td><td class="r num">70 × 45 × 15</td><td class="r num">25 kg</td><td class="r num">16</td><td><span class="mk sm s3">3</span></td></tr><tr><td class="r num">10</td><td><span class="code">PKG-015</span></td><td>Kiện văn phòng phẩm</td><td class="r num">60 × 40 × 30</td><td class="r num">18 kg</td><td class="r num">12</td><td><span class="mk sm s4">4</span></td></tr><tr><td class="r num">12</td><td><span class="code">PKG-017</span></td><td>Thùng sách giáo khoa</td><td class="r num">55 × 40 × 30</td><td class="r num">20 kg</td><td class="r num">10</td><td><span class="mk sm s4">4</span></td></tr><tr><td class="r num">13</td><td><span class="code">PKG-018</span></td><td>Thùng nồi cơm điện</td><td class="r num">40 × 40 × 35</td><td class="r num">5 kg</td><td class="r num">8</td><td><span class="mk sm s4">4</span></td></tr></tbody></table></div></section>
+</div></div><div class="dlg-f"><span class="btn btn-secondary " style="margin-right:auto">Đóng</span><span class="skip">Bỏ qua 3 dòng lỗi.</span><span class="btn btn-primary ">Nhập 9 dòng hợp lệ</span></div></div></figure>
+    <div class="stack">
+      <figure class="cell "><figcaption><b>Huỷ chuyến</b><span>Menu Thao tác · lý do bắt buộc, tối đa 300 ký tự</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic danger"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg></span><div style="min-width:0;flex:1"><h3>Huỷ chuyến TRIP-012?</h3><p>Chuyến chuyển sang Đã huỷ và không mở lại được. Lý do được ghi vào nhật ký.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div class="dlg-b"><div class="fld"><span class="lb">Lý do huỷ <span class="rq" aria-hidden="true">*</span></span><div class="ctl ta focus" role="textbox" aria-multiline="true"><span>Bệnh viện dời lịch nhận vật tư sang tuần sau<span class="caret"></span></span></div><div class="fmeta"><span class="count num">44 / 300</span></div></div></div><div class="dlg-f"><span class="btn btn-secondary ">Không huỷ</span><span class="btn btn-danger ">Huỷ chuyến</span></div></div></figure>
+      <figure class="cell "><figcaption><b>Xoá kiện</b><span>Panel kiện › Xoá kiện · phương án đã tối ưu thành lỗi thời</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic danger"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></span><div style="min-width:0;flex:1"><h3>Xoá kiện PKG-003?</h3><p>Kiện bị xoá khỏi chuyến. Phương án đã tối ưu sẽ thành lỗi thời.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div style="height:18px"></div><div class="dlg-f"><span class="btn btn-secondary ">Huỷ</span><span class="btn btn-danger ">Xoá kiện</span></div></div></figure>
+    </div>
+    <div class="grp-l">Tạo / sửa chuyến · Planner 3D</div>
+    <figure class="cell "><figcaption><b>Rời trang khi chưa lưu</b><span>Tạo / sửa chuyến · form còn thay đổi chưa lưu</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic danger"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z"/></svg></span><div style="min-width:0;flex:1"><h3>Rời trang khi chưa lưu?</h3><p>Thay đổi trên form chuyến sẽ mất nếu rời trang bây giờ.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div style="height:18px"></div><div class="dlg-f"><span class="btn btn-secondary ">Ở lại</span><span class="btn btn-danger ">Rời trang</span></div></div></figure>
+    <figure class="cell "><figcaption><b>Khôi phục mọi chỉnh sửa</b><span>Planner 3D · chế độ chỉnh sửa · hoàn tác được</span></figcaption><div class="dlg" role="dialog" style="width:480px;"><div class="dlg-h"><span class="ic info"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11"/></svg></span><div style="min-width:0;flex:1"><h3>Khôi phục mọi chỉnh sửa?</h3><p>Vị trí, hướng đặt và trạng thái ghim sẽ trở về phương án gốc. Bạn có thể hoàn tác thao tác này.</p></div><button type="button" class="x" aria-label="Đóng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div><div style="height:18px"></div><div class="dlg-f"><span class="btn btn-secondary ">Giữ chỉnh sửa</span><span class="btn btn-primary ">Khôi phục tất cả</span></div></div></figure>
+  </div>
+</div>
+</body></html>

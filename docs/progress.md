@@ -1,6 +1,6 @@
 # Theo dõi tiến độ — LoadMaster FE MVP
 
-Cập nhật lần cuối: **23/09/2026**
+Cập nhật lần cuối: **26/09/2026**
 
 Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](build-spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](handoff.md)
 
@@ -33,6 +33,19 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 ---
 
 ## 2. Nhật ký
+
+### 26/09/2026 — V2.3 "Cyan kính", đợt 1: token
+
+Nhận gói bàn giao V2.3 (`design/v2.3/`), áp `AGENTS.v2.3.diff` vào AGENTS.md (6/6 đoạn khớp). Trước khi làm, gộp V2 production
+(PR #1, `feat/v2-production-nav`) vào `developer` vì bộ V2.3 viết trên nền đó; CI của PR #1 đỏ ở một test giờ (máy CI chạy UTC,
+seed ghi giờ Việt Nam) — sửa bằng cách khoá `TZ=Asia/Ho_Chi_Minh` cho Vitest.
+
+Đợt 1 trên `feat/v2-3-Bluecyan`: khối `:root` của `src/index.css` theo `index.v2.3.css` (giữ tên token cũ, thêm thang cyan / n /
+amber / violet / green / red, `--sky`, `--card-shadow`, `--glass-dark*`, `--primary-fill-*`, `--on-primary`, `--font-*`), `@theme` xoá
+thang mặc định cùng tên của Tailwind rồi khai lại bằng token, Archivo nạp từ `src/assets/fonts/`, `font-display` vào `cn()`. Nút chính
+gradient + chữ tối. Token kính sáng V2 giữ lại (đổi sắc sang cyan) tới khi đợt 2 chuyển component. Tương phản đo lại: mọi cặp chữ/nền đã đổi ≥ 5,0:1,
+chữ trên nút chính 7,7:1 (hover 5,8:1). Test nhận "nút primary" bằng lớp `text-on-primary` thay `bg-primary`; E2E vật cản đọc màu
+`--highlight` từ trang. Ảnh trước / sau / đích: `docs/screenshots/v2.3/dot1-token/`. 813 unit/DOM, 82 E2E.
 
 ### 23/09/2026 — V2 bước 6, nhóm 2: bảng điều khiển, người dùng, nhật ký, hồ sơ
 

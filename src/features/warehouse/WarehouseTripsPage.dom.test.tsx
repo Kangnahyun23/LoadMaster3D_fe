@@ -34,8 +34,8 @@ test('in-progress trip first with Continue (110/280), then the approved trip, th
   expect(stale.queryByRole('link')).not.toBeInTheDocument()
 
   // Một nút primary: chuyến đang xếp dở
-  expect(container.querySelectorAll('a.bg-primary, button.bg-primary')).toHaveLength(1)
-  expect(loading.getByRole('link', { name: 'Tiếp tục (110/280)' })).toHaveClass('bg-primary')
+  expect(container.querySelectorAll('a.text-on-primary, button.text-on-primary')).toHaveLength(1)
+  expect(loading.getByRole('link', { name: 'Tiếp tục (110/280)' })).toHaveClass('text-on-primary')
   expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeInTheDocument()
   // LM-096: nút tài khoản 56px mở hồ sơ cá nhân
   expect(screen.getByRole('button', { name: 'Tài khoản Lê Văn Hải' })).toHaveClass('size-14')

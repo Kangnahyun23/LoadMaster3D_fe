@@ -12,3 +12,7 @@ test('cn keeps a theme font-size class when a text colour follows it', () => {
 test('cn still lets a later theme font-size replace an earlier one', () => {
   expect(cn('h-14 text-body-lg', 'xl:h-10 text-body')).toBe('h-14 xl:h-10 text-body')
 })
+
+test('cn treats font-display (Archivo, V2.3) as a font family, not a weight', () => {
+  expect(cn('font-mono font-semibold', 'font-display')).toBe('font-semibold font-display')
+})

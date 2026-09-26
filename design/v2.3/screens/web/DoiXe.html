@@ -1,0 +1,133 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Đội xe · 1536×921 --><title>Đội xe</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1536px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line-soft); }
+.toolbar .note { margin-left: auto; color: var(--ink-3); font-size: 13px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.toolbar .note svg { color: var(--n-600); }
+.chip .k { color: var(--ink-3); font-weight: 400; }
+.chip.on .k { color: var(--cyan-800); font-weight: 400; }
+.chip svg { flex: none; }
+table.grid { table-layout: fixed; }
+table.grid td { overflow: hidden; text-overflow: ellipsis; }
+table.grid td .t1, table.grid td .t2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t2 .code { font-size: 12px; }
+.sep-dot { color: var(--ink-3); margin: 0 6px; }
+a.code, .link.code { font: 500 12.5px/1 var(--mono); color: var(--cyan-700); }
+.go { color: var(--n-600); }
+.role.sm { height: 22px; padding: 0 7px; gap: 5px; font-size: 12px; border-radius: 7px; }
+.ava.off { background: var(--n-100); color: var(--n-700); box-shadow: inset 0 0 0 1px var(--n-200); }
+.sky .tag.ro { background: rgba(255,255,255,.10); color: #e7fcfd; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); height: 24px; padding: 0 9px; font-size: 12px; }
+.sky .tag.ro svg { color: var(--cyan-200); }
+.st-glass { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px; border-radius: 9px; font: 600 13px/1 var(--text);
+  background: rgba(0,195,212,.16); color: var(--cyan-100); border: 1px solid rgba(92,219,230,.35); white-space: nowrap; }
+.st-glass i { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan-400); box-shadow: 0 0 10px var(--cyan-400); }
+.page-head .sub .code { color: var(--cyan-200); font-size: 13px; }
+.page-head .sub a.code { color: var(--cyan-200); text-decoration: underline; text-decoration-color: rgba(155,237,242,.4); text-underline-offset: 3px; }
+.crumb a { color: rgba(203,247,249,.85); }
+.card-foot { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line-soft); color: var(--ink-3); font-size: 13px; }
+.card-foot svg { color: var(--n-600); flex: none; }
+
+.box { display: flex; align-items: center; gap: 12px; }
+.plan { flex: none; overflow: visible; }
+.plan .pf { fill: var(--n-100); stroke: var(--n-500); stroke-width: 1; }
+.plan .po { fill: var(--n-500); }
+.plan .pd { stroke: var(--cyan-600); stroke-width: 3; stroke-linecap: round; }
+.dim { font-weight: 500; }
+.pay { font-size: 15px; font-weight: 600; color: var(--ink); }
+.unit { color: var(--ink-3); font-size: 13px; }
+.stc { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
+.stc .st2 { margin-top: 0; max-width: 100%; }
+.plate { color: var(--ink-2); }
+table.grid td { height: 66px; }
+th .hn { font-weight: 400; color: var(--ink-3); margin-left: 6px; }
+.legend { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; }
+.lg-o { width: 12px; height: 5px; background: var(--n-500); border-radius: 1px; }
+.lg-d { width: 3px; height: 12px; background: var(--cyan-600); border-radius: 2px; }
+
+</style></head><body>
+<section class="sky">
+<header class="topbar">
+  <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 20.6 7.3v9.4L12 21.4 3.4 16.7V7.3z" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/><path d="M3.4 7.3 12 12l8.6-4.7M12 12v9.4" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/></svg></span><span class="word">Load<span>Master</span></span></div>
+  <nav class="glass-nav"><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Bảng điều khiển</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>Chuyến hàng</a><a class="on"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>Đội xe</a></nav>
+  <div class="right">
+    <div class="glass-search"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm chuyến, kiện, xe…<kbd>Ctrl K</kbd></div>
+    <div class="icon-glass lang">VI</div>
+    <div class="icon-glass bell"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b></b></div>
+    <div class="avatar">TT</div>
+  </div>
+</header>
+<div class="page-head">
+  <div style="min-width:0"><div style="display:flex;align-items:center;gap:14px"><h1>Đội xe</h1></div><div class="sub"><span><b class="num">8</b> xe trong danh mục</span><span>·</span><span>tải tối đa từ <b class="num">3.500</b> đến <b class="num">9.500 kg</b></span><span>·</span><span>lòng thùng dài <b class="num">520–850 cm</b></span></div></div>
+  <div class="actions"><span class="btn btn-primary "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Thêm xe</span></div>
+</div>
+<nav class="sky-tabs"><a class="on">Tất cả <span class="n">8</span></a><a class="">Sẵn sàng <span class="n">4</span></a><a class="">Đang phục vụ chuyến <span class="n">3</span></a><a class="">Bảo dưỡng <span class="n">1</span></a></nav>
+<div class="band-bottom" style="height:58px"></div>
+</section><div class="wrap">
+<section class="card">
+  <div class="toolbar">
+    <div class="field" style="width:360px"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm theo tên xe, biển số, mã xe</div>
+    <span class="note"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M20 8h-5"/><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10"/><path d="M15 14h5l-5 6h5"/></svg>Sắp theo tên xe, A → Z</span>
+  </div>
+  <table class="grid">
+    <colgroup><col style="width:290px"><col style="width:370px"><col style="width:136px"><col style="width:210px"><col><col style="width:48px"></colgroup>
+    <thead><tr><th>Phương tiện</th><th>Lòng thùng (D × R × C)<span class="hn">nhìn từ trên, cùng tỉ lệ</span></th><th class="r">Tải tối đa</th><th>Vật cản</th><th>Trạng thái</th><th></th></tr></thead>
+    <tbody><tr>
+<td><div class="t1">Hino FC9J đông lạnh</div><div class="t2"><span class="code plate">51C-190.07</span><span class="sep-dot">·</span><span class="code">VEHICLE-004</span></div></td>
+<td><div class="box"><svg class="plan" width="130" height="38" viewBox="0 0 130 38" aria-hidden="true"><rect x="1.5" y="3.7" width="87.5" height="30.6" rx="2" class="pf"/><rect x="1.5" y="3.7" width="3.6" height="30.6" class="po"/><line x1="89.0" x2="89.0" y1="4.4" y2="33.6" class="pd"/></svg><div><div class="t1 num dim">600 × 210 × 200 cm</div><div class="t2">25,2 m³</div></div></div></td>
+<td class="r"><span class="num pay">6.000</span> <span class="unit">kg</span></td>
+<td><div class="t1" style="font-weight:500"><span class="num">1</span> vùng</div><div class="t2">Dàn lạnh</div></td>
+<td><div class="stc"><span class="st st-ready"><i></i>Sẵn sàng</span></div></td>
+<td class="r go"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></td></tr><tr>
+<td><div class="t1">Hino XZU720</div><div class="t2"><span class="code plate">51D-457.88</span><span class="sep-dot">·</span><span class="code">VEHICLE-005</span></div></td>
+<td><div class="box"><svg class="plan" width="130" height="38" viewBox="0 0 130 38" aria-hidden="true"><rect x="1.5" y="4.4" width="75.9" height="29.2" rx="2" class="pf"/><rect x="45.3" y="4.4" width="12.4" height="2.9" class="po"/><rect x="45.3" y="30.7" width="12.4" height="2.9" class="po"/><line x1="77.4" x2="77.4" y1="5.1" y2="32.9" class="pd"/></svg><div><div class="t1 num dim">520 × 200 × 200 cm</div><div class="t2">20,8 m³</div></div></div></td>
+<td class="r"><span class="num pay">3.500</span> <span class="unit">kg</span></td>
+<td><div class="t1" style="font-weight:500"><span class="num">2</span> vùng</div><div class="t2">Hốc bánh xe</div></td>
+<td><div class="stc"><span class="st st-ready"><i></i>Sẵn sàng</span></div></td>
+<td class="r go"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></td></tr><tr>
+<td><div class="t1">Hyundai HD210</div><div class="t2"><span class="code plate">60C-446.32</span><span class="sep-dot">·</span><span class="code">VEHICLE-002</span></div></td>
+<td><div class="box"><svg class="plan" width="130" height="38" viewBox="0 0 130 38" aria-hidden="true"><rect x="1.5" y="1.9" width="105.0" height="34.3" rx="2" class="pf"/><rect x="62.8" y="1.9" width="16.0" height="3.6" class="po"/><rect x="62.8" y="32.5" width="16.0" height="3.6" class="po"/><line x1="106.5" x2="106.5" y1="2.6" y2="35.4" class="pd"/></svg><div><div class="t1 num dim">720 × 235 × 240 cm</div><div class="t2">40,6 m³</div></div></div></td>
+<td class="r"><span class="num pay">9.500</span> <span class="unit">kg</span></td>
+<td><div class="t1" style="font-weight:500"><span class="num">2</span> vùng</div><div class="t2">Hốc bánh xe</div></td>
+<td><div class="stc"><span class="st st-ready"><i></i>Sẵn sàng</span></div></td>
+<td class="r go"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></td></tr><tr>
+<td><div class="t1">Hyundai Mighty EX8</div><div class="t2"><span class="code plate">50H-118.29</span><span class="sep-dot">·</span><span class="code">VEHICLE-008</span></div></td>
+<td><div class="box"><svg class="plan" width="130" height="38" viewBox="0 0 130 38" aria-hidden="true"><rect x="1.5" y="3.0" width="91.9" height="32.1" rx="2" class="pf"/><rect x="55.5" y="3.0" width="14.6" height="3.6" class="po"/><rect x="55.5" y="31.4" width="14.6" height="3.6" class="po"/><line x1="93.4" x2="93.4" y1="3.7" y2="34.3" class="pd"/></svg><div><div class="t1 num dim">630 × 220 × 215 cm</div><div class="t2">29,8 m³</div></div></div></td>
+<td class="r"><span class="num pay">7.000</span> <span class="unit">kg</span></td>
+<td><div class="t1" style="font-weight:500"><span class="num">2</span> vùng</div><div class="t2">Hốc bánh xe</div></td>
+<td><div class="stc"><span class="st st-draft"><i></i>Bảo dưỡng</span><div class="t2 st2" title="Thay má phanh và bảo dưỡng định kỳ 20.000 km">Từ <span class="num">20/09</span><span class="sep-dot">·</span>Thay má phanh và bảo dưỡng định kỳ 20.000 km</div></div></td>
+<td class="r go"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></td></tr><tr>
+<td><div class="t1">Isuzu FVR 900</div><div class="t2"><span class="code plate">51D-622.14</span><span class="sep-dot">·</span><span class="code">VEHICLE-007</span></div></td>
+<td><div class="box"><svg class="plan" width="130" height="38" viewBox="0 0 130 38" aria-hidden="true"><rect x="1.5" y="1.5" width="124.0" height="35.0" rx="2" class="pf"/><rect x="77.4" y="1.5" width="17.5" height="3.6" class="po"/><rect x="77.4" y="32.9" width="17.5" height="3.6" class="po"/><line x1="125.5" x2="125.5" y1="2.2" y2="35.8" class="pd"/></svg><div><div class="t1 num dim">850 × 240 × 250 cm</div><div class="t2">51,0 m³</div></div></div></td>
+<td class="r"><span class="num pay">9.000</span> <span class="unit">kg</span></td>
+<td><div class="t1" style="font-weight:500"><span class="num">2</span> vùng</div><div class="t2">Hốc bánh xe</div></td>
+<td><div class="stc"><span class="st st-active"><i></i>Đang phục vụ chuyến</span><div class="t2 st2"><a class="code" href="#">TRIP-011</a><span class="sep-dot">·</span>Đang xếp hàng</div></div></td>
+<td class="r go"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></td></tr><tr>
+<td><div class="t1">Isuzu NQR 550</div><div class="t2"><span class="code plate">51C-284.19</span><span class="sep-dot">·</span><span class="code">VEHICLE-003</span></div></td>
+<td><div class="box"><svg class="plan" width="130" height="38" viewBox="0 0 130 38" aria-hidden="true"><rect x="1.5" y="3.7" width="83.2" height="30.6" rx="2" class="pf"/><rect x="49.6" y="3.7" width="13.9" height="3.6" class="po"/><rect x="49.6" y="30.7" width="13.9" height="3.6" class="po"/><line x1="84.7" x2="84.7" y1="4.4" y2="33.6" class="pd"/></svg><div><div class="t1 num dim">570 × 210 × 215 cm</div><div class="t2">25,7 m³</div></div></div></td>
+<td class="r"><span class="num pay">5.500</span> <span class="unit">kg</span></td>
+<td><div class="t1" style="font-weight:500"><span class="num">2</span> vùng</div><div class="t2">Hốc bánh xe</div></td>
+<td><div class="stc"><span class="st st-active"><i></i>Đang phục vụ chuyến</span><div class="t2 st2"><a class="code" href="#">TRIP-010</a><span class="sep-dot">·</span>Đã xếp xong</div></div></td>
+<td class="r go"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></td></tr><tr>
+<td><div class="t1">Thaco Ollin 720</div><div class="t2"><span class="code plate">61C-339.05</span><span class="sep-dot">·</span><span class="code">VEHICLE-006</span></div></td>
+<td><div class="box"><svg class="plan" width="130" height="38" viewBox="0 0 130 38" aria-hidden="true"><rect x="1.5" y="3.3" width="89.0" height="31.4" rx="2" class="pf"/><rect x="52.6" y="3.3" width="14.6" height="3.6" class="po"/><rect x="52.6" y="31.0" width="14.6" height="3.6" class="po"/><line x1="90.5" x2="90.5" y1="4.0" y2="34.0" class="pd"/></svg><div><div class="t1 num dim">610 × 215 × 215 cm</div><div class="t2">28,2 m³</div></div></div></td>
+<td class="r"><span class="num pay">7.000</span> <span class="unit">kg</span></td>
+<td><div class="t1" style="font-weight:500"><span class="num">2</span> vùng</div><div class="t2">Hốc bánh xe</div></td>
+<td><div class="stc"><span class="st st-active"><i></i>Đang phục vụ chuyến</span><div class="t2 st2"><a class="code" href="#">TRIP-009</a><span class="sep-dot">·</span>Đang giao</div></div></td>
+<td class="r go"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></td></tr><tr>
+<td><div class="t1">Truck 6m</div><div class="t2"><span class="code">VEHICLE-001</span></div></td>
+<td><div class="box"><svg class="plan" width="130" height="38" viewBox="0 0 130 38" aria-hidden="true"><rect x="1.5" y="1.5" width="87.5" height="35.0" rx="2" class="pf"/><rect x="1.5" y="1.5" width="17.5" height="4.4" class="po"/><line x1="89.0" x2="89.0" y1="3.0" y2="35.0" class="pd"/></svg><div><div class="t1 num dim">600 × 240 × 250 cm</div><div class="t2">36,0 m³</div></div></div></td>
+<td class="r"><span class="num pay">5.000</span> <span class="unit">kg</span></td>
+<td><div class="t1" style="font-weight:500"><span class="num">1</span> vùng</div><div class="t2">Hốc bánh xe</div></td>
+<td><div class="stc"><span class="st st-ready"><i></i>Sẵn sàng</span></div></td>
+<td class="r go"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></td></tr></tbody>
+  </table>
+  <div class="card-foot"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>Trạng thái lấy từ chuyến và lịch bảo dưỡng trong hệ thống. Chưa có GPS hay vị trí xe thời gian thực.</span>
+    <span class="legend"><span><i class="lg-o"></i>Vật cản</span><span><i class="lg-d"></i>Cửa sau</span></span></div>
+</section>
+</div>
+</body></html>

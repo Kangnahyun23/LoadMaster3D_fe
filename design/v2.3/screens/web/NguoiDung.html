@@ -1,0 +1,199 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Người dùng · tài khoản · 1536×1123 --><title>Người dùng</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1536px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line-soft); }
+.toolbar .note { margin-left: auto; color: var(--ink-3); font-size: 13px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.toolbar .note svg { color: var(--n-600); }
+.chip .k { color: var(--ink-3); font-weight: 400; }
+.chip.on .k { color: var(--cyan-800); font-weight: 400; }
+.chip svg { flex: none; }
+table.grid { table-layout: fixed; }
+table.grid td { overflow: hidden; text-overflow: ellipsis; }
+table.grid td .t1, table.grid td .t2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t2 .code { font-size: 12px; }
+.sep-dot { color: var(--ink-3); margin: 0 6px; }
+a.code, .link.code { font: 500 12.5px/1 var(--mono); color: var(--cyan-700); }
+.go { color: var(--n-600); }
+.role.sm { height: 22px; padding: 0 7px; gap: 5px; font-size: 12px; border-radius: 7px; }
+.ava.off { background: var(--n-100); color: var(--n-700); box-shadow: inset 0 0 0 1px var(--n-200); }
+.sky .tag.ro { background: rgba(255,255,255,.10); color: #e7fcfd; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); height: 24px; padding: 0 9px; font-size: 12px; }
+.sky .tag.ro svg { color: var(--cyan-200); }
+.st-glass { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px; border-radius: 9px; font: 600 13px/1 var(--text);
+  background: rgba(0,195,212,.16); color: var(--cyan-100); border: 1px solid rgba(92,219,230,.35); white-space: nowrap; }
+.st-glass i { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan-400); box-shadow: 0 0 10px var(--cyan-400); }
+.page-head .sub .code { color: var(--cyan-200); font-size: 13px; }
+.page-head .sub a.code { color: var(--cyan-200); text-decoration: underline; text-decoration-color: rgba(155,237,242,.4); text-underline-offset: 3px; }
+.crumb a { color: rgba(203,247,249,.85); }
+.card-foot { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line-soft); color: var(--ink-3); font-size: 13px; }
+.card-foot svg { color: var(--n-600); flex: none; }
+
+.ucols { display: grid; grid-template-columns: minmax(0, 1fr) 352px; gap: 16px; align-items: start; }
+.toolbar .seg .n { font: 600 11.5px/1 var(--display); padding: 3px 6px; border-radius: 8px; background: rgba(2,34,45,.07); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.toolbar .seg .on .n { background: var(--cyan-50); color: var(--cyan-800); }
+.who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.who > div { min-width: 0; }
+table.grid td { height: 60px; }
+table.grid tr.sel td { background: var(--cyan-50); }
+table.grid td.act-cell { text-align: right; padding: 0 12px 0 0; overflow: visible; }
+.act-cell .btn { color: var(--ink-2); }
+tr.sel .act-cell .btn { background: #fff; box-shadow: inset 0 0 0 1px var(--cyan-200); }
+.never { color: var(--ink-3); }
+/* panel chi tiết: nền đặc, không kính */
+.up { position: sticky; top: 16px; overflow: hidden; }
+.up-h { position: relative; display: flex; gap: 14px; align-items: flex-start; padding: 18px 44px 16px 18px; border-bottom: 1px solid var(--line-soft); }
+.up-h .ava.lg { font-size: 18px; }
+.up-h .nm { font: 700 18px/24px var(--display); font-stretch: 106%; color: var(--ink); }
+.up-h .em { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
+.up-h .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.up-h .x { position: absolute; right: 10px; top: 12px; color: var(--ink-3); }
+.up-sec { padding: 16px 18px; border-bottom: 1px solid var(--line-soft); }
+.up-sec:last-child { border-bottom: 0; }
+.up-sec h3 { margin: 0 0 10px; font: 650 14.5px/20px var(--display); font-stretch: 106%; color: var(--ink); }
+.up .kv { grid-template-columns: 136px 1fr; gap: 9px 12px; font-size: 13.5px; }
+.lockn { display: flex; gap: 10px; padding: 12px 14px; margin: 14px 18px 2px; border-radius: 12px; background: var(--n-50); border: 1px solid var(--line); font-size: 13px; line-height: 19px; color: var(--ink-2); }
+.lockn svg { flex: none; color: var(--ink-3); margin-top: 1px; }
+.lockn b { color: var(--ink); font-weight: 600; }
+.perm-note { margin: 0 0 10px; font-size: 12.5px; line-height: 18px; color: var(--ink-3); }
+.plist { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.plist li { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px; border-radius: 7px; border: 1px solid var(--line); background: var(--n-25); font-size: 12.5px; color: var(--ink-2); }
+.plist li svg { color: var(--cyan-700); }
+.acts { display: flex; flex-direction: column; gap: 8px; }
+.acts .btn { justify-content: flex-start; width: 100%; }
+.btn-suggest { background: var(--cyan-50); color: var(--cyan-800); border-color: var(--cyan-300); box-shadow: 0 1px 2px rgba(2,34,45,.05); }
+.btn-suggest svg { color: var(--cyan-700); }
+.btn-secondary svg { color: var(--ink-3); }
+
+</style></head><body>
+<section class="sky">
+<header class="topbar">
+  <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 20.6 7.3v9.4L12 21.4 3.4 16.7V7.3z" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/><path d="M3.4 7.3 12 12l8.6-4.7M12 12v9.4" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/></svg></span><span class="word">Load<span>Master</span></span></div>
+  <nav class="glass-nav"><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Bảng điều khiển</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>Chuyến hàng</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect x="6" y="10" width="12" height="12"/></svg>Kho</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Tài xế</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>Đội xe</a><a class="on"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Người dùng</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>Nhật ký</a></nav>
+  <div class="right">
+    <div class="glass-search compact"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm nhanh<kbd>Ctrl K</kbd></div>
+    <div class="icon-glass lang">VI</div>
+    <div class="icon-glass bell"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b></b></div>
+    <div class="avatar">MK</div>
+  </div>
+</header>
+<div class="page-head">
+  <div style="min-width:0"><div style="display:flex;align-items:center;gap:14px"><h1>Người dùng</h1></div><div class="sub"><span><b class="num">12</b> tài khoản</span><span>·</span><span><b class="num">5</b> vai trò</span><span>·</span><span><b class="num">3</b> kho / chi nhánh</span></div></div>
+  <div class="actions"><span class="btn btn-primary "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Thêm người dùng</span></div>
+</div>
+<nav class="sky-tabs"><a class="on">Tài khoản <span class="n">12</span></a><a class="">Ma trận quyền</a></nav>
+<div class="band-bottom" style="height:58px"></div>
+</section><div class="wrap"><div class="ucols"><section class="card">
+  <div class="toolbar">
+    <div class="field" style="width:318px"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm theo tên, email, số điện thoại, mã</div>
+    <span class="chip"><span class="k">Vai trò:</span> Mọi vai trò <svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+    <span class="seg"><span class="on">Tất cả <span class="n">12</span></span><span>Đang hoạt động <span class="n">11</span></span><span>Đã khoá <span class="n">1</span></span></span>
+    <span class="note"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M20 8h-5"/><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10"/><path d="M15 14h5l-5 6h5"/></svg>Theo tên, A → Z</span>
+  </div>
+  <table class="grid">
+    <colgroup><col><col style="width:186px"><col style="width:184px"><col style="width:146px"><col style="width:172px"><col style="width:60px"></colgroup>
+    <thead><tr><th>Người dùng</th><th>Vai trò</th><th>Kho / chi nhánh</th><th>Hoạt động gần nhất</th><th>Trạng thái</th><th class="r"><span class="sr">Thao tác</span></th></tr></thead>
+    <tbody><tr class="sel">
+<td><div class="who"><span class="ava off">TL</span><div><div class="t1">Bùi Thị Lan</div><div class="t2">lan.bui@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>Nhân viên kho</span></td>
+<td><span class="dep">Kho Sóng Thần</span></td>
+<td><span class="num">07/09</span><span class="sep-dot">·</span><span class="num">11:15</span></td>
+<td><span class="st st-draft"><i></i>Đã khoá</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Bùi Thị Lan"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">HN</span><div><div class="t1">Đặng Hoài Nam</div><div class="t2">nam.dang@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Tài xế</span></td>
+<td><span class="dep">Kho Sóng Thần</span></td>
+<td><span class="num">21/09</span><span class="sep-dot">·</span><span class="num">16:05</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Đặng Hoài Nam"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">TH</span><div><div class="t1">Đỗ Thị Hạnh</div><div class="t2">hanh.do@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>Nhân viên kho</span></td>
+<td><span class="dep">Kho Sóng Thần</span></td>
+<td>Hôm nay<span class="sep-dot">·</span><span class="num">05:45</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Đỗ Thị Hạnh"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">ĐA</span><div><div class="t1">Hoàng Đức Anh</div><div class="t2">anh.hoang@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></td>
+<td><span class="dep">Kho Sóng Thần</span></td>
+<td><span class="never">Chưa đăng nhập</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Hoàng Đức Anh"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">VH</span><div><div class="t1">Lê Văn Hải</div><div class="t2">kho@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>Nhân viên kho</span></td>
+<td><span class="dep">Kho Long Bình</span></td>
+<td>Hôm nay<span class="sep-dot">·</span><span class="num">05:20</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Lê Văn Hải"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">MC</span><div><div class="t1">Lý Minh Châu</div><div class="t2">chau.ly@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>Quản lý</span></td>
+<td><span class="dep">Trụ sở TP. Hồ Chí Minh</span></td>
+<td><span class="num">20/09</span><span class="sep-dot">·</span><span class="num">09:30</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Lý Minh Châu"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">VB</span><div><div class="t1">Ngô Văn Bảo</div><div class="t2">bao.ngo@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Tài xế</span></td>
+<td><span class="dep">Kho Long Bình</span></td>
+<td>Hôm nay<span class="sep-dot">·</span><span class="num">06:35</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Ngô Văn Bảo"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">TT</span><div><div class="t1">Nguyễn Thanh Tùng</div><div class="t2">dieuphoi@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></td>
+<td><span class="dep">Kho Long Bình</span></td>
+<td>Hôm nay<span class="sep-dot">·</span><span class="num">07:50</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Nguyễn Thanh Tùng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">QD</span><div><div class="t1">Phạm Quốc Dũng</div><div class="t2">taixe@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Tài xế</span></td>
+<td><span class="dep">Kho Long Bình</span></td>
+<td>Hôm qua<span class="sep-dot">·</span><span class="num">17:40</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Phạm Quốc Dũng"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">TM</span><div><div class="t1">Trần Thị Mai</div><div class="t2">quanly@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>Quản lý</span></td>
+<td><span class="dep">Trụ sở TP. Hồ Chí Minh</span></td>
+<td>Hôm nay<span class="sep-dot">·</span><span class="num">08:10</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Trần Thị Mai"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">VL</span><div><div class="t1">Trương Văn Lộc</div><div class="t2">loc.truong@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Tài xế</span></td>
+<td><span class="dep">Kho Long Bình</span></td>
+<td><span class="num">22/09</span><span class="sep-dot">·</span><span class="num">18:10</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Trương Văn Lộc"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr><tr>
+<td><div class="who"><span class="ava">MK</span><div><div class="t1">Võ Minh Khoa</div><div class="t2">quantri@loadmaster.vn</div></div></div></td>
+<td><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Quản trị hệ thống</span></td>
+<td><span class="dep">Trụ sở TP. Hồ Chí Minh</span></td>
+<td>Hôm qua<span class="sep-dot">·</span><span class="num">17:20</span></td>
+<td><span class="st st-done"><i></i>Đang hoạt động</span></td>
+<td class="act-cell"><button type="button" class="btn btn-ghost btn-sm btn-icon" aria-label="Thao tác cho Võ Minh Khoa"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></td></tr></tbody>
+  </table>
+  <div class="pager"><span>Hiển thị <b class="num" style="color:var(--ink)">1–12</b> trong <b class="num" style="color:var(--ink)">12</b></span><span style="margin-left:auto;display:flex;align-items:center;gap:6px">Số dòng <span class="ctl sm" style="width:74px;display:inline-flex">25<span class="chev"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></span><span class="pg"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span><span class="pg on">1</span><span class="pg" style="transform:scaleX(-1)"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span></span></div>
+</section><aside class="card up" aria-label="Chi tiết tài khoản Bùi Thị Lan">
+  <header class="up-h">
+    <span class="ava lg off">TL</span>
+    <div style="min-width:0"><div class="nm">Bùi Thị Lan</div><div class="em">lan.bui@loadmaster.vn</div>
+      <div class="chips"><span class="role"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg>Nhân viên kho</span><span class="st st-draft"><i></i>Đã khoá</span></div></div>
+    <button type="button" class="btn btn-ghost btn-sm btn-icon x" aria-label="Đóng chi tiết tài khoản"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+  </header>
+  <div class="lockn"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div><b>Khoá lúc <span class="num">11:30 · 07/09/2026</span></b> bởi Võ Minh Khoa. Không đăng nhập được cho tới khi mở khoá.</div></div>
+  <section class="up-sec"><h3>Thông tin cá nhân</h3>
+    <dl class="kv"><dt>Mã tài khoản</dt><dd><span class="code" style="color:var(--ink-2)">US-0008</span></dd>
+      <dt>Điện thoại</dt><dd class="num">0908 901 234</dd>
+      <dt>Kho / chi nhánh</dt><dd>Kho Sóng Thần</dd>
+      <dt>Hoạt động gần nhất</dt><dd><span class="num">11:15 · 07/09/2026</span></dd></dl>
+  </section>
+  <section class="up-sec"><h3>Công việc được phép</h3>
+    <p class="perm-note">Quyền đi theo vai trò Nhân viên kho, cùng cấu hình với tab Ma trận quyền. Đây là nhãn, không phải nút bấm.</p>
+    <ul class="plist"><li><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Xếp hàng tại kho</li></ul>
+  </section>
+  <section class="up-sec"><h3>Thao tác</h3>
+    <div class="acts">
+      <span class="btn btn-suggest "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>Mở khoá tài khoản</span>
+      <span class="btn btn-secondary "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Sửa thông tin</span>
+      <span class="btn btn-secondary "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>Đặt lại mật khẩu</span>
+      <span class="btn btn-danger-soft "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>Xoá tài khoản</span>
+    </div>
+  </section>
+</aside></div></div>
+</body></html>

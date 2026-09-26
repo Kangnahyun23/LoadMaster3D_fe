@@ -1,0 +1,181 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Nhật ký · lọc nhóm Chuyến · 1536×1637 --><title>Nhật ký hệ thống · Chuyến</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1536px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line-soft); }
+.toolbar .note { margin-left: auto; color: var(--ink-3); font-size: 13px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.toolbar .note svg { color: var(--n-600); }
+.chip .k { color: var(--ink-3); font-weight: 400; }
+.chip.on .k { color: var(--cyan-800); font-weight: 400; }
+.chip svg { flex: none; }
+table.grid { table-layout: fixed; }
+table.grid td { overflow: hidden; text-overflow: ellipsis; }
+table.grid td .t1, table.grid td .t2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t2 .code { font-size: 12px; }
+.sep-dot { color: var(--ink-3); margin: 0 6px; }
+a.code, .link.code { font: 500 12.5px/1 var(--mono); color: var(--cyan-700); }
+.go { color: var(--n-600); }
+.role.sm { height: 22px; padding: 0 7px; gap: 5px; font-size: 12px; border-radius: 7px; }
+.ava.off { background: var(--n-100); color: var(--n-700); box-shadow: inset 0 0 0 1px var(--n-200); }
+.sky .tag.ro { background: rgba(255,255,255,.10); color: #e7fcfd; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); height: 24px; padding: 0 9px; font-size: 12px; }
+.sky .tag.ro svg { color: var(--cyan-200); }
+.st-glass { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px; border-radius: 9px; font: 600 13px/1 var(--text);
+  background: rgba(0,195,212,.16); color: var(--cyan-100); border: 1px solid rgba(92,219,230,.35); white-space: nowrap; }
+.st-glass i { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan-400); box-shadow: 0 0 10px var(--cyan-400); }
+.page-head .sub .code { color: var(--cyan-200); font-size: 13px; }
+.page-head .sub a.code { color: var(--cyan-200); text-decoration: underline; text-decoration-color: rgba(155,237,242,.4); text-underline-offset: 3px; }
+.crumb a { color: rgba(203,247,249,.85); }
+.card-foot { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line-soft); color: var(--ink-3); font-size: 13px; }
+.card-foot svg { color: var(--n-600); flex: none; }
+
+.toolbar .chip { white-space: nowrap; }
+.dgrp + .dgrp { border-top: 1px solid var(--line-soft); }
+.day { display: flex; align-items: center; height: 36px; padding: 0 16px; background: linear-gradient(90deg, var(--n-25), #fff);
+  font: 600 12.5px/1 var(--text); color: var(--ink-2); border-bottom: 1px solid var(--line-soft); }
+.day .today { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 6px; background: var(--cyan-400); color: var(--cyan-950); font-size: 11.5px; margin-right: 8px; }
+.day .today.y { background: var(--cyan-50); color: var(--cyan-800); box-shadow: inset 0 0 0 1px var(--cyan-200); }
+.day .cnt { color: var(--ink-3); font-weight: 400; margin-left: 8px; }
+ol.evs { list-style: none; margin: 0; padding: 4px 0; position: relative; }
+ol.evs::before { content: ''; position: absolute; left: 97px; top: 0; bottom: 0; width: 2px; background: var(--n-100); }
+.ev { position: relative; display: grid; grid-template-columns: 56px 28px 296px 196px 386px minmax(0, 1fr); column-gap: 12px; align-items: center;
+  min-height: 46px; padding: 0 18px 0 16px; }
+.ev + .ev::before { content: ''; position: absolute; left: 124px; right: 0; top: 0; height: 1px; background: var(--line-soft); }
+.ev .t { font-size: 14px; font-weight: 500; color: var(--ink-2); text-align: right; }
+.ev .dot { justify-self: center; width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px var(--n-400); position: relative; z-index: 1; }
+.ev .who { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.ev .who .nm { font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev .who .role { flex: none; }
+.ev .what { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--ink); min-width: 0; white-space: nowrap; }
+.ev .what svg { color: var(--ink-3); flex: none; }
+.ev .obj { display: flex; align-items: baseline; gap: 8px; min-width: 0; white-space: nowrap; }
+.ev .obj .onm { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ev .det { color: var(--ink-2); font-size: 13px; line-height: 18px; padding: 6px 0; min-width: 0; }
+.ev .det .k { color: var(--ink-3); }
+.ev .det .code { font-size: 12px; color: var(--ink-2); }
+.ev .dsep { color: var(--ink-3); margin: 0 7px; }
+.ev .ba { display: inline-flex; align-items: center; gap: 5px; padding: 1px 7px; border-radius: 6px; background: var(--n-50); box-shadow: inset 0 0 0 1px var(--line); vertical-align: 1px; }
+.ev .chg { margin-top: 4px; color: var(--ink); }
+.ev .ba s { color: var(--ink-3); }
+.ev .ba b { color: var(--ink); font-weight: 650; }
+.ev .ba svg { color: var(--ink-3); }
+/* thao tác phá huỷ / bảo mật: nhấn đỏ ở chấm, icon và nhãn — không tô cả dòng */
+.ev.danger .dot { background: var(--red-500); box-shadow: 0 0 0 3px var(--red-50), 0 0 0 4px var(--red-200); }
+.ev.danger .what, .ev.danger .what svg { color: var(--red-700); }
+.ev.danger .what span { font-weight: 600; }
+.ev.danger .det { color: var(--ink); }
+
+</style></head><body>
+<section class="sky">
+<header class="topbar">
+  <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 20.6 7.3v9.4L12 21.4 3.4 16.7V7.3z" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/><path d="M3.4 7.3 12 12l8.6-4.7M12 12v9.4" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/></svg></span><span class="word">Load<span>Master</span></span></div>
+  <nav class="glass-nav"><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Bảng điều khiển</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>Chuyến hàng</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12"/><path d="M6 14h12"/><rect x="6" y="10" width="12" height="12"/></svg>Kho</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Tài xế</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>Đội xe</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Người dùng</a><a class="on"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>Nhật ký</a></nav>
+  <div class="right">
+    <div class="glass-search compact"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm nhanh<kbd>Ctrl K</kbd></div>
+    <div class="icon-glass lang">VI</div>
+    <div class="icon-glass bell"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b></b></div>
+    <div class="avatar">MK</div>
+  </div>
+</header>
+<div class="page-head">
+  <div style="min-width:0"><div style="display:flex;align-items:center;gap:14px"><h1>Nhật ký hệ thống</h1><span class="tag ro"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>Chỉ đọc</span></div><div class="sub"><span><b class="num">115</b> sự kiện trong nhật ký</span><span>·</span><span><b class="num">19</b> sự kiện ngày <span class="num">24/09</span></span><span>·</span><span>ghi nhận gần nhất <b class="num">11:40</b> hôm nay</span></div></div>
+  <div class="actions"></div>
+</div>
+
+<div class="band-bottom" style="height:64px"></div>
+</section><div class="wrap"><section class="card">
+  <div class="toolbar">
+    <div class="field" style="width:300px"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm theo mã chuyến, xe, người dùng</div>
+    <span class="chip"><span class="k">Người làm:</span> Mọi người <svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="chip on"><span class="k">Nhóm hành động:</span> Chuyến <svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="chip"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><span class="k">Khoảng ngày:</span> Tất cả <svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="chip"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Xoá lọc</span>
+    <span class="note"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/></svg><span><span class="num">17</span> sự kiện · mới nhất trước</span></span>
+  </div>
+  <div class="tl"><section class="dgrp"><div class="day"><span class="today">Hôm nay</span>Thứ Năm, 24/09<span class="cnt"><span class="num">2</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">11:40</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Sửa chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-013</a><span class="onm">Biên Hoà → Long Bình Tân</span></div>
+<div class="det"><span class="k">Trường đã sửa:</span> Kiện hàng<div class="chg"><span class="code">PKG-001</span> Kiện nước giặt 4 can<span class="dsep">·</span>Số lượng <span class="ba"><s class="num">80</s><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><b class="num">86</b></span></div></div></li><li class="ev">
+<span class="t num">09:49</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-014</a><span class="onm">Tân An → Dĩ An</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day"><span class="today y">Hôm qua</span>Thứ Tư, 23/09<span class="cnt"><span class="num">3</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">15:20</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-2026-0914</a><span class="onm">Q.7 → Thủ Dầu Một → Dĩ An → Biên Hoà</span></div>
+<div class="det"></div></li><li class="ev">
+<span class="t num">14:46</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-013</a><span class="onm">Biên Hoà → Long Bình Tân</span></div>
+<div class="det"></div></li><li class="ev">
+<span class="t num">14:43</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-012</a><span class="onm">Bình Chánh → Biên Hoà</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Thứ Ba, 22/09<span class="cnt"><span class="num">3</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:40</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-011</a><span class="onm">Tân Bình → Q.1 → Q.7</span></div>
+<div class="det"></div></li><li class="ev">
+<span class="t num">14:37</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-010</a><span class="onm">Thủ Đức → An Phú → Phú Nhuận</span></div>
+<div class="det"></div></li><li class="ev">
+<span class="t num">14:34</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-009</a><span class="onm">Thủ Dầu Một → Sóng Thần</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Thứ Bảy, 19/09<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:31</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-008</a><span class="onm">Biên Hoà → Thủ Đức → Bình Thạnh → Q.3</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Thứ Ba, 15/09<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:28</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-007</a><span class="onm">Vật tư y tế Biên Hoà → Bình Chánh</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Thứ Bảy, 12/09<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:25</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-006</a><span class="onm">Hàng lạnh Tân Uyên → Q.7 → Q.3</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Thứ Ba, 08/09<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:22</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-005</a><span class="onm">Sóng Thần → Dĩ An → Thủ Dầu Một</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Chủ Nhật, 06/09<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev danger">
+<span class="t num">18:05</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Huỷ chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-004</a><span class="onm">Tân An → Biên Hoà</span></div>
+<div class="det"><span class="k">Lý do:</span> Khách hoãn nhận hàng do kiểm kê kho cuối tháng</div></li></ol></section><section class="dgrp"><div class="day">Thứ Bảy, 05/09<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:19</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-004</a><span class="onm">Tân An → Biên Hoà</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Thứ Tư, 02/09<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:16</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-003</a><span class="onm">Thủ Dầu Một → Quận 1 → Tân Bình</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Thứ Bảy, 29/08<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:13</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-002</a><span class="onm">Q.7 → An Phú → Phú Nhuận</span></div>
+<div class="det"></div></li></ol></section><section class="dgrp"><div class="day">Thứ Tư, 26/08<span class="cnt"><span class="num">1</span> sự kiện</span></div><ol class="evs"><li class="ev">
+<span class="t num">14:10</span><span class="dot"></span>
+<div class="who"><span class="ini">TT</span><span class="nm">Nguyễn Thanh Tùng</span><span class="role sm"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>Điều phối viên</span></div>
+<div class="what"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span>Tạo chuyến</span></div>
+<div class="obj"><a class="code" href="#">TRIP-001</a><span class="onm">Thủ Đức → Dĩ An → Biên Hoà</span></div>
+<div class="det"></div></li></ol></section></div>
+  <div class="pager"><span>Hiển thị <b class="num" style="color:var(--ink)">1–17</b> trong <b class="num" style="color:var(--ink)">17</b></span><span style="margin-left:auto;display:flex;align-items:center;gap:6px">Số dòng <span class="ctl sm" style="width:74px;display:inline-flex">50<span class="chev"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></span><span class="pg"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span><span class="pg on">1</span><span class="pg" style="transform:scaleX(-1)"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></span></span></div>
+</section></div>
+</body></html>

@@ -8,9 +8,15 @@ import { extendTailwindMerge } from 'tailwind-merge'
  */
 const THEME_FONT_SIZES = ['display', 'h1', 'h2', 'h3', 'body-lg', 'body', 'caption', 'micro', 'note', 'lede']
 
+/**
+ * Họ chữ của `@theme` ngoài `sans`/`mono` mặc định. Thiếu khai báo thì tailwind-merge không xếp `font-display` (Archivo,
+ * V2.3) vào nhóm họ chữ, nên `cn('font-mono', 'font-display')` giữ cả hai thay vì để lớp sau thắng.
+ */
+const THEME_FONT_FAMILIES = ['display']
+
 const twMerge = extendTailwindMerge({
   extend: {
-    theme: { text: THEME_FONT_SIZES },
+    theme: { text: THEME_FONT_SIZES, font: THEME_FONT_FAMILIES },
   },
 })
 

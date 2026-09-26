@@ -1,0 +1,205 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Chi tiết xe · đang phục vụ chuyến · 1536×1076 --><title>Chi tiết xe — đang chạy chuyến</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1536px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line-soft); }
+.toolbar .note { margin-left: auto; color: var(--ink-3); font-size: 13px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.toolbar .note svg { color: var(--n-600); }
+.chip .k { color: var(--ink-3); font-weight: 400; }
+.chip.on .k { color: var(--cyan-800); font-weight: 400; }
+.chip svg { flex: none; }
+table.grid { table-layout: fixed; }
+table.grid td { overflow: hidden; text-overflow: ellipsis; }
+table.grid td .t1, table.grid td .t2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t2 .code { font-size: 12px; }
+.sep-dot { color: var(--ink-3); margin: 0 6px; }
+a.code, .link.code { font: 500 12.5px/1 var(--mono); color: var(--cyan-700); }
+.go { color: var(--n-600); }
+.role.sm { height: 22px; padding: 0 7px; gap: 5px; font-size: 12px; border-radius: 7px; }
+.ava.off { background: var(--n-100); color: var(--n-700); box-shadow: inset 0 0 0 1px var(--n-200); }
+.sky .tag.ro { background: rgba(255,255,255,.10); color: #e7fcfd; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); height: 24px; padding: 0 9px; font-size: 12px; }
+.sky .tag.ro svg { color: var(--cyan-200); }
+.st-glass { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px; border-radius: 9px; font: 600 13px/1 var(--text);
+  background: rgba(0,195,212,.16); color: var(--cyan-100); border: 1px solid rgba(92,219,230,.35); white-space: nowrap; }
+.st-glass i { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan-400); box-shadow: 0 0 10px var(--cyan-400); }
+.page-head .sub .code { color: var(--cyan-200); font-size: 13px; }
+.page-head .sub a.code { color: var(--cyan-200); text-decoration: underline; text-decoration-color: rgba(155,237,242,.4); text-underline-offset: 3px; }
+.crumb a { color: rgba(203,247,249,.85); }
+.card-foot { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line-soft); color: var(--ink-3); font-size: 13px; }
+.card-foot svg { color: var(--n-600); flex: none; }
+
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 16px; align-items: start; }
+.form .sec { padding: 20px 22px 22px; border-top: 1px solid var(--line-soft); }
+.form .sec:first-of-type { border-top: 0; }
+.form .sec-h { margin-bottom: 16px; }
+.form > .banner, .form > .vsum { margin: 18px 22px 2px; }
+.frow.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 16px; }
+.door-pos { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); color: var(--ink-3); }
+.door-pos .lb { font: 600 13px/18px var(--text); color: var(--ink-2); }
+.door-pos .seg > .on { gap: 6px; }
+.door-pos .seg > .on svg { color: var(--cyan-700); }
+.sec-f { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 14px; }
+.sec-f .muted { font-size: 14px; }
+table.obs { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+table.obs th { font: 600 12px/16px var(--text); color: var(--ink-3); text-align: left; padding: 0 5px 7px; white-space: nowrap; vertical-align: bottom; }
+table.obs tr.g th.grp { text-align: center; padding-bottom: 6px; border-bottom: 1px solid var(--line-soft); }
+table.obs th.r { text-align: right; padding-right: 12px; }
+table.obs th.c, table.obs td.c { text-align: center; }
+table.obs thead tr:last-child th, table.obs tr.g th[rowspan] { border-bottom: 1px solid var(--line); }
+table.obs td { padding: 8px 5px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+table.obs td:first-child { padding-left: 8px; }
+table.obs tr.hl td { background: var(--cyan-50); }
+table.obs tr.hl td:first-child { box-shadow: inset 3px 0 0 var(--cyan-500); }
+table.obs tr.bad td { background: var(--red-50); }
+table.obs tr.bad td:first-child { box-shadow: inset 3px 0 0 var(--red-500); }
+.oid { color: var(--ink-2); }
+.nctl { padding: 0 8px; justify-content: flex-end; gap: 4px; }
+.nctl > span:first-child { font-family: var(--display); font-variant-numeric: tabular-nums; }
+.nctl .unit { margin-left: 0; font-size: 12px; }
+.obs .ctl.sm { height: 34px; }
+.obs .tgl { vertical-align: middle; }
+.row-err { margin: 10px 0 0; font-size: 13px; line-height: 18px; color: var(--red-700); display: flex; gap: 7px; align-items: center; }
+/* xem trước 3D: thẻ đặc màu dầu (không kính) */
+.pv { position: sticky; top: 16px; background: linear-gradient(180deg, #073c4a 0%, #032630 100%); border-color: #0b4655; color: #e7fcfd; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(2,34,45,.08), 0 16px 34px -18px rgba(2,34,45,.55); }
+.pv .card-head { border-bottom-color: rgba(155,237,242,.12); }
+.pv .card-head h2 { color: #fff; }
+.pv .card-head .meta { color: rgba(203,247,249,.74); margin-left: auto; }
+.pv .stage { position: relative; height: 356px; margin: 14px 18px 0; border-radius: 12px; overflow: hidden;
+  background: radial-gradient(420px 260px at 50% 42%, rgba(0,169,187,.16), transparent 70%), #031f29; box-shadow: inset 0 0 0 1px rgba(155,237,242,.1); }
+.pv .iso { position: absolute; left: 0; top: 0; display: block; }
+.iso .fl { fill: rgba(155,237,242,.10); stroke: rgba(155,237,242,.34); stroke-width: 1; }
+.iso .slat { stroke: rgba(155,237,242,.11); stroke-width: 1; }
+.iso .wall { fill: rgba(155,237,242,.06); stroke: rgba(155,237,242,.3); stroke-width: 1; }
+.iso .edge { stroke: rgba(155,237,242,.42); stroke-width: 1; }
+.iso .roof { stroke: rgba(155,237,242,.46); stroke-width: 1; stroke-dasharray: 4 4; }
+.iso .door { fill: rgba(0,195,212,.10); stroke: #5cdbe6; stroke-width: 1.6; stroke-linejoin: round; }
+.iso .ob .s1 { fill: #62778b; } .iso .ob .s2 { fill: #7d92a6; } .iso .ob .s3 { fill: #a9bccc; }
+.iso .ob polygon { stroke: rgba(2,34,45,.55); stroke-width: .6; stroke-linejoin: round; }
+.iso .ob.on polygon { stroke: #9bedf2; stroke-width: 1.3; }
+.iso .ob.on .s3 { fill: #d4f7fa; } .iso .ob.on .s2 { fill: #8fd0dc; } .iso .ob.on .s1 { fill: #6fb2c0; }
+.iso .axis { stroke: #9bedf2; stroke-width: 1.4; }
+.iso .axh { fill: #9bedf2; }
+.iso .axl { font: 700 11px var(--display); fill: #cbf7f9; }
+.iso .dl rect { fill: rgba(2,26,34,.9); stroke: rgba(155,237,242,.28); stroke-width: 1; }
+.iso .dl text { font: 600 11.5px var(--display); fill: #e7fcfd; font-variant-numeric: tabular-nums; }
+.iso .dl.sel rect { fill: #cbf7f9; stroke: #9bedf2; }
+.iso .dl.sel text { fill: var(--cyan-950); font-family: var(--text); }
+.iso .lead { stroke: #9bedf2; stroke-width: 1.2; }
+.iso .ext { stroke: rgba(203,247,249,.35); stroke-width: 1; }
+.iso .dimln { stroke: rgba(203,247,249,.55); stroke-width: 1; }
+.iso .leadc { fill: #fff; stroke: #00c3d4; stroke-width: 2; }
+.iso .dim { opacity: .45; }
+.pend { position: absolute; left: 12px; top: 12px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px;
+  border-radius: 8px; background: rgba(2,26,34,.9); border: 1px solid rgba(250,171,53,.55); color: #fbd98f; font: 600 12.5px/1 var(--text); }
+.pend i { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--amber-500); }
+.pv-foot { padding: 12px 18px 16px; }
+.pv .lg { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 12.5px; color: rgba(231,252,253,.86); }
+.pv .lg > span { display: inline-flex; align-items: center; gap: 7px; }
+.sw-d { width: 14px; height: 11px; border: 1.6px solid #5cdbe6; border-radius: 2px; background: rgba(0,195,212,.12); display: inline-block; }
+.sw-o { width: 12px; height: 12px; border-radius: 3px; background: linear-gradient(135deg, #a9bccc 0 50%, #62778b 50%); display: inline-block; }
+.sw-a { width: 14px; height: 2px; background: #9bedf2; display: inline-block; }
+.muted-d { color: rgba(203,247,249,.7); }
+.pv .hint { margin: 8px 0 0; font-size: 12.5px; line-height: 18px; color: rgba(203,247,249,.74); }
+/* thanh tiêu đề: nút phụ trên dải = kính; nút xoá bị chặn kèm lý do */
+.head-acts { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.head-acts .row { display: flex; gap: 10px; }
+.btn-glass.danger { color: #ffd2cd; border-color: rgba(248,195,190,.34); }
+.btn-glass.is-dis { opacity: .5; }
+.why { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: rgba(203,247,249,.78); }
+.why svg { color: rgba(203,247,249,.7); }
+/* tóm tắt lỗi */
+.vsum { border: 1px solid var(--red-200); background: var(--red-50); border-radius: 12px; padding: 14px 16px 12px; }
+.vsum .vs-h { display: flex; align-items: center; gap: 10px; font: 650 15px/20px var(--display); font-stretch: 104%; color: var(--red-700); }
+.vsum ul { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.vsum li a { display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 6px 10px; border-radius: 8px; color: #7c1d1f; font-size: 14px; line-height: 20px; }
+.vsum li + li a { border-top: 1px solid rgba(248,195,190,.55); border-radius: 0; }
+.vsum li .n { font: 700 12px/1 var(--display); color: var(--red-700); width: 20px; height: 20px; border-radius: 6px; display: grid; place-items: center; background: #fff; box-shadow: inset 0 0 0 1px var(--red-200); flex: none; }
+.vsum li .to { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: var(--red-700); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.vsum .help { margin-top: 8px; padding-left: 2px; }
+.msg-err { align-items: flex-start; }
+.msg-err svg { flex: none; margin-top: 2px; }
+
+/* chip trạng thái trên dải: bộ tông của build_g1a (.st-glass.run = đang chạy, .st-glass.draft = trung tính) */
+.st-glass.run { background: rgba(130,100,231,.22); color: #e9e4ff; border-color: rgba(169,150,240,.5); }
+.st-glass.run i { background: #b3a3f5; box-shadow: 0 0 10px rgba(179,163,245,.9); }
+.st-glass.draft { background: rgba(255,255,255,.08); color: rgba(231,252,253,.88); border-color: rgba(255,255,255,.18); }
+.st-glass.draft i { background: var(--n-300); box-shadow: none; }
+/* banner có liên kết (a.act) và dòng ghi chú thứ hai */
+.banner a.act { margin-left: auto; flex: none; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+.banner.info a.act { color: var(--cyan-700); }
+.banner .l2 { display: block; margin-top: 4px; }
+.banner.warn .l2 { color: #6d4410; }
+/* form chỉ đọc: ô khoá n-50, công tắc mờ, cửa sau trung tính, nhãn "Đã khoá" cạnh tiêu đề mục */
+.sec-h .meta .tag { margin-left: 8px; vertical-align: 1px; }
+.tgl.dis { opacity: .45; }
+.ctl.ro .unit { color: var(--ink-3); }
+.door-pos.ro .seg > .on { color: var(--ink-2); box-shadow: 0 0 0 1px rgba(2,34,45,.06); }
+.door-pos.ro .seg > .on svg { color: var(--ink-3); }
+table.obs.ro td { padding-top: 9px; padding-bottom: 9px; }
+.head-acts .btn-glass.is-dis { opacity: .5; box-shadow: none; }
+
+</style></head><body>
+<section class="sky">
+<header class="topbar">
+  <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 20.6 7.3v9.4L12 21.4 3.4 16.7V7.3z" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/><path d="M3.4 7.3 12 12l8.6-4.7M12 12v9.4" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/></svg></span><span class="word">Load<span>Master</span></span></div>
+  <nav class="glass-nav"><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Bảng điều khiển</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>Chuyến hàng</a><a class="on"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>Đội xe</a></nav>
+  <div class="right">
+    <div class="glass-search"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm chuyến, kiện, xe…<kbd>Ctrl K</kbd></div>
+    <div class="icon-glass lang">VI</div>
+    <div class="icon-glass bell"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b></b></div>
+    <div class="avatar">TT</div>
+  </div>
+</header>
+<div class="page-head">
+  <div style="min-width:0"><div class="crumb"><a href="#">Đội xe</a><span>/</span><span class="code">VEHICLE-007</span></div><div style="display:flex;align-items:center;gap:14px"><h1>Isuzu FVR 900</h1><span class="st-glass run"><i></i>Đang phục vụ chuyến</span></div><div class="sub"><span class="code">51D-622.14</span><span>·</span><span class="code">VEHICLE-007</span><span>·</span><span>Xe của chuyến <a class="code" href="#">TRIP-011</a>, đang xếp hàng</span></div></div>
+  <div class="actions"><div class="head-acts"><div class="row"><span class="btn btn-glass is-dis" aria-disabled="true"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>Đưa vào bảo dưỡng</span></div><div class="why"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Xe đang chạy chuyến TRIP-011, không đưa vào bảo dưỡng được.</div></div></div>
+</div>
+
+<div class="band-bottom" style="height:64px"></div>
+</section><div class="wrap"><div class="cols">
+<section class="card form ro">
+  <div class="banner info" role="status"><span class="ic"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><div><b>Xe đang chạy chuyến TRIP-011:</b> cấu hình bị khoá tới khi chuyến kết thúc, không đưa vào bảo dưỡng được.</div><a href="#" class="act">Xem chuyến TRIP-011<svg class="" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a></div>
+  <div class="sec"><div class="sec-h"><span class="no">1</span><h2>Kích thước và tải trọng</h2><span class="meta">lòng thùng, cửa sau, tải trọng <span class="tag lk"><svg class="" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Đã khoá</span></span></div><div class="frow g3">
+  <div class="fld" style="grid-column:span 2"><span class="lb">Tên xe <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>Isuzu FVR 900 · 51D-622.14</span></div></div>
+  <div class="fld"><span class="lb">Tải trọng tối đa <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>9.000</span><span class="unit">kg</span></div></div>
+  <div class="fld"><span class="lb">Chiều dài lòng thùng <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>850</span><span class="unit">cm</span></div></div>
+  <div class="fld"><span class="lb">Chiều rộng lòng thùng <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>240</span><span class="unit">cm</span></div></div>
+  <div class="fld"><span class="lb">Chiều cao lòng thùng <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>250</span><span class="unit">cm</span></div></div>
+  <div class="fld"><span class="lb">Chiều rộng cửa <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>230</span><span class="unit">cm</span></div></div>
+  <div class="fld"><span class="lb">Chiều cao cửa <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>240</span><span class="unit">cm</span></div></div>
+  <div class="fld"><span class="lb">Khoảng hở quanh kiện <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>0</span><span class="unit">cm</span></div><span class="help">Khe chừa quanh mỗi kiện khi xếp; để 0 nếu không cần.</span></div>
+</div>
+<div class="door-pos ro"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561Z"/></svg><span class="lb">Vị trí cửa</span><span class="seg"><span class="on"><svg class="" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Cửa sau</span></span><span class="help">Bản này chỉ hỗ trợ cửa mở phía sau.</span></div></div>
+  <div class="sec"><div class="sec-h"><span class="no">2</span><h2>Vật cản trong thùng</h2><span class="meta"><span class="num">2</span> vùng <span class="tag lk"><svg class="" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Đã khoá</span></span></div>
+    <table class="obs ro">
+<colgroup><col style="width:84px"><col style="width:176px"><col span="6" style="width:72px"><col style="width:70px"><col style="width:112px"></colgroup>
+<thead><tr class="g"><th rowspan="2">Mã</th><th rowspan="2">Loại</th><th colspan="3" class="grp">Góc vật cản (cm)</th><th colspan="3" class="grp">Kích thước (cm)</th><th rowspan="2" class="c">Chịu tải</th><th rowspan="2">Tải trên tối đa</th></tr>
+<tr><th class="r">X</th><th class="r">Y</th><th class="r">Z</th><th class="r">Dài</th><th class="r">Rộng</th><th class="r">Cao</th></tr></thead>
+<tbody><tr><td><span class="code oid">OBS-001</span></td>
+<td><div class="ctl sm ro">Hốc bánh xe</div></td><td><div class="ctl sm nctl ro"><span>520</span></div></td><td><div class="ctl sm nctl ro"><span>0</span></div></td><td><div class="ctl sm nctl ro"><span>0</span></div></td><td><div class="ctl sm nctl ro"><span>120</span></div></td><td><div class="ctl sm nctl ro"><span>25</span></div></td><td><div class="ctl sm nctl ro"><span>32</span></div></td>
+<td class="c"><span class="tgl dis" role="switch" aria-checked="false" aria-disabled="true" aria-label="Chịu tải OBS-001"></span></td>
+<td><div class="ctl sm nctl dis"><span class="ph">—</span><span class="unit">kg</span></div></td>
+</tr><tr><td><span class="code oid">OBS-002</span></td>
+<td><div class="ctl sm ro">Hốc bánh xe</div></td><td><div class="ctl sm nctl ro"><span>520</span></div></td><td><div class="ctl sm nctl ro"><span>215</span></div></td><td><div class="ctl sm nctl ro"><span>0</span></div></td><td><div class="ctl sm nctl ro"><span>120</span></div></td><td><div class="ctl sm nctl ro"><span>25</span></div></td><td><div class="ctl sm nctl ro"><span>32</span></div></td>
+<td class="c"><span class="tgl dis" role="switch" aria-checked="false" aria-disabled="true" aria-label="Chịu tải OBS-002"></span></td>
+<td><div class="ctl sm nctl dis"><span class="ph">—</span><span class="unit">kg</span></div></td>
+</tr></tbody></table>
+    <div class="sec-f"><span class="help">X, Y, Z là góc vật cản tính từ vách đầu thùng, vách trái và sàn (cm).</span></div>
+  </div>
+  <div class="sec"><div class="sec-h"><span class="no">3</span><h2>Trục xe</h2><span class="meta"><span class="tag">Chưa dùng trong tính toán</span></span></div>
+    <div class="sec-f" style="margin-top:0"><span class="muted">Chưa khai báo trục nào.</span></div>
+  </div>
+</section>
+<aside class="card pv">
+  <div class="card-head"><h2>Xem trước 3D</h2><span class="meta">Theo cấu hình đã lưu · đúng tỉ lệ</span></div>
+  <div class="stage"><svg class="iso" width="404" height="356" viewBox="0 0 404 356" role="img" aria-label="Xem trước 3D thùng xe và vật cản"><g class="geo"><polygon points="129.3,114.4 382.0,260.2 310.7,301.4 58.0,155.6" class="fl"/><line x1="122.2" y1="118.5" x2="374.9" y2="264.4" class="slat"/><line x1="115.1" y1="122.6" x2="367.7" y2="268.5" class="slat"/><line x1="107.9" y1="126.7" x2="360.6" y2="272.6" class="slat"/><line x1="100.8" y1="130.8" x2="353.5" y2="276.7" class="slat"/><line x1="93.7" y1="135.0" x2="346.3" y2="280.8" class="slat"/><line x1="86.5" y1="139.1" x2="339.2" y2="285.0" class="slat"/><line x1="79.4" y1="143.2" x2="332.1" y2="289.1" class="slat"/><line x1="72.3" y1="147.3" x2="324.9" y2="293.2" class="slat"/><line x1="65.1" y1="151.4" x2="317.8" y2="297.3" class="slat"/><polygon points="129.3,114.4 58.0,155.6 58.0,69.8 129.3,28.6" class="wall"/><polygon points="129.3,114.4 382.0,260.2 382.0,174.4 129.3,28.6" class="wall"/><g class="ob"><polygon class="s1" points="276.5,207.9 312.1,228.5 312.1,217.5 276.5,196.9"/><polygon class="s2" points="319.6,224.2 312.1,228.5 312.1,217.5 319.6,213.2"/><polygon class="s3" points="283.9,192.6 319.6,213.2 312.1,217.5 276.5,196.9"/></g><g class="ob"><polygon class="s1" points="212.6,244.8 248.2,265.4 248.2,254.4 212.6,233.8"/><polygon class="s2" points="255.7,261.1 248.2,265.4 248.2,254.4 255.7,250.1"/><polygon class="s3" points="220.0,229.5 255.7,250.1 248.2,254.4 212.6,233.8"/></g><line x1="129.3" y1="114.4" x2="150.1" y2="126.4" class="axis"/><polygon points="154.9,129.1 150.1,122.4 146.7,128.3" class="axh"/><text x="158.6" y="140.4" class="axl">X</text><line x1="129.3" y1="114.4" x2="108.6" y2="126.4" class="axis"/><polygon points="103.8,129.1 112.0,128.3 108.6,122.4" class="axh"/><text x="92.1" y="140.4" class="axl">Y</text><line x1="129.3" y1="114.4" x2="129.3" y2="90.4" class="axis"/><polygon points="129.3,84.9 125.9,92.4 132.7,92.4" class="axh"/><text x="125.3" y="79.4" class="axl">Z</text><line x1="58.0" y1="155.6" x2="310.7" y2="301.4" class="edge"/><line x1="382.0" y1="260.2" x2="310.7" y2="301.4" class="edge"/><line x1="58.0" y1="155.6" x2="58.0" y2="69.8" class="edge"/><line x1="310.7" y1="301.4" x2="310.7" y2="215.6" class="edge"/><line x1="382.0" y1="260.2" x2="382.0" y2="174.4" class="edge"/><line x1="129.3" y1="28.6" x2="382.0" y2="174.4" class="roof"/><line x1="382.0" y1="174.4" x2="310.7" y2="215.6" class="roof"/><line x1="310.7" y1="215.6" x2="58.0" y2="69.8" class="roof"/><line x1="58.0" y1="69.8" x2="129.3" y2="28.6" class="roof"/><polygon points="380.5,261.1 312.1,300.6 312.1,218.2 380.5,178.7" class="door"/></g><g class="lbls"><line x1="55.4" y1="157.1" x2="42.4" y2="164.6" class="ext"/><line x1="308.1" y1="302.9" x2="295.1" y2="310.4" class="ext"/><line x1="42.4" y1="164.6" x2="295.1" y2="310.4" class="dimln"/><g class="dl"><rect x="141.9" y="227.0" width="53.6" height="21" rx="6"/><text x="168.7" y="241.5" text-anchor="middle">850 cm</text></g><line x1="384.6" y1="261.7" x2="397.6" y2="269.2" class="ext"/><line x1="313.3" y1="302.9" x2="326.2" y2="310.4" class="ext"/><line x1="397.6" y1="269.2" x2="326.2" y2="310.4" class="dimln"/><g class="dl"><rect x="335.1" y="279.3" width="53.6" height="21" rx="6"/><text x="361.9" y="293.8" text-anchor="middle">240 cm</text></g><line x1="55.4" y1="157.1" x2="42.4" y2="164.6" class="ext"/><line x1="55.4" y1="71.3" x2="42.4" y2="78.8" class="ext"/><line x1="42.4" y1="164.6" x2="42.4" y2="78.8" class="dimln"/><g class="dl"><rect x="11.6" y="111.2" width="53.6" height="21" rx="6"/><text x="38.4" y="125.7" text-anchor="middle">250 cm</text></g></g></svg></div>
+  <div class="pv-foot">
+    <div class="lg"><span><i class="sw-d"></i>Cửa sau <span class="num">230 × 240 cm</span></span><span><i class="sw-o"></i>Vật cản · 2 vùng</span><span><i class="sw-a"></i>Gốc X · Y · Z</span></div>
+    <p class="hint">Bấm vật cản trong hình hoặc một dòng trong bảng vật cản để làm nổi.</p>
+  </div>
+</aside>
+</div></div>
+</body></html>

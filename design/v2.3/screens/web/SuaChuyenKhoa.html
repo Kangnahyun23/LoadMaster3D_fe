@@ -1,0 +1,136 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Sửa chuyến · đang xếp hàng · 1536×1147 --><title>Sửa chuyến TRIP-011</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1536px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+.sky .btn-ghost { color: var(--cyan-100); }
+.crumb a { color: rgba(203,247,249,.82); }
+.page-head h1 .h1-code { font: 500 24px/1 var(--mono); color: var(--cyan-200); letter-spacing: 0; margin-left: 6px; }
+.st-glass { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px; border-radius: 9px; font: 600 13px/1 var(--text); white-space: nowrap; margin-top: 4px; }
+.st-glass i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.st-glass.ready { background: rgba(0,195,212,.16); color: var(--cyan-100); border: 1px solid rgba(92,219,230,.35); }
+.st-glass.ready i { background: var(--cyan-400); box-shadow: 0 0 10px var(--cyan-400); }
+.st-glass.draft { background: rgba(255,255,255,.08); color: rgba(231,252,253,.88); border: 1px solid rgba(255,255,255,.18); }
+.st-glass.draft i { background: var(--n-300); }
+.st-glass.run { background: rgba(130,100,231,.22); color: #e9e4ff; border: 1px solid rgba(169,150,240,.5); }
+.st-glass.run i { background: #b3a3f5; box-shadow: 0 0 10px rgba(179,163,245,.9); }
+.st-glass.opt i { background: conic-gradient(#b3a3f5 0 70%, rgba(179,163,245,.25) 0); box-shadow: 0 0 0 3px rgba(179,163,245,.18); }
+.page-head .sub .code { color: var(--cyan-200); }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 416px; gap: 16px; align-items: start; }
+.side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* thẻ form: các mục đánh số */
+.fcard { overflow: hidden; }
+.sec { padding: 22px 28px 26px; }
+.sec + .sec { border-top: 1px solid var(--line-soft); }
+.sec-hint { margin: 4px 0 0 40px; font-size: 13.5px; line-height: 20px; color: var(--ink-3); }
+.sec-body { margin: 18px 0 0 40px; }
+.sec-h .meta .tag { margin-left: 2px; }
+.g12 { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.c2 { grid-column: span 2; } .c3 { grid-column: span 3; } .c4 { grid-column: span 4; } .c5 { grid-column: span 5; } .c6 { grid-column: span 6; }
+.c7 { grid-column: span 7; } .c8 { grid-column: span 8; } .c12 { grid-column: span 12; }
+.tag.red { background: var(--red-50); color: var(--red-700); }
+
+/* thông số xe đang chọn */
+.readout { display: flex; align-items: center; gap: 30px; padding: 11px 16px; border-radius: 12px; background: var(--cyan-50); border: 1px solid var(--cyan-100); }
+.readout .rl { display: block; font-size: 12.5px; line-height: 16px; color: var(--ink-3); }
+.readout .rv { display: block; margin-top: 3px; font: 600 15px/20px var(--display); font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+.readout .end { margin-left: auto; }
+.readout.ro { background: var(--n-50); border-color: var(--line); }
+
+/* danh sách kiểm tra (trực tiếp) */
+.ck { list-style: none; margin: 0; padding: 4px 18px 6px; }
+.ck li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 11px; padding: 13px 0; border-top: 1px solid var(--line-soft); }
+.ck li:first-child { border-top: 0; }
+.ck .ci { display: flex; padding-top: 1px; }
+.ck .pass .ci { color: var(--green-700); }
+.ck .fail .ci { color: var(--red-700); }
+.ck .info .ci { color: var(--cyan-700); }
+.ck .later .ci, .ck .lock .ci { color: var(--ink-3); }
+.ck .ct { font-weight: 600; color: var(--ink); line-height: 20px; }
+.ck .later .ct, .ck .lock .ct { font-weight: 500; color: var(--ink-2); }
+.ck .cs { margin-top: 2px; font-size: 13px; line-height: 19px; color: var(--ink-3); }
+.ck .fail .cs { color: var(--red-700); }
+.ck .go { margin-top: 7px; font-size: 13px; }
+.ck-foot { padding: 11px 18px; border-top: 1px solid var(--line-soft); background: var(--n-25); font-size: 12.5px; line-height: 18px; color: var(--ink-3); border-radius: 0 0 14px 14px; }
+.ck-strip { display: flex; gap: 10px; align-items: center; margin: 14px 18px 2px; padding: 10px 12px; border-radius: 10px; font-weight: 600; font-size: 13.5px; line-height: 19px; }
+.ck-strip svg { flex: none; }
+.ck-strip.ok { background: var(--green-50); color: var(--green-700); }
+.ck-strip.err { background: var(--red-50); color: var(--red-700); }
+.ck .cs .fl { display: block; font-weight: 600; }
+
+/* tóm tắt */
+.sum { margin: 0; padding: 2px 18px 4px; }
+.sum > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line-soft); }
+.sum > div:first-child { border-top: 0; }
+.sum dt { color: var(--ink-3); font-size: 13.5px; white-space: nowrap; }
+.sum dd { margin: 0; font-weight: 600; text-align: right; color: var(--ink); }
+.sum dd.big { font: 650 17px/20px var(--display); font-variant-numeric: tabular-nums; }
+.sum dd .code { margin-left: 4px; }
+.sum-note { margin: 0; padding: 11px 18px 13px; border-top: 1px solid var(--line-soft); font-size: 12.5px; line-height: 18px; color: var(--ink-3); }
+
+/* nút chỉ-icon trong dòng điểm giao */
+.ib { width: 32px; height: 32px; padding: 0; justify-content: center; color: var(--ink-3); }
+.ib.is-dis { opacity: .4; }
+
+.stops { list-style: none; margin: 12px 0 0; padding: 0; }
+.stop { display: grid; grid-template-columns: 40px minmax(0, 1fr) 44px; padding: 18px 0 20px; border-top: 1px solid var(--line-soft); }
+.stop:first-child { border-top: 0; padding-top: 6px; }
+.stop .mk { width: 26px; height: 26px; border-radius: 8px; font-size: 13px; margin: 31px 0 0 1px; }
+.stop .f2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 16px; }
+.stop .acts { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; padding-top: 24px; }
+.add-stop { margin: 4px 0 0 40px; }
+.later-note { display: flex; gap: 12px; align-items: center; padding: 16px 28px; background: var(--n-25); border-top: 1px solid var(--line-soft); color: var(--ink-2); font-size: 13.5px; line-height: 20px; }
+.later-note .no { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; font: 700 13px/1 var(--display); background: var(--n-100); color: var(--ink-3); flex: none; }
+.later-note b { color: var(--ink); font-weight: 600; margin-right: 6px; }
+
+.lock-banner { margin: 22px 28px 0; }
+.ro-stops { list-style: none; margin: 16px 0 0; padding: 0; }
+.ro-row { display: grid; grid-template-columns: 28px minmax(0, 1.28fr) minmax(0, 1.5fr) 140px 128px; column-gap: 12px; align-items: end; padding-top: 10px; }
+.ro-row.first { padding-top: 0; }
+.ro-row .mk { width: 26px; height: 26px; border-radius: 8px; font-size: 13px; margin: 0 0 7px 1px; }
+.ro-row .fld:nth-child(2) { margin-left: 0; }
+.ro-row:not(.first) .fld { gap: 0; }
+.ro-hint { margin: 12px 0 0 40px; font-size: 12.5px; line-height: 18px; color: var(--ink-3); display: flex; gap: 6px; align-items: center; }
+.cargo-row { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px; }
+.cargo-row .t1 { font-weight: 600; }
+.cargo-row .t2 { margin-top: 2px; }
+.cargo-row .link { margin-left: auto; }
+
+</style></head><body>
+<section class="sky">
+<header class="topbar">
+  <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 20.6 7.3v9.4L12 21.4 3.4 16.7V7.3z" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/><path d="M3.4 7.3 12 12l8.6-4.7M12 12v9.4" fill="none" stroke="#02222d" stroke-width="2.2" stroke-linejoin="round"/></svg></span><span class="word">Load<span>Master</span></span></div>
+  <nav class="glass-nav"><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Bảng điều khiển</a><a class="on"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>Chuyến hàng</a><a class=""><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>Đội xe</a></nav>
+  <div class="right">
+    <div class="glass-search"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/></svg>Tìm chuyến, kiện, xe…<kbd>Ctrl K</kbd></div>
+    <div class="icon-glass lang">VI</div>
+    <div class="icon-glass bell"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b></b></div>
+    <div class="avatar">TT</div>
+  </div>
+</header>
+<div class="page-head">
+  <div style="min-width:0"><div class="crumb"><a href="#">Chuyến hàng</a><span>/</span><a href="#" class="code">TRIP-011</a><span>/</span><span>Sửa</span></div><div style="display:flex;align-items:center;gap:14px"><h1>Sửa chuyến <span class="h1-code">TRIP-011</span></h1><span class="st-glass run"><i></i>Đang xếp hàng</span></div><div class="sub"><span>Tuyến Tân Bình – Q.1 – Q.7</span><span>·</span><span>Hôm nay, <span class="num">24/09/2026</span></span><span>·</span><span>Đã xếp <b class="num">110 / 280</b> kiện</span></div></div>
+  <div class="actions"><span class="btn btn-ghost ">Huỷ</span><span class="btn btn-primary "><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>Lưu thay đổi</span></div>
+</div>
+
+<div class="band-bottom" style="height:66px"></div>
+</section><div class="wrap"><div class="layout"><section class="card fcard"><div class="lock-banner"><div class="banner info"><span class="ic"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><div>Kho đã bắt đầu xếp hàng nên xe và điểm giao đã khoá; vẫn sửa được tên, ngày chạy và tài xế.</div></div></div><section class="sec"><div class="sec-h"><span class="no">1</span><h2>Thông tin chuyến</h2></div>
+  <p class="sec-hint">Đặt tên để dễ tìm lại, chọn ngày chạy, tài xế và xe.</p>
+  <div class="sec-body g12">
+    <div class="c8"><div class="fld"><span class="lb">Tên chuyến <span class="rq" aria-hidden="true">*</span></span><div class="ctl"><span>Tuyến Tân Bình – Q.1 – Q.7</span></div></div></div>
+    <div class="c4"><div class="fld"><span class="lb">Ngày chạy <span class="rq" aria-hidden="true">*</span></span><div class="ctl"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><span>24/09/2026</span></div><span class="help">Thứ Năm · hôm nay</span></div></div>
+    <div class="c8"><div class="fld"><span class="lb">Xe <span class="rq" aria-hidden="true">*</span></span><div class="ctl ro"><span>Isuzu FVR 900 · <span class="code">51D-622.14</span></span><span class="unit"><svg class="" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span></div><span class="help">Đã khoá: kho đã bắt đầu xếp hàng theo phương án đã duyệt.</span></div></div>
+    <div class="c4"><div class="fld"><span class="lb">Tài xế <span class="opt">(không bắt buộc)</span></span><div class="ctl"><span>Đặng Hoài Nam</span><span class="chev"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div><span class="help">Chỉ gán được tài xế có tài khoản đang hoạt động.</span></div></div>
+    <div class="c8"><div class="readout ro"><div><span class="rl">Lòng thùng</span><span class="rv">850 × 240 × 250 cm</span></div><div><span class="rl">Tải trọng</span><span class="rv">9.000 kg</span></div></div></div>
+  </div>
+</section><section class="sec"><div class="sec-h"><span class="no">2</span><h2>Điểm giao</h2><span class="meta"><span class="num">4</span> điểm <span class="tag"><svg class="" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Đã khoá</span></span></div>
+  <ol class="ro-stops"><li class="ro-row first"><span class="mk s1" aria-hidden="true">1</span><div class="fld"><span class="lb">Tên<span class="sr"> điểm giao 1</span></span><div class="ctl ro"><span>Bánh kẹo Hải Hà – chi nhánh Tân Bình</span></div></div><div class="fld"><span class="lb">Địa chỉ<span class="sr"> điểm giao 1</span></span><div class="ctl ro"><span>45 Cộng Hoà, P. 4, Tân Bình</span></div></div><div class="fld"><span class="lb">Số điện thoại<span class="sr"> điểm giao 1</span></span><div class="ctl ro"><span>0283 811 5530</span></div></div><div class="fld"><span class="lb">Người liên hệ<span class="sr"> điểm giao 1</span></span><div class="ctl ro"><span>Anh Quân</span></div></div></li><li class="ro-row"><span class="mk s2" aria-hidden="true">2</span><div class="fld"><span class="lb"><span class="sr">Tên điểm giao 2</span></span><div class="ctl ro"><span>Trường Mầm non Hoa Sen</span></div></div><div class="fld"><span class="lb"><span class="sr">Địa chỉ điểm giao 2</span></span><div class="ctl ro"><span>9 Nguyễn Thị Minh Khai, P. Đa Kao, Q.1</span></div></div><div class="fld"><span class="lb"><span class="sr">Số điện thoại điểm giao 2</span></span><div class="ctl ro"><span>0283 822 6070</span></div></div><div class="fld"><span class="lb"><span class="sr">Người liên hệ điểm giao 2</span></span><div class="ctl ro"><span>Cô Trang</span></div></div></li><li class="ro-row"><span class="mk s3" aria-hidden="true">3</span><div class="fld"><span class="lb"><span class="sr">Tên điểm giao 3</span></span><div class="ctl ro"><span>Lotte Mart Quận 7</span></div></div><div class="fld"><span class="lb"><span class="sr">Địa chỉ điểm giao 3</span></span><div class="ctl ro"><span>469 Nguyễn Hữu Thọ, P. Tân Hưng, Q.7</span></div></div><div class="fld"><span class="lb"><span class="sr">Số điện thoại điểm giao 3</span></span><div class="ctl ro"><span>0283 775 3344</span></div></div><div class="fld"><span class="lb"><span class="sr">Người liên hệ điểm giao 3</span></span><div class="ctl ro"><span>Anh Đạt</span></div></div></li><li class="ro-row"><span class="mk s4" aria-hidden="true">4</span><div class="fld"><span class="lb"><span class="sr">Tên điểm giao 4</span></span><div class="ctl ro"><span>Công ty TNHH Thực phẩm Sài Gòn</span></div></div><div class="fld"><span class="lb"><span class="sr">Địa chỉ điểm giao 4</span></span><div class="ctl ro"><span>12 Nguyễn Văn Linh, Q.7, TP. Hồ Chí Minh</span></div></div><div class="fld"><span class="lb"><span class="sr">Số điện thoại điểm giao 4</span></span><div class="ctl ro"><span>0283 775 1122</span></div></div><div class="fld"><span class="lb"><span class="sr">Người liên hệ điểm giao 4</span></span><div class="ctl ro"><span>Chị Hương</span></div></div></li></ol>
+</section><section class="sec"><div class="sec-h"><span class="no">3</span><h2>Hàng hoá</h2><span class="meta"><span class="tag"><svg class="" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Đã khoá</span></span></div>
+  <div class="sec-body"><div class="cargo-row">
+    <div><div class="t1"><span class="num">4</span> dòng kiện · <span class="num">280</span> kiện</div><div class="t2">Kho đã xếp <span class="num">110 / 280</span> kiện theo phương án <span class="code">REV-024</span></div></div>
+    <a href="#" class="link">Mở danh sách kiện<svg class="" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a></div></div>
+</section></section><aside class="side"><section class="card"><div class="card-head"><h2>Kiểm tra trước khi lưu</h2></div><div class="ck-strip ok" role="status"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Không có lỗi — có thể lưu.</div><ol class="ck"><li class="pass"><span class="ci"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span><div><div class="ct">Tên tuyến và ngày chạy</div><div class="cs">Đã đặt tên · chạy Thứ Năm, <span class="num">24/09/2026</span></div></div></li><li class="pass"><span class="ci"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span><div><div class="ct">Xe đủ chỗ cho hàng dự kiến</div><div class="cs">Isuzu FVR 900 · <span class="num">6.080 / 9.000 kg</span> · <span class="num">22,0 / 51,0 m³</span></div></div></li><li class="lock"><span class="ci"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><div><div class="ct">Thứ tự điểm giao đúng thực tế — điểm cuối xếp sâu nhất</div><div class="cs">Đã khoá: kho đang xếp theo phương án đã duyệt.</div></div></li><li class="lock"><span class="ci"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><div><div class="ct">Sau khi lưu: thêm kiện rồi chạy tối ưu</div><div class="cs">Không áp dụng khi kho đang xếp hàng.</div></div></li></ol></section><section class="card"><div class="card-head"><h2>Tóm tắt chuyến</h2></div><dl class="sum"><div><dt>Xe</dt><dd class="">Isuzu FVR 900<span class="code">51D-622.14</span></dd></div><div><dt>Lòng thùng</dt><dd class=""><span class="num">850 × 240 × 250 cm</span></dd></div><div><dt>Tải trọng xe</dt><dd class="big">9.000 kg</dd></div><div><dt>Điểm giao</dt><dd class="big">4</dd></div><div><dt>Kiện hàng</dt><dd class="big">280</dd></div><div><dt>Khối lượng</dt><dd class="big">6.080 kg</dd></div></dl><p class="sum-note">Số điểm giao theo form đang nhập; kiện và khối lượng lấy từ chuyến đã lưu.</p></section></aside></div></div>
+</body></html>

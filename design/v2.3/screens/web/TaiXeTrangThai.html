@@ -1,0 +1,331 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Tài xế · trạng thái · 1760×948 --><title>Tài xế — trạng thái còn thiếu</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1760px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+body { background: #dfe8eb; font-size: 16px; line-height: 24px; }
+/* thanh trên trên dải trời: nút đặc cỡ chạm, không kính */
+.tb { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; flex: none; color: #e7fcfd;
+  background: #0b3945; border: 1px solid #235a69; }
+.lng { height: 56px; min-width: 56px; padding: 0 14px 0 12px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; flex: none; color: #e7fcfd; background: #0b3945; border: 1px solid #235a69; font: 600 16px/1 var(--text); letter-spacing: .04em; }
+.lng svg { color: var(--cyan-200); }
+.lng.sq { padding: 0; width: 56px; }
+.me { width: 56px; height: 56px; display: grid; place-items: center; flex: none; border-radius: 50%; }
+.me .avatar { width: 46px; height: 46px; font-size: 16px; }
+/* nút cỡ chạm */
+.btn.t56 { height: 56px; padding: 0 20px; border-radius: 14px; font-size: 17px; gap: 10px; justify-content: center; }
+.btn.t60 { height: 60px; padding: 0 22px; border-radius: 16px; font-size: 18px; gap: 10px; justify-content: center; }
+.btn.t64 { height: 64px; padding: 0 26px; border-radius: 16px; font-size: 19px; gap: 12px; justify-content: center; }
+.btn.is-dis { opacity: 1; box-shadow: none; background: var(--n-100); border-color: var(--n-200); color: var(--n-600); }
+/* trạng thái cỡ hiện trường */
+.st { height: 32px; padding: 0 12px 0 11px; font-size: 16px; gap: 8px; border-radius: 9px; }
+.st i { width: 8px; height: 8px; }
+.code.pl { font-size: 16px; color: var(--ink-2); }
+.help { font-size: 16px; line-height: 21px; }
+.ftag { height: 26px; padding: 0 9px; font-size: 14px; border-radius: 7px; }
+
+.phone { width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--app); display: flex; flex-direction: column; }
+.phd { flex: none; padding: 8px 12px 12px; color: #fff; }
+.phd .row { display: flex; align-items: center; gap: 8px; height: 56px; }
+.phd .ttl { flex: 1; min-width: 0; }
+.phd h1 { margin: 0; font: 700 22px/26px var(--display); font-stretch: 104%; letter-spacing: -.3px; white-space: nowrap; }
+.phd .sub { font-size: 16px; line-height: 20px; color: rgba(203,247,249,.8); margin-top: 1px; white-space: nowrap; }
+.strip { display: flex; gap: 6px; margin: 10px 4px 0; }
+.strip i { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.2); }
+.strip i.cur { background: var(--s1); box-shadow: 0 0 10px rgba(230,159,0,.55); }
+.strip i.done { background: var(--green-500); }
+/* W3: điểm hiện tại mang màu của chính điểm đó (DriverStopHeader: stopColor(number)) */
+.strip i.cur.s2 { background: var(--s2); box-shadow: 0 0 10px rgba(86,180,233,.55); }
+.strip i.cur.s3 { background: var(--s3); box-shadow: 0 0 10px rgba(0,158,115,.6); }
+.strip i.cur.s4 { background: var(--s4); box-shadow: 0 0 10px rgba(240,228,66,.5); }
+.smk { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; font: 700 17px/1 var(--display); color: #101828; }
+.smk.s1 { background: var(--s1); } .smk.s2 { background: var(--s2); } .smk.s3 { background: var(--s3); } .smk.s4 { background: var(--s4); }
+.pbody { flex: 1; min-height: 0; overflow: hidden; padding: 12px 16px 0; display: flex; flex-direction: column; gap: 12px; }
+.pbody > * { flex: none; }
+.pfoot { flex: none; background: #fff; border-top: 1px solid var(--line); padding: 10px 16px 14px; box-shadow: 0 -10px 24px -18px rgba(2,34,45,.35); }
+.pfoot .btn { width: 100%; }
+
+.cc { padding: 14px 16px 16px; border-radius: 18px; }
+.cc h2 { margin: 0; font: 700 19px/25px var(--display); font-stretch: 100%; letter-spacing: -.2px; }
+.cc p { margin: 2px 0 0; font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.cc .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.cc .acts .btn { color: var(--cyan-900); }
+.cc .acts .btn svg { color: var(--cyan-700); }
+.cnt .l1 { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 16px; line-height: 22px; font-weight: 500; }
+.cnt .l1 b { font: 700 17px/1 var(--display); font-variant-numeric: tabular-nums; }
+.cnt .pct { font: 650 16px/1 var(--display); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.cnt .trk { height: 8px; border-radius: 4px; background: var(--n-100); margin-top: 8px; overflow: hidden; }
+.cnt .trk i { display: block; height: 100%; border-radius: 4px; background: var(--green-500); }
+.btn.wide { width: 100%; }
+.rows { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; flex: none; }
+.it { display: flex; align-items: center; gap: 12px; min-height: 80px; padding: 9px 12px 9px 16px; border-bottom: 1px solid var(--line-soft); }
+.it:last-child { border-bottom: 0; }
+.it.done { background: var(--green-50); border-bottom-color: var(--green-200); }
+.it.iss { background: var(--amber-50); border-bottom-color: var(--amber-200); }
+.it .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; font-size: 16px; line-height: 22px; }
+.it .l1 { display: flex; align-items: baseline; gap: 10px; }
+.it .l1 .code { font: 600 16px/22px var(--mono); color: var(--ink); }
+.it .ord { color: var(--ink-3); }
+.it .l2 { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.it .l3 { color: var(--ink-3); display: flex; align-items: center; gap: 7px; }
+.it .l4 { display: flex; align-items: center; gap: 7px; font-weight: 600; }
+.it .l4.ok { color: var(--green-700); }
+.it .l4.warn { color: var(--amber-700); }
+.tg { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; flex: none; background: #fff;
+  border: 2px solid var(--green-700); color: var(--green-700); font: 600 16px/1 var(--text); text-align: center; letter-spacing: -.45px; white-space: nowrap; }
+.tg.on { background: var(--green-700); color: #fff; box-shadow: 0 6px 14px -8px rgba(21,111,65,.8); }
+.rem { margin: 0 0 10px; text-align: center; font-size: 16px; line-height: 22px; color: var(--ink-3); }
+.rem b { color: var(--ink-2); font-weight: 600; }
+.fr { display: grid; grid-template-columns: 60px 1fr; gap: 10px; }
+.issb { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; background: #fff; border: 1.5px solid var(--amber-200); color: var(--amber-700); }
+.ntc { margin: 0; }
+.ntc.banner { font-size: 16px; line-height: 22px; padding: 12px 14px; }
+/* W3: remaining = 0 — câu driver.allHandled dưới thanh tiến độ; chân màn nói điểm tiếp theo */
+.cnt .allok { margin: 10px 0 0; display: flex; align-items: flex-start; gap: 8px; font-size: 16px; line-height: 22px; font-weight: 600; color: var(--green-700); }
+.cnt .allok svg { flex: none; margin-top: 1px; }
+.cnt .allok .nw { white-space: nowrap; }
+/* W3: địa chỉ và thông báo dài xuống dòng không để một chữ trơ trọi (app: text-pretty) */
+.cc p, .ntc > div { text-wrap: pretty; }
+.nxt { display: flex; align-items: center; gap: 10px; height: 44px; margin: 0 0 10px; padding: 0 12px; border-radius: 13px;
+  background: var(--n-50); border: 1px solid var(--line); font-size: 16px; line-height: 22px; color: var(--ink-2); }
+.nxt .k { color: var(--ink-3); flex: none; }
+.nxt .mk { width: 26px; height: 26px; border-radius: 8px; font-size: 16px; }
+.nxt .nm { flex: 1; min-width: 0; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nxt .fl { width: 26px; height: 26px; display: grid; place-items: center; flex: none; color: var(--cyan-700); }
+
+.band { position: absolute; left: 0; right: 0; top: 0; height: 150px; }
+.phd.lst { position: relative; z-index: 1; padding-bottom: 0; }
+.estate { position: relative; z-index: 1; margin: 12px 16px 16px; flex: 1; min-height: 0; border-radius: 18px; display: grid; place-items: center; }
+.estate .empty { padding: 24px 26px 40px; }
+.estate .empty .art { width: 72px; height: 72px; border-radius: 20px; }
+.estate .empty h3 { font-size: 22px; line-height: 28px; margin-top: 18px; }
+.estate .empty p { font-size: 16px; line-height: 24px; margin-top: 8px; max-width: 290px; text-wrap: balance; }
+
+body { background: #4a626a; }
+.sheet { padding: 22px 24px 28px; }
+.fgrid { display: grid; gap: 28px 32px; align-items: start; }
+.cell { margin: 0; }
+.cell figcaption { display: flex; flex-direction: column; gap: 3px; margin: 0 4px 12px; }
+.cell figcaption b { font: 600 15px/21px var(--text); color: #fff; display: flex; align-items: center; gap: 9px; }
+.cell figcaption b .no { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font: 700 12px/1 var(--display);
+  background: rgba(255,255,255,.14); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); flex: none; }
+.cell figcaption span.m { font-size: 13px; line-height: 18px; color: rgba(255,255,255,.88); }
+.cell figcaption span.m .code { font-size: 12px; color: #cbf7f9; }
+.frame { position: relative; overflow: hidden; box-shadow: 0 22px 50px -22px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08); }
+
+.sheet { padding: 22px 40px 28px; }
+.fgrid { grid-template-columns: repeat(4, 390px); column-gap: 40px; }
+.cell figcaption { height: 42px; }
+.cell figcaption span.m { white-space: nowrap; }
+
+</style></head><body>
+<div class="sheet"><div class="fgrid"><figure class="cell"><figcaption><b><span class="no">1</span>Chuyến của tôi — chưa có chuyến</b><span class="m"><span class="code">/tai-xe</span> · chưa có chuyến nào được giao cho tài xế</span></figcaption><div class="frame phf" style="border-radius:20px"><div class="phone"><div class="sky band" aria-hidden="true"></div>
+<header class="phd lst">
+  <div class="row">
+    <button type="button" class="tb" aria-label="Đăng xuất"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
+    <div class="ttl"><h1>Chuyến của tôi</h1><div class="sub">Thứ Năm, 24/09</div></div>
+    <button type="button" class="lng sq" aria-label="Ngôn ngữ giao diện: Tiếng Việt">VI</button>
+    <button type="button" class="me" aria-label="Tài khoản Phạm Quốc Dũng"><span class="avatar">QD</span></button>
+  </div>
+</header>
+<section class="card estate">
+  <div class="empty">
+    <div class="art"><svg class="" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg></div>
+    <h3>Chưa có chuyến nào</h3>
+    <p>Chuyến điều phối viên giao cho bạn sẽ hiện ở đây.</p>
+  </div>
+</section></div></div></figure><figure class="cell"><figcaption><b><span class="no">2</span>Điểm giao — phương án lỗi thời</b><span class="m"><span class="code">?chuyen=TRIP-013</span> · kho chưa xếp, bản duyệt đã lỗi thời</span></figcaption><div class="frame phf" style="border-radius:20px"><div class="phone"><header class="sky phd">
+  <div class="row">
+    <button type="button" class="tb" aria-label="Về danh sách chuyến"><svg class="" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+    <span class="smk s1" aria-hidden="true">1</span>
+    <div class="ttl"><h1>Điểm 1 / 2</h1></div>
+    <button type="button" class="lng sq" aria-label="Ngôn ngữ giao diện: Tiếng Việt">VI</button>
+  </div>
+  <div class="strip" aria-hidden="true"><i class="cur s1"></i><i class=""></i></div>
+</header>
+<div class="pbody">
+  <div class="banner warn ntc" role="alert"><span class="ic"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span><div>Phương án đã duyệt này đã lỗi thời — xe hoặc kiện của chuyến đổi sau khi tối ưu. Hỏi điều phối viên trước khi dỡ.</div></div><div class="banner info ntc" role="status"><span class="ic"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></span><div>Kho chưa xếp xong chuyến này: bạn xem trước được, chưa bắt đầu giao được.</div></div>
+  <section class="card cc" aria-label="Điểm giao">
+  <h2>Siêu thị Co.opmart Biên Hoà</h2>
+  <p>121 Phạm Văn Thuận, P. Tân Tiến, Biên Hoà</p>
+  <p>Anh Khánh · <span class="num">0251 381 4420</span></p>
+  <div class="acts">
+    <a href="#" class="btn btn-secondary t56" aria-label="Gọi Anh Khánh"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Gọi</a>
+    <a href="#" class="btn btn-secondary t56" aria-label="Chỉ đường tới Siêu thị Co.opmart Biên Hoà"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Chỉ đường</a>
+  </div>
+</section>
+  <div class="cnt">
+  <div class="l1"><span>Cần dỡ <b>140</b> kiện · Đã dỡ <b>0</b> · Sự cố <b>0</b></span><span class="pct">0%</span></div>
+  <div class="trk" role="progressbar" aria-label="Tiến độ dỡ hàng" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><i style="width:0.00%"></i></div>
+  
+</div>
+  <span class="btn btn-secondary t56 wide"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/></svg>Xem vị trí hàng</span>
+  <ul class="rows" aria-label="Siêu thị Co.opmart Biên Hoà"><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-002-20</span><span class="ord">Dỡ thứ <span class="num">1</span></span></div>
+    <div class="l2">Thùng nước suối 24 chai · <span class="num">13 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Giữa xe, lớp dưới</div>
+    
+  </div>
+  
+</li><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-002-21</span><span class="ord">Dỡ thứ <span class="num">2</span></span></div>
+    <div class="l2">Thùng nước suối 24 chai · <span class="num">13 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Giữa xe, lớp dưới</div>
+    
+  </div>
+  
+</li><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-002-22</span><span class="ord">Dỡ thứ <span class="num">3</span></span></div>
+    <div class="l2">Thùng nước suối 24 chai · <span class="num">13 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Giữa xe, lớp dưới</div>
+    
+  </div>
+  
+</li><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-002-23</span><span class="ord">Dỡ thứ <span class="num">4</span></span></div>
+    <div class="l2">Thùng nước suối 24 chai · <span class="num">13 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Giữa xe, lớp dưới</div>
+    
+  </div>
+  
+</li></ul>
+</div>
+</div></div></figure><figure class="cell"><figcaption><b><span class="no">3</span>Điểm giao — xem trước</b><span class="m"><span class="code">?chuyen=TRIP-2026-0914</span> · kho chưa xếp xong: chỉ xem</span></figcaption><div class="frame phf" style="border-radius:20px"><div class="phone"><header class="sky phd">
+  <div class="row">
+    <button type="button" class="tb" aria-label="Về danh sách chuyến"><svg class="" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+    <span class="smk s1" aria-hidden="true">1</span>
+    <div class="ttl"><h1>Điểm 1 / 4</h1></div>
+    <button type="button" class="lng sq" aria-label="Ngôn ngữ giao diện: Tiếng Việt">VI</button>
+  </div>
+  <div class="strip" aria-hidden="true"><i class="cur s1"></i><i class=""></i><i class=""></i><i class=""></i></div>
+</header>
+<div class="pbody">
+  <div class="banner info ntc" role="status"><span class="ic"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></span><div>Kho chưa xếp xong chuyến này: bạn xem trước được, chưa bắt đầu giao được.</div></div>
+  <section class="card cc" aria-label="Điểm giao">
+  <h2>Công ty TNHH Thực phẩm Sài Gòn</h2>
+  <p>12 Nguyễn Văn Linh, Q.7, TP. Hồ Chí Minh</p>
+  <p>Chị Hương · <span class="num">0283 775 1122</span></p>
+  <div class="acts">
+    <a href="#" class="btn btn-secondary t56" aria-label="Gọi Chị Hương"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Gọi</a>
+    <a href="#" class="btn btn-secondary t56" aria-label="Chỉ đường tới Công ty TNHH Thực phẩm Sài Gòn"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Chỉ đường</a>
+  </div>
+</section>
+  <div class="cnt">
+  <div class="l1"><span>Cần dỡ <b>38</b> kiện · Đã dỡ <b>0</b> · Sự cố <b>0</b></span><span class="pct">0%</span></div>
+  <div class="trk" role="progressbar" aria-label="Tiến độ dỡ hàng" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><i style="width:0.00%"></i></div>
+  
+</div>
+  <span class="btn btn-secondary t56 wide"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/></svg>Xem vị trí hàng</span>
+  <ul class="rows" aria-label="Công ty TNHH Thực phẩm Sài Gòn"><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-001-10</span><span class="ord">Dỡ thứ <span class="num">1</span></span></div>
+    <div class="l2">Thùng nhựa nguyên liệu chế biến · <span class="num">48 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Gần cửa, lớp trên</div>
+    
+  </div>
+  
+</li><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-001-11</span><span class="ord">Dỡ thứ <span class="num">2</span></span></div>
+    <div class="l2">Thùng nhựa nguyên liệu chế biến · <span class="num">48 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Gần cửa, lớp trên</div>
+    
+  </div>
+  
+</li><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-001-05</span><span class="ord">Dỡ thứ <span class="num">3</span></span></div>
+    <div class="l2">Thùng nhựa nguyên liệu chế biến · <span class="num">48 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Gần cửa, lớp dưới</div>
+    
+  </div>
+  
+</li><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-001-12</span><span class="ord">Dỡ thứ <span class="num">4</span></span></div>
+    <div class="l2">Thùng nhựa nguyên liệu chế biến · <span class="num">48 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Gần cửa, lớp dưới</div>
+    
+  </div>
+  
+</li><li class="it ">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-001-13</span><span class="ord">Dỡ thứ <span class="num">5</span></span></div>
+    <div class="l2">Thùng nhựa nguyên liệu chế biến · <span class="num">48 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Gần cửa, sàn</div>
+    
+  </div>
+  
+</li></ul>
+</div>
+</div></div></figure><figure class="cell"><figcaption><b><span class="no">4</span>Điểm cuối đã dỡ hết</b><span class="m"><span class="code">?chuyen=TRIP-007</span> · điểm cuối → mở Tổng kết chuyến</span></figcaption><div class="frame phf" style="border-radius:20px"><div class="phone"><header class="sky phd">
+  <div class="row">
+    <button type="button" class="tb" aria-label="Về danh sách chuyến"><svg class="" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+    <span class="smk s3" aria-hidden="true">3</span>
+    <div class="ttl"><h1>Điểm 3 / 3</h1></div>
+    <button type="button" class="lng sq" aria-label="Ngôn ngữ giao diện: Tiếng Việt">VI</button>
+  </div>
+  <div class="strip" aria-hidden="true"><i class="done"></i><i class="done"></i><i class="cur s3"></i></div>
+</header>
+<div class="pbody">
+  
+  <section class="card cc" aria-label="Điểm giao">
+  <h2>Kho dược Lê Minh Xuân</h2>
+  <p>Lô 15, KCN Lê Minh Xuân, Bình Chánh</p>
+  <p>Anh Nghĩa · <span class="num">0283 766 1809</span></p>
+  <div class="acts">
+    <a href="#" class="btn btn-secondary t56" aria-label="Gọi Anh Nghĩa"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Gọi</a>
+    <a href="#" class="btn btn-secondary t56" aria-label="Chỉ đường tới Kho dược Lê Minh Xuân"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Chỉ đường</a>
+  </div>
+</section>
+  <div class="cnt">
+  <div class="l1"><span>Cần dỡ <b>40</b> kiện · Đã dỡ <b>40</b> · Sự cố <b>0</b></span><span class="pct">100%</span></div>
+  <div class="trk" role="progressbar" aria-label="Tiến độ dỡ hàng" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"><i style="width:100.00%"></i></div>
+  <p class="allok" role="status"><svg class="" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>Mọi kiện của điểm này đã dỡ hoặc <span class="nw">đã báo sự cố.</span></span></p>
+</div>
+  <span class="btn btn-secondary t56 wide"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.7 4.73a2 2 0 0 0 2 0L20.7 7"/></svg>Xem vị trí hàng</span>
+  <ul class="rows" aria-label="Kho dược Lê Minh Xuân"><li class="it done">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-003-01</span><span class="ord">Dỡ thứ <span class="num">46</span></span></div>
+    <div class="l2">Kiện văn phòng phẩm · <span class="num">18 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Sát vách trước, lớp trên</div>
+    <div class="l4 ok"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Đã dỡ</div>
+  </div>
+  <button type="button" class="tg on" aria-pressed="true" aria-label="Bỏ đánh dấu đã dỡ PKG-003-01"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+</li><li class="it done">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-003-07</span><span class="ord">Dỡ thứ <span class="num">47</span></span></div>
+    <div class="l2">Kiện văn phòng phẩm · <span class="num">18 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Sát vách trước, lớp trên</div>
+    <div class="l4 ok"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Đã dỡ</div>
+  </div>
+  <button type="button" class="tg on" aria-pressed="true" aria-label="Bỏ đánh dấu đã dỡ PKG-003-07"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+</li><li class="it done">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-003-12</span><span class="ord">Dỡ thứ <span class="num">48</span></span></div>
+    <div class="l2">Kiện văn phòng phẩm · <span class="num">18 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Sát vách trước, lớp trên</div>
+    <div class="l4 ok"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Đã dỡ</div>
+  </div>
+  <button type="button" class="tg on" aria-pressed="true" aria-label="Bỏ đánh dấu đã dỡ PKG-003-12"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+</li><li class="it done">
+  <div class="tx">
+    <div class="l1"><span class="code">PKG-003-02</span><span class="ord">Dỡ thứ <span class="num">49</span></span></div>
+    <div class="l2">Kiện văn phòng phẩm · <span class="num">18 kg</span></div>
+    <div class="l3"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>Sát vách trước, lớp dưới</div>
+    <div class="l4 ok"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Đã dỡ</div>
+  </div>
+  <button type="button" class="tg on" aria-pressed="true" aria-label="Bỏ đánh dấu đã dỡ PKG-003-02"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button>
+</li></ul>
+</div>
+<footer class="pfoot">
+  <div class="nxt last"><span class="k">Tiếp theo</span><span class="fl"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg></span><span class="nm">Tổng kết chuyến</span></div>
+  <div class="fr"><button type="button" class="issb" aria-label="Báo sự cố"><svg class="" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></button><span class="btn btn-primary t60">Hoàn tất điểm giao<svg class="" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span></div>
+</footer></div></div></figure></div></div>
+</body></html>

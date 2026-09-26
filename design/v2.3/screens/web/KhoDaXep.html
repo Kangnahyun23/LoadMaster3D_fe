@@ -1,0 +1,197 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><!-- Kho · đã xếp kiện · 1024×768 --><title>Kho — đã xếp kiện</title>
+<link rel="stylesheet" href="../../tokens/fonts.css"><link rel="stylesheet" href="../../tokens/v3.css">
+<style>
+body { width: 1024px; }
+.wrap { padding: 0 28px 28px; margin-top: -44px; position: relative; }
+
+body { background: #dfe8eb; font-size: 16px; line-height: 24px; }
+/* thanh trên trên dải trời: nút đặc cỡ chạm, không kính */
+.tb { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; flex: none; color: #e7fcfd;
+  background: #0b3945; border: 1px solid #235a69; }
+.lng { height: 56px; min-width: 56px; padding: 0 14px 0 12px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; flex: none; color: #e7fcfd; background: #0b3945; border: 1px solid #235a69; font: 600 16px/1 var(--text); letter-spacing: .04em; }
+.lng svg { color: var(--cyan-200); }
+.lng.sq { padding: 0; width: 56px; }
+.me { width: 56px; height: 56px; display: grid; place-items: center; flex: none; border-radius: 50%; }
+.me .avatar { width: 46px; height: 46px; font-size: 16px; }
+/* nút cỡ chạm */
+.btn.t56 { height: 56px; padding: 0 20px; border-radius: 14px; font-size: 17px; gap: 10px; justify-content: center; }
+.btn.t60 { height: 60px; padding: 0 22px; border-radius: 16px; font-size: 18px; gap: 10px; justify-content: center; }
+.btn.t64 { height: 64px; padding: 0 26px; border-radius: 16px; font-size: 19px; gap: 12px; justify-content: center; }
+.btn.is-dis { opacity: 1; box-shadow: none; background: var(--n-100); border-color: var(--n-200); color: var(--n-600); }
+/* trạng thái cỡ hiện trường */
+.st { height: 32px; padding: 0 12px 0 11px; font-size: 16px; gap: 8px; border-radius: 9px; }
+.st i { width: 8px; height: 8px; }
+.code.pl { font-size: 16px; color: var(--ink-2); }
+.help { font-size: 16px; line-height: 21px; }
+.ftag { height: 26px; padding: 0 9px; font-size: 14px; border-radius: 7px; }
+
+.tab { width: 1024px; height: 768px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: var(--app); }
+.thd { flex: none; height: 74px; display: flex; align-items: center; gap: 14px; padding: 0 12px 0 10px; color: #fff; }
+.thd .ttl { flex: 1; min-width: 0; }
+.thd h1 { margin: 0; font: 700 26px/1.1 var(--display); font-stretch: 108%; letter-spacing: -.3px; }
+.thd .sub { margin-top: 5px; font-size: 16px; line-height: 20px; color: rgba(203,247,249,.8); }
+.thd .sub b { color: #fff; font-weight: 600; }
+.trp { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; padding: 0 6px 0 16px; border-left: 1px solid rgba(155,237,242,.2); flex: none; }
+.trp .k { font-size: 16px; line-height: 1; color: rgba(203,247,249,.78); }
+.trp .code { font: 600 18px/1 var(--mono); color: #fff; }
+
+/* thanh tiến độ bước */
+.prg { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding-left: 2px; }
+.prg .l1 { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.prg .stp { font: 700 25px/1 var(--display); font-stretch: 108%; font-variant-numeric: tabular-nums; letter-spacing: -.3px; white-space: nowrap; margin-right: 6px; }
+.prg .stp small { font-size: 19px; font-weight: 500; color: rgba(203,247,249,.72); letter-spacing: 0; }
+.prg .tag.dk { background: rgba(155,237,242,.12); color: var(--cyan-100); }
+.prg .pct { margin-left: auto; font: 650 18px/1 var(--display); color: var(--cyan-300); font-variant-numeric: tabular-nums; }
+.trk { height: 10px; border-radius: 5px; background: rgba(255,255,255,.14); overflow: hidden; }
+.trk i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--cyan-300), var(--cyan-400)); }
+
+.main { flex: 1; min-height: 0; display: grid; grid-template-columns: 506px 1fr; gap: 12px; padding: 12px 16px 0; position: relative; }
+
+/* thẻ hướng dẫn */
+.pk { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--card-shadow); padding: 13px 18px 14px;
+  display: flex; flex-direction: column; gap: 11px; min-height: 0; overflow: hidden; }
+.pk .lbl { font-size: 16px; line-height: 20px; color: var(--ink-3); font-weight: 500; }
+.pk .pidr { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pk .pid { margin: 0; font: 600 40px/46px var(--mono); letter-spacing: -.02em; color: var(--ink); white-space: nowrap; }
+.pk .pnm { font-size: 17px; line-height: 22px; color: var(--ink-2); }
+.pk .pnm .num { font-size: 17px; font-weight: 500; color: var(--ink-2); }
+.stopc { display: inline-flex; align-items: center; gap: 9px; height: 40px; padding: 0 14px 0 7px; border-radius: 12px; font: 600 16px/1 var(--text); white-space: nowrap; flex: none; }
+.stopc .mk { width: 28px; height: 28px; border-radius: 8px; font-size: 16px; }
+.stopc.s3 { background: #dff3ec; color: #053a2c; box-shadow: inset 0 0 0 1px #b5e2d2; }
+
+.tiles { display: grid; grid-template-columns: 1fr 132px; gap: 9px; }
+.tile { border-radius: 14px; background: var(--n-25); border: 1px solid var(--line); padding: 7px 14px 9px; display: flex; flex-direction: column; min-width: 0; }
+.tile .k { font-size: 16px; line-height: 20px; color: var(--ink-3); }
+.tile .v { font: 700 21px/27px var(--display); font-stretch: 104%; color: var(--ink); margin-top: 2px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tile .v .mono { font: 600 20px/27px var(--mono); letter-spacing: -.01em; }
+.tile .v small { font-size: 16px; font-weight: 600; color: var(--ink-2); }
+.tile .v .sep { color: var(--ink-3); font-weight: 500; margin: 0 1px; }
+.ori .body { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.ori svg.fig { flex: none; display: block; }
+.figleg { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 16px; line-height: 21px; color: var(--ink-2); min-width: 0; }
+.figleg li { display: flex; align-items: flex-start; gap: 9px; }
+.figleg li svg { flex: none; margin-top: 2px; }
+.figleg .cy { color: var(--cyan-700); display: flex; flex: none; }
+
+.dist { margin: 0; display: grid; grid-template-columns: 1fr 1fr 1.1fr; column-gap: 12px; row-gap: 5px; padding: 7px 14px 7px; border-radius: 14px; border: 1px solid var(--line); }
+.dist > div { display: flex; flex-direction: column; min-width: 0; }
+.dist dt { font-size: 16px; line-height: 20px; color: var(--ink-3); white-space: nowrap; }
+.dist dd { margin: 1px 0 0; font: 650 18px/22px var(--display); font-variant-numeric: tabular-nums; color: var(--ink); }
+.dist dd.cd { font: 600 16px/22px var(--mono); }
+.dist .wide { grid-column: 1 / -1; flex-direction: row; align-items: baseline; justify-content: space-between; gap: 12px;
+  border-top: 1px solid var(--line-soft); padding-top: 6px; margin-top: 1px; }
+.dist .wide dd { font: 500 16px/22px var(--text); color: var(--ink-2); margin: 0; }
+
+.note { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--n-50);
+  color: var(--ink-2); font: 600 17px/24px var(--text); }
+.note svg { flex: none; color: var(--ink-3); }
+.note.warn { background: var(--amber-50); border-color: var(--amber-200); color: #5f3708; }
+.note.warn svg { color: var(--amber-700); }
+
+/* ô 3D: ảnh cảnh + nhãn nổi (kính chỉ cho nhãn) + thanh điều khiển đặc */
+.view { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid #0b3a47; min-height: 0;
+  background: #031f29 url(../img/scene-kho-step.jpg) center top / 100% auto no-repeat; }
+.view .lab { position: absolute; border-radius: 12px; padding: 9px 12px; font-size: 16px; line-height: 22px; color: #e7fcfd; }
+.view .lab b { display: block; color: #fff; font-weight: 600; }
+.view .now { left: 12px; top: 12px; }
+.view .now .code { font: 500 16px/22px var(--mono); color: var(--cyan-200); }
+.view .now b .code { font-weight: 600; color: #fff; }
+.view .ring { position: absolute; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--cyan-300);
+  box-shadow: 0 0 0 4px rgba(0,195,212,.25), 0 0 16px rgba(0,195,212,.6); }
+.view .door { font-size: 16px; padding: 5px 10px; border-radius: 9px; }
+.view .legend { left: 12px; right: 12px; bottom: 84px; text-align: center; font-size: 16px; padding: 7px 10px; border-radius: 10px; }
+.vbar { position: absolute; left: 0; right: 0; bottom: 0; height: 76px; display: flex; align-items: center; gap: 10px; padding: 0 10px;
+  background: #062a35; border-top: 1px solid #12404d; }
+.vbar .seg { padding: 0; gap: 0; border-radius: 14px; background: #0e3a47; border: 1px solid #1f5261; overflow: hidden; }
+.vbar .seg > * { height: 56px; padding: 0 15px; border-radius: 0; font: 600 16px/1 var(--text); color: #cbf7f9; }
+.vbar .seg > .on { background: #fff; color: var(--ink); }
+.vbar .fld { flex: 1; min-width: 0; }
+.vbar .ctl { height: 56px; border-radius: 13px; font-size: 16px; font-weight: 500; border-color: #fff; gap: 8px; padding: 0 12px; }
+.vbar .ctl svg { color: var(--ink-3); flex: none; }
+
+/* thanh hành động */
+.act { flex: none; display: grid; grid-template-columns: 1fr 336px; gap: 12px; padding: 10px 16px 12px; }
+.act .btn-secondary { color: var(--ink-2); }
+.act .btn-secondary svg { color: var(--ink-3); }
+
+.cfm { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  background: rgba(242,248,249,.93); }
+.cfm .ok { width: 160px; height: 160px; border-radius: 50%; display: grid; place-items: center; background: var(--green-700); color: #fff;
+  box-shadow: 0 0 0 12px var(--green-50), 0 0 0 13px var(--green-200), 0 22px 44px -16px rgba(21,111,65,.7); margin-bottom: 8px; }
+.cfm h2 { margin: 0; font: 700 32px/40px var(--display); font-stretch: 106%; letter-spacing: -.3px; color: var(--ink); }
+.cfm h2 .code { font: 600 31px/40px var(--mono); color: var(--ink); letter-spacing: -.02em; }
+.cfm p { margin: 0; font-size: 19px; line-height: 26px; color: var(--ink-2); }
+
+</style></head><body>
+<div class="tab"><header class="sky thd">
+  <button type="button" class="tb" aria-label="Thoát phiên xếp hàng"><svg class="" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+  <div class="prg">
+    <div class="l1"><span class="stp">Bước 112 <small>/ 280</small></span><span class="tag mock ftag">MOCK RESULT</span><span class="tag dk ftag">Thứ tự xếp tính lại khi duyệt</span><span class="pct">40%</span></div>
+    <div class="trk" role="progressbar" aria-label="Tiến độ xếp hàng" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"><i style="width:39.64%"></i></div>
+  </div>
+  <div class="trp"><span class="k">Chuyến</span><span class="code">TRIP-011</span></div>
+  <button type="button" class="lng" aria-label="Ngôn ngữ giao diện: Tiếng Việt"><svg class="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>VI</button>
+  <button type="button" class="me" aria-label="Tài khoản Lê Văn Hải"><span class="avatar">VH</span></button>
+</header>
+<div class="main">
+  <section class="pk" aria-label="Kiện cần xếp">
+  <div>
+    <div class="lbl">Kiện cần xếp</div>
+    <div class="pidr"><h1 class="pid">PKG-003-52</h1><span class="stopc s3" aria-label="Điểm 3 · Lotte Mart Quận 7"><span class="mk s3">3</span>Lotte Mart Quận 7</span></div>
+    <div class="pnm">Kiện nước giặt 4 can · <span class="num">50 × 40 × 35 cm</span></div>
+  </div>
+  <div class="tiles">
+    <div class="tile"><span class="k">Vị trí</span><span class="v">Lớp 3<span class="sep"> · </span>Cách cửa 570 cm</span></div>
+    <div class="tile"><span class="k">Khối lượng</span><span class="v">16 <small>kg</small></span></div>
+  </div>
+  <div class="tile ori"><span class="k">Hướng đặt</span><span class="v"><span class="mono">LWH</span><span class="sep"> · </span>Đứng thẳng · cạnh dài dọc thùng</span>
+    <div class="body"><svg class="fig" width="170" height="102" viewBox="0 0 170 102" role="img" aria-label="Minh hoạ hướng đặt LWH: mũi tên đen chỉ ra cửa sau, mũi tên xanh chỉ mặt trên gốc của kiện">
+  <g transform="translate(55,37)">
+    <polygon points="0.0,-13.2 80.0,33.0 26.7,63.8 -53.3,17.6" fill="#f2f8f9" stroke="#c6d4d8" stroke-width="1"/>
+    <polygon points="-30.5,17.6 7.6,39.6 7.6,8.8 -30.5,-13.2" fill="#006247" stroke="rgba(0,0,0,.25)" stroke-width=".8" stroke-linejoin="round"/>
+    <polygon points="38.1,22.0 7.6,39.6 7.6,8.8 38.1,-8.8" fill="#00825e" stroke="rgba(0,0,0,.25)" stroke-width=".8" stroke-linejoin="round"/>
+    <polygon points="0.0,-30.8 38.1,-8.8 7.6,8.8 -30.5,-13.2" fill="#14a67e" stroke="rgba(0,0,0,.25)" stroke-width=".8" stroke-linejoin="round"/>
+    <polyline points="27.6,33.1 48.6,45.2" fill="none" stroke="#0e1c21" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="52.4,43.0 54.7,48.7 44.8,47.4" fill="#0e1c21"/>
+    <polyline points="3.8,-11.0 3.8,-30.8" fill="none" stroke="#008a9d" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="3.8" cy="-30.8" r="4.5" fill="#008a9d"/>
+  </g>
+  <text x="108" y="101" font-family="Be Vietnam Pro" font-size="15" font-weight="600" fill="#0e1c21">Cửa sau</text>
+</svg>
+      <ul class="figleg">
+        <li><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span>Mũi tên đen: hướng ra cửa sau</span></li>
+        <li><span class="cy"><svg class="" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span>Mũi tên xanh: mặt trên gốc của kiện</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="note" role="note"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg><span>Mặt trên gốc hướng lên, đặt khít kiện bên cạnh</span></div>
+  <dl class="dist">
+    <div><dt>Cách vách trước</dt><dd>230 cm</dd></div>
+    <div><dt>Cách vách trái</dt><dd>0 cm</dd></div>
+    <div><dt>Cách vách phải</dt><dd>200 cm</dd></div>
+    <div><dt>Cách cửa sau</dt><dd>570 cm</dd></div>
+    <div><dt>Cách sàn</dt><dd>70 cm</dd></div>
+    <div><dt>Phía dưới gần nhất</dt><dd class="cd">PKG-003-44</dd></div>
+    <div class="wide"><dt>Vật cản gần nhất</dt><dd>Không có trong 5 cm</dd></div>
+  </dl>
+</section>
+  <section class="view" aria-label="Góc nhìn thùng xe">
+  <div class="lab now glass-dark"><b>Hiện tại: <span class="code">PKG-003-52</span> · Điểm 3</b>Tiếp theo: <span class="code">PKG-003-57</span> · Điểm 3</div>
+  
+  <span class="lab door glass-dark" style="left:268px;top:382px">Cửa sau · Hướng dỡ</span>
+  <div class="lab legend glass-dark">Trầm: đã xếp · Mờ: tiếp theo · Viền: kiện đang xếp</div>
+  <div class="vbar"><span class="seg"><span class="">Chỉ kiện này</span><span class="on">Hiện xung quanh</span></span><div class="fld"><div class="ctl"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="m3 13 9 5 9-5"/></svg><span>Góc chéo</span><span class="chev"><svg class="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></div></div></div>
+</section>
+  <div class="cfm" role="status" aria-live="assertive">
+  <span class="ok"><svg class="" width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+  <h2>Đã xếp <span class="code">PKG-003-48</span></h2>
+  <p>Chuyển sang bước <span class="num">112</span>…</p>
+</div>
+</div>
+<div class="act">
+  <span class="btn btn-primary t64 is-dis"><svg class="" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Xác nhận đã xếp</span>
+  <span class="btn btn-secondary t64 is-dis"><svg class="" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/><path d="m17 13 5 5m-5 0 5-5"/></svg>Kiện này không có ở kho</span>
+</div>
+</div>
+</body></html>
