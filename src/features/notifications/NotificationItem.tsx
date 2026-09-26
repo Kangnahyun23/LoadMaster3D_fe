@@ -13,17 +13,17 @@ const TILE: Record<KpiTone, string> = {
   blue: 'bg-cyan-50 text-cyan-700 shadow-[inset_0_0_0_1px_var(--cyan-200)]',
   green: 'bg-green-50 text-green-700 shadow-[inset_0_0_0_1px_var(--green-200)]',
   amber: 'bg-amber-50 text-amber-700 shadow-[inset_0_0_0_1px_var(--amber-200)]',
-  violet: 'bg-violet-50 text-violet-700 shadow-[inset_0_0_0_1px_var(--violet-200)]',
+  azure: 'bg-azure-50 text-azure-700 shadow-[inset_0_0_0_1px_var(--azure-200)]',
   slate: 'bg-n-100 text-n-700 shadow-[inset_0_0_0_1px_var(--n-200)]',
 }
 
 /**
  * Sự kiện vận hành mà chuông báo cho điều phối và quản lý có icon riêng, rõ hơn icon nhóm của nhật ký (MenuToanCuc V2.3). "Xếp xong"
- * tông tím: V2.3 dành tím cho "đã xếp xong", như chip trạng thái. Sự kiện khác (tài khoản của quản trị viên) theo icon và tint của
+ * tông xanh lam: "đã xếp xong" là việc đang chạy, như chip trạng thái. Sự kiện khác (tài khoản của quản trị viên) theo icon và tint của
  * bảng nhật ký.
  */
 const OPERATION_LOOK: Partial<Record<AuditAction, { icon: LucideIcon; tone: KpiTone }>> = {
-  'loading.completed': { icon: PackageCheck, tone: 'violet' },
+  'loading.completed': { icon: PackageCheck, tone: 'azure' },
   'loading.missing': { icon: PackageX, tone: 'amber' },
   'delivery.issue': { icon: TriangleAlert, tone: 'amber' },
   'delivery.completed': { icon: Flag, tone: 'green' },

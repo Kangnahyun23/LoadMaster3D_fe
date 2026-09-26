@@ -22,7 +22,7 @@ export function LabelsCard({ sample }: { sample: SheetSample | undefined }) {
           <Badge shape="tag" tone="cyan">{t('trips.compare.status.latest')}</Badge>
           <Badge shape="tag" tone="success">{t('trips.compare.status.approved')}</Badge>
           <Badge shape="tag" tone="warning">{t('trips.compare.status.stale')}</Badge>
-          <Badge shape="tag" tone="violet">{t('viewer.plan.manuallyEdited')}</Badge>
+          <Badge shape="tag" tone="azure">{t('viewer.plan.manuallyEdited')}</Badge>
           <Badge shape="tag" tone="mock">MOCK RESULT</Badge>
         </div>
       </div>

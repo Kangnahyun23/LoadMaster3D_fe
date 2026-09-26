@@ -11,7 +11,7 @@ type Token = `--${string}`
 type Pair = { fg: string; bg: Token }
 
 type RowKey =
-  | 'onPrimary' | 'link' | 'textSecondary' | 'badgeCyan' | 'badgeWarning' | 'badgeViolet' | 'badgeSuccess'
+  | 'onPrimary' | 'link' | 'textSecondary' | 'badgeCyan' | 'badgeWarning' | 'badgeAzure' | 'badgeSuccess'
   | 'skyText' | 'onDanger' | 'control' | 'fieldBorder' | 'stops' | 'forbidden'
 
 const stopPair = (number: number): Pair => ({ fg: stopForeground(number), bg: `--stop-${number}` })
@@ -26,7 +26,7 @@ const ROWS: readonly { key: RowKey; pairs: readonly Pair[]; min: number }[] = [
   { key: 'textSecondary', pairs: [{ fg: '--text-3', bg: '--bg' }], min: 4.5 },
   { key: 'badgeCyan', pairs: [{ fg: '--badge-cyan-fg', bg: '--badge-cyan-bg' }], min: 4.5 },
   { key: 'badgeWarning', pairs: [{ fg: '--badge-warning-fg', bg: '--badge-warning-bg' }], min: 4.5 },
-  { key: 'badgeViolet', pairs: [{ fg: '--badge-violet-fg', bg: '--badge-violet-bg' }], min: 4.5 },
+  { key: 'badgeAzure', pairs: [{ fg: '--badge-azure-fg', bg: '--badge-azure-bg' }], min: 4.5 },
   { key: 'badgeSuccess', pairs: [{ fg: '--badge-success-fg', bg: '--badge-success-bg' }], min: 4.5 },
   { key: 'skyText', pairs: [{ fg: '--cyan-200', bg: '--sky-end' }], min: 4.5 },
   { key: 'onDanger', pairs: [{ fg: '--bg', bg: '--danger' }], min: 4.5 },

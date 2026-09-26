@@ -3,13 +3,13 @@ import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /** Nghĩa cố định của năm cặp tint (AGENTS mục 4): không mượn màu sang nghĩa khác. */
-export type KpiTone = 'blue' | 'green' | 'amber' | 'violet' | 'slate'
+export type KpiTone = 'blue' | 'green' | 'amber' | 'azure' | 'slate'
 
 const TONE_CLASS: Record<KpiTone, string> = {
   blue: 'bg-tint-blue text-tint-blue-fg',
   green: 'bg-tint-green text-tint-green-fg',
   amber: 'bg-tint-amber text-tint-amber-fg',
-  violet: 'bg-tint-violet text-tint-violet-fg',
+  azure: 'bg-tint-azure text-tint-azure-fg',
   slate: 'bg-tint-slate text-tint-slate-fg',
 }
 

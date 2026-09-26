@@ -6,12 +6,12 @@ import { useT } from '@/lib/i18n'
 import type { VehicleState, VehicleStatus } from '@/lib/mock-db'
 
 /**
- * Chip trạng thái xe theo ngữ pháp chấm V2.3 (Main.jpg): sẵn sàng chấm xanh lá, đang phục vụ chuyến tím có quầng (đang chạy, cùng
+ * Chip trạng thái xe theo ngữ pháp chấm V2.3 (Main.jpg): sẵn sàng chấm xanh lá, đang phục vụ chuyến xanh lam có quầng (đang chạy, cùng
  * tông với chuyến đang xếp / đang giao), bảo dưỡng chip xám.
  */
 const TONE: Record<VehicleStatus, { tone: BadgeTone; dot: BadgeDot }> = {
   available: { tone: 'success', dot: 'solid' },
-  in_use: { tone: 'violet', dot: 'halo' },
+  in_use: { tone: 'azure', dot: 'halo' },
   maintenance: { tone: 'neutral', dot: 'solid' },
 }
 

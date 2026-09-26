@@ -42,7 +42,7 @@ export function ViewerHeader({ tripId, metrics, placedCount, totalCount, isMockR
       {isMockResult || manuallyEdited ? (
         <div className="flex shrink-0 flex-col items-start gap-1">
           {isMockResult ? <Badge shape="tag" tone="mock">MOCK RESULT</Badge> : null}
-          {manuallyEdited ? <Badge shape="tag" tone="violet">{t('viewer.plan.manuallyEdited')}</Badge> : null}
+          {manuallyEdited ? <Badge shape="tag" tone="azure">{t('viewer.plan.manuallyEdited')}</Badge> : null}
         </div>
       ) : null}
 

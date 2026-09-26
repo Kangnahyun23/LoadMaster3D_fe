@@ -9,7 +9,7 @@ export const designSystem = {
   style: {
     title: 'Cyan glass',
     lede:
-      'The V2.3 design system for LoadMaster. A deep petrol "sky" band tops every screen; glass lives only on that band and on the 3D scene. The work area is white paper with strong type, and colour appears only when it means something: cyan is the brand and "ready", amber is "needs you", violet is "running".',
+      'The V2.3 design system for LoadMaster. A deep petrol "sky" band tops every screen; glass lives only on that band and on the 3D scene. The work area is white paper with strong type, and colour appears only when it means something: cyan is the brand and "ready", amber is "needs you", blue is "running".',
     glass: {
       yesTitle: 'Glass',
       yes: 'Navigation bar · metric tiles on the top band · floating panels, toolbar and timeline over the 3D scene · Ctrl K quick search',
@@ -58,7 +58,7 @@ export const designSystem = {
         textSecondary: 'Secondary text n-600 on white',
         badgeCyan: '"Approved" badge cyan-800 on cyan-50',
         badgeWarning: '"Needs review" badge amber-700 on amber-50',
-        badgeViolet: '"Delivering" badge violet-700 on violet-50',
+        badgeAzure: '"Delivering" badge azure-700 on azure-50',
         badgeSuccess: '"Completed" badge green-700 on green-50',
         skyText: 'cyan-200 text on the bottom of the sky band',
         onDanger: 'White text on the red-700 danger button',

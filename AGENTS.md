@@ -32,8 +32,10 @@ quản trị `/nguoi-dung`); liên kết sâu mở trước khi đăng nhập đ
 (`RequireAuth` chỉ nhớ trang khi người **chưa** đăng nhập mở nó). Nút thoát ở màn kho/tài xế theo vai trò (`features/auth/exit.ts`):
 nhân viên kho và tài xế **ở màn danh sách** thì **đăng xuất** (màn chính của họ), **trong phiên xếp / trong chuyến** thì về danh sách
 (`/kho`, `/tai-xe`, LM-086/087); điều phối viên và quản trị viên về trang chuyến, vai trò khác về màn chính. *(đã điều chỉnh 26/09/2026, V2.3)* Điều hướng là **thanh ngang 60 px trên dải trời** ở đầu trang (`app/NavRail.tsx`): logo
-trái, nhóm mục giữa trên kính tối (`.glass-nav`), tìm nhanh · ngôn ngữ · chuông · tài khoản phải. Mục đang mở có **nền riêng** (cyan
-trong + viền + quầng, `--nav-on`) và chữ trắng 600; chỉ báo kính trượt theo con trỏ của V2 đã bỏ (hai lớp phản hồi sẽ chồng nhau).
+trái, nhóm mục giữa trên kính tối (`.glass-nav`), tìm nhanh · ngôn ngữ · chuông · tài khoản phải. Mục đang mở nằm dưới kính cyan
+(trong + viền + quầng, `--nav-on`), và kính đó là **chỉ báo trượt theo con trỏ** (`useGlassFollow`, `.glass-follow`): bám mục
+đang rê / focus, về mục đang mở khi con trỏ rời thanh. Chỉ báo là phản hồi nền duy nhất; mục đang mở chỉ có chữ trắng 600, **không** nền
+riêng, nếu không sẽ thành hai lớp chồng nhau. *(26/09/2026)* Bản đầu của đợt 2 bỏ chỉ báo này; người dùng yêu cầu giữ lại.
 Ngôn ngữ trên thanh là một nút "VI" mở menu chọn (`components/LanguageMenu.tsx`); màn toàn màn hình kho/tài xế giữ hai nút
 `LanguageSwitch` 56 px. Vòng focus trên dải trời là `--cyan-300` (`--primary` không đủ tương phản trên nền tối). Trước 23/09/2026 đây là
 rail dọc 96 px; 23/09 đổi sang ngang 56 px nền sáng (V2), 26/09 lên dải trời (V2.3). Thanh còn có nút Tìm nhanh (Ctrl+K / ⌘K, LM-099 — chỉ nhóm có quyền xem; màn toàn màn hình không
@@ -181,11 +183,11 @@ Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-tex
 
 Bản thiết kế đã chốt nằm ở `design/v2.3/` (`README.md` thứ tự làm, `SCREENS.md` màn → route, `CHANGES.md` việc cần làm).
 Đợt 1 (token) đã thay khối `:root` theo `design/v2.3/tokens/index.v2.3.css`: **giữ tên token cũ**, đổi giá trị sang cyan, thêm thang
-`--cyan-*`, `--n-*`, `--amber/violet/green/red-*`, `--sky`, `--card-shadow`, `--glass-dark*`, `--primary-fill-*`, `--on-primary`,
+`--cyan-*`, `--n-*`, `--amber/azure/green/red-*`, `--sky`, `--card-shadow`, `--glass-dark*`, `--primary-fill-*`, `--on-primary`,
 `--font-display`. Khối dưới đây là trạng thái hiện tại. Chỗ nào luật cũ ở mục 4–5 khác V2.3 thì theo các dòng
 *(đã điều chỉnh 25/09/2026, V2.3)*. `design/v2.3/tokens/v3.css` chỉ để tham chiếu, không import vào `src/`.
 
-- `@theme` xoá thang mặc định `cyan/amber/violet/green/red` của Tailwind rồi khai lại bằng token: `bg-cyan-600`, `text-red-700`… là màu
+- `@theme` xoá thang mặc định `cyan/amber/green/red` của Tailwind rồi khai lại bằng token (cùng `violet`/`purple` để không lọt màu tím): `bg-cyan-600`, `text-red-700`… là màu
   của bảng này, không có bậc nào ngoài bảng (`bg-red-300` không sinh class).
 - `font-display` là họ chữ trong `cn()` (`THEME_FONT_FAMILIES` của `lib/utils.ts`); thêm họ chữ mới vào `@theme` thì thêm tên vào đó.
 - *(đợt 2, 26/09/2026)* Kính sáng của V2 đã xoá (`--nav-glass`, `--follow-*`, `--tile-*`, `--glass-edge`, `--icon-ring`, `--spring`,
@@ -197,7 +199,7 @@ Bản thiết kế đã chốt nằm ở `design/v2.3/` (`README.md` thứ tự 
 ```css
 :root {
   /* thang gốc: --cyan-50 … --cyan-950 (#E7FCFD → #02222D), --n-0 … --n-900 xám ánh cyan (#FFFFFF → #0E1C21),
-     --{amber|violet|green|red}-{50|200|500|700} — giá trị đầy đủ ở src/index.css */
+     --{amber|azure|green|red}-{50|200|500|700} — giá trị đầy đủ ở src/index.css */
 
   /* nền và chữ */
   --bg: #FFFFFF;
@@ -249,8 +251,8 @@ Bản thiết kế đã chốt nằm ở `design/v2.3/` (`README.md` thứ tự 
   --stop-5: #0072B2;  --stop-6: #D55E00;  --stop-7: #CC79A7;  --stop-8: #555555;
 
   /* 7 tông badge, mỗi tông 3 biến bg/fg/border:
-     --badge-{neutral|info|cyan|success|warning|danger|violet}-{bg|fg|border}
-     violet (V2.3) = đang chạy / đang tối ưu / đã xếp xong */
+     --badge-{neutral|info|cyan|success|warning|danger|azure}-{bg|fg|border}
+     azure (V2.3, xanh lam #1D4FAE trên #ECF3FF, 6,8:1) = đang chạy / đang tối ưu / đã xếp xong */
 
   /* thang mực bốn cấp (V2): tiêu đề và số quan trọng → dữ liệu vận hành → thông tin phụ → chú thích */
   --ink-strong: var(--n-900);  --ink-1: var(--n-800);  --ink-2: var(--n-700);  --ink-3: var(--n-600);
@@ -258,11 +260,11 @@ Bản thiết kế đã chốt nằm ở `design/v2.3/` (`README.md` thứ tự 
 
   /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
      blue = vận hành (V2.3: sắc cyan, giữ tên) · green = sẵn sàng/xong · amber = cần chú ý
-     violet = phân tích phụ · slate = ngữ cảnh (không phải số đo) */
+     azure = phân tích phụ · slate = ngữ cảnh (không phải số đo) */
   --tint-blue: var(--cyan-50);     --tint-blue-fg: var(--cyan-800);
   --tint-green: var(--green-50);   --tint-green-fg: var(--green-700);
   --tint-amber: var(--amber-50);   --tint-amber-fg: var(--amber-700);
-  --tint-violet: var(--violet-50); --tint-violet-fg: var(--violet-700);
+  --tint-azure: var(--azure-50);  --tint-azure-fg: var(--azure-700);
   --tint-slate: var(--n-100);      --tint-slate-fg: var(--n-700);
 
   /* dải trời đầu trang (thanh điều hướng + tiêu đề + tab), hai vệt cyan trên nền #02222D → #053341 */
@@ -373,9 +375,12 @@ Mẫu: `design/v2.3/screens/web/ThanhPhan.jpg`, `TrangThaiChung.jpg`, `MenuToanC
 
 - **Chip trạng thái** (`Badge`, `StatusBadge`): cao 26, chữ `fine` 600, nền tint không viền. **Ngữ pháp chấm**: đặc = trạng thái · vòng
   rỗng = chờ người kế tiếp · quầng = đang chạy · quay = đang tính. Màu kể giai đoạn của chuyến: xám nháp, hổ phách cần bạn (đã tối ưu vòng
-  rỗng, cần xem lại có quầng + viền), cyan đã duyệt, **tím** đang chạy (đang tối ưu, đang xếp, đã xếp xong vòng rỗng, đang giao), xanh lá
-  hoàn thành, đã huỷ chip xám chữ gạch chấm đỏ. Xe: sẵn sàng xanh lá, đang phục vụ chuyến tím có quầng, bảo dưỡng xám. Tài khoản: đang
-  hoạt động xanh lá, đã khoá xám. `shape="tag"` (20 px) cho phiên bản, "Đã chỉnh tay" (tím) và **MOCK RESULT** (`tone="mock"`).
+  rỗng, cần xem lại có quầng + viền), cyan đã duyệt, **xanh lam** đang chạy (đang tối ưu, đang xếp, đã xếp xong vòng rỗng, đang giao), xanh lá
+  hoàn thành, đã huỷ chip đỏ trọn (không gạch chữ). Xe: sẵn sàng xanh lá, đang phục vụ chuyến xanh lam có quầng, bảo dưỡng xám. Tài khoản: đang
+  hoạt động xanh lá, đã khoá xám. `shape="tag"` (20 px) cho phiên bản, "Đã chỉnh tay" (xanh lam) và **MOCK RESULT** (`tone="mock"`).
+  *(đã điều chỉnh 26/09/2026)* Bản mẫu V2.3 dùng **tím** cho "đang chạy" và tint "phân tích phụ"; người dùng thấy tím không hợp nên đổi
+  sang thang **xanh lam** `--azure-*` (khác hẳn cyan thương hiệu, cùng họ màu lạnh). `@theme` xoá thang `violet`/`purple` của Tailwind:
+  không dùng tím ở đâu trong app. "Đã huỷ" cũng lệch bản mẫu: chip đỏ trọn thay vì chip xám gạch chữ.
 - **Card**: `Card`/`CardHeader`/`CardTitle` (Archivo 650 16/22)/`CardMeta`/`CardActions`; bo 14, `--card-shadow`.
 - **Ô nhập** (`components/ui/field-styles.tsx`, dùng chung cho Input, Textarea, Select, SelectField): nhãn `small` 600 `--ink-2`, viền
   `--line-strong`, focus viền `--cyan-500` + quầng `--focus-ring` (thay vòng outline), lỗi viền đỏ + `--error-ring` + icon.

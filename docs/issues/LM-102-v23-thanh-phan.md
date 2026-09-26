@@ -85,6 +85,16 @@ Luật mới ghi ở AGENTS mục 1, 4, 5 ("Thành phần V2.3", "Thanh tiêu đ
 - Vòng focus trên dải trời là `--cyan-300`, không phải `--primary`: cyan-700 không đủ tương phản trên nền tối.
 - Hover nút chính: gradient trượt một bậc cyan (mockup không vẽ).
 
+**Người dùng duyệt và yêu cầu sửa (26/09/2026)**
+
+- Giữ **chỉ báo kính trượt theo con trỏ** trên thanh điều hướng (bản đầu đợt 2 đã bỏ): khôi phục `useGlassFollow`, vật liệu kính cyan
+  `--nav-on`; mục đang mở không nền riêng.
+- **Bỏ tím** khỏi app: "đang chạy" (đang tối ưu / xếp / đã xếp xong / giao, xe đang phục vụ chuyến), tint "phân tích phụ", tag "Đã chỉnh
+  tay", ô icon "Xếp xong" của chuông và nhật ký chuyển sang thang xanh lam `--azure-*` (#1D4FAE trên #ECF3FF 6,8:1). `@theme` xoá thang
+  `violet`/`purple` của Tailwind.
+- **Đã huỷ**: chip đỏ trọn, không gạch chữ.
+- **"Mở phương án"** ở bảng chuyến trong kỳ (Bảng điều khiển): nút phụ cỡ `sm` có icon khối 3D, không còn là chữ liên kết.
+
 **Phát hiện thêm:** bảng tương phản của `/kieu-dang` (tính từ token lúc mở trang) cho thấy chữ trắng trên mốc điểm giao 3, 6, 7 chỉ
 3,1–3,9:1. Đã sửa `lib/stops.ts` chọn chữ tối cho các mốc đó (4,6–5,8:1), test khoá ngưỡng 4,5:1 cho cả tám mốc.
 

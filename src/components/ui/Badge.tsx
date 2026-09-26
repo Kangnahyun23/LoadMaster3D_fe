@@ -23,7 +23,7 @@ const badgeVariants = cva(['inline-flex shrink-0 items-center whitespace-nowrap 
       success: 'bg-badge-success-bg text-badge-success-fg',
       warning: 'bg-badge-warning-bg text-badge-warning-fg',
       danger: 'bg-badge-danger-bg text-badge-danger-fg',
-      violet: 'bg-badge-violet-bg text-badge-violet-fg',
+      azure: 'bg-badge-azure-bg text-badge-azure-fg',
       mock: 'bg-transparent text-badge-warning-fg',
     },
     outlined: { true: '', false: 'border-transparent' },
@@ -34,7 +34,7 @@ const badgeVariants = cva(['inline-flex shrink-0 items-center whitespace-nowrap 
     { tone: 'success', outlined: true, className: 'border-badge-success-border' },
     { tone: ['warning', 'mock'], outlined: true, className: 'border-badge-warning-border' },
     { tone: 'danger', outlined: true, className: 'border-badge-danger-border' },
-    { tone: 'violet', outlined: true, className: 'border-badge-violet-border' },
+    { tone: 'azure', outlined: true, className: 'border-badge-azure-border' },
     { shape: 'tag', tone: 'mock', className: 'tracking-[0.4px]' },
   ],
   defaultVariants: { shape: 'chip', tone: 'neutral', outlined: false },
@@ -52,7 +52,7 @@ const DOT_COLOR: Record<Tone, string> = {
   success: 'var(--green-500)',
   warning: 'var(--amber-500)',
   danger: 'var(--red-500)',
-  violet: 'var(--violet-500)',
+  azure: 'var(--azure-500)',
   mock: 'var(--amber-500)',
 }
 
@@ -68,16 +68,14 @@ type BadgeProps = ComponentProps<'span'> &
     tone?: Tone
     /** Chấm 7 px đầu chip. `true` = `solid`. */
     dot?: boolean | BadgeDot
-    /** Tông của chấm khi khác tông chip — "Đã huỷ": chip xám, chấm đỏ. */
-    dotTone?: Tone
   }
 
-export function Badge({ className, shape, tone = 'neutral', outlined, dot = false, dotTone, children, style, ...props }: BadgeProps) {
+export function Badge({ className, shape, tone = 'neutral', outlined, dot = false, children, style, ...props }: BadgeProps) {
   const dotKind: BadgeDot | null = dot === true ? 'solid' : dot || null
   return (
     <span
       className={cn(badgeVariants({ shape, tone, outlined: outlined ?? tone === 'mock' }), className)}
-      style={dotKind ? { ...style, ['--dot' as string]: DOT_COLOR[dotTone ?? tone] } : style}
+      style={dotKind ? { ...style, ['--dot' as string]: DOT_COLOR[tone] } : style}
       {...props}
     >
       {dotKind ? <span aria-hidden className={cn('size-[7px] flex-none rounded-full', DOT_SHAPE[dotKind])} /> : null}

@@ -20,6 +20,7 @@ import { useT, type MessageKey } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { initialsOf } from '@/types/user'
 import { BrandMark } from './BrandMark'
+import { useGlassFollow } from './useGlassFollow'
 
 type NavItem = {
   to: string
@@ -57,15 +58,16 @@ function Avatar({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
 
 /**
  * Thanh điều hướng 60px trên **dải trời** V2.3 (`ChuyenHang.jpg`, `v3.css` `.topbar`): logo trái, nhóm mục trên kính tối
- * (`.glass-nav`), tìm nhanh · ngôn ngữ · chuông · tài khoản phải. Mục đang mở có nền cyan trong + viền + quầng, chữ trắng 600 — nền
- * riêng của mục là phản hồi duy nhất (V2.3 bỏ chỉ báo kính trượt theo con trỏ của V2). Dưới 1.340px mục chỉ còn icon, tên nằm ở
- * `aria-label`.
+ * (`.glass-nav`), tìm nhanh · ngôn ngữ · chuông · tài khoản phải. Nền cyan kính là **chỉ báo trượt theo con trỏ**
+ * (`useGlassFollow`, `.glass-follow`): bám mục đang rê / focus, về mục đang mở khi con trỏ rời thanh. Mục đang mở chỉ có chữ trắng
+ * 600 và icon `--cyan-200`, không nền riêng — hai lớp nền sẽ chồng nhau. Dưới 1.340px mục chỉ còn icon, tên nằm ở `aria-label`.
  */
 export function NavRail() {
   const t = useT()
   const { user, signOut } = useAuth()
   const can = useCan()
   const navigate = useNavigate()
+  const { navRef, followRef } = useGlassFollow<HTMLElement>()
 
   async function handleSignOut() {
     await signOut()
@@ -85,7 +87,12 @@ export function NavRail() {
         </span>
       </Link>
 
-      <nav aria-label={t('nav.label')} className="glass-nav flex min-w-0 flex-1 gap-0.5 overflow-x-auto rounded-lg p-1 min-[1400px]:flex-none">
+      <nav
+        ref={navRef}
+        aria-label={t('nav.label')}
+        className="glass-nav relative flex min-w-0 flex-1 gap-0.5 overflow-x-auto rounded-lg p-1 min-[1400px]:flex-none"
+      >
+        <span ref={followRef} aria-hidden className="glass-follow" />
         {NAV_ITEMS.filter((item) => can(item.permission)).map(({ to, labelKey, icon: Icon }) => (
           <NavLink
             key={to}
@@ -94,12 +101,10 @@ export function NavRail() {
             aria-label={t(labelKey)}
             className={({ isActive }) =>
               cn(
-                'flex h-9 items-center gap-2 rounded-md px-2.5 text-body whitespace-nowrap xl:px-3.5',
+                'relative z-1 flex h-9 items-center gap-2 rounded-md px-2.5 text-body whitespace-nowrap xl:px-3.5',
                 'transition-colors duration-(--dur-fast) ease-standard',
                 'outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-cyan-300',
-                isActive
-                  ? 'bg-(image:--nav-on) font-semibold text-sky-text shadow-nav-on'
-                  : 'font-medium text-sky-text-2 hover:bg-sky-glass hover:text-sky-text',
+                isActive ? 'font-semibold text-sky-text' : 'font-medium text-sky-text-2 hover:text-sky-text',
               )
             }
           >

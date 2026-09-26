@@ -13,7 +13,7 @@ export const designSystem = {
   style: {
     title: 'Cyan kính',
     lede:
-      'Hệ thiết kế V2.3 cho LoadMaster. Dải "trời" màu dầu đậm ở đầu mọi màn, kính chỉ nằm trên dải đó và trên cảnh 3D. Phần làm việc là giấy trắng, chữ đậm, màu chỉ dùng khi có nghĩa: cyan là thương hiệu và "sẵn sàng", hổ phách là "cần bạn", tím là "đang chạy".',
+      'Hệ thiết kế V2.3 cho LoadMaster. Dải "trời" màu dầu đậm ở đầu mọi màn, kính chỉ nằm trên dải đó và trên cảnh 3D. Phần làm việc là giấy trắng, chữ đậm, màu chỉ dùng khi có nghĩa: cyan là thương hiệu và "sẵn sàng", hổ phách là "cần bạn", xanh lam là "đang chạy".',
     glass: {
       yesTitle: 'Có kính',
       yes: 'Thanh điều hướng · ô số liệu trên dải đầu trang · panel nổi, thanh công cụ và timeline trên cảnh 3D · hộp tìm nhanh Ctrl K',
@@ -63,7 +63,7 @@ export const designSystem = {
         textSecondary: 'Chữ phụ n-600 trên trắng',
         badgeCyan: 'Badge "Đã duyệt" cyan-800 trên cyan-50',
         badgeWarning: 'Badge "Cần xem lại" amber-700 trên amber-50',
-        badgeViolet: 'Badge "Đang giao" violet-700 trên violet-50',
+        badgeAzure: 'Badge "Đang giao" azure-700 trên azure-50',
         badgeSuccess: 'Badge "Hoàn thành" green-700 trên green-50',
         skyText: 'Chữ cyan-200 trên đáy dải trời',
         onDanger: 'Chữ trắng trên nút nguy hiểm red-700',
