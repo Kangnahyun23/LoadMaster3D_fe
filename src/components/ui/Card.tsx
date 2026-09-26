@@ -19,10 +19,10 @@ export function CardHeader({ className, ...props }: ComponentProps<'div'>) {
   )
 }
 
-/** Tiêu đề card: Archivo 650, 16/22, rộng 106 %. */
-export function CardTitle({ className, ...props }: ComponentProps<'h3'>) {
+/** Tiêu đề card: Archivo 650, 16/22, rộng 106 %. `as`: cấp tiêu đề theo chỗ đặt card (mặc định h3), để thứ bậc tiêu đề không nhảy cấp. */
+export function CardTitle({ className, as: Heading = 'h3', ...props }: ComponentProps<'h3'> & { as?: 'h2' | 'h3' }) {
   return (
-    <h3
+    <Heading
       className={cn('font-display text-h3 leading-5.5 font-[650] tracking-[-0.1px] text-ink-strong font-stretch-106%', className)}
       {...props}
     />
