@@ -16,9 +16,9 @@ function createColumns(t: TFunction) {
     helper.accessor('permission', {
       header: t('admin.permissions.permission'),
       cell: (info) => (
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate">{t(`admin.permissions.labels.${info.getValue()}`)}</span>
-          <span className="truncate font-mono text-caption text-text-3">{info.getValue()}</span>
+        <span className="flex min-w-0 flex-col whitespace-normal">
+          <span className="line-clamp-2 font-medium text-ink-strong">{t(`admin.permissions.labels.${info.getValue()}`)}</span>
+          <span className="font-mono text-caption text-ink-3">{info.getValue()}</span>
         </span>
       ),
     }),
@@ -32,7 +32,7 @@ function createColumns(t: TFunction) {
           <span className="sr-only">{t('admin.permissions.granted')}</span>
         </span>
       ) : (
-        <span className="inline-flex text-text-disabled">
+        <span className="inline-flex text-ink-3">
           <Minus className="size-4" strokeWidth={1.5} aria-hidden />
           <span className="sr-only">{t('admin.permissions.denied')}</span>
         </span>
@@ -44,16 +44,18 @@ function createColumns(t: TFunction) {
 /**
  * Tab "Ma trận quyền" (LM-092, D-41): chỉ đọc, dựng thẳng từ `ROLE_PERMISSIONS` — cùng hằng số chặn route, nav và nút, nên bảng
  * luôn đúng với những gì giao diện cho phép. Ô có quyền là dấu tích, không có là gạch; trình đọc màn hình đọc "Có"/"Không".
+ * Bảng V2 dạng "paper" trong một thẻ; dòng hai tầng (tên quyền + mã quyền) nên cao 56 px.
  */
 export function PermissionMatrix() {
   const t = useT()
   const columns = useMemo(() => createColumns(t), [t])
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-body text-text-2">{t('admin.permissions.description')}</p>
-      <div className="overflow-hidden rounded-md border border-border bg-bg">
-        <DataTable data={ROWS} columns={columns} density="comfortable" />
-      </div>
+      <p className="text-body text-ink-2">{t('admin.permissions.description')}</p>
+      {/* flex-none: con overflow-hidden của cột flex không được co (AGENTS mục 5, "Cuộn trong khung ứng dụng") */}
+      <section className="relative flex-none overflow-hidden rounded-lg border border-border bg-bg">
+        <DataTable data={ROWS} columns={columns} density="roomy" appearance="paper" />
+      </section>
     </div>
   )
 }

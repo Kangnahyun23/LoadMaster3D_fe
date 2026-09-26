@@ -25,18 +25,20 @@ Backend là Spring Boot monolith + PostgreSQL, cộng một Python FastAPI servi
 **Trạng thái hiện tại:** backend chưa nối. Toàn bộ dữ liệu là mẫu. *(đã điều chỉnh 19/09/2026, LM-084, D-41)* Phân quyền
 **giả lập ở FE**: ma trận `features/auth/permissions.ts` (`ROLE_PERMISSIONS`, quản trị toàn quyền, quản lý chỉ đọc + xuất báo cáo);
 mỗi nhóm route bọc `RequirePermission` trong `app/App.tsx`, thiếu quyền là màn 403 (`app/ForbiddenPage.tsx`) có nút về màn chính;
-nav rail chỉ hiện mục có quyền; nút ghi ẩn qua `useCan()`. Backend thật phải kiểm lại ở server. Màn mới thêm route vào đúng nhóm quyền;
+thanh điều hướng chỉ hiện mục có quyền; nút ghi ẩn qua `useCan()`. Backend thật phải kiểm lại ở server. Màn mới thêm route vào đúng nhóm quyền;
 E2E đăng nhập bằng `login(route, role)`, kịch bản đi qua nhiều vai trò dùng `admin`. *(bổ sung 17/09/2026)* Đăng nhập xong mở
 màn của vai trò (`features/auth/landing.ts`: điều phối `/chuyen`, quản lý `/`, kho `/kho`, tài xế `/tai-xe` (LM-087),
 quản trị `/nguoi-dung`); liên kết sâu mở trước khi đăng nhập được giữ, gốc `/` thì không. Đăng xuất không ghi nhớ trang đang đứng
 (`RequireAuth` chỉ nhớ trang khi người **chưa** đăng nhập mở nó). Nút thoát ở màn kho/tài xế theo vai trò (`features/auth/exit.ts`):
 nhân viên kho và tài xế **ở màn danh sách** thì **đăng xuất** (màn chính của họ), **trong phiên xếp / trong chuyến** thì về danh sách
-(`/kho`, `/tai-xe`, LM-086/087); điều phối viên và quản trị viên về trang chuyến, vai trò khác về màn chính. Nav rail 96px có nhãn chữ,
-mục đang mở có nền, chữ đậm và vạch mép trái (`app/NavRail.tsx`). *(bổ sung 20/09/2026)* Rail còn có nút Tìm nhanh (Ctrl+K / ⌘K, LM-099 —
-chỉ nhóm có quyền xem; màn toàn màn hình không có), chuông thông báo (LM-098 — sự kiện nhật ký liên quan vai trò, không gồm việc chính
-mình làm; "đã đọc" là state giao diện trong tab, `read-state.ts`) và mục "Hồ sơ cá nhân" trong menu tài khoản (`/ho-so`, LM-096 — mọi
-người đã đăng nhập; kho/tài xế mở từ nút tài khoản 56 px ở màn chính). Nút hành động trên rail dùng `components/NavRailButton.tsx`.
-Rail của quản trị cao ~880 px: màn thấp hơn thì rail cuộn (`overflow-y-auto`).
+(`/kho`, `/tai-xe`, LM-086/087); điều phối viên và quản trị viên về trang chuyến, vai trò khác về màn chính. *(đã điều chỉnh 23/09/2026)* Điều hướng là **thanh ngang 56 px** ở đầu trang (`app/NavRail.tsx`): logo trái, nhóm mục giữa, chuông và
+menu tài khoản phải. Mục đang mở có chữ xanh, weight 600 và một **chỉ báo kính trượt theo con trỏ** — chỉ báo là phản hồi nền duy nhất,
+mục đang mở **không** có nền riêng, nếu không sẽ thành hai lớp chồng nhau. Trước 23/09/2026 đây là rail dọc 96 px; đổi sang ngang theo
+hướng V2 để chiều cao dành cho dữ liệu. Thanh còn có nút Tìm nhanh (Ctrl+K / ⌘K, LM-099 — chỉ nhóm có quyền xem; màn toàn màn hình không
+có), chuông thông báo (LM-098 — sự kiện nhật ký liên quan vai trò, không gồm việc chính mình làm; "đã đọc" là state giao diện trong tab,
+`read-state.ts`) và mục "Hồ sơ cá nhân" trong menu tài khoản (`/ho-so`, LM-096 — mọi người đã đăng nhập; kho/tài xế mở từ nút tài khoản
+56 px ở màn chính). Nút hành động trên thanh dùng `components/NavRailButton.tsx`. Thanh ngang chật hơn rail dọc: thêm mục vào đây phải
+đo lại ở 1.366 px.
 
 ### MVP theo Build Spec *(bổ sung 15/09/2026)*
 
@@ -121,11 +123,11 @@ API v9 khác hẳn v8: dùng `useTable` + `tableFeatures({})` + `createColumnHel
 
 ```
 src/
-  app/                  router, providers, app shell, nav rail, route-title.ts (tiêu đề tab)
+  app/                  router, providers, app shell, thanh điều hướng, route-title.ts (tiêu đề tab)
     design-system/      2 trang tài liệu bàn giao (/kieu-dang, /thanh-phan)
   components/ui/        primitive tự viết trên Radix
   components/           component dùng chung: StatusBadge, DataTable, FilterBar, EmptyState, TripLockBanner, ConfirmDialog,
-                        VehicleName (tên xe không bẻ biển số)...
+                        VehicleName (tên xe không bẻ biển số), PageHero (thanh tiêu đề màn), KpiTile (ô số liệu)...
   features/
     auth/               đăng nhập, phiên, RequireAuth
     trips/              danh sách, chi tiết, form chuyến, so sánh phương án
@@ -217,8 +219,32 @@ Tailwind v4 nối token qua khối `@theme inline`, nên `bg-surface`, `text-tex
   /* 6 tông badge, mỗi tông 3 biến bg/fg/border:
      --badge-{neutral|info|cyan|success|warning|danger}-{bg|fg|border} */
 
+  /* thang mực bốn cấp (V2, 23/09/2026): tiêu đề và số quan trọng → dữ liệu vận hành
+     → thông tin phụ → chú thích. Trước đó ba cấp nằm quá gần nhau nên màn trông nhạt */
+  --ink-strong: #131F34;  --ink-1: #1F2C3E;  --ink-2: #4A5C75;  --ink-3: #5E6E84;
+  /* --ink-3 của bản V2 là #71829A — chỉ 3,9:1 trên trắng, 3,5:1 trên trường nền, trượt mục 10.
+     Tối lại cùng sắc độ (23/09/2026): 5,2:1 trên trắng, 4,7:1 trên trường nền. Đổi token này
+     thì đo lại cả hai nền. */
+
+  /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
+     blue = vận hành · green = sẵn sàng/xong · amber = cần chú ý
+     violet = phân tích phụ · slate = ngữ cảnh (không phải số đo) */
+  --tint-blue: #DCE8FB;    --tint-blue-fg: #1A4DA3;
+  --tint-green: #D1ECDE;   --tint-green-fg: #0C6B4C;
+  --tint-amber: #FCE6C2;   --tint-amber-fg: #85500A;
+  --tint-violet: #E2E0FA;  --tint-violet-fg: #443E9E;
+  --tint-slate: #E1E8F1;   --tint-slate-fg: #4E6681;
+
+  /* bề rộng tối đa vùng làm việc. Màn 2K trở lên không kéo giãn nội dung:
+     điều phối cần thêm dòng, không cần thêm chiều ngang */
+  --shell-max: 1680px;
+
   /* bo góc */
   --r-sm: 6px;  --r-md: 8px;  --r-lg: 12px;
+  --r-xl: 16px;   /* chỉ bề mặt kính (ô số liệu, khối tổng hợp) — V2 */
+
+  /* vật liệu kính V2: --nav-glass, --follow-glass, --tile-glass, --glass-edge, --tile-lift,
+     --hero-icon, --hero-icon-shadow, --icon-ring — xem src/index.css và mục 5 "Cấm tuyệt đối" */
 
   /* đổ bóng, chỉ cho lớp nổi */
   --e1: 0 1px 2px rgba(16,24,40,.06);
@@ -246,17 +272,20 @@ Font: **Be Vietnam Pro** cho giao diện, **JetBrains Mono** cho số, mã kiệ
 | body-lg | 16/24 | chữ thân trên tablet và điện thoại |
 | body | 14/20 | chữ thân trên desktop |
 | caption | 12/16 | nhãn phụ, tiêu đề cột bảng |
+| lede | 13,5/22 | câu mô tả dưới tiêu đề màn (`PageHero`) *(V2, 23/09/2026)* |
 | micro | 11/14 | nhãn trục biểu đồ, nhãn trong panel nổi *(bổ sung)* |
+| note | 11,5/17 | ghi chú nguồn của ô số liệu (`KpiTile`) *(V2, 23/09/2026)* |
 
 **Số liệu lớn** không nằm trong thang trên vì chúng là hình khối chứ không phải chữ đọc:
-`18px` mã kiện trên header · `22px` mã chuyến · `28px` số KPI · `40px` tỷ lệ lấp đầy
-trong hộp thoại. Luôn dùng JetBrains Mono. Không phát sinh thêm cỡ ngoài danh sách này.
+`18px` mã kiện trên header · `22px` mã chuyến · `40px` tỷ lệ lấp đầy trong hộp thoại — JetBrains Mono.
+*(đã điều chỉnh 23/09/2026, V2)* Số KPI `26px` dùng **Be Vietnam Pro** `tabular-nums`, không mono: mono dành cho mã và số
+đo đọc trong bảng, số tổng hợp là nội dung thông thường (brief V2). Không phát sinh thêm cỡ ngoài danh sách này.
 
 Spacing bội số 4px.
 
 **Token cỡ chữ và `cn()`** *(bổ sung 15/09/2026, LM-055)*: `cn()` trong `lib/utils.ts` dùng
 tailwind-merge đã khai báo các cỡ chữ của `@theme` (`display`, `h1`, `h2`, `h3`, `body-lg`, `body`,
-`caption`). Thiếu khai báo thì tailwind-merge coi `text-body` là màu chữ và **bỏ mất `text-white`**
+`caption`, `micro`, `note`, `lede`). Thiếu khai báo thì tailwind-merge coi `text-body` là màu chữ và **bỏ mất `text-white`**
 của nút. Thêm token `--text-*` mới vào `@theme` thì phải thêm tên vào `THEME_FONT_SIZES`.
 
 **Nguồn quét class của Tailwind** *(bổ sung 15/09/2026, LM-005)*: `src/index.css` khai báo
@@ -293,24 +322,64 @@ Xếp/Dỡ, điểm giao, góc nhìn, trạng thái duyệt, Chỉnh sửa, So s
 công cụ riêng (tablet hai hàng 56 px). Thêm gì vào hàng này phải đo lại ở 1.366 px (`e2e/planner-compact.spec.ts`). Thanh công cụ
 Planner dùng `PlannerSelect` (Select Radix); ô chọn kiện (tới 1.000 dòng) giữ `<select>` gốc.
 
-Cao **72px** cho mọi màn có nav rail. Chỉ **56px** cho màn xem phương án 3D, vì ở đó
+Cao **72px** cho mọi màn có thanh điều hướng. Chỉ **56px** cho màn xem phương án 3D, vì ở đó
 chiều cao nhường cho khung 3D. Không tự chọn chiều cao khác — lệch là nội dung nhảy
 khi chuyển màn.
+
+*(bổ sung 23/09/2026, V2)* Màn trong khung ứng dụng dùng `components/PageHero.tsx`: ô icon 44 px `.hero-icon` (gradient xanh nhạt,
+viền trắng, bóng nhẹ), tiêu đề h1 24 px `--ink-strong`, `meta` (số đếm, mã) mono `--ink-3`, một câu mô tả cỡ `lede` từ nhánh
+`pageHero` của từ điển, hành động ở phải. Ba luật của nó:
+icon là `<span aria-hidden>` **ngoài** `<h1>` (tên truy cập của tiêu đề giữ đúng chữ, test đọc `exact: true`); hành động nằm trong
+**cùng** `<header>` với tiêu đề; mô tả ẩn dưới 768 px để thanh giữ đúng 72 px. Mô tả nói màn dùng để làm gì — không số, không
+trạng thái. **Không** dùng `PageHero` khi tiêu đề là dữ liệu (mã chuyến ở Chi tiết chuyến, tên xe ở form xe) hay cho thanh 56 px
+của Planner; những màn đó giữ header riêng nhưng vẫn theo lề `px-shell`. Màn mới trong khung ứng dụng dùng `PageHero`.
+Bản V2 gốc có hoạ tiết đường nét phía sau tiêu đề — người dùng chọn **không** đưa vào production (23/09/2026).
+
+*(bổ sung 23/09/2026, V2)* Lề ngang của thanh điều hướng, thanh tiêu đề và vùng cuộn dùng utility `px-shell` (`index.css`): 24 px,
+và khi cột rộng hơn `--shell-max` thì nội dung dừng ở `--shell-max`, căn giữa. Là padding chứ không phải một div `max-w` bọc ngoài,
+để vùng cuộn vẫn rộng hết cột (thanh cuộn ở mép) và nền chrome vẫn tràn ngang — trên màn 2K logo, mục điều hướng, tiêu đề và nội
+dung cùng thẳng một cột. Không đặt lại `px-6`/`px-8` cho màn trong khung ứng dụng.
+
+*(bổ sung 23/09/2026, V2)* Ô số liệu là `components/KpiTile.tsx` (lên `components/` từ `features/manager`): kính `.glass-tile` bo
+`--r-xl`, viền sáng trong + bóng nâng nhẹ (`--glass-edge`, `--tile-lift`), nền đặc dự phòng; icon trên nền tint theo nghĩa cố định
+(mục 4); số 26 px **sans** `tabular-nums` `--ink-strong` (không mono — mono dành cho mã và số đo trong bảng, theo brief V2); nhãn
+`--ink-2`; ghi chú nguồn cỡ `note` `--ink-3`. Mọi số cùng màu mực — màu chỉ ở icon, không nói số tốt hay xấu. Vỏ ngoài
+`role="group"` + `aria-label` = nhãn; `value` và `unit` là hai text node liền nhau, không khoảng trắng JSX ở giữa.
+*(bổ sung 23/09/2026, bước 5)* Ô số liệu làm **công tắc lọc** (Đội xe): truyền `onPress` + `pressed`; ô dựng `<button aria-pressed>`
+**bên trong** vỏ group, không biến vỏ thành nút. Bấm đi qua `list.setFilter` của `useListUrlState` (URL đổi, cùng bộ lọc với ô
+chọn), bấm lại ô đang lọc thì bỏ lọc. Rê chuột đổi viền và nâng bóng (`--tile-hover-border`, `--tile-lift-hover`), không phóng
+to; đang lọc: viền `--primary` đậm gấp đôi. Số của ô đếm trên cả tập dữ liệu, không theo ô tìm.
 
 ### Thử nghiệm visual V2 (21/09/2026)
 
 Vòng ý tưởng 02: người dùng cho phép **thay đổi mạnh** trong prototype, thử nền sáng xanh chuyển nhẹ, gradient, kính lồi, phản sáng, bóng và thang bo góc ngoài luật V1. Chỉ áp dụng `design/v2`, chưa là chuẩn production; duy trì khả năng đọc, focus và reduced-motion. Xem brief V2 để biết đánh đổi và các mục chưa kiểm trên thiết bị thật.
 
-Người dùng cho phép thử glassmorphism trên navigation và một số nút trong **prototype biệt lập `design/v2/`** để duyệt trước. Được dùng blur, viền sáng, bóng nhẹ cho navigation nổi; nút chính giữ nền đặc, chữ/focus rõ, có công tắc nền đặc và reduced-motion. Token cục bộ và nhãn Việt trong prototype chưa là chuẩn production. Chưa áp ngoại lệ này lên toàn app; giữ luật dưới đây cho giao diện vận hành đến khi duyệt. Quyết định và phạm vi: [docs/v2-design-brief.md](docs/v2-design-brief.md).
+*(đã điều chỉnh 23/09/2026)* Hướng V2 **đã được duyệt** và đang chuyển dần vào `src/`: kính theo lớp (xem "Cấm tuyệt đối" bên dưới),
+thanh điều hướng ngang, thang mực bốn cấp và năm cặp tint ngữ nghĩa. Bản phác thảo gốc giữ ở `design/v2/` để đối chiếu; chuỗi chữ và
+token cục bộ trong đó **không** phải chuẩn — code production đi qua `t()` và token của `src/index.css`. Quyết định và phạm vi:
+[docs/v2-design-brief.md](docs/v2-design-brief.md).
+
+**Chưa đo trên thiết bị thật:** blur ở màn kho (tablet trong kho sáng, đeo găng) và tài xế (điện thoại ngoài nắng) chưa có số về tương
+phản và FPS. Đây đúng hai vai trò cần tương phản nhất. Phải đo trước khi coi kính ở hai màn đó là đã chốt.
 
 ### Cấm tuyệt đối
 
 - Không dùng chữ gạch chân làm nút hành động. Gạch chân chỉ cho link trong đoạn văn.
-- Không gradient trên nút, card, header hay nền trang.
-- Không glassmorphism, không blur nền, không viền phát sáng — **ngoại trừ** panel điều khiển nổi đè lên khung 3D nền tối.
+- Không gradient trên nút, card hay thanh tiêu đề. *(đã điều chỉnh 23/09/2026)* **Nền trang** được dùng trường màu rất nhạt
+  (`--field`): hai vệt radial xanh trên nền `#edf4fb`, biên độ dưới 5% độ sáng. Đây là lớp khí quyển để bề mặt đọc màu trắng
+  nổi lên khỏi nó. Ngoài nền trang, gradient chỉ có trong **vật liệu kính** (chỉ báo điều hướng, ô số liệu) và ô icon nhận diện
+  màn (`.hero-icon`) — đều là gradient trắng/xanh rất nhạt khai trong token, không phải màu trang trí.
+- *(đã điều chỉnh 23/09/2026)* Kính (blur nền, viền sáng) dùng **theo lớp**, không rải tuỳ ý.
+  **Được** ở chrome điều hướng, khối tổng hợp số liệu, và panel điều khiển nổi đè lên khung 3D nền tối.
+  **Không** ở bảng, form, inspector và mọi bề mặt người dùng đọc lâu — những chỗ đó giữ nền đặc, phân tách bằng viền 1px.
+  Không lồng kính trong kính. Luôn có nền đặc dự phòng khi trình duyệt thiếu `backdrop-filter`, và tôn trọng
+  `prefers-reduced-transparency`. Trước 23/09/2026 luật này cấm kính hoàn toàn; đổi sau khi duyệt hướng V2. Viền phát sáng
+  vẫn không dùng ngoài ba chỗ kể trên.
 - Toast nằm dưới thanh tiêu đề (`offset` trên 80 px): không che nút hành động ở góc phải header — rê chuột lên toast làm nó dừng đếm giờ
   (LM-101 phát hiện toast che nút Duyệt của Planner).
 - Không đổ bóng lên card. Card phân tách bằng viền 1px `--border`. Bóng chỉ dùng cho dropdown, modal, toast, popover, và **thẻ đang được kéo** (lúc đó nó là lớp đang nhấc khỏi mặt phẳng).
+  *(đã điều chỉnh 23/09/2026)* Bề mặt **kính** không phải card phẳng: được viền sáng trong và bóng nâng rất nhẹ bằng token
+  (`--nav-glass-shadow`, `--glass-edge`, `--tile-lift`, `--hero-icon-shadow`). Card nền đặc vẫn không có bóng.
 - Không emoji trong giao diện. Icon dùng Lucide, nét 1,5px, cỡ 16/20/24.
 - Không viết hoa toàn bộ, không giãn chữ trang trí.
 - Không bo góc tròn hoàn toàn cho nút hành động. Dạng viên thuốc chỉ cho badge, chip lọc và thanh tiến độ.
@@ -328,6 +397,15 @@ bám mép trên thì nội dung trôi lạc giữa vùng trống, nhìn như tra
 - **Màn vận hành** (có dữ liệu): nội dung căn trái, bám mép trên, không tiêu đề khổng lồ căn giữa, không hình minh hoạ lớn. Đây là mặc định.
 - **Màn không có dữ liệu**: được phép bố cục hai cột, căn giữa theo chiều dọc, và có hình minh hoạ. Hình minh hoạ phải dựng từ chính sản phẩm (phép chiếu đẳng cự ở `lib/isometric.ts`, bảng màu điểm giao), không mượn ảnh trang trí bên ngoài.
 
+**Cuộn trong khung ứng dụng** *(bổ sung 23/09/2026)*: trang không bao giờ cuộn; mỗi màn tự cuộn vùng nội dung của nó. `AppShell` đặt màn
+trong một **hàng** flex `relative min-h-0` dưới thanh điều hướng. Gốc màn `flex min-w-0 flex-1 flex-col`, vùng cuộn
+`min-h-0 flex-1 overflow-auto`. Ba lỗi đã gặp, cả ba chỉ lộ khi lăn chuột thật:
+- Đặt màn thẳng vào cột flex (bước 2 của V2): gốc màn cao theo nội dung (`min-height: auto`), `overflow-hidden` của khung cắt phần dưới.
+- Con `overflow-hidden` trực tiếp của cột flex (khung bo góc quanh bảng) được **co về 0** — phải `flex-none`, không thì bảng bị
+  cắt còn chiều cao khung và vùng cuộn không có gì để cuộn (nhật ký 50 dòng chỉ thấy 10).
+- Phần tử `absolute` không có tổ tiên định vị (`sr-only` của biểu đồ, ô ẩn của Radix) kéo cả tài liệu dài ra, trang cuộn và đẩy thanh
+  điều hướng khỏi màn — hàng chứa màn phải `relative`.
+
 ### Phân cấp thị giác
 
 Mỗi màn hình chỉ có **đúng một** hành động chính dùng nút primary. Mọi hành động khác dùng nút phụ hoặc ghost.
@@ -341,7 +419,23 @@ Không phải thứ gì cũng cần card. Nhóm nội dung bằng khoảng trắ
 (menu biến mất) hoặc menu nhảy sang người khác và thao tác chạy nhầm đối tượng. Chỉ truyền khi mã chắc chắn duy nhất — kiện có thể
 trùng mã khi dữ liệu còn lỗi, bảng kiện giữ khoá theo vị trí.
 
+*(bổ sung 23/09/2026, V2 bước 6)* TanStack Table v9 dựng mỗi hàm `cell`/`header` thành **một component** (`createElement(columnDef.cell)`):
+dựng lại mảng cột là mọi ô gỡ ra gắn lại — menu Radix đang mở trong ô bị rời khỏi DOM giữa cú bấm. Màn Người dùng từng gặp: cột
+memo theo `users`, truy vấn `staleTime: 0` về lại sau đăng nhập, menu "Khoá tài khoản" biến mất (E2E đỏ 1/4 lần). Bảng có trạng thái
+trong ô (menu, hộp thoại, ô nhập): khai hàm ô **một lần ở cấp module**, giá trị thay đổi (dữ liệu, người đang chọn, callback) đưa
+qua context hoặc `meta` của bảng; chỉ dựng lại cột khi đổi ngôn ngữ hay đổi tập cột (`features/admin/users-table-context.ts`).
+
+*(bổ sung 23/09/2026, V2)* Ảnh đại diện chữ cái đầu trong nội dung (bảng người dùng, nhật ký, hồ sơ, panel) là **ô vuông bo góc**
+theo V2; hình tròn chỉ ở nút tài khoản trên thanh điều hướng và menu tài khoản.
+
 Chiều cao dòng cố định (48px thoáng, 36px gọn, 56px cảm ứng). Cột số căn phải, JetBrains Mono. Tiêu đề cột 12px weight 500 màu `--text-3`, không viết hoa, dính khi cuộn. Bảng hẹp (cột phụ ≤ 360px) dùng padding ngang 10px thay vì 12px để tiêu đề không xuống dòng.
+
+*(bổ sung 23/09/2026, V2 bước 5–6)* Kiểu bảng V2 cho màn danh sách: bảng và thanh tìm/lọc nằm **chung một thẻ**
+(`rounded-lg`, viền 1px, nền trắng, `relative flex-none`); `FilterBar layout="toolbar"` là đầu thẻ — ô tìm giãn bên trái, bộ lọc
+có nhãn nằm cạnh dồn phải; bộ lọc phụ khai `secondary: true` xuống hàng thứ hai (ngày, xe, tài xế của danh sách chuyến).
+`DataTable appearance="paper"` — tiêu đề cột nền `--table-head`, 12px weight **600** `--ink-2`, cao 40px, lề ngang 14px.
+Ô hai dòng thì tăng mật độ thay vì cắt chữ: `roomy` 56px cho hai dòng chữ (tên + tuyến, số kiện + số điểm), `spacious` 72px khi
+kèm icon/badge (tên + mã có icon xe; trạng thái + mã chuyến / ghi chú tối đa hai dòng). Lớp kiểu dáng ở `components/data-table-styles.ts`.
 
 *(bổ sung 19/09/2026, LM-085, D-52)* Danh sách có tìm/lọc/sắp xếp/phân trang ghép `FilterBar` + `@/lib/list-filter` (tìm bỏ dấu:
 "bien hoa" khớp "Biên Hoà") + `DataTable` + `useListUrlState`. Cột chỉ sắp xếp được khi khai `enableSorting: true`; tiêu đề là nút có
@@ -449,7 +543,7 @@ chờ gì. Spec cấm "nút giả" (mục 9.3: Import CSV chỉ hiện khi hoạ
 - Ngoại lệ duy nhất: nơi Spec yêu cầu giữ vị trí cho tính năng sau (tải trục) hiển thị nhãn
   **"Sẽ có sau" / "Coming later"** dạng chữ, không bấm được.
 - Toast chỉ nói việc **thật sự đã xảy ra** trên màn: không hứa "sẽ đồng bộ", "điều phối viên sẽ thấy"
-  khi không có nơi lưu. *(LM-053)* Đã gỡ nút Cài đặt ở nav rail, "Ghi nhận sai lệch" ở kho, thanh tab
+  khi không có nơi lưu. *(LM-053)* Đã gỡ nút Cài đặt ở thanh điều hướng, "Ghi nhận sai lệch" ở kho, thanh tab
   đáy của tài xế (ba tab không có màn); "Kiện này không có ở kho" giữ vì nó thật sự bỏ qua bước.
 - `notifyPendingFeature` và `lib/pending-feature.ts` đã xoá (LM-053); "Nhập từ Excel" gỡ khi danh sách chuyến
   chuyển sang đọc kho. Danh sách và form tạo/sửa chuyến ghi thật vào kho, không báo thành công giả.
@@ -667,6 +761,9 @@ có backend nên chưa có request nào. Đường đi chuẩn khi làm màn m�
   - Cửa sổ lấy mẫu animation tính từ lúc animation **hiện ra**, không từ lúc bấm: máy chậm tiêu hết cửa sổ cho quãng bấm → React
     render → spring chạy.
   - Root R3F lấy theo canvas **đang có mặt** và chờ nó xuất hiện (`_roots.get(canvas)`), vì canvas có thể vừa được dựng lại.
+- *(bổ sung 23/09/2026)* Playwright **cuộn được cả vùng `overflow-hidden` bằng code** (`scrollIntoView` trước mỗi thao tác), nên màn
+  người dùng không lăn được vẫn xanh. Kiểm cuộn bằng `page.mouse.wheel` (`layout-1366.spec.ts`, test "mouse wheel"); thêm màn cuộn
+  dài mới thì thêm vào danh sách của test đó.
 
 ### Chia chunk theo route
 

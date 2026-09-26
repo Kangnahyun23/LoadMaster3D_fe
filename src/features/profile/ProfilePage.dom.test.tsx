@@ -43,9 +43,15 @@ test('name and phone are editable, email, role and depot read only; saving updat
   const details = within(screen.getByRole('region', { name: 'Thông tin cá nhân' }))
   expect(details.getByLabelText('Họ và tên')).toHaveValue('Nguyễn Thanh Tùng')
   expect(details.getByLabelText('Số điện thoại')).toHaveValue('0901 234 567')
-  const readOnly = details.getByText('dieuphoi@loadmaster.vn').closest('dl') as HTMLElement
-  expect([...readOnly.querySelectorAll('dt, dd')].map((cell) => cell.textContent)).toStrictEqual(['Email', 'dieuphoi@loadmaster.vn', 'Vai trò', 'Điều phối viên', 'Kho trực thuộc', 'Kho Long Bình'])
   expect(details.queryByRole('textbox', { name: 'Email' })).not.toBeInTheDocument()
+
+  // Cột nhận diện: tên, vai trò, rồi email và kho chỉ đọc. Email chỉ có một chỗ trên màn (V2 lặp lại — ở đây không).
+  const identity = within(screen.getByRole('complementary', { name: 'Tài khoản' }))
+  expect(identity.getByRole('heading', { level: 2, name: 'Nguyễn Thanh Tùng' })).toBeInTheDocument()
+  expect(identity.getByText('Điều phối viên')).toBeInTheDocument()
+  const readOnly = identity.getByText('dieuphoi@loadmaster.vn').closest('dl') as HTMLElement
+  expect([...readOnly.querySelectorAll('dt, dd')].map((cell) => cell.textContent)).toStrictEqual(['Email', 'dieuphoi@loadmaster.vn', 'Kho trực thuộc', 'Kho Long Bình'])
+  expect(screen.getAllByText('dieuphoi@loadmaster.vn')).toHaveLength(1)
 
   const save = details.getByRole('button', { name: 'Lưu thay đổi' })
   expect(save).toBeDisabled()
@@ -59,8 +65,9 @@ test('name and phone are editable, email, role and depot read only; saving updat
   expect(details.getByLabelText('Số điện thoại')).toHaveValue('0987 654 321')
   expect(save).toBeDisabled()
   expect(getMockDb().sessionUser()).toMatchObject({ fullName: 'Nguyễn Thanh Tùng Anh', phone: '0987 654 321' })
-  // Phiên của tab đọc lại từ kho: tên trên nav rail đổi theo
+  // Phiên của tab đọc lại từ kho: tên trên nav rail và ở cột nhận diện đổi theo
   expect(storedSession()).toMatchObject({ fullName: 'Nguyễn Thanh Tùng Anh', phone: '0987 654 321' })
+  expect(identity.getByRole('heading', { level: 2, name: 'Nguyễn Thanh Tùng Anh' })).toBeInTheDocument()
 })
 
 test('an empty name and a malformed phone are reported at their fields and nothing is saved', async () => {

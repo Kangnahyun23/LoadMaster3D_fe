@@ -40,7 +40,7 @@ export const designSystem = {
   style: {
     title: 'LoadMaster design system',
     description:
-      'Light, clean, modern SaaS. Generous white space, thin borders, no shadows on cards. The 3D area is always dark. 4px spacing grid, 8px radius for buttons and cards, 12px for dialogs.',
+      'Light, clean, modern SaaS (V2 direction). A very light blue page field, white reading surfaces, thin borders, no shadows on solid cards; glass (16px radius, soft lift) only on navigation and metric tiles. The 3D area is always dark. 4px spacing grid, 8px radius for buttons and cards, 12px for dialogs.',
     nav: {
       palette: 'Color',
       type: 'Type',
@@ -56,6 +56,29 @@ export const designSystem = {
       text: { name: 'Text', note: 'Three levels: primary, secondary, muted. Never use opacity for text.' },
       primary: { name: 'Primary', note: 'A single accent color. The light tint marks selection and info tags.' },
       semantic: { name: 'Semantic', note: 'Only for status and feedback, never as decoration.' },
+      ink: {
+        name: 'Ink (V2)',
+        note: 'Four levels: headings and key numbers → operational data → secondary information → captions. All four reach 4.5:1 on white.',
+      },
+      tint: {
+        name: 'Tint (V2)',
+        note: 'Icon and chip backgrounds with fixed meanings — never borrowed for anything else. Numbers stay ink; color lives only in the icon.',
+      },
+      tints: {
+        blue: 'Operations',
+        green: 'Ready · done',
+        amber: 'Needs attention',
+        violet: 'Secondary analysis',
+        slate: 'Context',
+      },
+      material: {
+        name: 'Field & glass (V2)',
+        note: 'A page field under every screen, with translucent chrome bands above it. Glass only on navigation and metric tiles, always with a solid fallback. The 16px radius is for glass only.',
+      },
+      materials: {
+        glass: 'Metric tile glass',
+        field: 'page field: two very light blue washes, under 5% lightness range',
+      },
       swatches: {
         bg: 'Background',
         surface: 'Surface',
@@ -64,6 +87,10 @@ export const designSystem = {
         text: 'Primary text',
         text2: 'Secondary text',
         text3: 'Muted text',
+        inkStrong: 'Strong ink',
+        ink1: 'Ink 1',
+        ink2: 'Ink 2',
+        ink3: 'Ink 3',
         primary: 'Primary',
         primaryHover: 'Hover',
         primaryBg: 'Light tint',
@@ -80,7 +107,7 @@ export const designSystem = {
     type: {
       title: 'Type',
       description:
-        'Be Vietnam Pro for the interface, JetBrains Mono (tabular figures) for numbers, package codes and dimensions. Weights: 400 / 500 / 600.',
+        'Be Vietnam Pro for the interface, JetBrains Mono (tabular figures) for codes, dimensions and measured numbers in tables. Metric tile totals use Be Vietnam Pro 26px with tabular figures. Weights: 400 / 500 / 600.',
       style: 'Style',
       size: 'Size / line',
       sample: 'Vietnamese sample with diacritics',
@@ -175,9 +202,10 @@ export const designSystem = {
       viewport: '3D components',
     },
     navigation: {
-      navRailNote: '96px wide; each item is a 24px icon with a text label and a 64px tall target. Active item: light primary background, bold label and a 4px bar on the left edge.',
-      pageHeaderNote: 'Standard 72px (dispatcher) · thin 56px (3D screen) · 72px tablet with progress.',
-      standard: 'standard 72px',
+      navRailNote: 'A 56px horizontal bar above every screen: logo on the left, items on one glass surface, quick search · bell · account on the right. The open item has blue, bold text; a glass indicator follows the pointer. Below 1,340px only icons remain, names move to aria-label.',
+      pageHeaderNote: 'PageHero 72px for screens in the app frame · a custom 72px header when the title is data (trip code, vehicle name) · thin 56px for the 3D screen.',
+      standard: 'PageHero · 72px',
+      dataTitle: 'title is data · 72px',
       thin: 'thin 56px',
       tabsNote: 'Tabs with counts · Segmented for small pickers (camera, color mode, speed).',
       tabsSample: 'Tabs with counts',

@@ -111,3 +111,45 @@ test('the manager reads a trip without the actions menu, with one primary action
   expect(await screen.findByRole('link', { name: 'Xem phương án 3D' })).toBeInTheDocument()
   expect(primaryActions(container)).toHaveLength(1)
 })
+
+/** Mã kiện của các dòng bảng kiện đang hiện, theo thứ tự. */
+function packageIds() {
+  const table = within(screen.getByRole('region', { name: 'Kiện hàng' }))
+  return table.getAllByRole('row').slice(1).map((row) => /PKG-\d{3}/.exec(row.textContent ?? '')?.[0])
+}
+
+test('the stop list filters the package table; the fragile chip and the search narrow it further (V2)', async () => {
+  const { user } = renderDetail('TRIP-2026-0914')
+  await screen.findByRole('row', { name: /PKG-006/ }, SLOW)
+  expect(packageIds()).toHaveLength(6)
+
+  // Seed chuyến chính: điểm 2 có PKG-002 và PKG-003
+  const stop2 = screen.getByRole('button', { name: /^Lọc kiện theo điểm 2/ })
+  await user.click(stop2)
+  expect(stop2).toHaveAttribute('aria-pressed', 'true')
+  expect(packageIds()).toStrictEqual(['PKG-002', 'PKG-003'])
+  // Ô chọn điểm giao trên bảng đi cùng một bộ lọc
+  expect(screen.getByRole('combobox', { name: 'Lọc theo điểm giao' })).toHaveValue('2')
+  await user.click(stop2)
+  expect(packageIds()).toHaveLength(6)
+
+  // Dễ vỡ là mức Cao: PKG-003 thuỷ tinh và PKG-005 trứng
+  await user.click(screen.getByRole('button', { name: 'Chỉ hàng dễ vỡ' }))
+  expect(packageIds()).toStrictEqual(['PKG-003', 'PKG-005'])
+  await user.type(screen.getByRole('searchbox', { name: 'Tìm mã hoặc tên kiện' }), 'trung ga')
+  expect(packageIds()).toStrictEqual(['PKG-005'])
+})
+
+test('the right column warns about fragile cargo; selecting a package shows its preview, and a read-only viewer gets no form', async () => {
+  const { user } = renderDetail('TRIP-2026-0914', 'manager')
+  expect(await screen.findByText('22 kiện dễ vỡ', {}, SLOW)).toBeInTheDocument()
+
+  await user.click(screen.getByRole('row', { name: /PKG-003/ }))
+  const panel = within(screen.getByRole('complementary', { name: 'Kiện PKG-003' }))
+  expect(panel.getByRole('img', { name: /Hình kiện 40 × 30 × 25 cm/ })).toBeInTheDocument()
+  // 11 kiện × 13,5 kg
+  expect(panel.getByText('148,5 kg')).toBeInTheDocument()
+  expect(panel.getByText('Mức dễ vỡ: Cao')).toBeInTheDocument()
+  // Quản lý chỉ xem: có phần xem kiện, không có form sửa
+  expect(panel.queryByRole('textbox', { name: 'Tên kiện' })).not.toBeInTheDocument()
+})

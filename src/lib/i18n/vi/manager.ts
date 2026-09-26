@@ -36,9 +36,29 @@ export const manager = {
     clean: 'Kiện giao không sự cố',
     cleanNote: '{clean} / {total} kiện của các điểm giao đã hoàn tất',
     cleanEmpty: 'Chưa có điểm giao nào hoàn tất trong kỳ',
-    vehicles: 'Xe đang chạy hôm nay',
+    vehicles: 'Xe đang phục vụ chuyến',
     vehiclesUnit: '/ {total} xe',
     vehiclesNote: 'Xe có chuyến đang xếp, đã xếp hoặc đang giao — không theo kỳ',
+    /**
+     * Dòng nguồn rút gọn trên ô số liệu (V2): năm ô chung một hàng ở 1.366 px. Câu đầy đủ ở trên vẫn là cột "Nguồn" của báo
+     * cáo .xlsx.
+     */
+    tile: {
+      trips: 'Theo ngày chạy, tổng gồm chuyến huỷ',
+      fill: { one: 'Bản duyệt của {count} chuyến, trừ chuyến huỷ', other: 'Bản duyệt của {count} chuyến, trừ chuyến huỷ' },
+      fillEmpty: 'Chưa có chuyến nào được duyệt phương án',
+      delivered: 'Theo các kiện tài xế đã dỡ',
+      clean: '{clean} / {total} kiện ở điểm đã giao xong',
+      cleanEmpty: 'Chưa có điểm giao nào xong',
+      vehicles: 'Lúc này, không theo kỳ',
+    },
+  },
+  /** Thẻ đội xe (V2): ba trạng thái như màn Đội xe, đếm trên cả đội lúc đọc kho. Nhãn trạng thái lấy từ nhánh `fleet.status`. */
+  fleet: {
+    title: 'Trạng thái đội xe',
+    ratio: '/ {total} xe đang phục vụ chuyến',
+    note: 'Trạng thái lúc này của cả đội xe, không đổi theo kỳ báo cáo.',
+    open: 'Xem đội xe',
   },
   charts: {
     /** Chú thích của bảng số thay biểu đồ cho trình đọc màn hình. */
@@ -58,6 +78,9 @@ export const manager = {
       note: 'Chuyến có ngày chạy trong kỳ',
       status: 'Trạng thái',
       count: 'Số chuyến',
+      /** Tỷ lệ trên tổng chuyến của kỳ: cột cuối bảng số (dòng phụ của tooltip không có nhãn). */
+      share: 'Tỷ lệ',
+      total: { one: '{count} chuyến', other: '{count} chuyến' },
     },
     vehicles: {
       title: 'Khối lượng đã giao theo xe',
@@ -65,6 +88,8 @@ export const manager = {
       empty: 'Chưa có kiện nào được giao trong kỳ.',
       vehicle: 'Xe',
       weight: 'Khối lượng đã giao',
+      /** Tỷ lệ trên tổng khối lượng đã giao của kỳ. */
+      share: 'Tỷ lệ',
     },
   },
   empty: {
@@ -75,9 +100,11 @@ export const manager = {
     title: 'Chuyến trong kỳ',
     subtitle: 'Tối đa {count} chuyến có ngày chạy gần nhất',
     trip: 'Chuyến',
+    count: { one: '{count} chuyến', other: '{count} chuyến' },
     date: 'Ngày chạy',
     vehicle: 'Xe',
     status: 'Trạng thái',
+    packages: 'Kiện',
     volume: 'Lấp đầy',
     delivered: 'Đã giao',
     plan: 'Phương án',

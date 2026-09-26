@@ -23,7 +23,7 @@ export function TripDetailHeader({ tripId, detail }: { tripId: string; detail: T
   const plan = !runnable && can('plans.view') ? detail?.plan : null
 
   return (
-    <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg px-8">
+    <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-chrome px-shell">
       <Link
         to="/chuyen"
         aria-label={t('trips.detail.back')}

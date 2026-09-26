@@ -1,6 +1,6 @@
 # Theo dõi tiến độ — LoadMaster FE MVP
 
-Cập nhật lần cuối: **22/09/2026**
+Cập nhật lần cuối: **23/09/2026**
 
 Tài liệu liên quan: [PRD](prd.md) · [Gói issue](issues/README.md) · [Build Spec](build-spec.md) · [AGENTS.md](../AGENTS.md) · [handoff.md](handoff.md)
 
@@ -33,6 +33,205 @@ Trạng thái: ⬜ Chưa bắt đầu · 🟦 Đang làm · 🟨 Chờ / bị ch
 ---
 
 ## 2. Nhật ký
+
+### 23/09/2026 — V2 bước 6, nhóm 2: bảng điều khiển, người dùng, nhật ký, hồ sơ
+
+Bốn màn làm song song, mỗi màn một agent trong git worktree riêng (không chung file: mỗi màn một thư mục feature, một nhánh từ
+điển, một file E2E), người điều phối gộp và chạy kiểm tra trên nhánh gộp. Điểm V2 cần quyết định mới được hỏi người dùng sau lượt
+đầu rồi làm bù. Bài học quy trình: worktree của agent được tạo từ commit cũ, phải bảo agent đặt lại về đầu nhánh trước khi làm.
+
+**Đã làm**
+- **Bảng điều khiển:** lưới hai cột V2 (chuyến theo trạng thái + thẻ đội xe; lấp đầy theo ngày + khối lượng đã giao theo xe), bảng
+  chuyến gần đây kiểu paper. Thẻ đội xe mới: sẵn sàng / đang phục vụ chuyến / bảo dưỡng, đếm trên cả đội xe theo cùng luật với Đội
+  xe. Giữ 5 ô số liệu (người dùng chọn giữ cả ô và số lớn trên thẻ đội xe), chọn kỳ ở đầu nội dung. Lượt đầu agent chuyển hai biểu đồ
+  sang thanh HTML — người dùng chọn giữ recharts, đã đưa về; tên xe kèm biển số xuống tối đa ba dòng trên trục, không cắt biển số.
+- **Người dùng:** ba ô số liệu (tổng · đang hoạt động · đã khoá), hai ô trạng thái lọc qua `trang-thai`; thanh tìm/lọc và bảng chung
+  thẻ; avatar chữ cái vuông bo góc. Bấm dòng mở panel chi tiết (thông tin, chip "Công việc được phép" từ `ROLE_PERMISSIONS`, nút sửa /
+  khoá / đặt lại mật khẩu / xoá cùng luật chặn với menu dòng); panel mở thì ẩn cột Điện thoại. Giữ tab Ma trận quyền (nay kiểu paper).
+- **Nhật ký:** ba ô số liệu trên cả nhật ký (tổng sự kiện · sự kiện ngày gần nhất — bấm để lọc ngày đó · ghi nhận gần nhất); dòng có
+  avatar người làm + vai trò hiện tại (người dùng chọn giữ; kho chưa lưu vai trò lúc xảy ra), icon hành động trên nền tint theo nghĩa
+  cố định (hổ phách chỉ cho việc cần chú ý); giữ đủ cột, bộ lọc, tham số URL.
+- **Hồ sơ:** hai cột — cột nhận diện (avatar, tên, vai trò, email, kho) và thẻ gồm hai phần form; email chỉ hiện một lần. Không hiện
+  "đăng nhập gần nhất": với chính mình đó chỉ là giờ của phiên này.
+
+**Lỗi tìm ra khi gộp**
+- `admin-users` E2E đỏ 1/4 lần: menu "Khoá tài khoản" bị gỡ khỏi DOM giữa cú bấm. Nguyên nhân: TanStack Table v9 dựng hàm `cell` thành
+  component, cột memo theo `users` nên dữ liệu về lại (sau đăng nhập) dựng lại cột và gắn lại mọi ô. Sửa: hàm ô cấp module, giá trị
+  đổi qua context; test hồi quy giữ nguyên phần tử menu khi dữ liệu về lại. Luật mới ở AGENTS mục 5 "Bảng dữ liệu".
+- `plan-approval` đỏ một lần khi máy chạy song song các agent, chạy riêng xanh.
+
+**Kết quả:** `pnpm lint`, `pnpm build` sạch; 812 unit/DOM; 82/82 E2E trên nhánh gộp (chạy khi không còn agent song song).
+
+**Còn lại:** nhóm 3 (panel Planner; kho và tài xế theo V2 mobile — cần nghiên cứu nghiệp vụ và hỏi trước; đăng nhập/403/404 chỉ
+token). Bảng khác có hàm ô viết trong memo theo dữ liệu (danh sách chuyến, đội xe, chuyến gần đây) chưa có menu trong ô nên chưa lỗi,
+nhưng nên đưa về cùng lối khi thêm trạng thái vào ô.
+
+### 23/09/2026 — V2 bước 6, nhóm 1: năm màn điều phối
+
+Làm theo nhóm, một commit mỗi màn, người dùng chốt từng điểm lệch với bản V2 trước khi làm (quyết định ghi lại trong phiên).
+Số nào bản V2 bịa (132 kiện lúc tạo chuyến mới, "không đo" thời gian chạy) đều thay bằng số truy được về kho.
+
+**Đã làm**
+- **Danh sách chuyến:** ba ô số liệu (tổng · đang thực hiện · cần xem phương án), hai ô nhóm là công tắc lọc qua cùng tham số
+  `trang-thai` (thêm slug nhóm `dang-thuc-hien`, `can-xem-phuong-an`). Thanh tìm/lọc chung thẻ với bảng, hàng lọc thứ hai
+  (`secondary`) cho ngày, xe, tài xế. Cột Kiện kèm số điểm giao → mật độ mới `roomy` 56px. Không làm panel "Cần xử lý" và bộ chọn mật
+  độ của V2 (ô số liệu đã lọc được nhóm đó; bộ chọn mật độ trong V2 không có chức năng).
+- **Form tạo/sửa chuyến:** một thẻ, các phần đánh số (`FormSection`, dùng chung với Thiết lập tối ưu); điểm giao có chip màu định
+  danh, nút ↑/↓ đổi thứ tự khi tạo mới; cột phải là danh sách tự kiểm và khối tổng hợp kính.
+- **Thiết lập tối ưu:** phần 1 Kiểm tra đầu vào, phần 2 Yêu cầu xếp hàng (mỗi công tắc một câu giải thích qua `aria-describedby`),
+  Thiết lập nâng cao gập trong `<details>` và tự mở khi có lỗi. Cột phải: "Hai giới hạn khác nhau" (khối lượng / tải, thể tích / lòng
+  thùng). Nút Tối ưu giữ ở thanh tiêu đề — một nút primary mỗi màn.
+- **Chi tiết chuyến** (hai lượt): tiến trình thành dải ngang 7 mốc; sơ đồ tuyến gập được; tóm tắt hàng thành khối kính; ba cột từ
+  1.536px, 1.280–1.535px thẻ phương tiện xuống dưới cột trái (`grid-template-areas`) để bảng kiện giữ ~1.030px. Bấm điểm giao lọc bảng
+  kiện. Bảng kiện một thẻ: tìm, lọc điểm giao, chip "Chỉ hàng dễ vỡ" / "Chỉ kiện có lỗi", ô tên gộp tên / mã · kích thước, cột Yêu
+  cầu thay cột số hướng đặt. "Dễ vỡ" = mức Cao — seed có đúng 22 kiện như bản V2 ghi. Panel kiện có phần xem kiểu V2 (hình đẳng cự
+  theo tỉ lệ kích thước) trên form; người chỉ xem chỉ thấy phần xem.
+- **So sánh phương án:** ma trận chỉ số × bản lưu thay các thẻ; đầu cột có radio chọn bản mở trong 3D, MOCK RESULT và trạng thái; ô
+  tốt nhất tô nền kèm dấu tích, không đánh dấu khi mọi bản bằng nhau; "Chỉ hiện khác biệt"; chân bảng ghi bản duyệt kế thừa từ bản
+  nào. Gỡ `PlanCard`.
+
+**Test**
+- Mới: nhóm trạng thái và số điểm giao (TDD), ô số liệu lọc qua URL; nút ↑/↓ điểm giao; chip yêu cầu và định nghĩa dễ vỡ (TDD, số
+  từ seed), lọc bảng kiện theo điểm giao / dễ vỡ / tìm, phần xem kiện cho người chỉ xem; ma trận so sánh (số theo cột, radio chọn,
+  "Chỉ hiện khác biệt").
+- Sửa: `spec-flow` (regex dòng kiện theo ô tên gộp), `plan-compare-404` (radio thay nút chọn thẻ).
+- Lượt E2E đầy đủ đầu tiên: 75/81 xanh. Sáu test đỏ: bốn selector theo giao diện cũ (dòng kiện nay tên trước mã; "9.500 kg" có
+  thêm ở khối tổng hợp; chữ đầu tiên khớp nằm trong sơ đồ tuyến đang gập; số kiện ở Thiết lập tối ưu tách số và đơn vị), hai lỗi thật
+  ở `layout-1366`: thẻ điểm giao ở cột trái 272px chỉ còn 130px cho chữ, tên và địa chỉ vượt hai dòng — thu khoảng cách và chip số,
+  nay 152px. Chạy lại mọi file E2E liên quan: xanh.
+- Kết quả: `pnpm lint`, `pnpm build` sạch; 788 unit/DOM; 81/81 E2E.
+
+**Còn lại:** nhóm 2 (bảng điều khiển, người dùng, nhật ký, hồ sơ), nhóm 3 (panel Planner; kho và tài xế theo V2 mobile — cần nghiên
+cứu nghiệp vụ và hỏi trước; đăng nhập/403/404 chỉ token).
+
+### 23/09/2026 — V2 bước 5: màn Đội xe theo V2
+
+Nghiên cứu bản V2 (`design/v2/desktop-fleet.js`, ảnh `screen-fleet.png`), code hiện tại và các test ràng buộc; người dùng chốt từng
+điểm lệch trước khi làm.
+
+**Đã làm**
+- Bốn ô số liệu trên đầu (tổng · sẵn sàng · đang phục vụ chuyến · bảo dưỡng), đếm trên cả đội xe. Ba ô trạng thái là công tắc lọc:
+  `<button aria-pressed>` trong vỏ `role="group"`, đi qua `list.setFilter('trang-thai', …)` nên URL đổi và ô chọn trạng thái khớp
+  theo; bấm lại thì bỏ lọc. `KpiTile` thêm `onPress`/`pressed`.
+- Bảng theo V2: Phương tiện · Lòng thùng · Tải tối đa · Vật cản · Trạng thái (bỏ cột Cửa — xem ở cấu hình xe). Icon xe tô theo
+  trạng thái, tên + mã hai dòng; trạng thái là badge + mã chuyến / ghi chú bảo dưỡng tối đa hai dòng — hết lỗi ghi chú bị cắt.
+- Thanh tìm/lọc và bảng chung một thẻ: `FilterBar layout="toolbar"`, `DataTable appearance="paper"` (tiêu đề cột nền
+  `--table-head`, 600), mật độ mới `spacious` 72px. Chỉ Đội xe dùng; bước 6 mới lan. Lớp kiểu dáng tách ra `data-table-styles.ts`.
+- Nhãn "Đang chạy" → "Đang phục vụ chuyến" (gồm cả xe đứng ở kho chờ xếp); KPI bảng điều khiển "Xe đang phục vụ chuyến". Tham số
+  URL giữ `trang-thai=dang-chay` để link cũ không gãy. Badge xe đang phục vụ đổi tông xanh dương cho khớp icon tint "vận hành".
+- Chú thích ô số liệu sửa cho đúng dữ liệu thay vì chép V2 (xe đang phục vụ cũng chọn được khi lập chuyến; chỉ xe bảo dưỡng bị
+  chặn — D-53). Chân bảng là câu nguồn dữ liệu: chưa có GPS hay vị trí thời gian thực.
+- Chi tiết xe: giữ đủ chức năng (3D, vật cản, trục, bảo dưỡng, khoá khi đang chạy), khoác vật liệu V2 — ô icon, tên xe h1 24px +
+  mã mono trong cùng header, thẻ bo 12px.
+
+**Test**
+- Mới: ô số liệu đếm đúng và không theo ô tìm; bấm ô lọc + URL + `aria-pressed`, chuyển ô bằng bàn phím, bấm lại bỏ lọc.
+- Sửa: `spec-flow` (thứ tự cột), 6 chỗ nhãn "Đang chạy", helper `vehicleIds` (`\d{3}` — cột sau tên nay bắt đầu bằng số).
+- `layout-1366`: thêm Đội xe vào kiểm chữ bị cắt ở 1.366/1.600 và vào test lăn chuột.
+
+**Kiểm tra**
+- Trình duyệt 1.366 × 768: không chữ bị cắt, ô đang lọc viền primary, tên truy cập dòng "Truck 6m VEHICLE-001 600 × 240 × 250 cm
+  5.000 kg 1 vùng Sẵn sàng".
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **778/778** ✅ · `pnpm test:e2e` **81/81** ✅ (16,1 phút). CI của PR #1 (bước 0 → tài liệu) xanh trọn.
+
+### 23/09/2026 — Sửa: màn trong khung ứng dụng không lăn chuột được
+
+Người dùng báo bảng điều khiển "bị cố định", không lướt xuống được.
+
+**Nguyên nhân** (ba lỗi, tái hiện bằng `mouse.wheel` ở 1.366 × 768 trước khi sửa)
+- Bước 2 của V2 đổi `AppShell` từ hàng (rail dọc) sang cột (thanh ngang) nhưng đặt màn thẳng vào cột: gốc màn cao theo nội dung
+  (bảng điều khiển 1.645 px trong cửa sổ 768 px), `overflow-hidden` của khung cắt phần dưới, vùng cuộn không có gì để cuộn.
+- Bảng `sr-only` của biểu đồ là `absolute` không có tổ tiên định vị: kéo tài liệu dài tới 959 px, bánh xe cuộn cả trang và đẩy thanh
+  điều hướng khỏi mép trên — đúng ảnh người dùng gửi.
+- Có từ trước V2: khung bo góc quanh bảng nhật ký là con `overflow-hidden` của cột flex nên bị co còn 516 px, 50 dòng chỉ thấy khoảng 10.
+
+**Đã làm**
+- `AppShell`: màn nằm trong hàng flex `relative min-h-0` — trả lại đúng bối cảnh mọi màn được viết cho, và giữ phần tử `absolute` trong khung.
+- Nhật ký: khung bảng `flex-none`. Quét tự động 12 màn ở 1.366 × 768 tìm con của cột flex bị co thấp hơn nội dung: chỉ còn nhật ký.
+- E2E mới trong `layout-1366.spec.ts`: lăn chuột thật tới cuối ở bảng điều khiển, chi tiết chuyến, chi tiết xe, nhật ký; trang không cuộn,
+  thanh điều hướng ở mép trên. Bỏ hai chỗ sửa thì test đỏ, có thì xanh.
+- AGENTS mục 5 (cuộn trong khung ứng dụng) và mục 9 (Playwright cuộn được `overflow-hidden` bằng code — kiểm bằng bánh xe).
+
+**Vì sao E2E không bắt được:** Playwright tự `scrollIntoView` trước mỗi thao tác, và cách đó cuộn được cả vùng `overflow-hidden`.
+
+**Kiểm tra**
+- `pnpm lint` · `pnpm build` · `pnpm test` · `pnpm test:e2e` ✅ — lint, build, **776/776** unit, **81/81** E2E (80 cũ + 1 mới, 16,3 phút).
+
+### 23/09/2026 — V2 bước 4b: theo sát bản V2, sửa luật cũ cho khớp
+
+Người dùng chốt: làm theo V2, luật viết cho giao diện phẳng V1 thì sửa theo thực tế. Hỏi từng điểm lệch trước khi sửa.
+
+**Đã làm**
+- Kính ô số liệu theo V2: gradient kính, viền sáng trong + bóng nâng nhẹ, bo 16 px (token mới `--r-xl`, chỉ cho bề mặt kính).
+- Ô icon tiêu đề 44 px gradient xanh nhạt, viền trắng, bóng nhẹ (`.hero-icon`); icon ô số liệu có vòng sáng mảnh.
+- Số KPI 26 px **sans** `tabular-nums` như V2 (brief V2: mono chỉ cho mã/số đo), thay 28 px mono.
+- Hai bậc chữ lẻ của V2 thành token: `note` 11,5/17 (ghi chú ô số liệu), `lede` 13,5/22 (mô tả dưới tiêu đề).
+- `--ink-3` tối lại `#71829A` → `#5E6E84`: 5,2:1 trên trắng, 4,7:1 trên trường nền (bản V2 trượt 4,5:1). Chú thích dùng lại được `--ink-3`.
+- Thanh điều hướng trên màn 2K canh theo cột như V2 (`xl:px-shell`): logo, tiêu đề, nội dung cùng thẳng x=464 ở 2.560 px.
+- Không đưa hoạ tiết sau tiêu đề — người dùng không chọn.
+- AGENTS mục 4 (token, thang chữ, số KPI) và mục 5 (gradient và bóng cho vật liệu kính) sửa theo.
+
+**Kiểm tra**
+- Trình duyệt 1.366: `getComputedStyle` xác nhận bo 16 px, bóng kính, số Be Vietnam Pro 26 px, ghi chú `#5E6E84`, hero icon gradient
+  44 px, mô tả 13,5 px, header 72 px, không chữ bị cắt.
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · E2E liên quan **23/23** ✅ (manager-dashboard, layout-1366, spec-flow,
+  fleet-status, i18n-en, rbac, profile, quick-search, planner-compact).
+
+### 23/09/2026 — V2 vào production, bước 4: thanh tiêu đề màn và ô số liệu dùng chung
+
+**Đã làm**
+- `components/PageHero.tsx`: icon màn trên nền tint, tiêu đề h1 24 px, `meta` mono, một câu mô tả (nhánh từ điển mới `pageHero`),
+  hành động ở phải, nút quay lại tuỳ chọn. Áp cho 9 màn: danh sách chuyến, tạo/sửa chuyến, thiết lập tối ưu, so sánh, đội xe,
+  bảng điều khiển, người dùng, nhật ký, hồ sơ. Chi tiết chuyến, form xe và Planner giữ header riêng (tiêu đề là dữ liệu / thanh 56 px).
+  Tiêu đề thống nhất về h1 24 px — trước đó 7 màn dùng h2 20 px, 2 màn h1.
+- `KpiTile` lên `components/` và theo V2: kính `.glass-tile` (nền đặc dự phòng khi thiếu `backdrop-filter` hoặc
+  `prefers-reduced-transparency`), icon tint theo nghĩa, số 28 px mono, ghi chú cỡ micro. Bảng điều khiển gán icon/tông cho 5 ô.
+- `--shell-max` nay được dùng: utility `px-shell` cho thanh tiêu đề và vùng cuộn của 11 màn — thống nhất năm kiểu padding ngang
+  (`p-6`, `p-6 px-8`, `px-8 py-6`, `px-8 pt-6 pb-8`, `p-4 sm:p-6`) về 24 px; cột rộng hơn 1.680 px thì khối nội dung (kể cả lề) dừng ở 1.680 px, căn giữa.
+- Token cỡ chữ `micro` 11/14 vào `@theme` và `THEME_FONT_SIZES`. AGENTS mục 3, 4, 5 cập nhật.
+
+**Lệch khỏi bản V2, có chủ ý**
+- Không đưa hoạ tiết đường nét sau tiêu đề: màn vận hành không có hình minh hoạ (AGENTS mục 5).
+- Nền icon tint phẳng, không gradient/bóng như bản V2; ô số liệu không đổ bóng ra ngoài (card).
+- Số 26 px sans → 28 px JetBrains Mono; ghi chú 11,5 → 11 px; bo 15 → 12 px — về thang của AGENTS mục 4.
+- Chữ `--ink-3` của V2 đổi sang `--ink-2`: `--ink-3` chỉ đạt 3,9:1 trên trắng (3,5:1 trên trường nền), dưới ngưỡng 4,5:1.
+
+**Kiểm tra**
+- Trình duyệt thật 1.366 × 768 (admin, 11 màn): header đúng 72 px; không cuộn ngang; `getComputedStyle` xác nhận kính, h1 24 px,
+  ghi chú 11 px, số mono. 2.560 px: nội dung từ x=464 tới 2.096 (1.632 = 1.680 − 2 × 24). 390 px (hồ sơ): header 72 px, mô tả ẩn.
+- Phép kiểm "chữ bị cắt" báo ô bảng ở `/chuyen` (tên tuyến dài) và `/doi-xe` (ghi chú bảo dưỡng) — bề rộng ở 1.366 px không đổi so
+  với trước bước này (lề 24 px cả hai), nên đây là tồn đọng có sẵn; `layout-1366.spec` không phủ hai màn này. Xem lại ở bước 5.
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · `pnpm test:e2e` **80/80** ✅ (16,1 phút)
+
+### 23/09/2026 — V2 vào production, bước 0–3: luật, token, thanh điều hướng ngang, trường nền
+
+Nhánh `feat/v2-production-nav` (tách từ `developer`). Hướng B đã duyệt; chuyển ngôn ngữ thị giác của `design/v2` vào `src/` theo
+từng bước, mỗi bước một commit.
+
+**Đã làm**
+- **Bước 0 — luật.** AGENTS mục 5: bỏ lệnh cấm kính, thay bằng luật phân lớp (kính ở chrome điều hướng, khối tổng hợp số liệu, panel
+  nổi trên khung 3D; bảng, form, inspector giữ nền đặc; không lồng kính; luôn có nền đặc dự phòng). Nền trang được dùng trường màu
+  biên độ dưới 5% độ sáng. Điều hướng rail dọc 96 px → thanh ngang 56 px.
+- **Bước 1 — token** (`src/index.css`): thang mực `--ink-strong/1/2/3`, năm cặp `--tint-*`, `--shell-max`, `--field`, `--chrome`,
+  nối vào `@theme inline`. Bổ sung thuần, chưa đổi giao diện.
+- **Bước 2 — thanh điều hướng ngang** (`app/NavRail.tsx`, `app/useGlassFollow.ts`): chỉ báo kính bám mục đang hover/focus, trả về
+  mục đang mở khi rời thanh. Dưới 1.340 px chỉ còn icon, tên vào `aria-label`. Ba lỗi thanh ngang gây ra đã sửa: toast đè nút ở góc
+  phải header (offset 80 → 136 px), màn 403 bị cắt 56 px trong `AppShell`, nav không vừa ở 1.024/390 px (nay co và cuộn).
+- **Bước 3 — trường nền**: `AppShell` dùng `--field`; 11 thanh tiêu đề 72 px, thanh tab Người dùng và thanh chân So sánh đổi sang
+  `bg-chrome`; `EmptyState`, `ErrorScreen` bỏ nền xám.
+
+**Vướng mắc**
+- `background-image` có lớp cuối là màu là CSS không hợp lệ: trình duyệt bỏ cả khai báo, không báo lỗi. Prototype dùng shorthand
+  `background` nên không gặp. Lớp cuối của `--field` nay là `linear-gradient` đặc. Kiểm nền bằng `getComputedStyle`.
+
+**Kiểm tra**
+- `pnpm lint` ✅ · `pnpm build` ✅ · `pnpm test` **776/776** ✅ · `pnpm test:e2e` **80/80** ✅ (bước 2); bước 3 chạy lại
+  `layout-1366`, `rbac`, `profile` ✅.
+
+**Việc tiếp theo**
+- Bước 4: tiêu đề màn dùng chung (`PageHero`) và ô số liệu dùng chung (`KpiTile` lên `components/`), áp `--shell-max`.
+- Bước 5: màn Đội xe trọn vẹn. Bước 6: đo rồi mới mở rộng sang các màn còn lại.
+- Blur ở màn kho/tài xế chưa đo trên thiết bị thật — phải đo trước khi coi là chốt.
 
 ### 22/09/2026 — V2 Mobile 03: đăng nhập, cài đặt và bàn giao
 

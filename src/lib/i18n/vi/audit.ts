@@ -44,6 +44,25 @@ export const audit = {
     allActors: 'Mọi người',
     group: 'Nhóm hành động',
     allGroups: 'Mọi nhóm',
+    /** Nhãn cạnh tiêu đề: màn không có thao tác ghi nào. */
+    readOnly: 'Chỉ đọc',
+    /**
+     * Ba ô số liệu trên đầu màn (V2), đếm trên cả nhật ký của kho — không theo bộ lọc hay ô tìm. Ô "ngày gần nhất" là công tắc lọc
+     * khoảng ngày về đúng ngày đó.
+     */
+    summary: {
+      region: 'Tóm tắt nhật ký',
+      total: 'Sự kiện trong nhật ký',
+      totalNote: 'Cả nhật ký, không theo bộ lọc',
+      latestDay: 'Sự kiện ngày {date}',
+      latestDayNote: 'Ngày gần nhất có ghi nhận · bấm để lọc',
+      latestDayNone: 'Sự kiện ngày gần nhất',
+      latestAt: 'Ghi nhận gần nhất',
+      latestAtNote: 'Ngày {date}',
+      /** Nhật ký rỗng: không có ngày, không có giờ để hiện. */
+      noEvents: 'Chưa có sự kiện',
+      noValue: '—',
+    },
     columns: { at: 'Thời điểm', actor: 'Người làm', action: 'Hành động', target: 'Đối tượng', details: 'Chi tiết' },
     /** Ngày giờ ghép từ hai phần đã format theo ngôn ngữ. */
     dateTime: '{time} {date}',

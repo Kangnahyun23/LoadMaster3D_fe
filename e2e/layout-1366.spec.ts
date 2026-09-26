@@ -56,6 +56,15 @@ const SCREENS: readonly Screen[] = [
     },
   },
   {
+    // V2: ghi chú bảo dưỡng dài (VEHICLE-008) xuống hai dòng dưới badge thay vì bị cắt
+    name: 'fleet',
+    route: '/doi-xe',
+    ready: async (page) => {
+      await expect(page.getByRole('group', { name: 'Bảo dưỡng', exact: true })).toBeVisible()
+      await expect(page.getByRole('row', { name: /VEHICLE-008/ })).toContainText('Thay má phanh')
+    },
+  },
+  {
     name: 'planner',
     route: PLANNER_ROUTE,
     ready: async (page) => {
@@ -88,3 +97,34 @@ for (const size of SIZES) {
     expect(browserErrors).toStrictEqual([])
   })
 }
+
+/**
+ * Cuộn bằng bánh xe chuột thật, không bằng `scrollIntoView`: Playwright cuộn được cả vùng `overflow-hidden` bằng code, nên các
+ * test khác không thấy khi người dùng không lăn được (khung dọc thiếu `min-h-0`, bảng nhật ký bị co trong cột flex, bảng `sr-only`
+ * của biểu đồ kéo cả trang dài ra). Trang không bao giờ tự cuộn: thanh điều hướng luôn ở mép trên.
+ */
+const WHEEL_SCREENS: readonly Screen[] = [
+  { name: 'dashboard', route: '/', ready: async (page) => { await expect(page.getByRole('group', { name: 'Chuyến hoàn thành', exact: true })).toBeVisible() } },
+  { name: 'trip-detail', route: '/chuyen/TRIP-2026-0914', ready: async (page) => { await expect(page.getByRole('heading', { name: 'Kiện hàng', exact: true })).toBeVisible() } },
+  { name: 'vehicle-detail', route: '/doi-xe/VEHICLE-002', ready: async (page) => { await expect(page.getByRole('heading', { name: 'Vật cản trong thùng', exact: true })).toBeVisible() } },
+  { name: 'fleet', route: '/doi-xe', ready: async (page) => { await expect(page.getByRole('row', { name: /VEHICLE-008/ })).toBeVisible() } },
+  { name: 'audit', route: '/nhat-ky', ready: async (page) => { await expect(page.getByRole('row')).not.toHaveCount(0) } },
+]
+
+test('app-shell screens scroll with the mouse wheel at 1366 × 768 and the page itself stays put', async ({ page, login }) => {
+  await page.setViewportSize({ width: 1366, height: 768 })
+  await login('/', 'admin')
+  for (const screen of WHEEL_SCREENS) {
+    await page.goto(screen.route)
+    await screen.ready(page)
+    // Vùng cuộn của màn là khối ngay sau thanh tiêu đề
+    const region = page.locator('header:has(h1) + *')
+    const bottomOfLastChild = () => region.evaluate((el) => el.scrollTop + el.clientHeight >= el.scrollHeight - 1)
+    expect.soft(await bottomOfLastChild(), `${screen.name}: content taller than the screen`).toBe(false)
+    await page.mouse.move(683, 500)
+    await page.mouse.wheel(0, 5000)
+    await expect.poll(bottomOfLastChild, { message: `${screen.name}: wheel reaches the end` }).toBe(true)
+    const pageScroll = await page.evaluate(() => ({ tall: document.documentElement.scrollHeight > innerHeight, y: scrollY, navTop: document.querySelector('header')!.getBoundingClientRect().top }))
+    expect.soft(pageScroll, screen.name).toStrictEqual({ tall: false, y: 0, navTop: 0 })
+  }
+})

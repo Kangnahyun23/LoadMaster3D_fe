@@ -1,6 +1,6 @@
 import { roundKg } from '@/domain/geometry'
 import type { VehicleConfig } from '@/domain/models'
-import type { VehicleState } from '@/lib/mock-db'
+import type { VehicleState, VehicleStatus } from '@/lib/mock-db'
 import { compareText } from '@/lib/list-filter'
 import type { TripStatus } from '@/types/trip'
 import type { User } from '@/types/user'
@@ -41,8 +41,14 @@ export type DashboardSummary = {
   readonly deliveredWeightKg: number
   /** Kiện giao không sự cố trên kiện của các điểm giao đã hoàn tất. */
   readonly delivery: { readonly cleanPercent: number | null; readonly cleanItems: number; readonly finishedItems: number }
-  /** Xe đang chạy chuyến lúc đọc kho — không theo kỳ. */
-  readonly vehicles: { readonly inUse: number; readonly total: number }
+  /**
+   * Đội xe lúc đọc kho — không theo kỳ: số xe đang chạy chuyến trên tổng, và số xe theo ba trạng thái của màn Đội xe.
+   */
+  readonly vehicles: {
+    readonly inUse: number
+    readonly total: number
+    readonly byStatus: Readonly<Record<VehicleStatus, number>>
+  }
   /** Mỗi ngày của kỳ một phần tử; ngày không có bản đã duyệt thì `null`. */
   readonly fillByDay: readonly { readonly date: string; readonly averagePercent: number | null; readonly planCount: number }[]
   /** Theo vòng đời chuyến, chỉ trạng thái có chuyến. */
@@ -101,7 +107,7 @@ export function summarizeDashboard(data: DashboardData, period: DateRange): Dash
     },
     deliveredWeightKg: roundKg(rows.reduce((sum, row) => sum + row.deliveredWeightKg, 0)),
     delivery: { cleanPercent: finishedItems === 0 ? null : (cleanItems / finishedItems) * 100, cleanItems, finishedItems },
-    vehicles: { inUse: data.vehicleStates.filter((state) => state.status === 'in_use').length, total: data.vehicles.length },
+    vehicles: summarizeFleet(data),
     fillByDay: daysOf(period).map((date) => {
       const values = fillValues(rows.filter((row) => row.scheduledDate === date))
       return { date, averagePercent: average(values), planCount: values.length }
@@ -112,6 +118,17 @@ export function summarizeDashboard(data: DashboardData, period: DateRange): Dash
     byVehicle: summarizeVehicles(rows),
     trips: rows,
   }
+}
+
+/**
+ * Xe theo trạng thái, cùng luật với màn Đội xe (`vehicleRows`): xe không có trong danh sách trạng thái là Sẵn sàng. Đếm trên
+ * danh sách xe, nên trạng thái của xe đã xoá không được tính.
+ */
+function summarizeFleet(data: DashboardData): DashboardSummary['vehicles'] {
+  const statusOf = new Map(data.vehicleStates.map((state) => [state.vehicleId, state.status]))
+  const byStatus: Record<VehicleStatus, number> = { available: 0, in_use: 0, maintenance: 0 }
+  for (const vehicle of data.vehicles) byStatus[statusOf.get(vehicle.id) ?? 'available'] += 1
+  return { inUse: byStatus.in_use, total: data.vehicles.length, byStatus }
 }
 
 function summarizeVehicles(rows: readonly DashboardTripRow[]): VehicleSummary[] {

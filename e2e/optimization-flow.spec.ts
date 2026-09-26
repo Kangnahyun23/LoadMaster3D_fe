@@ -62,7 +62,7 @@ test('cargo that does not all fit gives a partial result notice and still opens 
   // Kho nằm trong bộ nhớ trang: chuyển route phía client, không tải lại.
   await page.evaluate((route) => { history.pushState({}, '', route); window.dispatchEvent(new PopStateEvent('popstate')) }, SETUP)
   // Chờ màn đọc lại kho: 132 kiện seed + 60 kiện thêm
-  await expect(page.getByText(/192 kiện/)).toBeVisible()
+  await expect(page.getByRole('definition').filter({ hasText: /^192 \/ 7 dòng$/ })).toBeVisible()
   await optimize(page).click()
   await expect(page.getByText(/Kết quả một phần: \d+ kiện chưa xếp\./)).toBeVisible({ timeout: 30_000 })
   await page.waitForURL(/\/phuong-an\?revision=MOCK-/)

@@ -42,7 +42,7 @@ export const designSystem = {
   style: {
     title: 'Hệ thống thiết kế LoadMaster',
     description:
-      'SaaS sáng, sạch, hiện đại. Nhiều khoảng trắng, viền mảnh, không bóng trên card. Vùng 3D luôn nền tối. Spacing bội số 4px, radius 8px cho nút và thẻ, 12px cho hộp thoại.',
+      'SaaS sáng, sạch, hiện đại (hướng V2). Trường nền xanh rất nhạt, bề mặt đọc trắng, viền mảnh, không bóng trên card nền đặc; kính (bo 16px, bóng nâng nhẹ) chỉ ở điều hướng và ô số liệu. Vùng 3D luôn nền tối. Spacing bội số 4px, radius 8px cho nút và thẻ, 12px cho hộp thoại.',
     nav: {
       palette: 'Màu',
       type: 'Chữ',
@@ -58,6 +58,29 @@ export const designSystem = {
       text: { name: 'Chữ', note: 'Ba mức: chính, phụ, mờ. Không dùng độ trong suốt cho chữ.' },
       primary: { name: 'Primary', note: 'Một màu nhấn duy nhất. Nền nhạt cho trạng thái chọn và tag thông tin.' },
       semantic: { name: 'Ngữ nghĩa', note: 'Chỉ dùng cho trạng thái và phản hồi, không dùng làm màu trang trí.' },
+      ink: {
+        name: 'Mực (V2)',
+        note: 'Bốn cấp: tiêu đề và số quan trọng → dữ liệu vận hành → thông tin phụ → chú thích. Cả bốn đạt từ 4,5:1 trên nền trắng.',
+      },
+      tint: {
+        name: 'Tint (V2)',
+        note: 'Nền icon và chip, nghĩa cố định — không mượn sang mục đích khác. Số liệu không tô màu; màu chỉ ở icon.',
+      },
+      tints: {
+        blue: 'Vận hành',
+        green: 'Sẵn sàng · xong',
+        amber: 'Cần chú ý',
+        violet: 'Phân tích phụ',
+        slate: 'Ngữ cảnh',
+      },
+      material: {
+        name: 'Nền & kính (V2)',
+        note: 'Trường nền dưới mọi màn; dải chrome bán trong đè lên nó. Kính chỉ ở điều hướng và ô số liệu, luôn có nền đặc dự phòng. Bo 16px chỉ cho kính.',
+      },
+      materials: {
+        glass: 'Kính ô số liệu',
+        field: 'trường nền: hai vệt xanh rất nhạt, biên độ dưới 5% độ sáng',
+      },
       swatches: {
         bg: 'Nền',
         surface: 'Surface',
@@ -66,6 +89,10 @@ export const designSystem = {
         text: 'Text chính',
         text2: 'Text phụ',
         text3: 'Text mờ',
+        inkStrong: 'Mực đậm',
+        ink1: 'Mực 1',
+        ink2: 'Mực 2',
+        ink3: 'Mực 3',
         primary: 'Primary',
         primaryHover: 'Hover',
         primaryBg: 'Nền nhạt',
@@ -82,7 +109,7 @@ export const designSystem = {
     type: {
       title: 'Chữ',
       description:
-        'Be Vietnam Pro cho giao diện, JetBrains Mono (tabular figures) cho số, mã kiện và kích thước. Trọng lượng dùng: 400 / 500 / 600.',
+        'Be Vietnam Pro cho giao diện, JetBrains Mono (tabular figures) cho mã, kích thước và số đo trong bảng. Số tổng hợp của ô số liệu dùng Be Vietnam Pro 26px, chữ số đều nhau. Trọng lượng dùng: 400 / 500 / 600.',
       style: 'Kiểu',
       size: 'Cỡ / dòng',
       sample: 'Mẫu tiếng Việt có dấu',
@@ -177,9 +204,10 @@ export const designSystem = {
       viewport: 'Thành phần 3D',
     },
     navigation: {
-      navRailNote: 'Rộng 96px, mỗi mục icon 24px kèm nhãn chữ, vùng bấm cao 64px. Mục đang mở: nền primary nhạt, chữ đậm và vạch 4px mép trái.',
-      pageHeaderNote: 'Chuẩn 72px (dispatcher) · mỏng 56px (màn 3D) · máy tính bảng 72px có tiến trình.',
-      standard: 'chuẩn 72px',
+      navRailNote: 'Thanh ngang 56px trên đầu mọi màn: logo trái, các mục trên một mặt kính, tìm nhanh · chuông · tài khoản bên phải. Mục đang mở chữ xanh, đậm; chỉ báo kính trượt theo con trỏ. Dưới 1.340px chỉ còn icon, tên vào aria-label.',
+      pageHeaderNote: 'PageHero 72px cho màn trong khung ứng dụng · header riêng 72px khi tiêu đề là dữ liệu (mã chuyến, tên xe) · mỏng 56px cho màn 3D.',
+      standard: 'PageHero · 72px',
+      dataTitle: 'tiêu đề là dữ liệu · 72px',
       thin: 'mỏng 56px',
       tabsNote: 'Tabs có đếm · Segmented cho bộ chọn nhỏ (camera, chế độ màu, tốc độ).',
       tabsSample: 'Tabs có đếm',

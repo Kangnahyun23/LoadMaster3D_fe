@@ -14,6 +14,15 @@ export const admin = {
     empty: 'Chưa có tài khoản nào.',
     noMatch: 'Không có tài khoản khớp bộ lọc.',
     tabs: { accounts: 'Tài khoản', permissions: 'Ma trận quyền' },
+    /** Ba ô số liệu trên đầu tab Tài khoản (V2): đếm trên toàn bộ danh sách; nhãn hai ô trạng thái lấy từ `status`. */
+    summary: {
+      total: 'Tổng tài khoản',
+      totalNote: 'Mọi vai trò, kể cả tài khoản đã khoá',
+      note: {
+        active: 'Đăng nhập được vào hệ thống',
+        suspended: 'Không đăng nhập được cho tới khi mở khoá',
+      },
+    },
     search: 'Tìm theo tên, email, số điện thoại, mã',
     filters: { role: 'Vai trò', allRoles: 'Mọi vai trò', status: 'Trạng thái', allStatuses: 'Mọi trạng thái' },
     updated: 'Đã cập nhật {name}',
@@ -49,6 +58,19 @@ export const admin = {
       unlock: 'Mở khoá tài khoản',
       resetPassword: 'Đặt lại mật khẩu',
       delete: 'Xoá tài khoản',
+    },
+    /**
+     * Panel chi tiết bên phải (V2), mở khi bấm một dòng. Nhãn trường dùng lại `columns`, nhãn nút dùng lại `menu`, tên quyền dùng
+     * lại `admin.permissions.labels`.
+     */
+    detail: {
+      region: 'Chi tiết tài khoản {name}',
+      close: 'Đóng chi tiết tài khoản',
+      info: 'Thông tin cá nhân',
+      id: 'Mã tài khoản',
+      permissions: 'Công việc được phép',
+      permissionsNote: 'Quyền đi theo vai trò {role}, cùng cấu hình với tab Ma trận quyền. Đây là nhãn, không phải nút bấm.',
+      actions: 'Thao tác',
     },
     /** Lý do một thao tác bị chặn trước khi gửi kho (`account-guards.ts`). */
     blocked: {

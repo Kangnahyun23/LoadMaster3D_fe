@@ -20,6 +20,8 @@ export type TripRow = {
   readonly route: string
   /** Số kiện sau khi mở rộng `quantity` */
   readonly packageCount: number
+  /** Số điểm giao của chuyến */
+  readonly stopCount: number
   /** Tỷ lệ thể tích của revision Planner mở mặc định; `null` khi chưa tối ưu */
   readonly volumePercent: number | null
   readonly status: TripStatus
@@ -47,6 +49,7 @@ export function tripRow(
     driverName: driver?.fullName ?? null,
     route: trip.stops.map((stop) => stop.name).join(' → '),
     packageCount: expandPackages(trip.packages).instances.length,
+    stopCount: trip.stops.length,
     volumePercent: shown ? shown.result.metrics.volumeUtilizationPercent : null,
     status: tripStatus(trip, revisions),
     phase: trip.phase,
@@ -67,8 +70,38 @@ export const FILTERABLE_STATUSES: readonly TripStatus[] = [
 ]
 
 /**
- * Lọc dòng theo từ khoá và bộ lọc của URL: tìm bỏ dấu trên mã, tên, tuyến, xe, tài xế; trạng thái, khoảng ngày chạy (tính hai đầu),
- * xe và tài xế (`UNASSIGNED_DRIVER` là chưa gán). Giá trị rỗng là không lọc.
+ * Nhóm trạng thái của ô số liệu trên đầu danh sách (V2). Giá trị `trang-thai` trên URL là một trạng thái đơn hoặc slug của nhóm:
+ * - đang thực hiện: kho đang/đã xếp hoặc tài xế đang giao;
+ * - cần xem phương án: đã tối ưu chờ duyệt, hoặc cần xem lại vì dữ liệu đổi sau khi tối ưu.
+ */
+export const TRIP_STATUS_GROUPS = {
+  active: ['dang_xep_hang', 'da_xep_xong', 'dang_giao'],
+  review: ['da_toi_uu', 'can_xem_lai'],
+} as const satisfies Record<string, readonly TripStatus[]>
+
+export type TripStatusGroup = keyof typeof TRIP_STATUS_GROUPS
+
+/** Slug nhóm trên URL, tiếng Việt không dấu như mọi tham số màn danh sách (D-52). */
+export const TRIP_STATUS_GROUP_SLUGS = {
+  active: 'dang-thuc-hien',
+  review: 'can-xem-phuong-an',
+} as const satisfies Record<TripStatusGroup, string>
+
+function matchesStatus(status: TripStatus, filter: string): boolean {
+  if (filter === '') return true
+  const group = (Object.keys(TRIP_STATUS_GROUP_SLUGS) as TripStatusGroup[]).find((key) => TRIP_STATUS_GROUP_SLUGS[key] === filter)
+  return group ? (TRIP_STATUS_GROUPS[group] as readonly TripStatus[]).includes(status) : status === filter
+}
+
+/** Số của ba ô số liệu: mọi chuyến (kể cả đã huỷ) và từng nhóm — đếm trên cả danh sách, không theo ô tìm. */
+export function tripStatusGroupCounts(rows: readonly TripRow[]): { total: number } & Record<TripStatusGroup, number> {
+  const count = (group: TripStatusGroup) => rows.filter((row) => matchesStatus(row.status, TRIP_STATUS_GROUP_SLUGS[group])).length
+  return { total: rows.length, active: count('active'), review: count('review') }
+}
+
+/**
+ * Lọc dòng theo từ khoá và bộ lọc của URL: tìm bỏ dấu trên mã, tên, tuyến, xe, tài xế; trạng thái hoặc nhóm trạng thái, khoảng
+ * ngày chạy (tính hai đầu), xe và tài xế (`UNASSIGNED_DRIVER` là chưa gán). Giá trị rỗng là không lọc.
  */
 export function filterTripRows(
   rows: readonly TripRow[],
@@ -78,7 +111,7 @@ export function filterTripRows(
   const { 'trang-thai': status, tu: from, den: to, xe: vehicleId, 'tai-xe': driverId } = filters
   return rows.filter((row) =>
     matchesQuery([row.id, row.name, row.route, row.vehicleName, row.driverName], query)
-    && (status === '' || row.status === status)
+    && matchesStatus(row.status, status)
     && isWithinDateRange(row.scheduledDate, from, to)
     && (vehicleId === '' || row.vehicleId === vehicleId)
     && (driverId === '' || (driverId === UNASSIGNED_DRIVER ? row.driverId === null : row.driverId === driverId)))

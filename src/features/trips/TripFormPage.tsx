@@ -1,21 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Save } from 'lucide-react'
+import { Route, Save } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Link, useBlocker, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { FormSection } from '@/components/FormSection'
+import { PageHero } from '@/components/PageHero'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
-import { SelectField, type SelectOption } from '@/components/ui/SelectField'
+import { SelectField } from '@/components/ui/SelectField'
 import type { Trip, TripPhase } from '@/lib/mock-db'
-import { dataErrorMessage, useFormat, useT, type TFunction } from '@/lib/i18n'
-import { compareText } from '@/lib/list-filter'
-import { createTripFormSchema, driverIdOf, tripFormDefaults, UNASSIGNED, type TripFormValues } from './trip-form.schema'
+import { dataErrorMessage, useFormat, useT } from '@/lib/i18n'
+import { createTripFormSchema, driverIdOf, tripFormDefaults, type TripFormValues } from './trip-form.schema'
+import { tripFormChoices } from './trip-form-choices'
+import { TripFormAside } from './TripFormAside'
 import { TripStopsFields } from './TripStopsFields'
 import { useCreateTripMutation, useTripDetailQuery, useTripFormOptionsQuery, useUpdateTripFrameMutation } from './useTripsQuery'
-import type { TripFormOptions } from './trips-api'
 
 /** Pha còn mở form sửa: lập kế hoạch sửa mọi thứ; kho đang/đã xếp chỉ còn tên, ngày chạy, tài xế (D-45). */
 const EDITABLE_PHASES: readonly TripPhase[] = ['planning', 'loading', 'loaded']
@@ -57,17 +58,13 @@ function FormShell({ title, backTo, children }: { title: string; backTo: string;
   const t = useT()
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg px-6">
-        <Link
-          to={backTo}
-          aria-label={t('trips.create.back')}
-          className="grid size-9 place-items-center rounded-md text-text-2 transition-colors duration-(--dur-fast) ease-standard hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
-        </Link>
-        <h1 className="text-h2 font-semibold">{title}</h1>
-      </header>
-      <div className="min-h-0 flex-1 overflow-auto p-6">{children}</div>
+      <PageHero
+        icon={Route}
+        title={title}
+        description={t('pageHero.tripForm')}
+        back={{ to: backTo, label: t('trips.create.back') }}
+      />
+      <div className="min-h-0 flex-1 overflow-auto px-shell py-6">{children}</div>
     </div>
   )
 }
@@ -82,7 +79,8 @@ function TripForm({ existing }: { existing?: Trip }) {
   const schema = useMemo(() => createTripFormSchema(t, { withStops: !existing }), [t, existing])
   const form = useForm<TripFormValues>({ resolver: zodResolver(schema), defaultValues: tripFormDefaults(existing) })
   const vehicleId = useWatch({ control: form.control, name: 'vehicleId' })
-  const choices = useMemo(() => formChoices(options.data, existing, t), [options.data, existing, t])
+  const choices = useMemo(() => tripFormChoices(options.data, existing, t), [options.data, existing, t])
+  const stopCount = useWatch({ control: form.control, name: 'stops' })?.length ?? 0
   const selected = options.data?.vehicles.find((option) => option.vehicle.id === vehicleId)
   // Kho đã bắt đầu xếp: xe và điểm giao khoá, còn tên, ngày chạy, tài xế (D-45)
   const locked = existing !== undefined && existing.phase !== 'planning'
@@ -121,58 +119,79 @@ function TripForm({ existing }: { existing?: Trip }) {
 
   return (
     <FormShell title={existing ? t('trips.create.editTitle', { id: existing.id }) : t('trips.create.title')} backTo={backTo}>
-      <form noValidate onSubmit={form.handleSubmit(handleSubmit)} className="flex max-w-160 flex-col gap-5">
-        {locked ? (
-          <p role="status" className="rounded-md border border-badge-warning-border bg-badge-warning-bg px-4 py-3 text-body text-badge-warning-fg">
-            {t('trips.create.lockedHint')}
-          </p>
-        ) : null}
-        <Card className="flex flex-col gap-4 p-5">
-          <Input label={t('trips.create.name')} placeholder={t('trips.create.namePlaceholder')} error={errors.name?.message} {...form.register('name')} />
-          <div className="grid grid-cols-2 gap-3">
-            <Input type="date" label={t('trips.create.scheduledDate')} error={errors.scheduledDate?.message} {...form.register('scheduledDate')} />
-            <SelectField control={form.control} name="driverId" label={t('trips.create.driver')} options={choices.drivers} hint={t('trips.create.driverHint')} />
+      {/* V2: một thẻ gồm các phần đánh số, cột phải là danh sách tự kiểm + tổng hợp */}
+      <div className="grid max-w-300 grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_288px]">
+        <form noValidate onSubmit={form.handleSubmit(handleSubmit)} className="flex min-w-0 flex-col gap-6 rounded-lg border border-border bg-bg p-6">
+          {locked ? (
+            <p role="status" className="rounded-md border border-badge-warning-border bg-badge-warning-bg px-4 py-3 text-body text-badge-warning-fg">
+              {t('trips.create.lockedHint')}
+            </p>
+          ) : null}
+
+          <FormSection number={1} title={t('trips.create.infoTitle')} description={t('trips.create.infoHint')}>
+            <Input label={t('trips.create.name')} placeholder={t('trips.create.namePlaceholder')} error={errors.name?.message} {...form.register('name')} />
+            <div className="grid grid-cols-2 gap-3">
+              <Input type="date" label={t('trips.create.scheduledDate')} error={errors.scheduledDate?.message} {...form.register('scheduledDate')} />
+              <SelectField control={form.control} name="driverId" label={t('trips.create.driver')} options={choices.drivers} hint={t('trips.create.driverHint')} />
+            </div>
+            <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
+              <SelectField
+                control={form.control}
+                name="vehicleId"
+                label={t('trips.create.vehicle')}
+                placeholder={t('trips.create.vehiclePlaceholder')}
+                options={choices.vehicles}
+                hint={selected?.status === 'maintenance' ? t('trips.create.vehicleMaintenanceHint') : t('trips.create.vehicleHint')}
+              />
+              {selected ? (
+                <dl className="m-0 grid grid-cols-2 gap-3 rounded-md bg-primary-bg px-4 py-3">
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="text-caption text-ink-2">{t('trips.create.cargoSpace')}</dt>
+                    <dd className="m-0 font-mono text-body font-medium text-ink-1">
+                      {format.dimensions(selected.vehicle.innerLengthCm, selected.vehicle.innerWidthCm, selected.vehicle.innerHeightCm)}
+                    </dd>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <dt className="text-caption text-ink-2">{t('trips.create.payload')}</dt>
+                    <dd className="m-0 font-mono text-body font-medium text-ink-1">{format.weight(selected.vehicle.maxPayloadKg)}</dd>
+                  </div>
+                </dl>
+              ) : null}
+            </fieldset>
+          </FormSection>
+
+          <FormSection number={2} title={t('trips.create.stopsTitle')} description={existing ? t('trips.create.editStopsHint') : t('trips.create.stopsHint')}>
+            <fieldset disabled={locked} className="m-0 min-w-0 border-0 p-0">
+              <TripStopsFields form={form} creating={!existing} />
+            </fieldset>
+          </FormSection>
+
+          {existing ? (
+            <FormSection number={3} title={t('trips.create.cargoTitle')} description={t('trips.create.cargoHint')}>
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border px-4 py-3">
+                <span className="text-body text-ink-1">
+                  {t('trips.create.cargoLines', { count: existing.packages.length, instances: format.integer(existing.packages.reduce((sum, p) => sum + p.quantity, 0)) })}
+                </span>
+                <Link to={`/chuyen/${existing.id}`} className="rounded-sm text-body font-medium text-primary hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                  {t('trips.create.openCargo')}
+                </Link>
+              </div>
+            </FormSection>
+          ) : null}
+
+          <div className="flex gap-2 border-t border-border pt-5">
+            <Button type="submit" variant="primary" loading={pending}>
+              <Save strokeWidth={1.5} />
+              {existing ? t('trips.create.submitEdit') : t('trips.create.submitCreate')}
+            </Button>
+            <Button type="button" variant="secondary" asChild>
+              <Link to={backTo}>{t('trips.create.cancel')}</Link>
+            </Button>
           </div>
-          <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
-            <SelectField
-              control={form.control}
-              name="vehicleId"
-              label={t('trips.create.vehicle')}
-              placeholder={t('trips.create.vehiclePlaceholder')}
-              options={choices.vehicles}
-              hint={selected?.status === 'maintenance' ? t('trips.create.vehicleMaintenanceHint') : t('trips.create.vehicleHint')}
-            />
-            {selected ? (
-              <dl className="grid grid-cols-2 gap-3 rounded-md border border-border bg-surface p-4">
-                <div className="flex flex-col gap-0.5">
-                  <dt className="text-caption text-text-3">{t('trips.create.cargoSpace')}</dt>
-                  <dd className="font-mono text-body font-medium">
-                    {format.dimensions(selected.vehicle.innerLengthCm, selected.vehicle.innerWidthCm, selected.vehicle.innerHeightCm)}
-                  </dd>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <dt className="text-caption text-text-3">{t('trips.create.payload')}</dt>
-                  <dd className="font-mono text-body font-medium">{format.weight(selected.vehicle.maxPayloadKg)}</dd>
-                </div>
-              </dl>
-            ) : null}
-          </fieldset>
-        </Card>
+        </form>
 
-        <fieldset disabled={locked} className="m-0 min-w-0 border-0 p-0">
-          <TripStopsFields form={form} creating={!existing} />
-        </fieldset>
-
-        <div className="flex gap-2">
-          <Button type="submit" variant="primary" loading={pending}>
-            <Save strokeWidth={1.5} />
-            {existing ? t('trips.create.submitEdit') : t('trips.create.submitCreate')}
-          </Button>
-          <Button type="button" variant="secondary" asChild>
-            <Link to={backTo}>{t('trips.create.cancel')}</Link>
-          </Button>
-        </div>
-      </form>
+        <TripFormAside stopCount={stopCount} vehicle={selected?.vehicle} existing={existing} />
+      </div>
 
       <ConfirmDialog
         open={blocker.state === 'blocked'}
@@ -188,26 +207,4 @@ function TripForm({ existing }: { existing?: Trip }) {
       />
     </FormShell>
   )
-}
-
-/**
- * Lựa chọn của hai ô chọn. Xe bảo dưỡng vẫn hiện, kèm lý do, nhưng không chọn được (D-53) — trừ xe chuyến đang dùng, để form sửa
- * không mất giá trị. Tài xế: người dùng vai trò tài xế đang hoạt động; tài xế đang gán mà tài khoản đã khoá vẫn hiện, không chọn lại được.
- */
-function formChoices(data: TripFormOptions | undefined, existing: Trip | undefined, t: TFunction) {
-  const vehicles: SelectOption[] = (data?.vehicles ?? []).map(({ vehicle, status }) => {
-    const maintenance = status === 'maintenance'
-    return {
-      value: vehicle.id,
-      label: maintenance ? t('trips.create.vehicleMaintenance', { name: vehicle.name }) : vehicle.name,
-      disabled: maintenance && vehicle.id !== existing?.vehicleId,
-    }
-  })
-  const drivers: SelectOption[] = (data?.drivers ?? [])
-    .filter((user) => user.status === 'active' || user.id === existing?.driverId)
-    .toSorted((a, b) => compareText(a.fullName, b.fullName))
-    .map((user) => user.status === 'active'
-      ? { value: user.id, label: user.fullName }
-      : { value: user.id, label: t('trips.create.driverSuspended', { name: user.fullName }), disabled: true })
-  return { vehicles, drivers: [{ value: UNASSIGNED, label: t('trips.create.unassigned') }, ...drivers] }
 }

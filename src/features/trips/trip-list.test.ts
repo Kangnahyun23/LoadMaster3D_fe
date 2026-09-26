@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { createMockDb } from '@/lib/mock-db'
-import { filterTripRows, tripFilterOptions, tripRow, UNASSIGNED_DRIVER, type TripRow } from './trip-list'
+import { filterTripRows, TRIP_STATUS_GROUP_SLUGS, tripFilterOptions, tripRow, tripStatusGroupCounts, UNASSIGNED_DRIVER, type TripRow } from './trip-list'
 
 /** Seam: dòng danh sách chuyến dựng từ dữ liệu kho (chuyến + xe + tài xế + revision), không có số nào ngoài kho. */
 async function seed() {
@@ -89,6 +89,19 @@ test('status, run-date range, vehicle and driver filters combine; "unassigned" f
   expect(ids({ 'tai-xe': 'US-0004' })).toStrictEqual(['TRIP-002', 'TRIP-007', 'TRIP-010', 'TRIP-2026-0914'])
   expect(ids({ 'tai-xe': UNASSIGNED_DRIVER })).toStrictEqual(['TRIP-014'])
   expect(ids({ 'tai-xe': 'US-0004', tu: '2026-09-14' })).toStrictEqual(['TRIP-010', 'TRIP-2026-0914'])
+})
+
+test('status groups of the summary tiles: "in progress" is loading, loaded and delivering; "needs a plan review" is optimised or needing review', async () => {
+  const rows = await seedRows()
+  const ids = (status: string) => filterTripRows(rows, '', { ...NO_FILTER, 'trang-thai': status }).map((row) => row.id).toSorted()
+  expect(ids(TRIP_STATUS_GROUP_SLUGS.active)).toStrictEqual(['TRIP-009', 'TRIP-010', 'TRIP-011'])
+  expect(ids(TRIP_STATUS_GROUP_SLUGS.review)).toStrictEqual(['TRIP-012', 'TRIP-013'])
+  expect(tripStatusGroupCounts(rows)).toStrictEqual({ total: rows.length, active: 3, review: 2 })
+})
+
+test('each row counts its delivery stops', async () => {
+  const { db, trip, vehicle } = await seed()
+  expect(tripRow(trip, vehicle, await db.listRevisions(trip.id)).stopCount).toBe(4)
 })
 
 test('filter options list only vehicles and drivers used by trips, in Vietnamese alphabetical order', async () => {

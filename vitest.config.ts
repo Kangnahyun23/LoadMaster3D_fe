@@ -1,6 +1,10 @@
 import { defineConfig, mergeConfig } from 'vitest/config'
 import viteConfig from './vite.config.ts'
 
+// Seed ghi giờ theo đồng hồ Việt Nam và giao diện hiện giờ theo múi máy. Máy CI chạy UTC nên "07:50" thành "00:50";
+// khoá múi giờ cho mọi worker để test đọc đúng giờ người dùng thấy.
+process.env.TZ = 'Asia/Ho_Chi_Minh'
+
 /**
  * Hai project dùng chung alias `@/` của Vite:
  * - unit: domain và logic thuần, môi trường node, nhanh.

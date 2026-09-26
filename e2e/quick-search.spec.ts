@@ -2,10 +2,10 @@ import { expect, test } from './fixtures'
 import { SEED_TRIP } from './spec-flow-helpers'
 
 /**
- * Tìm nhanh (LM-099, D-55): Ctrl+K ở màn có nav rail mở hộp thoại, gõ mã chuyến, Enter mở chi tiết chuyến; mở lại bằng nút trên nav
- * rail, mũi tên chọn kiện rồi Enter mở chuyến đúng kiện đó.
+ * Tìm nhanh (LM-099, D-55): Ctrl+K ở màn có nav rail mở hộp thoại, gõ mã chuyến, Enter mở chi tiết chuyến; mở lại bằng nút trên thanh điều hướng
+ * ngang, mũi tên chọn kiện rồi Enter mở chuyến đúng kiện đó.
  */
-test('Ctrl+K opens a trip, the nav rail button opens a package', async ({ page, login, browserErrors }) => {
+test('Ctrl+K opens a trip, the nav bar button opens a package', async ({ page, login, browserErrors }) => {
   await login('/chuyen', 'dispatcher')
   await expect(page.getByRole('heading', { level: 1, name: 'Chuyến hàng', exact: true })).toBeVisible()
 
@@ -21,7 +21,7 @@ test('Ctrl+K opens a trip, the nav rail button opens a package', async ({ page, 
   await expect(dialog).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Kiện hàng', exact: true })).toBeVisible()
 
-  await page.getByRole('navigation', { name: 'Điều hướng chính' }).getByRole('button', { name: 'Tìm nhanh', exact: true }).click()
+  await page.getByRole('banner').getByRole('button', { name: 'Tìm nhanh', exact: true }).click()
   await input.pressSequentially('pkg-002')
   const packages = dialog.getByRole('group', { name: 'Kiện', exact: true })
   await expect(packages.getByRole('option').first()).toContainText(SEED_TRIP)

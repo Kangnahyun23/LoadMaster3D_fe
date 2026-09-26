@@ -50,6 +50,7 @@ export function NotificationBell() {
     <DropdownMenu onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <NavRailButton
+          orientation="horizontal"
           icon={Bell}
           label={t('notifications.label')}
           aria-label={unreadCount > 0 ? t('notifications.labelUnread', { count: unreadCount }) : undefined}

@@ -25,12 +25,15 @@ import type { StopRow } from './trip-summary'
  * mutation, kiện được đánh số lại trong kho. Điểm cuối trong danh sách được xếp sâu nhất trong thùng.
  * Kéo bằng bàn phím vẫn dùng được (dnd-kit KeyboardSensor).
  */
-export function StopList({ stops, onReorder, onRemove, readOnly = false }: {
+export function StopList({ stops, onReorder, onRemove, readOnly = false, selectedStop = null, onSelectStop }: {
   stops: readonly StopRow[]
   onReorder: (stops: readonly DeliveryStop[]) => void
   onRemove: (stop: StopRow) => void
   /** Chỉ xem: không kéo, không xoá, không hiện gợi ý kéo (D-41, D-45). */
   readOnly?: boolean
+  /** V2: số điểm đang lọc bảng kiện; bấm điểm đang lọc thì bỏ lọc (`null`). Lọc được cả khi chỉ xem. */
+  selectedStop?: number | null
+  onSelectStop?: (stopNumber: number | null) => void
 }) {
   const t = useT()
   const sensors = useSensors(
@@ -58,7 +61,11 @@ export function StopList({ stops, onReorder, onRemove, readOnly = false }: {
             {t('trips.stops.count', { count: stops.length })}
           </span>
         </div>
-        {readOnly ? null : <span className="text-caption text-text-3">{t('trips.stops.hint')}</span>}
+        <span className="text-caption text-ink-3">
+          {onSelectStop ? t('trips.stops.filterHint') : null}
+          {onSelectStop && !readOnly ? ' ' : null}
+          {readOnly ? null : t('trips.stops.hint')}
+        </span>
       </div>
 
       <DndContext
@@ -69,7 +76,16 @@ export function StopList({ stops, onReorder, onRemove, readOnly = false }: {
       >
         <SortableContext items={stops.map((stop) => stop.id)} strategy={verticalListSortingStrategy}>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">
-            {stops.map((stop) => <StopCard key={stop.id} stop={stop} readOnly={readOnly} onRemove={() => onRemove(stop)} />)}
+            {stops.map((stop) => (
+              <StopCard
+                key={stop.id}
+                stop={stop}
+                readOnly={readOnly}
+                onRemove={() => onRemove(stop)}
+                selected={selectedStop === stop.number}
+                onSelect={onSelectStop ? () => onSelectStop(selectedStop === stop.number ? null : stop.number) : undefined}
+              />
+            ))}
           </ul>
         </SortableContext>
       </DndContext>

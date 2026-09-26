@@ -13,5 +13,6 @@ export const nav = {
   account: 'Account {name}',
   signOut: 'Sign out',
   profile: 'My profile',
+  home: 'LoadMaster — back to home',
   backHome: 'Back to home',
 } satisfies Dictionary<typeof source>

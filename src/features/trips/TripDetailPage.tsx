@@ -9,6 +9,7 @@ import type { CargoPackage } from '@/domain/models'
 import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { CargoSummaryCard } from './CargoSummaryCard'
+import { FragileNote } from './FragileNote'
 import { PackageFormPanel } from './PackageFormPanel'
 import { PackageImportDialog } from './PackageImportDialog'
 import { emptyPackage } from './package-defaults'
@@ -47,6 +48,8 @@ export function TripDetailPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [draft, setDraft] = useState<CargoPackage | null>(null)
   const [importing, setImporting] = useState(false)
+  // Điểm giao đang lọc bảng kiện: cột điểm giao bên trái và ô chọn trên bảng dùng chung (V2)
+  const [stopFilter, setStopFilter] = useState<number | null>(null)
 
   const trip = query.data?.trip
   const vehicle = query.data?.vehicle
@@ -54,6 +57,7 @@ export function TripDetailPage() {
   const editable = can('trips.edit') && trip?.phase === 'planning'
   const stops = useMemo<StopRow[]>(() => (trip ? stopRows(trip.stops, trip.packages) : []), [trip])
   const summary = useMemo(() => (trip && vehicle ? cargoSummary(trip.packages, vehicle) : null), [trip, vehicle])
+  const delivered = trip?.phase === 'delivering' || trip?.phase === 'completed'
   // `?kien=<mã>` mở panel của kiện đó — liên kết từ validation summary của Thiết lập tối ưu (LM-047).
   const linkedId = searchParams.get('kien')
   const editing = draft ?? trip?.packages.find((pkg) => pkg.id === linkedId) ?? null
@@ -93,42 +97,45 @@ export function TripDetailPage() {
       {query.isPending ? (
         <div role="status" aria-label={t('trips.detail.loading')} className="grid flex-1 place-items-center"><Spinner /></div>
       ) : !trip || !vehicle || !summary ? (
-        <div className="flex flex-1 flex-col items-start gap-3 p-8">
+        <div className="flex flex-1 flex-col items-start gap-3 px-shell py-8">
           <h2 className="text-h2 font-semibold">{t('trips.detail.notFound', { id: tripId })}</h2>
           <Button variant="secondary" asChild><Link to="/chuyen">{t('common.backToTrips')}</Link></Button>
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-8 pt-6 pb-8">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-auto px-shell pt-6 pb-8">
           <TripLockBanner trip={trip} />
-          {/* Dấu đã giao chỉ khi chuyến đang giao hoặc đã hoàn thành (LM-097) */}
-          <RouteDiagram stops={stops} delivery={trip.phase === 'delivering' || trip.phase === 'completed' ? trip.delivery : undefined} />
+          {/* V2: tiến trình ngang chiếm cả hàng (tới 7 mốc); sơ đồ tuyến gập được để bảng kiện lên cao */}
+          <TripProgressCard trip={trip} />
+          {/* Dấu đã giao chỉ khi chuyến đang giao hoặc đã hoàn thành (LM-097) — khi đó sơ đồ mở sẵn */}
+          <RouteDiagram
+            collapsible
+            defaultOpen={delivered}
+            stops={stops}
+            delivery={delivered ? trip.delivery : undefined}
+          />
 
           {/*
-            Từ 1.280 px (LM-095): cột thông tin co giãn (xe, thứ tự điểm giao, tóm tắt hàng, tiến trình) cạnh bảng kiện chiếm phần
-            còn lại; panel kiện là cột thứ ba khi mở. Hẹp hơn thì mọi phần xếp chồng một cột.
+            V2: trái là tóm tắt hàng và thứ tự điểm giao (bấm để lọc bảng), giữa là bảng kiện, phải là phương tiện; chọn một kiện thì
+            cột phải thành panel kiện (xem + form). Từ 1.536 px đủ ba cột như V2; 1.280–1.535 px thẻ phương tiện xuống dưới cột trái để
+            bảng kiện giữ ~1.050 px (ba cột ở 1.366 px chỉ còn ~650 px, tên kiện bị cắt). Hẹp hơn thì xếp chồng một cột (LM-095).
+            Vị trí đổi bằng grid-template-areas, không dựng thẻ hai lần.
           */}
           <div className={cn('grid items-start gap-5', editing
-            ? 'xl:grid-cols-[minmax(272px,1fr)_minmax(0,3.2fr)_360px]'
-            : 'xl:grid-cols-[minmax(272px,1fr)_minmax(0,3.2fr)]')}>
-            <div className="flex min-w-0 flex-col gap-4">
-              <VehicleCard vehicle={vehicle} tripId={tripId} driverId={trip.driverId} driver={query.data?.driver} canChange={editable} />
+            ? 'xl:grid-cols-[272px_minmax(0,1fr)_336px] xl:[grid-template-areas:"left_main_side"]'
+            : 'xl:grid-cols-[272px_minmax(0,1fr)] xl:[grid-template-areas:"left_main"_"side_main"] 2xl:grid-cols-[272px_minmax(0,1fr)_336px] 2xl:[grid-template-areas:"left_main_side"]')}>
+            <div className="flex min-w-0 flex-col gap-4 xl:[grid-area:left]">
+              <CargoSummaryCard summary={summary} />
               <StopList
                 stops={stops}
                 readOnly={!editable}
                 onReorder={(next) => stopsMutation.mutate(next)}
                 onRemove={handleRemoveStop}
+                selectedStop={stopFilter}
+                onSelectStop={setStopFilter}
               />
-              <CargoSummaryCard summary={summary} />
-              <TripProgressCard trip={trip} />
             </div>
 
-            <div className="flex min-w-0 flex-col gap-3">
-              <div className="flex items-baseline gap-2 px-1">
-                <h2 className="text-h3 font-semibold">{t('trips.packages.title')}</h2>
-                <span className="font-mono text-caption text-text-3">
-                  {t('trips.packages.lineCount', { count: summary.lines })}
-                </span>
-              </div>
+            <div className="flex min-w-0 flex-col gap-3 xl:[grid-area:main]">
               <PackagesTable
                 packages={trip.packages}
                 vehicle={vehicle}
@@ -137,11 +144,14 @@ export function TripDetailPage() {
                 onSelect={(pkg) => setEditing(editing?.id === pkg.id ? null : pkg)}
                 onAdd={editable ? () => setEditing(emptyPackage(trip.packages, stops[0]?.number ?? 1)) : undefined}
                 onImport={editable ? () => setImporting(true) : undefined}
+                stopFilter={stopFilter}
+                onStopFilterChange={setStopFilter}
               />
               {editable ? <PackageImportDialog trip={trip} vehicle={vehicle} open={importing} onOpenChange={setImporting} /> : null}
             </div>
 
             {editing ? (
+              <div className="min-w-0 xl:sticky xl:top-0 xl:[grid-area:side]">
               <PackageFormPanel
                 key={editing.id}
                 value={editing}
@@ -155,7 +165,13 @@ export function TripDetailPage() {
                 onDuplicate={trip.packages.some((pkg) => pkg.id === editing.id) ? handleDuplicate : undefined}
                 onClose={() => setEditing(null)}
               />
-            ) : null}
+              </div>
+            ) : (
+              <div className="flex min-w-0 flex-col gap-4 xl:[grid-area:side]">
+                <VehicleCard vehicle={vehicle} tripId={tripId} driverId={trip.driverId} driver={query.data?.driver} canChange={editable} usage={summary} />
+                <FragileNote packages={trip.packages} />
+              </div>
+            )}
           </div>
         </div>
       )}

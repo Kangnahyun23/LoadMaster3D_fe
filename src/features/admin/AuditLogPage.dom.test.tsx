@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router'
 import { expect, test } from 'vitest'
 import { I18nProvider } from '@/lib/i18n'
-import { getMockDb } from '@/lib/mock-db'
+import { getMockDb, vnDate } from '@/lib/mock-db'
 import { AuditLogPage } from './AuditLogPage'
 
 /**
@@ -31,10 +31,20 @@ function renderLog(url = '/nhat-ky') {
   )
 }
 
+/**
+ * Chữ của ô như trình đọc màn hình đọc: bỏ phần `aria-hidden` (ô chữ tắt, icon hành động), gộp khoảng trắng. Ô người làm đọc
+ * "tên vai trò", ô đối tượng đọc "tên mã".
+ */
+function cellText(cell: HTMLElement) {
+  const copy = cell.cloneNode(true) as HTMLElement
+  for (const hidden of copy.querySelectorAll('[aria-hidden="true"]')) hidden.remove()
+  return (copy.textContent ?? '').replace(/\s+/g, ' ').trim()
+}
+
 /** Hàng dữ liệu (bỏ hàng tiêu đề), mỗi hàng là chữ của từng ô. */
 async function dataRows() {
   const table = await screen.findByRole('table', {}, SLOW)
-  return within(table).getAllByRole('row').slice(1).map((row) => within(row).getAllByRole('cell').map((cell) => cell.textContent ?? ''))
+  return within(table).getAllByRole('row').slice(1).map((row) => within(row).getAllByRole('cell').map(cellText))
 }
 
 test('sự kiện vừa ghi đứng đầu: người làm, hành động, đối tượng dẫn tới chuyến, chi tiết đã dịch', async () => {
@@ -45,8 +55,12 @@ test('sự kiện vừa ghi đứng đầu: người làm, hành động, đối
   renderLog()
 
   const [first] = await dataRows()
-  expect(first?.slice(1)).toStrictEqual(['Nguyễn Thanh Tùng', 'Huỷ chuyến', 'Tuyến Bình Chánh – Biên Hoà TRIP-012', 'Lý do: Khách đổi lịch nhận hàng'])
+  // Người làm kèm vai trò hiện tại; ô chữ tắt "TT" và icon hành động chỉ để nhìn
+  expect(first?.slice(1)).toStrictEqual([
+    'Nguyễn Thanh Tùng Điều phối viên', 'Huỷ chuyến', 'Tuyến Bình Chánh – Biên Hoà TRIP-012', 'Lý do: Khách đổi lịch nhận hàng',
+  ])
   const firstRow = within(screen.getByRole('table')).getAllByRole('row')[1]
+  expect(within(firstRow!).getAllByRole('cell')[1]).toHaveTextContent(/^TTNguyễn Thanh Tùng/)
   expect(within(firstRow!).getByRole('link', { name: 'Tuyến Bình Chánh – Biên Hoà' })).toHaveAttribute('href', '/chuyen/TRIP-012')
   // Mặc định 50 dòng một trang, mới nhất trước
   expect(await dataRows()).toHaveLength(50)
@@ -64,7 +78,7 @@ test('lọc theo người làm: chỉ còn sự kiện của người đó, bộ
   expect(await screen.findByTestId('search')).toHaveTextContent('?nguoi-lam=US-0003')
   // Bảng cũ còn hiện (mờ) trong lúc đọc lại: chờ tới khi mọi hàng là của người được chọn
   await waitFor(async () => {
-    expect(new Set((await dataRows()).map((row) => row[1]))).toStrictEqual(new Set(['Lê Văn Hải']))
+    expect(new Set((await dataRows()).map((row) => row[1]))).toStrictEqual(new Set(['Lê Văn Hải Nhân viên kho']))
   }, SLOW)
 })
 
@@ -92,6 +106,32 @@ test('khoảng ngày tính theo giờ Việt Nam: ngày chạy của TRIP-001 (1
     'Hoàn thành chuyến', 'Hoàn tất điểm giao', 'Hoàn tất điểm giao', 'Hoàn tất điểm giao', 'Xuất phát giao hàng', 'Xếp xong', 'Bắt đầu xếp hàng',
   ])
   expect(rows.every((row) => row[3]?.endsWith('TRIP-001'))).toBe(true)
+})
+
+test('ba ô tóm tắt đếm cả nhật ký dù đang lọc; ô ngày gần nhất lọc đúng ngày đó, bấm lại thì bỏ', async () => {
+  const user = userEvent.setup()
+  // Nhật ký dùng chung giữa các test (test trước ghi thêm sự kiện): đọc kho để biết cả nhật ký lúc này, mới nhất trước
+  const all = await getMockDb().listEvents()
+  const latest = vnDate(new Date(all[0]!.at))
+  const [year, month, day] = latest.split('-')
+  renderLog('/nhat-ky?nhom=trip')
+
+  const total = await screen.findByRole('group', { name: 'Sự kiện trong nhật ký' }, SLOW)
+  expect(total).toHaveTextContent(`${new Intl.NumberFormat('vi-VN').format(all.length)}Sự kiện trong nhật ký`)
+  const dayTile = screen.getByRole('group', { name: `Sự kiện ngày ${day}/${month}/${year}` })
+  expect(dayTile).toHaveTextContent(new RegExp(`^${all.filter((event) => vnDate(new Date(event.at)) === latest).length}Sự kiện ngày`))
+  expect(screen.getByRole('group', { name: 'Ghi nhận gần nhất' })).toHaveTextContent(`Ngày ${day}/${month}/${year}`)
+
+  const toggle = within(dayTile).getByRole('button')
+  expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await user.click(toggle)
+  expect(screen.getByTestId('search')).toHaveTextContent(`?nhom=trip&tu=${latest}&den=${latest}`)
+  expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  // Ô tổng không đổi theo bộ lọc
+  expect(total).toHaveTextContent(new Intl.NumberFormat('vi-VN').format(all.length))
+
+  await user.click(toggle)
+  expect(screen.getByTestId('search')).toHaveTextContent(/^\?nhom=trip$/)
 })
 
 test('không có sự kiện khớp: bảng nói rõ và có nút xoá lọc', async () => {

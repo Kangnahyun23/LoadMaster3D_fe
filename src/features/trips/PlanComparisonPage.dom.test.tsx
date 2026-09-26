@@ -11,7 +11,7 @@ import { PlanComparisonPage } from './PlanComparisonPage'
 
 /**
  * Seam kiểm thử là kho dùng chung (`@/lib/mock-db`) → `trips-api.ts` → hook → màn hình, không giả lập module nào:
- * số trên thẻ phải truy về `result.metrics` của revision (tiêu chí nghiệm thu LM-051).
+ * số trong ma trận phải truy về `result.metrics` của revision (tiêu chí nghiệm thu LM-051).
  */
 const SEED_TRIP = 'TRIP-2026-0914'
 const vi = createFormatter('vi-VN')
@@ -37,53 +37,82 @@ function primaryActions(container: HTMLElement) {
   return container.querySelectorAll('a.bg-primary, button.bg-primary')
 }
 
-test('thẻ revision của chuyến seed: số khớp result.metrics, bản duyệt và bản nguồn tách bạch, một nút primary', async () => {
+/** Chữ của mọi ô trong cột một bản lưu — cột xác định bằng radio mang mã bản ở đầu cột (ma trận V2). */
+function columnTexts(revisionId: string): string[] {
+  const table = screen.getByRole('table')
+  const index = within(table).getAllByRole('columnheader').findIndex((header) => within(header).queryByRole('radio', { name: revisionId }))
+  if (index < 0) throw new Error(`Không có cột ${revisionId}`)
+  return within(table).getAllByRole('row').map((row) => row.children[index]?.textContent ?? '')
+}
+
+test('ma trận revision của chuyến seed: số khớp result.metrics, bản duyệt và bản nguồn tách bạch, một nút primary', async () => {
   const [source, approved] = await getMockDb().listRevisions(SEED_TRIP)
   if (!source || !approved) throw new Error('Seed phải có revision nguồn và revision đã duyệt')
   const container = renderComparison(SEED_TRIP)
 
-  const sourceCard = within(await screen.findByRole('article', { name: source.id }))
-  const approvedCard = within(screen.getByRole('article', { name: approved.id }))
+  await screen.findByRole('radio', { name: approved.id })
+  const sourceColumn = columnTexts(source.id)
+  const approvedColumn = columnTexts(approved.id)
 
-  for (const [card, revision] of [[sourceCard, source], [approvedCard, approved]] as const) {
+  for (const [column, revision] of [[sourceColumn, source], [approvedColumn, approved]] as const) {
     const { metrics } = revision.result
-    expect(card.getByText('MOCK RESULT')).toBeInTheDocument()
-    expect(card.getByText(vi.percent(metrics.volumeUtilizationPercent))).toBeInTheDocument()
-    expect(card.getByText(vi.percent(metrics.payloadUtilizationPercent))).toBeInTheDocument()
-    expect(card.getByText(`${vi.integer(metrics.placedCount)} kiện`)).toBeInTheDocument()
-    expect(card.getByText(`${vi.integer(metrics.unplacedCount)} kiện`)).toBeInTheDocument()
-    expect(card.getByText(`${vi.integer(metrics.runtimeMs)} ms`)).toBeInTheDocument()
-    expect(card.getByText(String(revision.request.settings.randomSeed))).toBeInTheDocument()
-    expect(card.getByText('Mock (xếp kệ tất định)')).toBeInTheDocument()
+    expect(column[0]).toContain('MOCK RESULT')
+    expect(column).toContain(vi.percent(metrics.volumeUtilizationPercent))
+    expect(column).toContain(vi.percent(metrics.payloadUtilizationPercent))
+    expect(column).toContain(`${vi.integer(metrics.placedCount)} kiện`)
+    expect(column).toContain(`${vi.integer(metrics.unplacedCount)} kiện`)
+    expect(column).toContain(`${vi.integer(metrics.runtimeMs)} ms`)
+    expect(column).toContain(String(revision.request.settings.randomSeed))
+    expect(column).toContain('Mock (xếp kệ tất định)')
+    expect(column).toContain(revision.jobId)
   }
   // Số seed kiểm bằng máy: 16.552.000 / 40.608.000 cm³ = 40,76%; 5.844 / 9.500 kg = 61,52%; 132 kiện, seed 20260914, LIFO bật.
-  expect(approvedCard.getByText('40,8%')).toBeInTheDocument()
-  expect(approvedCard.getByText('61,5%')).toBeInTheDocument()
-  expect(approvedCard.getByText('132 kiện')).toBeInTheDocument()
-  expect(approvedCard.getByText('20260914')).toBeInTheDocument()
-  expect(approvedCard.getByText('30 giây')).toBeInTheDocument()
+  expect(approvedColumn).toEqual(expect.arrayContaining(['40,8%', '61,5%', '132 kiện', '20260914', '30 giây', 'Bật']))
 
-  expect(approvedCard.getByText('Đã duyệt')).toBeInTheDocument()
-  expect(approvedCard.getByText('Mới nhất')).toBeInTheDocument()
-  expect(approvedCard.getByText(`Duyệt từ ${source.id}`)).toBeInTheDocument()
-  expect(sourceCard.queryByText('Đã duyệt')).not.toBeInTheDocument()
-  expect(sourceCard.queryByText('Mới nhất')).not.toBeInTheDocument()
-  expect(sourceCard.getByText(`Đã duyệt thành ${approved.id}`)).toBeInTheDocument()
+  expect(approvedColumn[0]).toContain('Đã duyệt')
+  expect(approvedColumn[0]).toContain('Mới nhất')
+  expect(approvedColumn[0]).toContain(`Duyệt từ ${source.id}`)
+  const sourceHeader = within(screen.getByRole('columnheader', { name: new RegExp(`^${source.id}`) }))
+  expect(sourceHeader.queryByText('Đã duyệt', { exact: true })).not.toBeInTheDocument()
+  expect(sourceHeader.queryByText('Mới nhất')).not.toBeInTheDocument()
+  expect(sourceColumn[0]).toContain(`Đã duyệt thành ${approved.id}`)
   expect(screen.queryByText('Lỗi thời')).not.toBeInTheDocument()
+  expect(screen.getByText(`${approved.id} được duyệt từ ${source.id}.`, { exact: false })).toBeInTheDocument()
 
   // Mặc định chọn bản đã duyệt; chọn bản nguồn thì hành động chính đổi theo, vẫn chỉ một nút primary.
+  expect(screen.getByRole('radio', { name: approved.id })).toBeChecked()
   const plannerHref = `/chuyen/${SEED_TRIP}/phuong-an?revision=${encodeURIComponent(approved.id)}`
   expect(screen.getByRole('link', { name: `Mở ${approved.id} trong 3D` })).toHaveAttribute('href', plannerHref)
   expect(primaryActions(container)).toHaveLength(1)
   expect(screen.getByRole('link', { name: 'Chạy thêm phương án' })).toHaveAttribute('href', `/chuyen/${SEED_TRIP}/toi-uu`)
 
-  await userEvent.setup().click(sourceCard.getByRole('button', { name: 'Chọn phương án này' }))
-  expect(sourceCard.getByRole('button', { name: 'Đang chọn' })).toHaveAttribute('aria-pressed', 'true')
+  await userEvent.setup().click(screen.getByRole('radio', { name: source.id }))
+  expect(screen.getByRole('radio', { name: source.id })).toBeChecked()
+  expect(screen.getByRole('radio', { name: approved.id })).not.toBeChecked()
+  expect(screen.getByText(`Đang chọn: ${source.id}`)).toBeInTheDocument()
   expect(screen.getByRole('link', { name: `Mở ${source.id} trong 3D` })).toHaveAttribute(
     'href',
     `/chuyen/${SEED_TRIP}/phuong-an?revision=${encodeURIComponent(source.id)}`,
   )
   expect(primaryActions(container)).toHaveLength(1)
+})
+
+test('"Chỉ hiện khác biệt" ẩn dòng mà mọi bản cùng giá trị', async () => {
+  const [source, approved] = await getMockDb().listRevisions(SEED_TRIP)
+  if (!source || !approved) throw new Error('Seed phải có revision nguồn và revision đã duyệt')
+  renderComparison(SEED_TRIP)
+  await screen.findByRole('radio', { name: approved.id })
+  const table = screen.getByRole('table')
+  expect(within(table).getByRole('rowheader', { name: 'Tỷ lệ thể tích' })).toBeInTheDocument()
+  expect(within(table).getByRole('rowheader', { name: 'Hình phương án' })).toBeInTheDocument()
+
+  await userEvent.setup().click(screen.getByRole('checkbox', { name: 'Chỉ hiện khác biệt' }))
+  // Bản duyệt chép nguyên kết quả chạy: tỷ lệ thể tích như nhau nên dòng này ẩn; hình phương án cũng ẩn
+  expect(source.result.metrics.volumeUtilizationPercent).toBe(approved.result.metrics.volumeUtilizationPercent)
+  expect(within(table).queryByRole('rowheader', { name: 'Tỷ lệ thể tích' })).not.toBeInTheDocument()
+  expect(within(table).queryByRole('rowheader', { name: 'Hình phương án' })).not.toBeInTheDocument()
+  // Cột bản lưu và nút chọn vẫn còn
+  expect(screen.getByRole('radio', { name: source.id })).toBeInTheDocument()
 })
 
 test('chuyến chưa có revision: trạng thái rỗng dẫn tới Thiết lập tối ưu', async () => {
@@ -93,7 +122,7 @@ test('chuyến chưa có revision: trạng thái rỗng dẫn tới Thiết lậ
   expect(await screen.findByText('Chưa đủ phương án để so sánh')).toBeInTheDocument()
   expect(screen.getByText(/mới có 0 phương án đã lưu/)).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Thiết lập tối ưu' })).toHaveAttribute('href', `/chuyen/${trip.id}/toi-uu`)
-  expect(screen.queryByRole('article')).not.toBeInTheDocument()
+  expect(screen.queryByRole('table')).not.toBeInTheDocument()
   expect(primaryActions(container)).toHaveLength(1)
 })
 

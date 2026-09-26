@@ -18,7 +18,17 @@ test('KPI của kỳ: chuyến hoàn thành / tổng, lấp đầy trung bình b
   // Điểm đã hoàn tất: 101 có 5 kiện (1 từ chối), 102 điểm 1 có 3 kiện (kiện thiếu ở kho không tính), 108 có 2 kiện
   // (sự cố cả điểm) → 4 + 3 + 0 sạch trên 10
   expect(summary.delivery).toStrictEqual({ cleanPercent: 70, cleanItems: 7, finishedItems: 10 })
-  expect(summary.vehicles).toStrictEqual({ inUse: 1, total: 3 })
+  // A đang chạy, B sẵn sàng, C bảo dưỡng — cùng ba trạng thái màn Đội xe đếm
+  expect(summary.vehicles).toStrictEqual({ inUse: 1, total: 3, byStatus: { available: 1, in_use: 1, maintenance: 1 } })
+})
+
+test('đội xe: xe chưa có trạng thái trong kho là sẵn sàng, như màn Đội xe', () => {
+  const data = dashboardData()
+  const summary = summarizeDashboard(
+    { ...data, vehicleStates: data.vehicleStates.filter((state) => state.vehicleId !== 'VEHICLE-A') },
+    DASHBOARD_PERIOD,
+  )
+  expect(summary.vehicles).toStrictEqual({ inUse: 0, total: 3, byStatus: { available: 2, in_use: 0, maintenance: 1 } })
 })
 
 test('ba chuỗi biểu đồ: lấp đầy theo ngày, chuyến theo trạng thái, theo xe', () => {
@@ -75,7 +85,7 @@ test('kỳ không có chuyến: mọi tổng bằng 0, tỷ lệ không có, chu
   })
   expect(summary.fillByDay.every((day) => day.averagePercent === null)).toBe(true)
   // Xe đang chạy là trạng thái lúc này, không theo kỳ
-  expect(summary.vehicles).toStrictEqual({ inUse: 1, total: 3 })
+  expect(summary.vehicles).toStrictEqual({ inUse: 1, total: 3, byStatus: { available: 1, in_use: 1, maintenance: 1 } })
 })
 
 test('không gắn MOCK RESULT khi mọi bản đã duyệt trong kỳ là kết quả thật', () => {

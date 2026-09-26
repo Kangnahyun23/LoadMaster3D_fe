@@ -16,6 +16,7 @@ import { useMemo } from 'react'
 import { useT } from '@/lib/i18n'
 import { compareText } from '@/lib/list-filter'
 import { cn } from '@/lib/utils'
+import { ALIGN, APPEARANCE, CELL_PADDING, ROW_HEIGHT, TOUCH_ROW_HEIGHT } from './data-table-styles'
 import { NoMatchRow, SortHeader } from './DataTableParts'
 import { clampPageIndex, PaginationFooter, type DataTablePagination } from './DataTablePagination'
 
@@ -64,28 +65,6 @@ export type ColumnMeta = {
 
 export type { DataTablePagination }
 
-const ALIGN = {
-  left: 'text-left',
-  right: 'text-right',
-  center: 'text-center',
-} as const
-
-const ROW_HEIGHT = {
-  /** Thoáng — 48px */
-  comfortable: 'h-12',
-  /** Gọn — 36px, dùng cho danh sách dài */
-  compact: 'h-9',
-} as const
-
-/** Cảm ứng: hàng 56px (mục 8 style sheet) */
-const TOUCH_ROW_HEIGHT = 'h-14'
-
-/** Bảng hẹp (cột phụ 360px) cần padding sát hơn để tiêu đề không xuống dòng. */
-const CELL_PADDING = {
-  normal: 'px-3',
-  tight: 'px-2.5',
-} as const
-
 /** Không cột nào sắp xếp được trừ khi màn khai `enableSorting: true` (TanStack mặc định bật cho mọi cột). */
 const SORTING_OFF_BY_DEFAULT = { enableSorting: false }
 
@@ -97,6 +76,7 @@ type DataTableProps<TData extends RowData> = SortingProps & {
   data: TData[]
   columns: DataTableColumns<TData>
   density?: keyof typeof ROW_HEIGHT
+  appearance?: keyof typeof APPEARANCE
   cellPadding?: keyof typeof CELL_PADDING
   /** Hàng 56px cho tablet tại kho */
   touch?: boolean
@@ -121,6 +101,7 @@ export function DataTable<TData extends RowData>({
   data,
   columns,
   density = 'compact',
+  appearance = 'default',
   cellPadding = 'normal',
   touch = false,
   onRowClick,
@@ -159,7 +140,8 @@ export function DataTable<TData extends RowData>({
     ...(getRowId ? { getRowId } : {}),
   })
   const rowHeight = touch ? TOUCH_ROW_HEIGHT : ROW_HEIGHT[density]
-  const padX = CELL_PADDING[cellPadding]
+  const look = APPEARANCE[appearance]
+  const padX = look.padX ?? CELL_PADDING[cellPadding]
 
   if (rowCount === 0 && !isFiltering) {
     return (
@@ -185,9 +167,10 @@ export function DataTable<TData extends RowData>({
                     aria-sort={sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : undefined}
                     style={meta?.width ? { width: meta.width } : undefined}
                     className={cn(
-                      'sticky top-0 z-10 h-8 border-b border-border bg-surface',
+                      'sticky top-0 z-10 border-b border-border',
+                      look.head,
                       padX,
-                      'text-caption font-medium leading-none text-text-3',
+                      'text-caption leading-none',
                       ALIGN[align],
                     )}
                   >

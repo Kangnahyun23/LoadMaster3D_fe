@@ -1,0 +1,14 @@
+/**
+ * Dòng mô tả dưới tiêu đề màn (`components/PageHero.tsx`, V2). Một câu nói màn dùng để làm gì — không số liệu, không
+ * trạng thái: những thứ đó nằm trong nội dung màn và phải truy được về kho (AGENTS mục 6).
+ */
+export const pageHero = {
+  trips: 'Chuyến trong kỳ, trạng thái phương án và việc cần xử lý trước khi bàn giao kho.',
+  tripForm: 'Nhập thông tin chuyến, chọn xe và sắp thứ tự điểm giao.',
+  optimization: 'Khai báo yêu cầu xếp và kiểm tra đầu vào trước khi chạy tối ưu.',
+  fleet: 'Trạng thái đội xe và xe đang phục vụ chuyến nào.',
+  dashboard: 'Chuyến, tỷ lệ lấp đầy và khối lượng đã giao trong kỳ đang xem.',
+  users: 'Tài khoản, vai trò và quyền trong hệ thống.',
+  audit: 'Sự kiện ghi lại từ các thao tác có ghi dữ liệu.',
+  profile: 'Thông tin cá nhân và mật khẩu đăng nhập.',
+} as const

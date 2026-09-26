@@ -3,14 +3,17 @@ import type { profile as source } from '../vi/profile'
 
 export const profile = {
   title: 'My profile',
+  identity: {
+    label: 'Account',
+    email: 'Email',
+    depot: 'Depot',
+    note: 'Your email, role and depot are changed by an administrator.',
+  },
   details: {
     title: 'Personal details',
-    description: 'You can edit your name and phone number. Your email, role and depot are changed by an administrator.',
+    description: 'You can edit your name and phone number.',
     fullName: 'Full name',
     phone: 'Phone number',
-    email: 'Email',
-    role: 'Role',
-    depot: 'Depot',
     save: 'Save changes',
     saved: 'Profile saved',
   },

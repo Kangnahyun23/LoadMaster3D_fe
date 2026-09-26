@@ -80,10 +80,74 @@
   --stop-7: #cc79a7;
   --stop-8: #555555;
 
+  /* thang mực bốn cấp (V2): tiêu đề và số quan trọng → dữ liệu vận hành → thông tin
+     phụ → chú thích. Ba cấp --text/--text-2/--text-3 cũ nằm quá gần nhau nên màn
+     trông nhạt; thang này giãn hai đầu ra. Vẫn giữ thang cũ cho code chưa chuyển. */
+  --ink-strong: #131f34;
+  --ink-1: #1f2c3e;
+  --ink-2: #4a5c75;
+  /* V2 gốc là #71829a — chỉ 3,9:1 trên trắng, 3,5:1 trên trường nền. Tối lại cùng sắc
+     độ để qua 4,5:1 (AGENTS mục 10): 5,2:1 trên trắng, 4,7:1 trên trường nền. */
+  --ink-3: #5e6e84;
+
+  /* năm cặp tint cho nền icon và chip. Nghĩa cố định, không mượn sang mục đích khác:
+     blue = vận hành · green = sẵn sàng/xong · amber = cần chú ý
+     violet = phân tích phụ · slate = ngữ cảnh (không phải số đo) */
+  --tint-blue: #dce8fb;
+  --tint-blue-fg: #1a4da3;
+  --tint-green: #d1ecde;
+  --tint-green-fg: #0c6b4c;
+  --tint-amber: #fce6c2;
+  --tint-amber-fg: #85500a;
+  --tint-violet: #e2e0fa;
+  --tint-violet-fg: #443e9e;
+  --tint-slate: #e1e8f1;
+  --tint-slate-fg: #4e6681;
+
+  /* bề rộng tối đa vùng làm việc. Màn 2K trở lên không kéo giãn nội dung:
+     điều phối cần thêm dòng, không cần thêm chiều ngang */
+  --shell-max: 1680px;
+
+  /* trường nền của trang (V2). Bề mặt đọc giữ --bg trắng để nổi lên khỏi trường này;
+     KHÔNG đổi --bg, vì 110 chỗ dùng bg-bg là card, input và hộp thoại. */
+  /* Mọi lớp phải là ảnh: background-image có lớp cuối là màu là CSS không hợp lệ và
+     bị bỏ cả khai báo. Prototype dùng shorthand background nên không gặp. */
+  --field: radial-gradient(ellipse at 18% -12%, #c9e7ff, transparent 56%),
+    radial-gradient(ellipse at 102% 46%, #dbe8ff, transparent 52%),
+    linear-gradient(#edf4fb, #edf4fb);
+  /* nền của dải chrome đè lên trường: đủ đục để chữ đọc rõ, đủ trong để thấy trường */
+  --chrome: #ffffffd9;
+
+  /* vật liệu kính của lớp chrome (V2). Chỉ dùng ở thanh điều hướng và khối tổng
+     hợp số liệu — bảng, form, inspector giữ nền đặc. Xem AGENTS mục 5. */
+  --nav-glass: 130deg, #ffffffc2, #ffffff45;
+  --nav-glass-shadow: 0 8px 20px #33517a10, inset 0 1px 0 #fff;
+  --follow-glass: linear-gradient(125deg, #ffffffe0, #ffffff55 60%, #ffffffad);
+  --follow-shadow: 0 5px 10px #46658721, inset 0 1px 0 #fff, inset 0 -1px 1px #aec1d950;
+  /* bề mặt kính của khối tổng hợp số liệu (ô KPI): viền sáng trong + bóng nâng rất nhẹ.
+     Kính không phải card phẳng nên được bóng nâng (AGENTS mục 5). */
+  --tile-glass: 118deg, #ffffffc4, #ffffff5c;
+  --glass-edge: inset 0 2px 1px #fff, inset 0 -1px 2px #ffffffaa;
+  --tile-lift: 0 7px 18px #4e79a51c;
+  /* ô icon nhận diện màn trên thanh tiêu đề */
+  --hero-icon: 140deg, #e2edfd, #cbdefa;
+  --hero-icon-shadow: inset 0 1px 0 #fff, inset 0 -1px 2px #b7cdec80, 0 2px 6px #4e79a51f;
+  /* vòng sáng mảnh quanh ô icon tint trên nền kính */
+  --icon-ring: inset 0 0 0 1px #ffffff9c;
+  /* ô số liệu bấm được (lọc): viền và bóng nâng khi rê chuột — V2 */
+  --tile-hover-border: #b6cff2;
+  --tile-lift-hover: 0 10px 24px #4e79a52e;
+  /* nền tiêu đề cột của bảng kiểu V2 (DataTable appearance="paper") */
+  --table-head: #f2f6fc;
+  /* chuyển động lò xo của chỉ báo: vượt nhẹ rồi lắng lại */
+  --spring: linear(0, .0069 1.15%, .1135 5.18%, .5977 15.84%, .9676 28.8%, 1.0352 36.29%, 1.046 42.05%, 1.0118 61.63%, .9981 80.35%, 1);
+
   /* bo góc */
   --r-sm: 6px;
   --r-md: 8px;
   --r-lg: 12px;
+  /* bề mặt kính (ô số liệu, khối tổng hợp) — V2; nút, input, bảng giữ ba bậc trên */
+  --r-xl: 16px;
 
   /* đổ bóng, chỉ cho lớp nổi */
   --e1: 0 1px 2px rgba(16, 24, 40, 0.06);
@@ -112,6 +176,23 @@
   --color-text-2: var(--text-2);
   --color-text-3: var(--text-3);
   --color-text-disabled: var(--text-disabled);
+  --color-chrome: var(--chrome);
+  --container-shell: var(--shell-max);
+  --color-ink-strong: var(--ink-strong);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-tint-blue: var(--tint-blue);
+  --color-tint-blue-fg: var(--tint-blue-fg);
+  --color-tint-green: var(--tint-green);
+  --color-tint-green-fg: var(--tint-green-fg);
+  --color-tint-amber: var(--tint-amber);
+  --color-tint-amber-fg: var(--tint-amber-fg);
+  --color-tint-violet: var(--tint-violet);
+  --color-tint-violet-fg: var(--tint-violet-fg);
+  --color-tint-slate: var(--tint-slate);
+  --color-tint-slate-fg: var(--tint-slate-fg);
+  --color-table-head: var(--table-head);
   --color-switch-off: var(--switch-off);
   --color-highlight: var(--highlight);
 
@@ -161,6 +242,7 @@
   --radius-sm: var(--r-sm);
   --radius-md: var(--r-md);
   --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
 
   --shadow-e1: var(--e1);
   --shadow-e2: var(--e2);
@@ -189,6 +271,22 @@
   --text-body-lg--line-height: 24px;
   --text-caption: 12px;
   --text-caption--line-height: 16px;
+  /* micro 11/14 — ghi chú nguồn của ô số liệu, nhãn trục, nhãn trong panel nổi */
+  --text-micro: 11px;
+  --text-micro--line-height: 14px;
+  /* hai bậc lẻ của V2: note 11,5 — ghi chú nguồn của ô số liệu; lede 13,5 — mô tả dưới tiêu đề màn */
+  --text-note: 11.5px;
+  --text-note--line-height: 17px;
+  --text-lede: 13.5px;
+  --text-lede--line-height: 22px;
+}
+
+/* Lề ngang của vùng làm việc (V2): 24px, và từ khi cột rộng hơn --shell-max thì nội dung
+   dừng ở --shell-max, căn giữa. Dùng padding thay vì bọc thêm một div max-w, để vùng cuộn
+   vẫn rộng hết cột (thanh cuộn nằm ở mép) và thanh tiêu đề giữ nền chrome tràn ngang —
+   chỉ nội dung dừng lại. `100%` là bề rộng khối chứa, tức cột của màn. */
+@utility px-shell {
+  padding-inline: max(1.5rem, calc((100% - var(--shell-max)) / 2 + 1.5rem));
 }
 
 @keyframes lm-spin {
@@ -375,3 +473,94 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Chỉ báo kính trượt theo con trỏ trong thanh điều hướng (V2, `app/useGlassFollow.ts`).
+   Vị trí và kích thước do hook đặt inline; ở đây chỉ có vật liệu và chuyển động. */
+.glass-follow {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border: 1px solid #fff;
+  border-radius: var(--r-md);
+  background: var(--follow-glass);
+  box-shadow: var(--follow-shadow);
+  backdrop-filter: blur(5px) saturate(1.4);
+}
+/* Phản sáng hai góc — thứ làm bề mặt trông như kính chứ không phải ô trắng. */
+.glass-follow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 15% 0, #fff, transparent 55%),
+    radial-gradient(ellipse at 90% 100%, #ffffff9c, transparent 55%);
+}
+/* Chỉ bật chuyển động sau khi hook đã đặt đúng chỗ ở frame đầu, nếu không lúc tải
+   trang chỉ báo sẽ trượt từ mép trái thanh vào mục đang mở. */
+.glass-nav[data-follow='ready'] .glass-follow {
+  transition:
+    transform 1s var(--spring),
+    left 1s var(--spring),
+    width 1s var(--spring),
+    height 1s var(--spring);
+}
+/* Ô số liệu (`components/KpiTile.tsx`) — "khối tổng hợp số liệu" của luật kính, mục 5.
+   Viền sáng trong + bóng nâng nhẹ theo V2; không lồng thêm kính nào bên trong. */
+.glass-tile {
+  border: 1px solid #fff;
+  background: linear-gradient(var(--tile-glass));
+  box-shadow: var(--glass-edge), var(--tile-lift);
+  backdrop-filter: blur(10px) saturate(1.45);
+}
+/* Ô số liệu bấm được (lọc danh sách): rê chuột đổi viền và nâng bóng như V2, không phóng
+   to. Đang lọc: viền primary đậm gấp đôi. Specificity cao hơn nhánh dự phòng bên dưới nên
+   trạng thái đang lọc vẫn thấy khi không có kính. */
+.glass-tile[data-pressable]:has(> button:hover) {
+  border-color: var(--tile-hover-border);
+  box-shadow: var(--glass-edge), var(--tile-lift-hover);
+}
+.glass-tile[data-pressed='true'] {
+  border-color: var(--primary);
+  box-shadow: var(--glass-edge), 0 0 0 1px var(--primary), var(--tile-lift);
+}
+/* Ô icon nhận diện màn trên thanh tiêu đề (`components/PageHero.tsx`). Không dùng
+   backdrop-filter nên chỉ cần nhánh bớt trong suốt ở dưới. */
+.hero-icon {
+  border: 1px solid #fff;
+  background: linear-gradient(var(--hero-icon));
+  box-shadow: var(--hero-icon-shadow);
+}
+/* Trình duyệt thiếu backdrop-filter, hoặc người dùng xin bớt trong suốt: nền đặc. */
+@supports not (backdrop-filter: blur(5px)) {
+  .glass-nav,
+  .glass-follow {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+  /* ô số liệu nằm trên trường nền, nên nền đặc là trắng như mọi bề mặt đọc, kèm viền */
+  .glass-tile {
+    border-color: var(--border);
+    background: var(--bg);
+    backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-nav,
+  .glass-follow {
+    background: var(--surface);
+    backdrop-filter: none;
+  }
+  .glass-tile {
+    border-color: var(--border);
+    background: var(--bg);
+    backdrop-filter: none;
+  }
+  .hero-icon {
+    background: var(--bg);
+  }
+}
+/* Không cần rule prefers-reduced-motion riêng: khối toàn cục phía trên đã ép
+   transition-duration 100ms !important cho mọi phần tử (AGENTS mục 8), nên chỉ báo
+   nhảy tới nơi gần như tức thì thay vì bật lò xo. */

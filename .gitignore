@@ -34,6 +34,8 @@ dist
 test-results/
 playwright-report/
 blob-report/
+# ảnh và nhật ký của công cụ Playwright MCP khi kiểm trên trình duyệt thật
+.playwright-mcp/
 
 # cấu hình và thư mục tạm của công cụ soạn thảo trên máy, không thuộc dự án
 .claude/

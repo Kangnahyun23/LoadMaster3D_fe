@@ -35,7 +35,7 @@ test('Tổng quan có kỳ, giờ xuất và đúng số KPI của màn, kèm gh
   expect(metric('Lấp đầy thể tích trung bình')).toStrictEqual([45, '%'])
   expect(metric('Khối lượng đã giao')).toStrictEqual([96, 'kg'])
   expect(metric('Kiện giao không sự cố')).toStrictEqual([70, '%'])
-  expect(metric('Xe đang chạy hôm nay')).toStrictEqual([1, 'xe'])
+  expect(metric('Xe đang phục vụ chuyến')).toStrictEqual([1, 'xe'])
   expect(rows.some((row) => row[0] === 'MOCK RESULT')).toBe(true)
 })
 

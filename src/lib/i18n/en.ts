@@ -24,6 +24,7 @@ import { profile } from './en/profile'
 import { notifications } from './en/notifications'
 import { search } from './en/search'
 import { titles } from './en/titles'
+import { pageHero } from './en/pageHero'
 
 /** Bản tiếng Anh: mỗi nhánh một file trong `en/`, kiểm thiếu/thừa key theo nhánh nguồn `vi/`. */
 export const en = {
@@ -51,4 +52,5 @@ export const en = {
   notifications,
   search,
   titles,
+  pageHero,
 } satisfies Dictionary<typeof vi>

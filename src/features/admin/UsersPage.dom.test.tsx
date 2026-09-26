@@ -59,8 +59,8 @@ test('danh sách từ kho: sắp theo tên, tìm, lọc vai trò và trạng th�
   // Bốn tài xế của seed, theo thứ tự chữ cái tiếng Việt (ô đầu: chữ viết tắt, tên, email)
   const names = within(screen.getByRole('table')).getAllByRole('row').slice(1).map((row) => row.querySelector('td')?.textContent)
   expect(names).toStrictEqual([
-    'HNĐặng Hoài Namnam.dang@loadmaster.vn', 'VBNgô Văn Bảobao.ngo@loadmaster.vn', 'QDPhạm Quốc Dũngtaixe@loadmaster.vn',
-    'VLTrương Văn Lộcloc.truong@loadmaster.vn',
+    'HNĐặng Hoài Nam nam.dang@loadmaster.vn', 'VBNgô Văn Bảo bao.ngo@loadmaster.vn', 'QDPhạm Quốc Dũng taixe@loadmaster.vn',
+    'VLTrương Văn Lộc loc.truong@loadmaster.vn',
   ])
   expect(screen.getByText('12 tài khoản')).toBeInTheDocument()
   expect(screen.getByRole('combobox', { name: 'Vai trò' })).toHaveTextContent('Tài xế')
@@ -74,6 +74,46 @@ test('tìm theo số điện thoại không dấu cách và lọc tài khoản �
   await user.type(screen.getByRole('searchbox', { name: 'Tìm theo tên, email, số điện thoại, mã' }), '0905678901')
   await waitFor(() => expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(2))
   expect(await rowOf('Võ Minh Khoa')).toBeInTheDocument()
+})
+
+/** Ô số liệu theo nhãn (vỏ `role="group"`), để không bắt nhầm số hay chữ trùng trong bảng. */
+function tile(label: string) {
+  return within(screen.getByRole('group', { name: label }))
+}
+
+test('ô số liệu đếm trên cả danh sách, không theo ô tìm; ô tổng chỉ hiển thị', async () => {
+  // Seed: 12 tài khoản, chỉ Bùi Thị Lan đã khoá. Ô tìm đang lọc còn một dòng, ô số liệu không đổi.
+  renderUsers('/nguoi-dung?q=khoa')
+  await rowOf('Võ Minh Khoa')
+  expect(tile('Tổng tài khoản').getByText('12')).toBeInTheDocument()
+  expect(tile('Tổng tài khoản').getByText('Mọi vai trò, kể cả tài khoản đã khoá')).toBeInTheDocument()
+  expect(tile('Đang hoạt động').getByText('11')).toBeInTheDocument()
+  expect(tile('Đã khoá').getByText('1')).toBeInTheDocument()
+  expect(tile('Tổng tài khoản').queryByRole('button')).toBeNull()
+})
+
+test('ô trạng thái lọc danh sách cùng bộ lọc với ô chọn; bấm lại ô đang lọc thì bỏ lọc', async () => {
+  const user = userEvent.setup()
+  renderUsers()
+  await rowOf('Võ Minh Khoa')
+  const suspended = tile('Đã khoá').getByRole('button')
+  expect(suspended).toHaveAttribute('aria-pressed', 'false')
+
+  await user.click(suspended)
+  await waitFor(() => expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(2))
+  expect(await rowOf('Bùi Thị Lan')).toBeInTheDocument()
+  expect(suspended).toHaveAttribute('aria-pressed', 'true')
+  expect(screen.getByRole('combobox', { name: 'Trạng thái' })).toHaveTextContent('Đã khoá')
+
+  // Chuyển thẳng sang ô khác bằng bàn phím
+  tile('Đang hoạt động').getByRole('button').focus()
+  await user.keyboard('{Enter}')
+  await waitFor(() => expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(12))
+  expect(suspended).toHaveAttribute('aria-pressed', 'false')
+
+  await user.click(tile('Đang hoạt động').getByRole('button'))
+  await waitFor(() => expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(13))
+  expect(screen.getByRole('combobox', { name: 'Trạng thái' })).toHaveTextContent('Mọi trạng thái')
 })
 
 test('tạo tài khoản: hộp thoại hiện mật khẩu tạm một lần, sao chép được, và đăng nhập được bằng nó', async () => {

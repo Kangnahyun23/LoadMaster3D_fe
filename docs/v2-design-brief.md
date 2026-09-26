@@ -1,6 +1,7 @@
 # V2 — Brief thiết kế và vòng duyệt Chi tiết chuyến
 
-Ngày: 21/09/2026. Trạng thái: **đang duyệt visual**, chưa thay giao diện vận hành.
+Ngày: 21/09/2026. Trạng thái: **hướng B đã duyệt (23/09/2026)**, đang chuyển dần vào `src/` trên nhánh `feat/v2-production-nav`
+(luật và phạm vi: [AGENTS mục 5](../AGENTS.md), tiến độ: [progress.md](progress.md)). Các vòng bên dưới là lịch sử duyệt prototype.
 
 ## Quyết định từ người dùng
 

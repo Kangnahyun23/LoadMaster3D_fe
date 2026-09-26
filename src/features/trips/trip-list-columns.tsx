@@ -73,8 +73,14 @@ export function createTripColumns(t: TFunction, format: Formatter) {
     helper.accessor('packageCount', {
       header: t('trips.list.packages'),
       enableSorting: true,
-      meta: { align: 'right', width: '88px' } satisfies ColumnMeta,
-      cell: (info) => <span className={mono}>{format.integer(info.getValue())}</span>,
+      meta: { align: 'right', width: '104px' } satisfies ColumnMeta,
+      // V2: số kiện kèm số điểm giao ngay dưới
+      cell: (info) => (
+        <span className="flex flex-col items-end">
+          <span className={mono}>{format.integer(info.getValue())}</span>
+          <span className="text-caption text-ink-3">{t('trips.list.stops', { count: info.row.original.stopCount })}</span>
+        </span>
+      ),
     }),
     helper.accessor('volumePercent', {
       header: t('trips.list.volume'),

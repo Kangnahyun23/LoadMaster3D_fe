@@ -24,3 +24,9 @@ export function accountGuards(user: Account, currentUserId: string | null, users
   const block = user.role === 'admin' && user.status === 'active' && activeAdmins <= 1 ? 'lastAdmin' : null
   return { lock: block, remove: block, role: block }
 }
+
+/** Lý do chặn thao tác Khoá/Mở khoá theo trạng thái hiện tại: mở khoá chỉ bị chặn với chính mình, khoá theo cả luật quản trị viên cuối. */
+export function toggleLockBlock(user: Pick<User, 'status'>, guards: AccountGuards): AccountBlock | null {
+  if (user.status === 'suspended') return guards.lock === 'self' ? 'self' : null
+  return guards.lock
+}

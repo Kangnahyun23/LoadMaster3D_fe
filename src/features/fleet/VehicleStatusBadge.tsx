@@ -1,16 +1,27 @@
+import { Truck } from 'lucide-react'
 import type { MouseEvent } from 'react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/Badge'
 import { useT } from '@/lib/i18n'
 import type { VehicleState, VehicleStatus } from '@/lib/mock-db'
 
-type BadgeTone = 'success' | 'cyan' | 'warning'
+type BadgeTone = 'success' | 'info' | 'warning'
 
-/** Tông badge theo trạng thái xe; chấm cho trạng thái đang diễn ra (mục 4 style sheet, như trạng thái chuyến). */
+/**
+ * Tông badge theo trạng thái xe; chấm cho trạng thái đang diễn ra (mục 4 style sheet, như trạng thái chuyến). Xe đang phục vụ
+ * chuyến dùng tông xanh dương — cùng nghĩa "vận hành" với icon tint của nó (V2).
+ */
 const TONE: Record<VehicleStatus, { tone: BadgeTone; dot?: boolean }> = {
   available: { tone: 'success' },
-  in_use: { tone: 'cyan', dot: true },
+  in_use: { tone: 'info', dot: true },
   maintenance: { tone: 'warning' },
+}
+
+/** Tint của icon xe đầu dòng — cùng nghĩa với ô số liệu của trạng thái đó (AGENTS mục 4). */
+const THUMB: Record<VehicleStatus, string> = {
+  available: 'bg-tint-green text-tint-green-fg',
+  in_use: 'bg-tint-blue text-tint-blue-fg',
+  maintenance: 'bg-tint-amber text-tint-amber-fg',
 }
 
 export function VehicleStatusBadge({ status }: { status: VehicleStatus }) {
@@ -19,19 +30,28 @@ export function VehicleStatusBadge({ status }: { status: VehicleStatus }) {
   return <Badge tone={spec.tone} dot={spec.dot}>{t(`fleet.status.${status}`)}</Badge>
 }
 
+/** Icon xe đầu dòng bảng đội xe, tô theo trạng thái. Trang trí: trạng thái đã có chữ ở cột Trạng thái. */
+export function VehicleThumb({ status }: { status: VehicleStatus }) {
+  return (
+    <span aria-hidden className={`grid size-9 flex-none place-items-center rounded-lg ${THUMB[status]}`}>
+      <Truck className="size-5" strokeWidth={1.5} />
+    </span>
+  )
+}
+
 /** Liên kết trong dòng bảng: không để cú bấm lan lên dòng (dòng cũng mở trang khi bấm). */
 function stopRowClick(event: MouseEvent) {
   event.stopPropagation()
 }
 
 /**
- * Ô trạng thái ở danh sách đội xe (LM-089): badge, kèm mã chuyến đang chạy (liên kết tới chuyến) hoặc ghi chú bảo dưỡng
- * (cắt bớt, đủ câu ở `title` và ở trang cấu hình xe).
+ * Ô trạng thái ở danh sách đội xe (LM-089, V2): badge, dòng dưới là mã chuyến đang phục vụ (liên kết tới chuyến) hoặc ghi chú
+ * bảo dưỡng (tối đa hai dòng, đủ câu ở `title` và ở trang cấu hình xe). Xe sẵn sàng không có dòng phụ.
  */
 export function VehicleStatusCell({ state }: { state: VehicleState }) {
   const note = state.maintenance?.note
   return (
-    <span className="flex min-w-0 items-center gap-2">
+    <span className="flex min-w-0 flex-col items-start gap-1 whitespace-normal">
       <VehicleStatusBadge status={state.status} />
       {state.status === 'in_use' && state.tripId ? (
         <Link
@@ -43,7 +63,7 @@ export function VehicleStatusCell({ state }: { state: VehicleState }) {
         </Link>
       ) : null}
       {state.status === 'maintenance' && note ? (
-        <span className="min-w-0 truncate text-caption text-text-2" title={note}>{note}</span>
+        <span className="line-clamp-2 text-caption text-ink-3" title={note}>{note}</span>
       ) : null}
     </span>
   )

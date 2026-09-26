@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Play } from 'lucide-react'
+import { Play, SlidersHorizontal } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { FormSection } from '@/components/FormSection'
+import { PageHero } from '@/components/PageHero'
 import { TripLockBanner } from '@/components/TripLockBanner'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
@@ -16,7 +18,8 @@ import { OptimizationRunDialog } from './OptimizationRunDialog'
 import { buildOptimizationRequest, DEFAULT_SETTINGS, groupRequestIssues, METHODS, type OptimizationSettings } from './optimization-request'
 import { RequestIssueList } from './RequestIssueList'
 import { SetupContextPanels } from './SetupContextPanels'
-import { SetupSettingsFields } from './SetupSettingsFields'
+import { SetupLimitsPanel } from './SetupLimitsPanel'
+import { SetupAdvancedFields, SetupRequirementFields } from './SetupSettingsFields'
 import { useOptimizationRun, useOptimizationSetupQuery } from './useOptimizationSetup'
 
 /**
@@ -80,44 +83,53 @@ export function OptimizationSetupPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex h-18 flex-none items-center gap-4 border-b border-border bg-bg px-8">
-        <Link
-          to={`/chuyen/${tripId}`}
-          aria-label={t('optimization.back')}
-          className="grid size-9 place-items-center rounded-md text-text-2 hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >
-          <ChevronLeft className="size-5" strokeWidth={1.5} aria-hidden />
-        </Link>
-        <h1 className="text-h1 font-semibold">{t('optimization.title')}</h1>
-        <span className="font-mono text-body text-text-2">{tripId}</span>
-        <div className="flex-1" />
-        <Button
-          variant="primary"
-          disabled={locked || !summary?.canRun || run.isPending || !isValid}
-          onClick={form.handleSubmit(start)}
-        >
-          <Play strokeWidth={1.5} />
-          {t('optimization.run')}
-        </Button>
-      </header>
+      <PageHero
+        icon={SlidersHorizontal}
+        title={t('optimization.title')}
+        meta={tripId}
+        description={t('pageHero.optimization')}
+        back={{ to: `/chuyen/${tripId}`, label: t('optimization.back') }}
+        actions={
+          <Button
+            variant="primary"
+            disabled={locked || !summary?.canRun || run.isPending || !isValid}
+            onClick={form.handleSubmit(start)}
+          >
+            <Play strokeWidth={1.5} />
+            {t('optimization.run')}
+          </Button>
+        }
+      />
 
       {query.isPending ? (
         <div role="status" className="grid flex-1 place-items-center"><Spinner /></div>
       ) : !setup || !summary ? (
-        <div className="p-8">
+        <div className="px-shell py-6">
           <Button variant="secondary" asChild><Link to="/chuyen">{t('optimization.back')}</Link></Button>
         </div>
       ) : (
-        <div className="grid min-h-0 flex-1 grid-cols-1 items-start gap-6 overflow-auto px-8 py-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid min-h-0 flex-1 grid-cols-1 items-start gap-6 overflow-auto px-shell py-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           {locked ? <div className="lg:col-span-2"><TripLockBanner trip={setup.trip} /></div> : null}
-          <div className="flex flex-col gap-6">
-            <SetupContextPanels tripId={tripId} setup={setup} locked={locked} />
-            <section className="flex flex-col gap-3 rounded-md border border-border p-4">
-              <h2 className="text-h3 font-semibold">{t('optimization.settings')}</h2>
-              <SetupSettingsFields form={form} />
-            </section>
+          {/* V2: một thẻ gồm các phần đánh số; nút chính giữ ở thanh tiêu đề (AGENTS mục 5: một nút primary mỗi màn) */}
+          <div className="flex min-w-0 flex-col gap-6 rounded-lg border border-border bg-bg p-6">
+            <FormSection number={1} title={t('optimization.inputTitle')} description={<><span className="font-mono">{tripId}</span>{` · ${setup.trip.name}`}</>}>
+              <SetupContextPanels tripId={tripId} setup={setup} locked={locked} />
+            </FormSection>
+            <FormSection number={2} title={t('optimization.requirementsTitle')} description={t('optimization.requirementsHint')}>
+              <SetupRequirementFields form={form} />
+            </FormSection>
+            <div className="border-t border-border pt-5">
+              <SetupAdvancedFields form={form} />
+            </div>
           </div>
-          <RequestIssueList summary={summary} />
+          <div className="flex flex-col gap-5 lg:sticky lg:top-0">
+            <SetupLimitsPanel setup={setup} />
+            <RequestIssueList summary={summary} />
+            <div className="flex flex-col gap-1 px-1">
+              <span className="text-caption font-medium text-ink-2">{t('optimization.afterTitle')}</span>
+              <p className="text-caption text-ink-3">{t('optimization.afterSteps')}</p>
+            </div>
+          </div>
         </div>
       )}
 

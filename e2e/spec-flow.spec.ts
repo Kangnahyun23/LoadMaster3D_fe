@@ -33,8 +33,8 @@ for (const device of ['desktop', 'tablet'] as const) {
     await expect(page.getByRole('spinbutton', { name: 'Dài OBS-001', exact: true }).locator('xpath=..')).toContainText('cm')
     await page.getByRole('button', { name: 'Lưu', exact: true }).click()
     await page.waitForURL(/\/doi-xe$/)
-    // Seed có 8 xe (LM-083) nên xe mới là VEHICLE-009; cột trạng thái đứng sau tên (LM-089)
-    await expect(page.getByRole('row', { name: /Truck 6m VEHICLE-009 Sẵn sàng 600 × 240 × 250 cm 5\.000 kg/ })).toBeVisible()
+    // Seed có 8 xe (LM-083) nên xe mới là VEHICLE-009; cột theo V2: tên · lòng thùng · tải · vật cản · trạng thái cuối
+    await expect(page.getByRole('row', { name: /Truck 6m VEHICLE-009 600 × 240 × 250 cm 5\.000 kg 1 vùng Sẵn sàng/ })).toBeVisible()
 
     // Dashboard → Tạo kế hoạch xếp → form chuyến
     await page.getByRole('link', { name: 'Bảng điều khiển', exact: true }).click()
@@ -54,7 +54,7 @@ for (const device of ['desktop', 'tablet'] as const) {
     // Kiện PKG-001 × 4, rồi nhân bản
     const panel = await addPackage(page, { name: 'Thùng sơn', lengthCm: 120, widthCm: 100, heightCm: 100, weightKg: 200, quantity: 4 })
     // §15 "Mọi field hiển thị đơn vị": form kiện
-    await expect(page.getByRole('row', { name: /PKG-001 Thùng sơn 120 × 100 × 100 cm 200 kg 4/ })).toBeVisible()
+    await expect(page.getByRole('row', { name: /Thùng sơn PKG-001 · 120 × 100 × 100 cm 200 kg 4/ })).toBeVisible()
     await expect(page.getByText('Đã lưu kiện PKG-001')).toBeVisible()
     // §15 "Tự tính tổng khối lượng và thể tích": 4 × 1,2 m³ và 4 × 200 kg
     await expect(page.getByText(/Kiện\s*4\s*Thể tích\s*4,8 m³\s*Khối lượng\s*800 kg/)).toBeVisible()
@@ -65,7 +65,7 @@ for (const device of ['desktop', 'tablet'] as const) {
     // §15 "Thêm/sửa/xóa/nhân bản kiện": nhân bản
     await editPanel.getByRole('button', { name: 'Nhân bản', exact: true }).click()
     await expect(page.getByText('Đã tạo bản sao PKG-002')).toBeVisible()
-    await expect(page.getByRole('row', { name: /PKG-002 Thùng sơn 120 × 100 × 100 cm 200 kg 4/ })).toBeVisible()
+    await expect(page.getByRole('row', { name: /Thùng sơn PKG-002 · 120 × 100 × 100 cm 200 kg 4/ })).toBeVisible()
     await expect(page.getByText(/Kiện\s*8\s*Thể tích\s*9,6 m³\s*Khối lượng\s*1\.600 kg/)).toBeVisible()
     await expect(panel).toHaveCount(0)
 
@@ -213,7 +213,7 @@ test('cargo that does not fit lists unplaced packages with a reason in the Plann
   await expect(page.getByRole('row', { name: /PKG-006/ })).toBeVisible()
   // 30 × 1,2 m³ = 36 m³ thêm vào 132 kiện seed, vượt lòng thùng 720 × 235 × 240 cm (≈ 40,6 m³)
   await addPackage(page, { name: 'Pallet gạch', lengthCm: 120, widthCm: 100, heightCm: 100, weightKg: 20, quantity: 30 })
-  await expect(page.getByRole('row', { name: /PKG-007 Pallet gạch/ })).toBeVisible()
+  await expect(page.getByRole('row', { name: /Pallet gạch PKG-007/ })).toBeVisible()
   await page.getByRole('link', { name: 'Chạy tối ưu', exact: true }).click()
   await optimizeAndOpenPlanner(page)
 
@@ -284,7 +284,7 @@ test('switching to English mid-flow keeps form input and formats numbers the Eng
   await page.getByRole('textbox', { name: 'Tên điểm giao 1', exact: true }).fill('Kho Long Bình')
   await page.getByRole('combobox', { name: 'Xe', exact: true }).click()
   await page.getByRole('option', { name: 'Hyundai HD210 · 60C-446.32', exact: true }).click()
-  await expect(page.getByText('9.500 kg', { exact: true })).toBeVisible()
+  await expect(page.locator('form').getByText('9.500 kg', { exact: true })).toBeVisible()
 
   await page.getByRole('button', { name: 'EN English', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Create trip', exact: true })).toBeVisible()
@@ -293,14 +293,15 @@ test('switching to English mid-flow keeps form input and formats numbers the Eng
   await expect(page.getByRole('textbox', { name: 'Stop 1 name', exact: true })).toHaveValue('Kho Long Bình')
   await expect(page.getByRole('combobox', { name: 'Vehicle', exact: true })).toHaveText('Hyundai HD210 · 60C-446.32')
   // Số theo en-US
-  await expect(page.getByText('9,500 kg', { exact: true })).toBeVisible()
+  await expect(page.locator('form').getByText('9,500 kg', { exact: true })).toBeVisible()
   await expect(page.getByText('720 × 235 × 240 cm', { exact: true })).toBeVisible()
 
   await page.getByRole('button', { name: 'Create trip', exact: true }).click()
   await expect(page.getByText('Created trip TRIP-015')).toBeVisible()
   await addPackageEn(page)
   await expect(page.getByText(/1\.2 m³/)).toBeVisible()
-  await expect(page.getByText(/1,234\.5 kg/).first()).toBeVisible()
+  // Dòng kiện, không lấy chữ đầu tiên khớp: sơ đồ tuyến gập sẵn cũng có "1 package · 1,234.5 kg"
+  await expect(page.getByRole('row', { name: /Tủ đông .*1,234\.5 kg/ })).toBeVisible()
 })
 
 /** Thêm một kiện bằng nhãn tiếng Anh sau khi đã đổi ngôn ngữ. */

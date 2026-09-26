@@ -1,16 +1,19 @@
 import { useId, type ReactNode } from 'react'
-import { Card } from '@/components/ui/Card'
 import { useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 /**
- * Khung một biểu đồ của bảng điều khiển (LM-090): tiêu đề, dòng nguồn, rồi hình. Hình chỉ để nhìn (`aria-hidden`); trình đọc màn
- * hình đọc bảng số ẩn ngay sau nó, cùng giá trị. Kỳ không có dữ liệu thì thay hình bằng một câu, không vẽ trục trống.
+ * Khung một biểu đồ của bảng điều khiển (LM-090, V2): thẻ nền đặc, tiêu đề và số tổng ở hai đầu, dòng nguồn dưới tiêu đề, rồi
+ * hình. Hình chỉ để nhìn (`aria-hidden`); trình đọc màn hình đọc bảng số ẩn ngay sau nó, cùng giá trị. Kỳ không có dữ liệu thì
+ * thay hình bằng một câu, không vẽ trục trống.
+ *
+ * `relative`: bảng `sr-only` định vị tuyệt đối phải có tổ tiên định vị, không thì nó kéo cả trang dài ra (AGENTS mục 5).
  */
 export function ChartCard({
   title,
   note,
   badge,
+  meta,
   empty,
   table,
   className,
@@ -19,6 +22,8 @@ export function ChartCard({
   title: string
   note: string
   badge?: ReactNode
+  /** Số tổng của biểu đồ ở góc phải tiêu đề ("12 chuyến"). */
+  meta?: string
   /** Câu thay hình khi kỳ không có dữ liệu cho biểu đồ này. */
   empty?: string
   /** Bảng số thay thế (`ChartTable`). */
@@ -28,25 +33,28 @@ export function ChartCard({
 }) {
   const titleId = useId()
   return (
-    <Card className={cn('flex min-w-0 flex-col', className)}>
-      <figure aria-labelledby={titleId} className="m-0 flex flex-col gap-4 px-5 py-4">
+    <section className={cn('relative flex min-w-0 flex-col rounded-lg border border-border bg-bg', className)}>
+      <figure aria-labelledby={titleId} className="m-0 flex flex-1 flex-col gap-5 p-5">
         <figcaption className="flex flex-col gap-0.5">
-          <span className="flex flex-wrap items-center gap-2">
-            <h2 id={titleId} className="text-h3 font-semibold">{title}</h2>
-            {badge}
+          <span className="flex items-baseline justify-between gap-3">
+            <span className="flex flex-wrap items-center gap-2">
+              <h2 id={titleId} className="text-h3 font-semibold text-ink-strong">{title}</h2>
+              {badge}
+            </span>
+            {meta ? <span className="flex-none text-body text-ink-2 tabular-nums">{meta}</span> : null}
           </span>
-          <span className="text-caption text-text-3">{note}</span>
+          <span className="text-caption text-ink-3">{note}</span>
         </figcaption>
         {empty ? (
-          <p className="flex h-40 items-center justify-center rounded-md bg-surface px-6 text-center text-body text-text-2">{empty}</p>
+          <p className="flex min-h-40 flex-1 items-center justify-center rounded-md bg-surface px-6 text-center text-body text-ink-2">{empty}</p>
         ) : (
           <>
-            <div aria-hidden className="min-w-0">{children}</div>
+            <div aria-hidden className="flex min-w-0 flex-1 flex-col">{children}</div>
             {table}
           </>
         )}
       </figure>
-    </Card>
+    </section>
   )
 }
 

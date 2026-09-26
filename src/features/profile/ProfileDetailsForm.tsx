@@ -8,12 +8,13 @@ import { dataErrorMessage, useT } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { User } from '@/types/user'
 import { profileSchema, translateProfileError, type ProfileInput, type ProfileValues } from './profile-form.schema'
-import { FORM_ALERT, TOUCH_CONTROL } from './profile-styles'
+import { FORM_ALERT, SECTION_TEXT, SECTION_TITLE, TOUCH_CONTROL } from './profile-styles'
 import { useSaveProfileMutation } from './useProfileMutations'
 
 /**
- * Thông tin cá nhân (LM-096): họ tên và số điện thoại sửa được; email, vai trò, kho trực thuộc chỉ đọc vì do quản trị viên đổi.
- * Lưu xong thì form lấy giá trị kho vừa lưu (số điện thoại dạng "0901 234 567") làm mốc, nút Lưu tắt tới lần sửa sau.
+ * Thông tin cá nhân (LM-096): họ tên và số điện thoại sửa được. Email, vai trò, kho trực thuộc chỉ đọc và nằm ở cột nhận diện
+ * (`ProfileIdentity`), không lặp lại ở đây. Lưu xong thì form lấy giá trị kho vừa lưu (số điện thoại dạng "0901 234 567") làm
+ * mốc, nút Lưu tắt tới lần sửa sau.
  */
 export function ProfileDetailsForm({ user }: { user: User }) {
   const t = useT()
@@ -35,17 +36,11 @@ export function ProfileDetailsForm({ user }: { user: User }) {
     }
   }
 
-  const readOnly = [
-    { label: t('profile.details.email'), value: user.email, wide: true },
-    { label: t('profile.details.role'), value: t(`roles.${user.role}`), wide: false },
-    { label: t('profile.details.depot'), value: user.depot, wide: false },
-  ]
-
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h2 id={titleId} className="text-h3 font-semibold">{t('profile.details.title')}</h2>
-        <p className="text-text-2">{t('profile.details.description')}</p>
+        <h2 id={titleId} className={SECTION_TITLE}>{t('profile.details.title')}</h2>
+        <p className={SECTION_TEXT}>{t('profile.details.description')}</p>
       </div>
 
       <form noValidate onSubmit={form.handleSubmit(handleValid)} className="flex flex-col gap-5">
@@ -67,17 +62,6 @@ export function ProfileDetailsForm({ user }: { user: User }) {
             {...form.register('phone')}
           />
         </div>
-
-        <dl className="m-0 grid gap-4 sm:grid-cols-2">
-          {readOnly.map(({ label, value, wide }) => (
-            <div key={label} className={cn('flex min-w-0 flex-col gap-1.5', wide && 'sm:col-span-2')}>
-              <dt className="text-body font-medium text-text">{label}</dt>
-              <dd className="m-0 flex min-h-10 items-center rounded-md border border-border bg-surface px-3 break-all text-text-2 pointer-coarse:min-h-14">
-                {value}
-              </dd>
-            </div>
-          ))}
-        </dl>
 
         {save.isError ? <p role="alert" className={FORM_ALERT}>{dataErrorMessage(save.error, t)}</p> : null}
 

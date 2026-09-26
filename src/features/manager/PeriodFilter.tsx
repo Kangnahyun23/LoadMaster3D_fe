@@ -31,9 +31,10 @@ export function PeriodFilter({
   const format = useFormat()
 
   return (
-    <div className="flex flex-none flex-wrap items-end gap-x-4 gap-y-3">
-      <div className="flex flex-col gap-1">
-        <span className="text-caption font-medium text-text-2">{t('manager.period.label')}</span>
+    // V2: nhãn đứng cùng hàng với lựa chọn kỳ, khoảng ngày đã giải ngay sau
+    <div className="flex flex-none flex-wrap items-center gap-x-4 gap-y-3">
+      <div className="flex items-center gap-3">
+        <span className="text-body text-ink-2">{t('manager.period.label')}</span>
         <SegmentedControl
           ariaLabel={t('manager.period.label')}
           floating={false}
@@ -46,12 +47,12 @@ export function PeriodFilter({
       {selection.preset === 'tuy-chon' ? (
         <div className="flex items-center gap-2">
           <DateField label={t('manager.period.from')} value={selection.from} max={selection.to} onChange={(value) => onDateChange('from', value)} />
-          <span aria-hidden className="text-body text-text-3">–</span>
+          <span aria-hidden className="text-body text-ink-3">–</span>
           <DateField label={t('manager.period.to')} value={selection.to} min={selection.from} onChange={(value) => onDateChange('to', value)} />
         </div>
       ) : null}
       {range ? (
-        <span className="pb-2 font-mono text-caption text-text-2">
+        <span className="font-mono text-caption text-ink-2">
           {t('manager.period.range', { from: format.date(range.from), to: format.date(range.to) })}
         </span>
       ) : null}
